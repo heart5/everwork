@@ -55,15 +55,42 @@ china = False
 # https://www.evernote.com/api/DeveloperToken.action
 client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
-userStore = client.get_user_store()
-user = userStore.getUser()
-print(str(user.id))
-print(str(user.username))
-print(str(user.name))
-print(str(user.email))
-print(str(user.active))
-if user.premiumInfo: print('高级用户哦。')
 
+def timestamp2str(timestamp):
+    return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(timestamp))
+
+
+userStore = client.get_user_store()
+currentuser = userStore.getUser()
+
+
+# 测试用户数据结构每个属性的返回值
+# 开发口令的方式调用返回如下
+def printusertoken(user):
+    print 'id\t', str(user.id)  #返回3884191
+    print '名称\t', str(user.username)  #返回heart5
+    print '用户名\t', str(user.name)  #返回白晔峰
+    # print '电子邮箱\t', str(user.email)  #这种权限的调用返回None
+    print '时区\t', str(user.timezone)  #返回Asia/Harbin
+    # print '服务级别\t',user.serviceLevel #这种权限的调用没有返回这个值，报错
+    # print '启用时间\t', str(user.created), '\t', timestamp2str(user.created)  #这种权限的调用返回None
+    # print '更新时间\t', str(user.updated), '\t', timestamp2str(user.updated)  #这种权限的调用返回None
+    # print '删除时间\t', str(user.deleted), '\t', timestamp2str(user.deleted)  #这种权限的调用返回None
+    print '活跃状态\t', str(user.active)  #返回True
+    print '分享id\t', str(user.shardId)  #返回s37
+    # print '用户属性\t', str(user.attributes)  #这种权限的调用返回None
+    print '账户\t', str(user.accounting)  #返回Accounting(businessRole=None, currency=None, uploadLimitNextMonth=10737418240L, premiumOrderNumber=None, lastRequestedCharge=None, nextPaymentDue=None, unitDiscount=None, premiumCommerceService=None, nextChargeDate=None, premiumServiceStart=None, premiumSubscriptionNumber=None, lastFailedCharge=None, updated=None, businessId=None, uploadLimitEnd=1504854000000L, uploadLimit=10737418240L, lastSuccessfulCharge=None, premiumServiceStatus=2, unitPrice=None, premiumServiceSKU=None, premiumLockUntil=None, businessName=None, lastFailedChargeReason=None)
+    print '活跃状态\t', str(user.active)  #返回True
+    print '商用用户信息\t', str(user.businessUserInfo)  #这种权限的调用返回None
+    # print '头像url\t', str(user.photoUrl)  #这种权限的调用没有返回这个值，报错
+    # print '头像最近更新\t', str(user.photoLastUpdated)  #这种权限的调用没有返回这个值，报错
+    # print '账户限制\t', str(user.accountLimits)  #这种权限的调用没有返回这个值，报错
+
+
+printusertoken(currentuser)
+
+print
+print int(time.time())
 print time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
 
 version_ok = userStore.checkVersion(
@@ -86,10 +113,10 @@ for notebook in notebooks:
     print "\t*\t", notebook.name, "\t",notebook.guid
     notefilter.notebookGuid = notebook.guid
     spec = NoteStore.NotesMetadataResultSpec( includeTitle=True,includeContentLength=True,includeCreated=True,includeUpdated=True)
-    ourNoteList=note_store.findNotesMetadata(auth_token,notefilter,0,5,spec)
+    ourNoteList=note_store.findNotesMetadata(auth_token, notefilter, 0, 5, spec)
     for note in ourNoteList.notes:
-
-        print "\t\t\t\t", note.title, "\t",note.guid, "\t",note.contentLength, "\t",note.created, "\t",note.updated
+        # print "\t\t\t\t", note.title, "\t", note.guid, "\t", note.contentLength, "\t", note.created, "\t", note.updated
+        print "\t\t\t\t", note.title, "\t", note.guid, "\t", note.contentLength, "\t", timestamp2str(int(note.created/1000)), "\t", timestamp2str(int(note.updated/1000))
     print
 
 
