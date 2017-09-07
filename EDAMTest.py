@@ -166,8 +166,9 @@ def printnotefromnotebook( notebookguid, notecount):
                                               includeNotebookGuid=True, includeTagGuids=True, includeAttributes=True,
                                               includeLargestResourceMime=True, includeLargestResourceSize=True)
     ourNoteList=note_store.findNotesMetadata(auth_token, notefilter, 0, notecount, notemetaspec)
-    # print note_store.getNoteContent(ourNoteList.notes[8].guid) #测试打印指定note的内容
-    # note = note_store.getNote(auth_token, ourNoteList.notes[9].guid, True, True, True, True) #获得Note并打印其中的值
+    # print ourNoteList.notes[-1].title  #测试打印指定note的标题
+    # print note_store.getNoteContent(ourNoteList.notes[-1].guid)  #测试打印指定note的内容
+    # note = note_store.getNote(auth_token, ourNoteList.notes[9].guid, True, True, True, True)  #获得Note并打印其中的值
     # printnoteattributeundertoken(note)
     # print ourNoteList.notes[5] #打印NoteMetadata
 
@@ -176,7 +177,8 @@ def printnotefromnotebook( notebookguid, notecount):
         # print "\t\t\t\t", note.title, "\t", note.guid, "\t", note.contentLength, "\t", timestamp2str(int(note.created/1000)), "\t", timestamp2str(int(note.updated/1000))
         # print note.title.find('天气')
         if note.title.find('天气') > 0:
-            print note_store.getNoteContent(note.guid)
+            notetext = note_store.getNoteContent(note.guid)
+            notetxt = notetext.en-note
     print
 
 
