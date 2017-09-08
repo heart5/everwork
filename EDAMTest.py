@@ -16,7 +16,7 @@ import evernote.edam.userstore.constants as UserStoreConstants
 import evernote.edam.type.ttypes as Types
 import evernote.edam.notestore.NoteStore as NoteStore
 
-
+from bs4 import BeautifulSoup
 from evernote.api.client import EvernoteClient
 
 # Real applications authenticate with Evernote using OAuth, but for the
@@ -177,8 +177,10 @@ def printnotefromnotebook( notebookguid, notecount):
         # print "\t\t\t\t", note.title, "\t", note.guid, "\t", note.contentLength, "\t", timestamp2str(int(note.created/1000)), "\t", timestamp2str(int(note.updated/1000))
         # print note.title.find('天气')
         if note.title.find('天气') > 0:
-            notetext = note_store.getNoteContent(note.guid)
-            notetxt = notetext.en-note
+            soup = BeautifulSoup(note_store.getNoteContent(note.guid), "html.parser")
+            tags = soup.find('en-note')
+            print tags
+
     print
 
 
