@@ -212,4 +212,4 @@ def weatherstat(note_store, sourceguid, destguid=None):
     # attributes such as the new note's unique GUID.
     updated_note = note_store.updateNote(note)
 
-    print "Successfully updated a note with GUID: ", updated_note.guid
+    print "Successfully updated a note with GUID: ", updated_note.guid, updated_note.title
