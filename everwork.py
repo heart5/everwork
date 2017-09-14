@@ -23,6 +23,7 @@ import evernote.edam.notestore.NoteStore as NoteStore
 from bs4 import BeautifulSoup
 from evernote.api.client import EvernoteClient
 from pylab import *
+from matplotlib.ticker import MultipleLocator, FuncFormatter
 
 mpl.rcParams['font.sans-serif'] = ['SimHei']
 mpl.rcParams['axes.unicode_minus'] = False
@@ -165,6 +166,10 @@ def printnoteattributeundertoken( note):
     # print '范围\t', note.limits  #这种权限的调用没有返回这个值，报错
 
 
+def min_formatter(x, pos):
+    return r"%02d:%02d" %(int(x/60), int(x%60))
+
+
 #列出笔记本中的笔记信息
 def printnotefromnotebook( notebookguid, notecount):
     notefilter = NoteStore.NoteFilter()
@@ -184,7 +189,7 @@ def printnotefromnotebook( notebookguid, notecount):
         # print "\t\t\t\t", note.title, "\t", note.guid, "\t", note.contentLength, "\t", note.created, "\t", note.updated
         # print "\t\t\t\t", note.title, "\t", note.guid, "\t", note.contentLength, "\t", timestamp2str(int(note.created/1000)), "\t", timestamp2str(int(note.updated/1000))
         # print note.title.find('天气')
-        if note.title.find('天气') > 0:
+        if note.title.find('武汉每日天气') >= 0:
             soup = BeautifulSoup(note_store.getNoteContent(note.guid), "html.parser")
             # tags = soup.find('en-note')
             # print tags
@@ -215,20 +220,22 @@ def printnotefromnotebook( notebookguid, notecount):
                 for jj in re.findall(itempattern, ii):
                     stritem = [pd.Timestamp(jj[0]),
                                int(jj[1]), int(jj[2]), int(jj[3]), jj[4],
-                               pd.Timestamp(jj[5]).strftime("%I%M"),
-                               pd.Timestamp(jj[6]),
+                               # pd.Timestamp(jj[5]).strftime("%I%M"),
+                               int(pd.Timestamp(jj[5]).strftime("%H"))*60+int(pd.Timestamp(jj[5]).strftime("%M")),
+                               # pd.Timestamp(jj[6]),
+                               int(pd.Timestamp(jj[6]).strftime("%H"))*60+int(pd.Timestamp(jj[6]).strftime("%M")),
                                int(jj[7])]
                 # print stritem
                 data_list.append(stritem)
 
             # print type(data_list[0][0]), type(data_list[0][5]), type(data_list[0][6])
             #
-            # print len(data_list)
-            # print data_list[0]
+            print len(data_list)
+            print data_list[0]
             # # print data_list
             # print type(data_list)
 
-            df = pd.DataFrame(data_list[-90:-1],
+            df = pd.DataFrame(data_list,
                               columns=['date', 'gaowen', 'diwen', 'fengsu', 'fengxiang', 'sunon', 'sunoff', 'shidu'])
 
             # print df.head()
@@ -261,6 +268,7 @@ def printnotefromnotebook( notebookguid, notecount):
             plt.plot(df['date'], df['gaowen'], lw=1.5, label= u'日高温')
             plt.plot(df['date'], df['diwen'], lw=1.5, label= u'日低温')
             plt.plot(df['date'], df['fengsu'], lw=1.5, label= u'风速')
+            # plt.plot(df['date'], df['sunon'], lw=1.5, label= u'日出')
 
             plt.xlabel(u'日期')
             plt.ylabel(u'温度（℃）')
@@ -282,7 +290,37 @@ def printnotefromnotebook( notebookguid, notecount):
 
             # plt.show()
 
-            plt.savefig('sample.png')
+            plt.savefig('wenshifeng.png')
+            plt.close()
+
+            fig, ax1 = plt.subplots()
+            plt.plot(df['date'], df['sunon'], lw=1.5, label= u'日出')
+
+            ax = plt.gca()
+            # 主刻度文本用pi_formatter函数计算
+            ax.yaxis.set_major_formatter(FuncFormatter(min_formatter))
+
+            plt.xlabel(u'日期')
+            plt.ylabel(u'日出（时分）')
+            # plt.axis('tight')
+            plt.legend(loc = 2)
+
+            ax2 = ax1.twinx()
+            plt.plot(df['date'], df['sunoff'], 'y*', lw=1.5, label=u'日落')
+
+            ax = plt.gca()
+            # 主刻度文本用pi_formatter函数计算
+            ax.yaxis.set_major_formatter(FuncFormatter(min_formatter))
+
+            plt.legend(loc = 3)
+            plt.ylabel(u'日落（时分）')
+
+            plt.title(u'武汉日出日落图')
+            plt.grid(True)
+
+            plt.savefig('sunonoff.png')
+
+            plt.close()
 
     print
 
@@ -309,38 +347,82 @@ note.notebookGuid = '31eee750-e240-438b-a1f5-03ce34c904b4'
 # for the attachment. At a minimum, the Resource contains the binary attachment
 # data, an MD5 hash of the binary data, and the attachment MIME type.
 # It can also include attributes such as filename and location.
-image = open('sample.png', 'rb').read()
+image = open('wenshifeng.png', 'rb').read()
 md5 = hashlib.md5()
 md5.update(image)
 hash = md5.digest()
+# print hash
 
 data = Types.Data()
 data.size = len(image)
 data.bodyHash = hash
 data.body = image
+# print data
 
-resource = Types.Resource()
-resource.mime = 'image/png'
-resource.data = data
-
-# Now, add the new Resource to the note's list of resources
-note.resources = [resource]
+resource_wenshifeng = Types.Resource()
+resource_wenshifeng.mime = 'image/png'
+resource_wenshifeng.data = data
+# print resource_wenshifeng
 
 # To display the Resource as part of the note's content, include an <en-media>
 # tag in the note's ENML content. The en-media tag identifies the corresponding
 # Resource using the MD5 hash.
-hash_hex = binascii.hexlify(hash)
+# hash_hex_wenshifeng = binascii.hexlify(hash)
+
+
+# print note.resources
+
+image = open('sunonoff.png', 'rb').read()
+md5 = hashlib.md5()
+md5.update(image)
+hash = md5.digest()
+# print hash
+
+data = Types.Data()
+data.size = len(image)
+data.bodyHash = hash
+data.body = image
+# print  data
+
+resource_sunonoff = Types.Resource()
+resource_sunonoff.mime = 'image/png'
+resource_sunonoff.data = data
+# print resource_sunonoff
+
+# To display the Resource as part of the note's content, include an <en-media>
+# tag in the note's ENML content. The en-media tag identifies the corresponding
+# Resource using the MD5 hash.
+hash_hex_sunonoff = binascii.hexlify(hash)
+
+
+# Now, add the new Resource to the note's list of resources
+note.resources =[resource_wenshifeng, resource_sunonoff]
+# note.resources.append(resource_wenshifeng)
+
+# print len(note.resources)
+# # print note.resources
+# print note.resources[0]
+# print note.resources[1]
+
 
 # The content of an Evernote note is represented using Evernote Markup Language
 # (ENML). The full ENML specification can be found in the Evernote API Overview
 # at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
-note.content = '<?xml version="1.0" encoding="UTF-8"?>'
-note.content += '<!DOCTYPE en-note SYSTEM ' \
-    '"http://xml.evernote.com/pub/enml2.dtd">'
-note.content += '<en-note>武汉天气图<br/>'
-note.content += '<en-media type="image/png" hash="' + hash_hex + '"/>'
-note.content += '</en-note>'
+nBody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+nBody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+nBody += "<en-note>"
+if note.resources:
+    ### Add Resource objects to note body
+    # nBody += "<br />" * 2
+    for resource in note.resources:
+        hexhash = binascii.hexlify(resource.data.bodyHash)
+        nBody += "<en-media type=\"%s\" hash=\"%s\" /><br />" % \
+                 (resource.mime, hexhash)
+nBody += "</en-note>"
 
+note.content = nBody
+
+# print note.content
 # Finally, send the new note to Evernote using the createNote method
 # The new Note object that is returned will contain server-generated
 # attributes such as the new note's unique GUID.
