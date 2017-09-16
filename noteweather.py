@@ -63,8 +63,8 @@ def weatherstat(note_store, sourceguid, destguid=None):
         # print stritem
         data_list.append(stritem)
 
-    print len(data_list)
-    print data_list[0]
+    print (len(data_list))
+    print (data_list[0])
 
 
     df = pd.DataFrame(data_list,
@@ -136,6 +136,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
     plt.ylabel(u'日落（时分）')
     plt.title(u'武汉日出日落图')
     plt.grid(True)
+    # plt.show()
     plt.savefig('sunonoff.png')
     plt.close()
 
@@ -200,16 +201,20 @@ def weatherstat(note_store, sourceguid, destguid=None):
         # nBody += "<br />" * 2
         for resource in note.resources:
             hexhash = binascii.hexlify(resource.data.bodyHash)
-            nBody += "<en-media type=\"%s\" hash=\"%s\" /><br />" % \
-                     (resource.mime, hexhash)
+            hexhash = binascii.hexlify(resource.data.bodyHash)
+            str1 = "%s" %hexhash
+            print (str1)
+            str1 = str1[2:-1]
+            print (str1)
+            nBody += "<en-media type=\"%s\" hash=\"%s\" /><br />"  %(resource.mime, str1)
     nBody += "</en-note>"
 
     note.content = nBody
-    # print note.content
+    print (note.content)
 
     # Finally, send the new note to Evernote using the updateNote method
     # The new Note object that is returned will contain server-generated
     # attributes such as the new note's unique GUID.
     updated_note = note_store.updateNote(note)
-
-    print "Successfully updated a note with GUID: ", updated_note.guid, updated_note.title
+    print(updated_note)
+    print ("Successfully updated a note with GUID: ", updated_note.guid, updated_note.title)

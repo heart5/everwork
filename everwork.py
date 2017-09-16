@@ -23,7 +23,7 @@ from evernote.api.client import EvernoteClient
 from pylab import *
 from matplotlib.ticker import MultipleLocator, FuncFormatter
 from noteweather import weatherstat #调用同目录下其他文件（py）中的函数
-from everfunc import *
+# from everfunc import *
 
 # plot中显示中文
 mpl.rcParams['font.sans-serif'] = ['SimHei']
@@ -47,9 +47,8 @@ mpl.rcParams['axes.unicode_minus'] = False
 auth_token = "S=s37:U=3b449f:E=1659f8b7c0f:C=15e47da4ef8:P=1cd:A=en-devtoken:V=2:H=e445e5fcbceff83703151d71df584197"
 
 if auth_token == "your developer token":
-    print "Please fill in your developer token"
-    print "To get a developer token, visit " \
-        "https://sandbox.evernote.com/api/DeveloperToken.action"
+    print ("Please fill in your developer token\nTo get a developer token, visit " \
+        "https://sandbox.evernote.com/api/DeveloperToken.action")
     exit(1)
 
 
@@ -70,15 +69,15 @@ currentuser = userStore.getUser()
 
 # printuserattributeundertoken(currentuser)
 
-print int(time.time()), '\t', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+print (int(time.time()), '\t', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
 version_ok = userStore.checkVersion(
     "Evernote EDAMTest (Python)",
     UserStoreConstants.EDAM_VERSION_MAJOR,
     UserStoreConstants.EDAM_VERSION_MINOR
 )
-print "Is my Evernote API version up to date? ", str(version_ok)
-print ""
+print ("Is my Evernote API version up to date? ", str(version_ok))
+
 if not version_ok:
     exit(1)
 
@@ -107,7 +106,7 @@ def printnotefromnotebook( notebookguid, notecount):
 
     for note in ourNoteList.notes:
         if note.title.find('武汉每日天气') >= 0:
-            print note.guid, note.title
+            print (note.guid, note.title)
 
     print
 
