@@ -99,14 +99,14 @@ def weatherstat(note_store, sourceguid, destguid=None):
     # plt.figure(figsize=(16, 12))
     plt.plot(df['date'], df['gaowen'], lw=1.5, label=u'日高温')
     plt.plot(df['date'], df['diwen'], lw=1.5, label=u'日低温')
-    plt.plot(df['date'], df['fengsu'], lw=1.5, label=u'风速')
+    # plt.plot(df['date'], df['fengsu'], lw=1.5, label=u'风速')
     plt.xlabel(u'日期')
     plt.ylabel(u'温度（℃）')
     # plt.axis('tight')
     plt.grid(True)
     plt.legend(loc=0)
     ax2 = ax1.twinx()
-    plt.plot(df['date'], df['shidu'], 'y*', lw=1.5, label=u'湿度')
+    plt.plot(df['date'], df['shidu'], 'c*', lw=1.5, label=u'湿度')
     plt.legend(loc=7)
     plt.ylabel(u'湿度（%）')
     plt.grid(True)
@@ -129,7 +129,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
     # plt.axis('tight')
     plt.legend(loc=2)
     ax2 = ax1.twinx()
-    plt.plot(df['date'], df['sunoff'], 'y*', lw=1.5, label=u'日落')
+    plt.plot(df['date'], df['sunoff'], 'yd', lw=1.5, label=u'日落')
     ax = plt.gca()
     ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用min_formatter函数计算
     plt.legend(loc=3)
@@ -201,20 +201,19 @@ def weatherstat(note_store, sourceguid, destguid=None):
         # nBody += "<br />" * 2
         for resource in note.resources:
             hexhash = binascii.hexlify(resource.data.bodyHash)
-            hexhash = binascii.hexlify(resource.data.bodyHash)
-            str1 = "%s" %hexhash
-            print (str1)
-            str1 = str1[2:-1]
-            print (str1)
+            str1 = "%s" %hexhash #b'cd34b4b6c8d9279217b03c396ca913df'
+            # print (str1)
+            str1 = str1[2:-1] #cd34b4b6c8d9279217b03c396ca913df
+            # print (str1)
             nBody += "<en-media type=\"%s\" hash=\"%s\" /><br />"  %(resource.mime, str1)
     nBody += "</en-note>"
 
     note.content = nBody
-    print (note.content)
+    # print (note.content)
 
     # Finally, send the new note to Evernote using the updateNote method
     # The new Note object that is returned will contain server-generated
     # attributes such as the new note's unique GUID.
     updated_note = note_store.updateNote(note)
-    print(updated_note)
+    # print(updated_note)
     print ("Successfully updated a note with GUID: ", updated_note.guid, updated_note.title)

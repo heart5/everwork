@@ -21,8 +21,8 @@ def arrayplot():
     np.random.seed(1000)
     y = np.random.standard_normal(20) #生成 20 个 标准 正态分布（ 伪） 随机数， 保存 在 一个 NumPy ndarray 中
 
-    print y
-    print range(len(y)) #[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    print (y)
+    print (range(len(y))) #[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 
     plt.plot(range(len(y)), y)
 
