@@ -105,7 +105,7 @@ def printnotefromnotebook( notebookguid, notecount):
     # print ourNoteList.notes[5] #打印NoteMetadata
 
     for note in ourNoteList.notes:
-        if note.title.find('武汉每日天气') >= 0:
+        if note.title.find('真元日配送图') >= 0:
             print (note.guid, note.title)
 
     print
