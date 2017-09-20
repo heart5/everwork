@@ -121,6 +121,7 @@ df['peicuoweiyao'] = df['peicuoweiyao'].astype(float)
 # print(df.columns)
 # print(df[0:15])
 
+
 df = df[(df['peihuoren'] != '作废') &(df['dingdanriqi'] >= '2016-03-29')]
 
 df['songdatianshu'] = (df['songdariqi'] - df['dingdanriqi']).dt.days
