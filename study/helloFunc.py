@@ -41,11 +41,11 @@ def yingdacal(x):
     # print(len(dfall))
     print(int(x.strftime('%w')))
     if(len(dfall) > 0):
-        return pd.to_datetime(x)+pd.DateOffset(days=int(dfall['tianshu'][0]))
+        return x+pd.DateOffset(days=int(dfall['tianshu'][0]))
     elif(int(x.strftime('%w')) == 6):
-        return pd.to_datetime(x)+pd.DateOffset(days=2)
+        return x+pd.DateOffset(days=2)
     else:
-        return pd.to_datetime(x) + pd.DateOffset(days=1)
+        return x + pd.DateOffset(days=1)
 
 
 print(yingdacal(pd.to_datetime('2017-04-30')))

@@ -4,10 +4,24 @@
 # 有关evernote的各种探测性函数
 #
 
-import time
+import time, pandas as pd, sqlite3 as lite
 
 def timestamp2str(timestamp):
     return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(timestamp))
+
+def yingdacal(x):
+    ii = (x+pd.DateOffset(days=1)).strftime('%Y-%m-%d')
+    dfall = pd.read_sql_query('select tianshu from jiaqi where date =\''+ii+'\'', cnx)
+    # print(dfall.columns)
+    # print(dfall['tianshu'])
+    # print(len(dfall))
+    print(int(x.strftime('%w')))
+    if(len(dfall) > 0):
+        return x+pd.DateOffset(days=int(dfall['tianshu'][0]))
+    elif(int(x.strftime('%w')) == 6):
+        return x+pd.DateOffset(days=2)
+    else:
+        return x + pd.DateOffset(days=1)
 
 
 #测试笔记本（notebook）数据结构每个属性的返回值
