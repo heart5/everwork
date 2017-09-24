@@ -2,7 +2,12 @@
 # 处理配送全单数据
 #
 
-import pandas as pd, sqlite3 as lite, os, datetime, time
+import pandas as pd, sqlite3 as lite, os, datetime, time, matplotlib.pyplot as plt
+from pylab import *
+
+# plot中显示中文
+mpl.rcParams['font.sans-serif'] = ['SimHei']
+mpl.rcParams['axes.unicode_minus'] = False
 
 def descdb(df):
     # print(df.head(5))
@@ -39,23 +44,22 @@ def gengxinfou(filename,conn,tablename='fileread'):
     fncount = (result.fetchone())[0]
     if fncount == 0:
         print("文件"+fn+"无记录，录入信息")
-        sql = c.execute("insert into %s values(?,?,?,?,?,?)" %tablename,(fn,fna,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)),str(fstat.st_dev),str(fstat.st_size),time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())))
-        # conn.commit()
+        result = c.execute("insert into %s values(?,?,?,?,?,?)" %tablename,(fn,fna,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)),str(fstat.st_dev),str(fstat.st_size),time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())))
+        print('添加成功。')
         rt = True
     else:
-        print("文件"+fn+"有 "+str(fncount)+" 条记录，看是否最新",'\t')
+        print("文件"+fn+"已有 "+str(fncount)+" 条记录，看是否最新",'\t')
         sql = "select max(修改时间) as xg from %s where 文件名 = \'%s\'" %(tablename,fn)
         result = c.execute(sql)
         if time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)) > (result.fetchone())[0]:
             result = c.execute("insert into %s values(?,?,?,?,?,?)" %tablename,(fn,fna,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)),str(fstat.st_dev),str(fstat.st_size),time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())))
-            # conn.commit()
-            print('更新成功')
+            print('更新成功。')
             rt = True
         else:
             print('无需更新')
             rt = False
-
     # print(fstat.st_mtime, '\t', time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_atime)),'\t', '\t', time.strftime('%Y-%m-%d %H:%M',time.localtime(fstat.st_mtime)),'\t', '\t', time.strftime('%Y-%m-%d %H:%M',time.localtime(fstat.st_ctime)),'\t', fstat.st_dev)
+    conn.commit()
 
     return rt
 
@@ -98,41 +102,70 @@ def desclitedb(cnx):
         cur.execute("PRAGMA table_info(%s)" %table)
         # print (cur.fetchall())
         result = cur.execute("select * from %s" %table)
-        print(len(result.fetchall()))
+        print(len(result.fetchall()),end='\t')
         # print(cur.description)
         col_name_list = [tuple[0] for tuple in cur.description]
         print (col_name_list)
 
+
+def ceshizashua():
+    # desclitedb(cnx)
+    # cnx.cursor().execute('drop table fileread')
+    # cnx.cursor().execute("insert into fileread values('白晔峰','万寿无疆','2016-06-12','43838883','4099','2016-09-30')")
+    # cnx.commit()
+
+    ttt = '2017-09-01'
+    # result = cnx.cursor().execute('select * from jiaqi where 日期 > \'%s\'' %ttt)
+    # for ii in result.fetchall():
+    #     print(ii)
+
+    result = cnx.cursor().execute('select * from quandan limit 10')
+    for ii in result.fetchall():
+        print(ii)
+
+    result = cnx.cursor().execute("select * from fileread where 修改时间 >\'%s\'" % ttt)
+    for ii in result.fetchall():
+        print(ii)
+
+    result = cnx.cursor().execute('select max(修改时间) as xg from fileread')
+    print(result.fetchone()[0])
+
+
+def fenxi(cnx):
+    df = pd.read_sql_query('select 收款日期,count(终端编码) as danshu,sum(实收金额) as jine from quandan where (配货人!=\'%s\' or 配货人 is null) and (订单日期 >\'%s\') group by 收款日期' %('作废','2016-04-01'),cnx)
+    descdb(df)
+    df.index = pd.to_datetime(df['收款日期'])
+    df['danjun'] = df['jine'] / df['danshu']
+    descdb(df)
+
+    ds = pd.Series(df['jine'],index=df.index)
+    print(ds.index)
+    print(ds)
+    dates = pd.date_range('2016-04-01',periods=541,freq='D')
+    print(dates)
+    ds1 = ds.reindex(dates,fill_value=0)
+    print(ds1)
+    ds1.plot()
+
+    ds2 = ds1.resample('M').sum()
+    print(ds2)
+    ds2.plot()
+    plt.show()
+    # dfr = df.reindex(dates,fill_value=0)
+    # descdb(dfr)
+    # df['danshu'].plot()
+    # plt.show()
+    # df['jine'].plot()
+    # plt.show()
+
 cnx = lite.connect('data\\quandan.db')
 
-desclitedb(cnx)
-# cnx.cursor().execute('drop table fileread')
-# tt =time.localtime()
-# print(tt)
-# print(time.strftime("%Y-%m-%d %H:%M:%S",tt))
-# print(pd.to_datetime(time.strftime("%Y-%m-%d %H:%M:%S",tt)))
-
 dataokay(cnx)
-
-ttt = '2017-06-01'
-result = cnx.cursor().execute('select * from jiaqi where 日期 > \'%s\'' %ttt)
-for ii in result.fetchall():
-    print(ii)
-
-# result = cnx.cursor().execute('select * from quandan limit 5')
-# for ii in result.fetchall():
-#     print(ii)
-
-# cnx.cursor().execute("insert into fileread values('白晔峰','万寿无疆','2016-06-12','43838883','4099','2016-09-30')")
-# cnx.commit()
-result = cnx.cursor().execute("select * from fileread where 修改时间 >\'%s\'" %ttt)
-for ii in result.fetchall():
-    print(ii)
-
-result = cnx.cursor().execute('select min(修改时间) as xg from fileread')
-print(result.fetchone()[0])
-
-desclitedb(cnx)
+# desclitedb(cnx)
+fenxi(cnx)
+# cur = cnx.cursor()
+# result = cur.execute('PRAGMA count_changes')
+# print(result.fetchone()[0])
 
 cnx.close()
 
