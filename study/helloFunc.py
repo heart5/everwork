@@ -47,9 +47,14 @@ def yingdacal(x):
     else:
         return x + pd.DateOffset(days=1)
 
+num = 24322222222222222222222222222222222222222222222222222222222222221111111111111111111111111111111111111111111111111111111111111.0
+# num = 111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+print(type(num))
+print(type(num) in [float,int])
+print(time.time())
 
-print(yingdacal(pd.to_datetime('2017-04-30')))
-print(yingdacal(pd.to_datetime('2017-05-30')))
-print(yingdacal(pd.to_datetime('2017-02-23')))
-print(yingdacal(pd.to_datetime('2017-03-24')))
-print(yingdacal(pd.to_datetime('2017-09-02')))
+# print(yingdacal(pd.to_datetime('2017-04-30')))
+# print(yingdacal(pd.to_datetime('2017-05-30')))
+# print(yingdacal(pd.to_datetime('2017-02-23')))
+# print(yingdacal(pd.to_datetime('2017-03-24')))
+# print(yingdacal(pd.to_datetime('2017-09-02')))
