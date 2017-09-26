@@ -108,7 +108,7 @@ def desclitedb(cnx):
         print (col_name_list)
 
 
-def ceshizashua():
+def ceshizashua(cnx):
     # desclitedb(cnx)
     # cnx.cursor().execute('drop table fileread')
     # cnx.cursor().execute("insert into fileread values('白晔峰','万寿无疆','2016-06-12','43838883','4099','2016-09-30')")
@@ -119,9 +119,9 @@ def ceshizashua():
     # for ii in result.fetchall():
     #     print(ii)
 
-    result = cnx.cursor().execute('select * from quandan limit 10')
-    for ii in result.fetchall():
-        print(ii)
+    # result = cnx.cursor().execute('select * from quandan limit 10')
+    # for ii in result.fetchall():
+    #     print(ii)
 
     result = cnx.cursor().execute("select * from fileread where 修改时间 >\'%s\'" % ttt)
     for ii in result.fetchall():
@@ -133,22 +133,24 @@ def ceshizashua():
 
 def fenxi(cnx):
     df = pd.read_sql_query('select 收款日期,count(终端编码) as danshu,sum(实收金额) as jine from quandan where (配货人!=\'%s\' or 配货人 is null) and (订单日期 >\'%s\') group by 收款日期' %('作废','2016-04-01'),cnx)
+    df = pd.read_sql_query('select 送达日期,count(终端编码) as danshu,sum(送货金额) as jine from quandan where (配货人!=\'%s\' and 收款日期 is null) and (订单日期 >\'%s\') group by 送达日期' %('作废','2010-11-04'),cnx)
     descdb(df)
-    df.index = pd.to_datetime(df['收款日期'])
+    df.index = pd.to_datetime(df['送达日期'])
     df['danjun'] = df['jine'] / df['danshu']
     descdb(df)
 
     ds = pd.Series(df['jine'],index=df.index)
     print(ds.index)
     print(ds)
-    dates = pd.date_range('2016-04-01',periods=541,freq='D')
+    dates = pd.date_range('2010-11-04',periods=2520,freq='D')
     print(dates)
     ds1 = ds.reindex(dates,fill_value=0)
-    print(ds1)
+    descdb(ds1)
     ds1.plot()
 
     ds2 = ds1.resample('M').sum()
-    print(ds2)
+    descdb(ds2)
+    print(ds2.sum())
     ds2.plot()
     plt.show()
     # dfr = df.reindex(dates,fill_value=0)
@@ -166,6 +168,8 @@ fenxi(cnx)
 # cur = cnx.cursor()
 # result = cur.execute('PRAGMA count_changes')
 # print(result.fetchone()[0])
+
+# ceshizashua(cnx)
 
 cnx.close()
 
