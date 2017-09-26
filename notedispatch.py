@@ -13,8 +13,10 @@ def descdb(df):
     # print(df.head(5))
     print(df.tail(5))
     print(df.dtypes)
+    if type(df) == pd.DataFrame:
+        print(df.columns)
     print(len(df))
-    print(df.describe())
+    # print(df.describe())
 
 def gengxinfou(filename,conn,tablename='fileread'):
     rt = False
@@ -142,7 +144,7 @@ def fenxi(cnx):
     ds = pd.Series(df['jine'],index=df.index)
     print(ds.index)
     print(ds)
-    dates = pd.date_range('2010-11-04',periods=2520,freq='D')
+    dates = pd.date_range('2016-01-01',periods=365,freq='D')
     print(dates)
     ds1 = ds.reindex(dates,fill_value=0)
     descdb(ds1)
@@ -153,6 +155,7 @@ def fenxi(cnx):
     print(ds2.sum())
     ds2.plot()
     plt.show()
+
     # dfr = df.reindex(dates,fill_value=0)
     # descdb(dfr)
     # df['danshu'].plot()
