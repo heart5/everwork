@@ -10,7 +10,7 @@ mpl.rcParams['font.sans-serif'] = ['SimHei']
 mpl.rcParams['axes.unicode_minus'] = False
 
 def descdb(df):
-    # print(df.head(5))
+    print(df.head(5))
     print(df.tail(5))
     print(df.dtypes)
     if type(df) == pd.DataFrame:
@@ -134,27 +134,67 @@ def ceshizashua(cnx):
 
 
 def fenxi(cnx):
-    df = pd.read_sql_query('select 收款日期,count(终端编码) as danshu,sum(实收金额) as jine from quandan where (配货人!=\'%s\' or 配货人 is null) and (订单日期 >\'%s\') group by 收款日期' %('作废','2016-04-01'),cnx)
-    df = pd.read_sql_query('select 送达日期,count(终端编码) as danshu,sum(送货金额) as jine from quandan where (配货人!=\'%s\' and 收款日期 is null) and (订单日期 >\'%s\') group by 送达日期' %('作废','2010-11-04'),cnx)
-    descdb(df)
-    df.index = pd.to_datetime(df['送达日期'])
+    # df = pd.read_sql_query('select 收款日期,count(终端编码) as danshu,sum(实收金额) as jine from quandan where (配货人!=\'%s\' or 配货人 is null) and (订单日期 >\'%s\') group by 收款日期' %('作废','2016-03-29'),cnx)
+    yibu = ('01','02','03','04','05','06','09')
+    erbu = ('00','07','08','10','11','12','13')
+    hankou = ('21','22','23','24','25','26')
+    hanyang = ('31','32','33','34')
+    zongbu = tuple(list(yibu)+list(erbu)+list(hankou)+list(hanyang))
+    lxzd = ('A','B','C','S','W','Y')
+    lxqd = ('O','P','Q')
+    lxls = ('L','Z')
+    lxqt = ('G','N','X')
+    lxqb = tuple(list(lxzd)+list(lxqd)+list(lxls)+list(lxqt))
+    df = pd.read_sql_query("select 订单日期,count(终端编码) as danshu,sum(送货金额) as jine,substr(终端编码,1,2) as quyu ,substr(终端编码,12,1) as leixing from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(quyu in %s) and(leixing in %s) group by 订单日期" %('作废',hankou,lxzd),cnx)
+    # df = pd.read_sql_query('select 送达日期,count(终端编码) as danshu,sum(送货金额) as jine from quandan where (配货人!=\'%s\' and 收款日期 is null) and (订单日期 >\'%s\') group by 送达日期' %('作废','2010-11-04'),cnx)
+    # descdb(df)
+    df.index = pd.to_datetime(df['订单日期'])
     df['danjun'] = df['jine'] / df['danshu']
     descdb(df)
 
-    ds = pd.Series(df['jine'],index=df.index)
-    print(ds.index)
-    print(ds)
-    dates = pd.date_range('2016-01-01',periods=365,freq='D')
-    print(dates)
+    ds = pd.DataFrame(df['jine'],index=df.index)
+    # print(ds.index)
+    # print(ds)
+    dates = pd.date_range('2017-07-29',periods=31,freq='D')
+    # print(dates)
     ds1 = ds.reindex(dates,fill_value=0)
+    # ds1 = ds1.resample('M').sum()
+    # descdb(ds1)
+    ds1.index = (range(31))
+    ds1.columns = ['201708']
     descdb(ds1)
-    ds1.plot()
 
-    ds2 = ds1.resample('M').sum()
+    dates = pd.date_range('2017-08-29',periods=31,freq='D')
+    # print(dates)
+    ds2 = ds.reindex(dates,fill_value=0)
+    # ds2 =ds2.resample('M').sum()
+    # descdb(ds2)
+    ds2.index = range(31)
+    ds2.columns = ['201709']
     descdb(ds2)
-    print(ds2.sum())
-    ds2.plot()
+
+    dates = pd.date_range('2016-08-29',periods=31,freq='D')
+    # print(dates)
+    ds3 = ds.reindex(dates,fill_value=0)
+    # ds2 =ds2.resample('M').sum()
+    # descdb(ds2)
+    ds3.index = range(31)
+    ds3.columns = ['201609']
+    descdb(ds3)
+
+    df = ds1.join(ds2,how='left')
+    df = df.join(ds3,how='left')
+    df = df[['201709','201708','201609']]
+    descdb(df)
+    df.cumsum().plot()
     plt.show()
+    # ds1.plot()
+    #
+    # ds2 = ds1.resample('M').sum()
+    # descdb(ds2)
+    # print(ds2.sum())
+    # ds2.plot()
+    # plt.show()
 
     # dfr = df.reindex(dates,fill_value=0)
     # descdb(dfr)
@@ -166,7 +206,7 @@ def fenxi(cnx):
 cnx = lite.connect('data\\quandan.db')
 
 dataokay(cnx)
-# desclitedb(cnx)
+desclitedb(cnx)
 fenxi(cnx)
 # cur = cnx.cursor()
 # result = cur.execute('PRAGMA count_changes')
