@@ -17,22 +17,32 @@ def helloSec(name):
     print('你好啊，'+name)
 
 # helloSec('白珍石')
-# helloSec('白珍岩')
 
 
-def yingdacal(x,cnx):
-    ii = (x+pd.DateOffset(days=1)).strftime('%Y-%m-%d')
-    dfall = pd.read_sql_query('select 天数 from jiaqi where 日期 =\''+ii+'\'', cnx)
-    # print(dfall.columns)
-    # print(dfall['tianshu'])
-    # print(len(dfall))
-    print(int(x.strftime('%w')))
-    if(len(dfall) > 0):
-        return x+pd.DateOffset(days=int(dfall['tianshu'][0]))
-    elif(int(x.strftime('%w')) == 6):
-        return x+pd.DateOffset(days=2)
-    else:
-        return x + pd.DateOffset(days=1)
+def yingdacal(dfy,cnx):
+    df = []
+    dfjiaqi = pd.read_sql_query('select 日期 from jiaqi',cnx)
+    # print(dfjiaqi['日期'])
+    for x in dfy:
+        if type(x) == str:
+            x = pd.to_datetime(x)
+        datestr = str(x+pd.DateOffset(days=1))
+        # print(datestr)
+
+        # print(dfall.columns)
+        # print(dfall['tianshu'])
+        # print(len(dfall))
+        # print(int(x.strftime('%w')))
+        if(datestr in tuple(dfjiaqi['日期'])):
+            dfjiaqitianshu = pd.read_sql_query('select 天数 from jiaqi where 日期 =\'' + datestr + '\'', cnx)
+            ii = x+pd.DateOffset(days=int(dfjiaqitianshu['天数'][0]))
+        elif(int(x.strftime('%w')) == 6):
+            ii = x+pd.DateOffset(days=2)
+        else:
+            ii = x + pd.DateOffset(days=1)
+        df.append(ii)
+
+    return df
 
 
 def guizheng():
@@ -57,9 +67,6 @@ def cstype():
 
 guizheng()
 
-# cnx = lite.connect('..\\data\\quandan.db')
-# print(yingdacal(pd.to_datetime('2017-04-30'),cnx))
-# print(yingdacal(pd.to_datetime('2017-05-30'),cnx))
-# print(yingdacal(pd.to_datetime('2017-02-23'),cnx))
-# print(yingdacal(pd.to_datetime('2017-03-24'),cnx))
-# print(yingdacal(pd.to_datetime('2017-09-02'),cnx))
+cnx = lite.connect('..\\data\\quandan.db')
+ceshiriqi = ['2017-04-28','2017-06-08','2017-02-23','2017-03-24','2017-09-02','2017-09-30']
+print(yingdacal(ceshiriqi,cnx))

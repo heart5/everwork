@@ -145,21 +145,21 @@ def fenxi(cnx):
     lxls = ('L','Z')
     lxqt = ('G','N','X')
     lxqb = tuple(list(lxzd)+list(lxqd)+list(lxls)+list(lxqt))
-    df = pd.read_sql_query("select 订单日期,count(终端编码) as danshu,sum(送货金额) as jine,substr(终端编码,1,2) as quyu ,substr(终端编码,12,1) as leixing from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(quyu in %s) and(leixing in %s) group by 订单日期" %('作废',hankou,lxzd),cnx)
+    df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',zongbu,lxzd),cnx)
     # df = pd.read_sql_query('select 送达日期,count(终端编码) as danshu,sum(送货金额) as jine from quandan where (配货人!=\'%s\' and 收款日期 is null) and (订单日期 >\'%s\') group by 送达日期' %('作废','2010-11-04'),cnx)
     # descdb(df)
     df.index = pd.to_datetime(df['订单日期'])
-    df['danjun'] = df['jine'] / df['danshu']
+    df['单均'] = df['金额'] / df['单数']
     descdb(df)
 
-    ds = pd.DataFrame(df['jine'],index=df.index)
+    ds = pd.DataFrame(df['单数'],index=df.index)
     # print(ds.index)
     # print(ds)
     dates = pd.date_range('2017-07-29',periods=31,freq='D')
     # print(dates)
     ds1 = ds.reindex(dates,fill_value=0)
     # ds1 = ds1.resample('M').sum()
-    # descdb(ds1)
+    descdb(ds1)
     ds1.index = (range(31))
     ds1.columns = ['201708']
     descdb(ds1)
@@ -168,25 +168,30 @@ def fenxi(cnx):
     # print(dates)
     ds2 = ds.reindex(dates,fill_value=0)
     # ds2 =ds2.resample('M').sum()
-    # descdb(ds2)
+    descdb(ds2)
     ds2.index = range(31)
     ds2.columns = ['201709']
-    descdb(ds2)
+    # descdb(ds2)
 
     dates = pd.date_range('2016-08-29',periods=31,freq='D')
     # print(dates)
     ds3 = ds.reindex(dates,fill_value=0)
     # ds2 =ds2.resample('M').sum()
-    # descdb(ds2)
+    descdb(ds3)
     ds3.index = range(31)
     ds3.columns = ['201609']
-    descdb(ds3)
+    # descdb(ds3)
 
     df = ds1.join(ds2,how='left')
     df = df.join(ds3,how='left')
     df = df[['201709','201708','201609']]
     descdb(df)
-    df.cumsum().plot()
+    if len(df) > 12:
+        # print(len(df))
+        df.cumsum().plot(title='单数日累积')
+    else:
+        df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
+
     plt.show()
     # ds1.plot()
     #

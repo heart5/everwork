@@ -156,7 +156,7 @@ cnx = lite.connect('quandan.db')
 #                  '送达日期', '车辆', '送货人', '收款日期', '收款人', '拒收品项']]
 # df.to_sql(name='sources', con=cnx, schema=sql_df, if_exists='replace', chunksize=10000)
 
-def yingdacal(dfy):
+def yingdacal(dfy,cnx):
     df = []
     dfjiaqi = pd.read_sql_query('select date from jiaqi',cnx)
     for x in dfy:
