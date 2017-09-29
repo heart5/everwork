@@ -145,14 +145,14 @@ def fenxi(cnx):
     lxls = ('L','Z')
     lxqt = ('G','N','X')
     lxqb = tuple(list(lxzd)+list(lxqd)+list(lxls)+list(lxqt))
-    df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',zongbu,lxzd),cnx)
+    df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',zongbu,lxqb),cnx)
     # df = pd.read_sql_query('select 送达日期,count(终端编码) as danshu,sum(送货金额) as jine from quandan where (配货人!=\'%s\' and 收款日期 is null) and (订单日期 >\'%s\') group by 送达日期' %('作废','2010-11-04'),cnx)
     # descdb(df)
     df.index = pd.to_datetime(df['订单日期'])
     df['单均'] = df['金额'] / df['单数']
     descdb(df)
 
-    ds = pd.DataFrame(df['单数'],index=df.index)
+    ds = pd.DataFrame(df['金额'],index=df.index)
     # print(ds.index)
     # print(ds)
     dates = pd.date_range('2017-07-29',periods=31,freq='D')
@@ -188,7 +188,7 @@ def fenxi(cnx):
     descdb(df)
     if len(df) > 12:
         # print(len(df))
-        df.cumsum().plot(title='单数日累积')
+        df.cumsum().plot(title='金额日累积')
     else:
         df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
 
