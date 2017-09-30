@@ -2,7 +2,7 @@
 # 处理配送全单数据
 #
 
-import pandas as pd, sqlite3 as lite, os, datetime, time, matplotlib.pyplot as plt
+import pandas as pd, sqlite3 as lite, os, datetime, time, matplotlib.pyplot as plt,calendar
 from pylab import *
 
 # plot中显示中文
@@ -132,6 +132,14 @@ def ceshizashua(cnx):
     result = cnx.cursor().execute('select max(修改时间) as xg from fileread')
     print(result.fetchone()[0])
 
+    ddd = '2017-03-31'
+    ddd =pd.to_datetime(ddd)+pd.DateOffset(months=-1)
+    print(ddd)
+    ddd =pd.to_datetime(ddd)+pd.DateOffset(years=-1)
+    print(ddd)
+    print('%02d' %ddd.month)
+    print('%04d%02d' %(ddd.year,ddd.month))
+    print(calendar.monthrange(2017,2)[1])
 
 def fenxi(cnx):
     # df = pd.read_sql_query('select 收款日期,count(终端编码) as danshu,sum(实收金额) as jine from quandan where (配货人!=\'%s\' or 配货人 is null) and (订单日期 >\'%s\') group by 收款日期' %('作废','2016-03-29'),cnx)
@@ -152,47 +160,63 @@ def fenxi(cnx):
     df['单均'] = df['金额'] / df['单数']
     descdb(df)
 
-    ds = pd.DataFrame(df['金额'],index=df.index)
+    dangqianyue = pd.to_datetime('2017-09-29')
+    for i in range(7):
+        chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'金额')
+        chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
+
+
+#riqi形如2017-08-29，代表2017年9月为标的物
+def chubiaorileiji(df,riqi,xiangmu,quyu='',leixing=''):
+    riqicur = pd.to_datetime(riqi)
+    riqibefore = riqicur+pd.DateOffset(months=-1)
+    riqilast = riqicur+pd.DateOffset(years=-1)
+    tianshu = calendar.monthrange(riqibefore.year,riqibefore.month)[1]
+
+    ds = pd.DataFrame(df[xiangmu],index=df.index)
     # print(ds.index)
     # print(ds)
-    dates = pd.date_range('2017-07-29',periods=31,freq='D')
+    dates = pd.date_range(riqibefore,periods=tianshu,freq='D')
     # print(dates)
     ds1 = ds.reindex(dates,fill_value=0)
     # ds1 = ds1.resample('M').sum()
-    descdb(ds1)
-    ds1.index = (range(31))
-    ds1.columns = ['201708']
-    descdb(ds1)
+    # descdb(ds1)
+    ds1.index = (range(tianshu))
+    ds1.columns = ['%04d%02d' %(riqibefore.year,(riqibefore+pd.DateOffset(months=1)).month)]
+    # descdb(ds1)
 
-    dates = pd.date_range('2017-08-29',periods=31,freq='D')
+    dates = pd.date_range(riqicur,periods=tianshu,freq='D')
     # print(dates)
     ds2 = ds.reindex(dates,fill_value=0)
     # ds2 =ds2.resample('M').sum()
-    descdb(ds2)
-    ds2.index = range(31)
-    ds2.columns = ['201709']
+    # descdb(ds2)
+    ds2.index = range(tianshu)
+    ds2.columns = ['%04d%02d' %(riqicur.year,(riqicur+pd.DateOffset(months=1)).month)]
     # descdb(ds2)
 
-    dates = pd.date_range('2016-08-29',periods=31,freq='D')
+    dates = pd.date_range(riqilast,periods=tianshu,freq='D')
     # print(dates)
     ds3 = ds.reindex(dates,fill_value=0)
     # ds2 =ds2.resample('M').sum()
-    descdb(ds3)
-    ds3.index = range(31)
-    ds3.columns = ['201609']
+    # descdb(ds3)
+    ds3.index = range(tianshu)
+    ds3.columns = ['%04d%02d' %(riqilast.year,(riqilast+pd.DateOffset(months=1)).month)]
     # descdb(ds3)
 
     df = ds1.join(ds2,how='left')
     df = df.join(ds3,how='left')
-    df = df[['201709','201708','201609']]
-    descdb(df)
+    df = df[['%04d%02d' %(riqicur.year,(riqicur+pd.DateOffset(months=1)).month),'%04d%02d' %(riqibefore.year,(riqibefore+pd.DateOffset(months=1)).month),'%04d%02d' %(riqilast.year,(riqilast+pd.DateOffset(months=1)).month)]]
+    # descdb(df)
     if len(df) > 12:
         # print(len(df))
-        df.cumsum().plot(title='金额日累积')
+        df.cumsum().plot(title=leixing+quyu+xiangmu+'日累积')
     else:
         df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
 
-    plt.show()
+    nianyue = '%04d%02d'%(riqicur.year,(riqicur+pd.DateOffset(months=1)).month)
+    plt.savefig('img\\'+leixing+quyu+nianyue+xiangmu+'.png' )
+    # plt.show()
+    plt.close()
     # ds1.plot()
     #
     # ds2 = ds1.resample('M').sum()
