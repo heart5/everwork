@@ -154,24 +154,28 @@ def fenxi(cnx):
     lxqt = ('G','N','X')
     lxqb = tuple(list(lxzd)+list(lxqd)+list(lxls)+list(lxqt))
     df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',zongbu,lxqb),cnx)
+    df = pd.read_sql_query('select 订单日期,sum(送货金额) as 金额, count(终端编码) as 单数 from quandan where (送货金额 is null) group by 订单日期',cnx)
     # df = pd.read_sql_query('select 送达日期,count(终端编码) as danshu,sum(送货金额) as jine from quandan where (配货人!=\'%s\' and 收款日期 is null) and (订单日期 >\'%s\') group by 送达日期' %('作废','2010-11-04'),cnx)
     # descdb(df)
     df.index = pd.to_datetime(df['订单日期'])
-    df['单均'] = df['金额'] / df['单数']
+    # df['单均'] = df['金额'] / df['单数']
     descdb(df)
 
-    dangqianyue = pd.to_datetime('2017-09-29')
-    for i in range(7):
+    dangqianyue = pd.to_datetime('2017-02-01')
+    for i in range(1):
         chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'金额')
-        chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
+        # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
 
+
+def rizi(df):
+    return '%02d' %(df[0].day)
 
 #riqi形如2017-08-29，代表2017年9月为标的物
 def chubiaorileiji(df,riqi,xiangmu,quyu='',leixing=''):
     riqicur = pd.to_datetime(riqi)
     riqibefore = riqicur+pd.DateOffset(months=-1)
     riqilast = riqicur+pd.DateOffset(years=-1)
-    tianshu = calendar.monthrange(riqibefore.year,riqibefore.month)[1]
+    tianshu = calendar.monthrange(riqicur.year,riqicur.month)[1]
 
     ds = pd.DataFrame(df[xiangmu],index=df.index)
     # print(ds.index)
@@ -182,17 +186,8 @@ def chubiaorileiji(df,riqi,xiangmu,quyu='',leixing=''):
     # ds1 = ds1.resample('M').sum()
     # descdb(ds1)
     ds1.index = (range(tianshu))
-    ds1.columns = ['%04d%02d' %(riqibefore.year,(riqibefore+pd.DateOffset(months=1)).month)]
+    ds1.columns = ['%04d%02d' %(riqibefore.year,riqibefore.month)]
     # descdb(ds1)
-
-    dates = pd.date_range(riqicur,periods=tianshu,freq='D')
-    # print(dates)
-    ds2 = ds.reindex(dates,fill_value=0)
-    # ds2 =ds2.resample('M').sum()
-    # descdb(ds2)
-    ds2.index = range(tianshu)
-    ds2.columns = ['%04d%02d' %(riqicur.year,(riqicur+pd.DateOffset(months=1)).month)]
-    # descdb(ds2)
 
     dates = pd.date_range(riqilast,periods=tianshu,freq='D')
     # print(dates)
@@ -200,20 +195,33 @@ def chubiaorileiji(df,riqi,xiangmu,quyu='',leixing=''):
     # ds2 =ds2.resample('M').sum()
     # descdb(ds3)
     ds3.index = range(tianshu)
-    ds3.columns = ['%04d%02d' %(riqilast.year,(riqilast+pd.DateOffset(months=1)).month)]
+    ds3.columns = ['%04d%02d' %(riqilast.year,riqilast.month)]
     # descdb(ds3)
 
-    df = ds1.join(ds2,how='left')
+    dates = pd.date_range(riqicur,periods=tianshu,freq='D')
+    print(dates)
+    ds2 = ds.reindex(dates,fill_value=0)
+    # ds2 =ds2.resample('M').sum()
+    # descdb(ds2)
+    ds2.index = range(tianshu)
+    ds2.columns = ['%04d%02d' %(riqicur.year,riqicur.month)]
+    # descdb(ds2)
+
+    df = ds2.join(ds1,how='left')
     df = df.join(ds3,how='left')
-    df = df[['%04d%02d' %(riqicur.year,(riqicur+pd.DateOffset(months=1)).month),'%04d%02d' %(riqibefore.year,(riqibefore+pd.DateOffset(months=1)).month),'%04d%02d' %(riqilast.year,(riqilast+pd.DateOffset(months=1)).month)]]
+    df = df[['%04d%02d' %(riqicur.year,riqicur.month),'%04d%02d' %(riqibefore.year,riqibefore.month),'%04d%02d' %(riqilast.year,riqilast.month)]]
     # descdb(df)
+    zuobiao = pd.DataFrame(dates).apply(lambda r:rizi(r),axis=1)
+    df.index= zuobiao
+    descdb(df)
     if len(df) > 12:
         # print(len(df))
         df.cumsum().plot(title=leixing+quyu+xiangmu+'日累积')
     else:
         df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
 
-    nianyue = '%04d%02d'%(riqicur.year,(riqicur+pd.DateOffset(months=1)).month)
+    # plt.gca().set_xticklabels(list(zuobiao))  # 主刻度文本用min_formatter函数计算
+    nianyue = '%04d%02d'%(riqicur.year,riqicur.month)
     plt.savefig('img\\'+leixing+quyu+nianyue+xiangmu+'.png' )
     # plt.show()
     plt.close()
