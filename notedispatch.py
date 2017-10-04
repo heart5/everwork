@@ -161,8 +161,8 @@ def fenxi(cnx):
     # df['单均'] = df['金额'] / df['单数']
     descdb(df)
 
-    dangqianyue = pd.to_datetime('2017-09-01')
-    for i in range(3):
+    dangqianyue = pd.to_datetime('2017-05-01')
+    for i in range(7):
         chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'金额')
         chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
 
