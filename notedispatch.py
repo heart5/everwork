@@ -141,6 +141,11 @@ def ceshizashua(cnx):
     print('%04d%02d' %(ddd.year,ddd.month))
     print(calendar.monthrange(2017,2)[1])
 
+    for i in range(10):
+        nianfen = 2017-i
+        print(str(nianfen),end='\t')
+        print(calendar.isleap(int(nianfen)))
+
 def fenxi(cnx):
     # df = pd.read_sql_query('select 收款日期,count(终端编码) as danshu,sum(实收金额) as jine from quandan where (配货人!=\'%s\' or 配货人 is null) and (订单日期 >\'%s\') group by 收款日期' %('作废','2016-03-29'),cnx)
     yibu = ('01','02','03','04','05','06','09')
@@ -153,7 +158,7 @@ def fenxi(cnx):
     lxls = ('L','Z')
     lxqt = ('G','N','X')
     lxqb = tuple(list(lxzd)+list(lxqd)+list(lxls)+list(lxqt))
-    df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',zongbu,lxqb),cnx)
+    df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',zongbu,lxzd),cnx)
     # df = pd.read_sql_query('select 订单日期,sum(送货金额) as 金额, count(终端编码) as 单数 from quandan where (送货金额 is not null) group by 订单日期',cnx)
     # df = pd.read_sql_query('select 送达日期,count(终端编码) as danshu,sum(送货金额) as jine from quandan where (配货人!=\'%s\' and 收款日期 is null) and (订单日期 >\'%s\') group by 送达日期' %('作废','2010-11-04'),cnx)
     # descdb(df)
@@ -161,16 +166,96 @@ def fenxi(cnx):
     # df['单均'] = df['金额'] / df['单数']
     descdb(df)
 
-    dangqianyue = pd.to_datetime('2017-05-01')
-    for i in range(7):
-        chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'金额')
-        chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
+    dangqianyue = pd.to_datetime('2017-09-01')
+    for i in range(6):
+        chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'金额',leixing='终端')
+        # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
+
+    chubiaoyueleiji(df,dangqianyue,'金额')
+
+
+
+#
+# 把纵轴的刻度设置为万
+#
+def y_formatter(x, pos):
+    return r"%d万" %(int(x/10000)) #%d
 
 
 def rizi(df):
     return '%02d' %(df[0].day)
 
-#riqi形如2017-08-29，代表2017年9月为标的物
+
+def yuezi(df):
+    return '%02d' %(df[0]+1)
+
+
+# 月度（全年，自然年度）累积对比图，自最早日期起，默认3年
+# df，数据表，必须用DateTime做index
+# riqi，当前月份，可以是DateTIme的各种形式，只要pd能识别成功，形如2017-10-01，代表2017年10月为标的月份
+# xiangmu，主题，画图时写入标题
+# quyu，销售区域或区域聚合（分部）
+# leixing，终端类型
+# nianshu，用来对比的年份数，从当前年份向回数
+def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',nianshu=3):
+    riqicur = pd.to_datetime(riqi)
+    nianlist = []
+    for i in range(nianshu):
+        nianlist.append(riqicur+pd.DateOffset(years=-(i)))
+
+    ds = pd.DataFrame(df[xiangmu],index=df.index)#取出日期索引的数据列
+
+    # 分年份生成按照每天日期重新索引的数据列
+    dslist = []
+    for i in range(nianshu):
+        dstmp = ds.reindex(pd.date_range(pd.to_datetime(str(nianlist[i].year)+'-01-01'),periods=365,freq='D'),fill_value=0)
+        dstmp = dstmp.resample('M').sum()
+        dstmp.columns = ['%04d'%(nianlist[i].year)]
+        dstmp.index = (range(12))
+        dslist.append(dstmp)
+
+    df = dslist[0]
+    for i in range(nianshu-1):
+        df = df.join(dslist[i+1])
+
+    colnames = []
+    for i in range(nianshu):
+        colnames.append((dslist[i].columns)[0])
+    # print(colnames)
+    df = df[colnames]
+    zuobiao = pd.DataFrame(df.index).apply(lambda r:yuezi(r),axis=1)
+    df.index= zuobiao
+
+    descdb(df)
+
+    nianyue = '%04d年'%(riqicur.year)
+    biaoti = leixing+quyu+nianyue+xiangmu
+    df.cumsum().plot(title=('%s月累积年' %biaoti))
+    # df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
+    plt.savefig('img\\%s（月累积年）.png' %biaoti)
+    plt.close()
+    df.plot(title=('%s月折线年') %biaoti)
+    plt.savefig('img\\%s（月度折线）.png' %biaoti)
+    plt.close()
+    # plt.show()
+    # ds1.plot()
+    #
+    # ds2 = ds1.resample('M').sum()
+    # descdb(ds2)
+    # print(ds2.sum())
+    # ds2.plot()
+    # plt.show()
+
+    # dfr = df.reindex(dates,fill_value=0)
+    # descdb(dfr)
+    # df['danshu'].plot()
+    # plt.show()
+    # df['jine'].plot()
+    # plt.show()
+
+#日（整月）累积对比图，当月、环比、同期比
+#riqi形如2017-10-01，代表2017年10月为标的月份
 def chubiaorileiji(df,riqi,xiangmu,quyu='',leixing=''):
     riqicur = pd.to_datetime(riqi)
     riqibefore = riqicur+pd.DateOffset(months=-1)
@@ -220,9 +305,9 @@ def chubiaorileiji(df,riqi,xiangmu,quyu='',leixing=''):
     else:
         df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
 
-    # plt.gca().set_xticklabels(list(zuobiao))  # 主刻度文本用min_formatter函数计算
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
     nianyue = '%04d%02d'%(riqicur.year,riqicur.month)
-    plt.savefig('img\\'+leixing+quyu+nianyue+xiangmu+'.png' )
+    plt.savefig('img\\'+leixing+quyu+nianyue+xiangmu+'（日累积月）.png' )
     # plt.show()
     plt.close()
     # ds1.plot()
