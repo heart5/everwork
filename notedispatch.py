@@ -45,20 +45,20 @@ def gengxinfou(filename,conn,tablename='fileread'):
     # conn.commit()
     fncount = (result.fetchone())[0]
     if fncount == 0:
-        print("文件"+fn+"无记录，录入信息")
+        print("文件《"+fn+"》无记录，录入信息！\t",end='\t')
         result = c.execute("insert into %s values(?,?,?,?,?,?)" %tablename,(fn,fna,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)),str(fstat.st_dev),str(fstat.st_size),time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())))
         print('添加成功。')
         rt = True
     else:
-        print("文件"+fn+"已有 "+str(fncount)+" 条记录，看是否最新",'\t')
+        print("文件《"+fn+"》已有 "+str(fncount)+" 条记录，看是否最新？\t",end='\t')
         sql = "select max(修改时间) as xg from %s where 文件名 = \'%s\'" %(tablename,fn)
         result = c.execute(sql)
         if time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)) > (result.fetchone())[0]:
             result = c.execute("insert into %s values(?,?,?,?,?,?)" %tablename,(fn,fna,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)),str(fstat.st_dev),str(fstat.st_size),time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())))
-            print('更新成功。')
+            print('更新成功！')
             rt = True
         else:
-            print('无需更新')
+            print('无需更新。')
             rt = False
     # print(fstat.st_mtime, '\t', time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_atime)),'\t', '\t', time.strftime('%Y-%m-%d %H:%M',time.localtime(fstat.st_mtime)),'\t', '\t', time.strftime('%Y-%m-%d %H:%M',time.localtime(fstat.st_ctime)),'\t', fstat.st_dev)
     conn.commit()
@@ -66,6 +66,24 @@ def gengxinfou(filename,conn,tablename='fileread'):
     return rt
 
 def dataokay(cnx):
+    if gengxinfou('data\\系统表.xlsx',cnx,'fileread') :#or True:
+        df = pd.read_excel('data\\系统表.xlsx',sheetname='区域')
+        df['区域'] = pd.DataFrame(df['区域']).apply(lambda r: '%02d' %r, axis=1)
+        print(df)
+        sql_df=df.loc[:,['区域', '分部']]
+        df.to_sql(name='quyu', con=cnx, schema=sql_df, if_exists='replace')
+
+        df = pd.read_excel('data\\系统表.xlsx', sheetname='小区')
+        df['小区'] = pd.DataFrame(df['小区']).apply(lambda r: '%03d' %r, axis=1)
+        print(df)
+        sql_df = df.loc[:, ['小区']]
+        df.to_sql(name='xiaoqu', con=cnx, schema=sql_df, if_exists='replace')
+
+        df = pd.read_excel('data\\系统表.xlsx', sheetname='终端类型')
+        print(df)
+        sql_df = df.loc[:, ['编码','描述','类型']]
+        df.to_sql(name='leixing', con=cnx, schema=sql_df, if_exists='replace')
+
     if gengxinfou('data\\2017年全单统计管理.xlsm',cnx,'fileread'):
         df = pd.read_excel('data\\2017年全单统计管理.xlsm',sheetname='全单统计管理',na_values=[0])
         # descdb(df)
@@ -74,7 +92,7 @@ def dataokay(cnx):
                          '送达日期', '车辆', '送货人', '收款日期', '收款人', '拒收品项']]
         df.to_sql(name='quandan', con=cnx, schema=sql_df, if_exists='replace', chunksize=1000)
 
-    if gengxinfou('data\\jiaqi.txt',cnx):
+    if gengxinfou('data\\jiaqi.txt',cnx,'fileread'):
         df = pd.read_csv('data\\jiaqi.txt',sep=',',header=None)
         dfjiaqi = []
         for ii in df[0]:
@@ -112,7 +130,8 @@ def desclitedb(cnx):
 
 def ceshizashua(cnx):
     # desclitedb(cnx)
-    # cnx.cursor().execute('drop table fileread')
+    # cnx.cursor().execute('drop table quyu')
+    # cnx.cursor().execute('drop table xiaoqu')
     # cnx.cursor().execute("insert into fileread values('白晔峰','万寿无疆','2016-06-12','43838883','4099','2016-09-30')")
     # cnx.commit()
 
@@ -146,18 +165,35 @@ def ceshizashua(cnx):
         print(str(nianfen),end='\t')
         print(calendar.isleap(int(nianfen)))
 
+
+    # lxzd = ('A', 'B', 'C', 'S', 'W', 'Y')
+    # lxqd = ('O', 'P', 'Q')
+    # lxls = ('L', 'Z')
+    # lxqt = ('G', 'N', 'X')
+    # lxqb = tuple(list(lxzd) + list(lxqd) + list(lxls) + list(lxqt))
+
+
 def fenxi(cnx):
     # df = pd.read_sql_query('select 收款日期,count(终端编码) as danshu,sum(实收金额) as jine from quandan where (配货人!=\'%s\' or 配货人 is null) and (订单日期 >\'%s\') group by 收款日期' %('作废','2016-03-29'),cnx)
-    yibu = ('01','02','03','04','05','06','09')
-    erbu = ('00','07','08','10','11','12','13')
-    hankou = ('21','22','23','24','25','26')
-    hanyang = ('31','32','33','34')
-    zongbu = tuple(list(yibu)+list(erbu)+list(hankou)+list(hanyang))
-    lxzd = ('A','B','C','S','W','Y')
-    lxqd = ('O','P','Q')
-    lxls = ('L','Z')
-    lxqt = ('G','N','X')
-    lxqb = tuple(list(lxzd)+list(lxqd)+list(lxls)+list(lxqt))
+    dfquyu= pd.read_sql('select * from quyu',cnx,index_col='index')
+    descdb(dfquyu)
+    yibu = tuple((dfquyu[dfquyu['分部'] == '一部'])['区域'])
+    erbu = tuple((dfquyu[dfquyu['分部'] == '二部'])['区域'])
+    hankou = tuple((dfquyu[dfquyu['分部'] == '汉口'])['区域'])
+    hanyang = tuple((dfquyu[dfquyu['分部'] == '汉阳'])['区域'])
+    zongbu = tuple(list(yibu) + list(erbu) + list(hankou) + list(hanyang))
+    print(zongbu)
+
+    dfquyu= pd.read_sql('select * from leixing',cnx,index_col='index')
+    descdb(dfquyu)
+    lxzd = tuple((dfquyu[dfquyu['类型'] == '终端客户'])['编码'])
+    lxls = tuple((dfquyu[dfquyu['类型'] == '连锁客户'])['编码'])
+    lxqd = tuple((dfquyu[dfquyu['类型'] == '渠道客户'])['编码'])
+    lxzx = tuple((dfquyu[dfquyu['类型'] == '直销客户'])['编码'])
+    lxqt = tuple((dfquyu[dfquyu['类型'] == '其他客户'])['编码'])
+    lxqb = tuple(list(lxzd) + list(lxqd) + list(lxls) + list(lxqt) + list(lxzx))
+    print(lxqb)
+
     df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',zongbu,lxzd),cnx)
     # df = pd.read_sql_query('select 订单日期,sum(送货金额) as 金额, count(终端编码) as 单数 from quandan where (送货金额 is not null) group by 订单日期',cnx)
     # df = pd.read_sql_query('select 送达日期,count(终端编码) as danshu,sum(送货金额) as jine from quandan where (配货人!=\'%s\' and 收款日期 is null) and (订单日期 >\'%s\') group by 送达日期' %('作废','2010-11-04'),cnx)
@@ -167,7 +203,7 @@ def fenxi(cnx):
     descdb(df)
 
     dangqianyue = pd.to_datetime('2017-09-01')
-    for i in range(6):
+    for i in range(3):
         chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'金额',leixing='终端')
         # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
 
@@ -330,6 +366,8 @@ cnx = lite.connect('data\\quandan.db')
 dataokay(cnx)
 desclitedb(cnx)
 fenxi(cnx)
+
+
 # cur = cnx.cursor()
 # result = cur.execute('PRAGMA count_changes')
 # print(result.fetchone()[0])
