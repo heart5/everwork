@@ -190,8 +190,9 @@ def fenxi(cnx):
     lxls = tuple((dfquyu[dfquyu['类型'] == '连锁客户'])['编码'])
     lxqd = tuple((dfquyu[dfquyu['类型'] == '渠道客户'])['编码'])
     lxzx = tuple((dfquyu[dfquyu['类型'] == '直销客户'])['编码'])
+    lxgg = tuple((dfquyu[dfquyu['类型'] == '公关客户'])['编码'])
     lxqt = tuple((dfquyu[dfquyu['类型'] == '其他客户'])['编码'])
-    lxqb = tuple(list(lxzd) + list(lxqd) + list(lxls) + list(lxqt) + list(lxzx))
+    lxqb = tuple(list(lxzd) + list(lxls) + list(lxqd) + list(lxzx) + list(lxgg) + list(lxqt))
     print(lxqb)
 
     df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',zongbu,lxzd),cnx)
