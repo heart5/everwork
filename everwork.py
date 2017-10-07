@@ -108,8 +108,8 @@ def printnotefromnotebook( notebookguid, notecount):
         if note.title.find('真元日配送图') >= 0:
             print (note.guid, note.title)
 
-    print
+    print()
+
 
 printnotefromnotebook('31eee750-e240-438b-a1f5-03ce34c904b4',100)
-
 weatherstat(note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')

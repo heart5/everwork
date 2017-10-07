@@ -70,7 +70,7 @@ def dataokay(cnx):
         df = pd.read_excel('data\\系统表.xlsx',sheetname='区域')
         df['区域'] = pd.DataFrame(df['区域']).apply(lambda r: '%02d' %r, axis=1)
         print(df)
-        sql_df=df.loc[:,['区域', '分部']]
+        sql_df=df.loc[:,['区域','区域名称', '分部']]
         df.to_sql(name='quyu', con=cnx, schema=sql_df, if_exists='replace')
 
         df = pd.read_excel('data\\系统表.xlsx', sheetname='小区')
@@ -177,38 +177,47 @@ def fenxi(cnx):
     # df = pd.read_sql_query('select 收款日期,count(终端编码) as danshu,sum(实收金额) as jine from quandan where (配货人!=\'%s\' or 配货人 is null) and (订单日期 >\'%s\') group by 收款日期' %('作废','2016-03-29'),cnx)
     dfquyu= pd.read_sql('select * from quyu',cnx,index_col='index')
     descdb(dfquyu)
-    yibu = tuple((dfquyu[dfquyu['分部'] == '一部'])['区域'])
-    erbu = tuple((dfquyu[dfquyu['分部'] == '二部'])['区域'])
-    hankou = tuple((dfquyu[dfquyu['分部'] == '汉口'])['区域'])
-    hanyang = tuple((dfquyu[dfquyu['分部'] == '汉阳'])['区域'])
-    zongbu = tuple(list(yibu) + list(erbu) + list(hankou) + list(hanyang))
-    print(zongbu)
+    dfleixing= pd.read_sql('select * from leixing',cnx,index_col='index')
+    descdb(dfleixing)
+    fenbulist = ['一部','二部','汉口','汉阳','销售部']
+    leixinglist = ['终端客户','连锁客户','渠道客户','直销客户','公关客户','其他客户','全渠道']
 
-    dfquyu= pd.read_sql('select * from leixing',cnx,index_col='index')
-    descdb(dfquyu)
-    lxzd = tuple((dfquyu[dfquyu['类型'] == '终端客户'])['编码'])
-    lxls = tuple((dfquyu[dfquyu['类型'] == '连锁客户'])['编码'])
-    lxqd = tuple((dfquyu[dfquyu['类型'] == '渠道客户'])['编码'])
-    lxzx = tuple((dfquyu[dfquyu['类型'] == '直销客户'])['编码'])
-    lxgg = tuple((dfquyu[dfquyu['类型'] == '公关客户'])['编码'])
-    lxqt = tuple((dfquyu[dfquyu['类型'] == '其他客户'])['编码'])
-    lxqb = tuple(list(lxzd) + list(lxls) + list(lxqd) + list(lxzx) + list(lxgg) + list(lxqt))
-    print(lxqb)
+    for leixingset in leixinglist:
+        if leixingset == '全渠道':
+            leixing = tuple(dfleixing['编码'])
+        else:
+            leixing = tuple((dfleixing[dfleixing['类型'] == leixingset])['编码'])
 
-    df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',zongbu,lxzd),cnx)
-    # df = pd.read_sql_query('select 订单日期,sum(送货金额) as 金额, count(终端编码) as 单数 from quandan where (送货金额 is not null) group by 订单日期',cnx)
-    # df = pd.read_sql_query('select 送达日期,count(终端编码) as danshu,sum(送货金额) as jine from quandan where (配货人!=\'%s\' and 收款日期 is null) and (订单日期 >\'%s\') group by 送达日期' %('作废','2010-11-04'),cnx)
-    # descdb(df)
-    df.index = pd.to_datetime(df['订单日期'])
-    # df['单均'] = df['金额'] / df['单数']
-    descdb(df)
+        if len(leixing) == 1:
+            leixing = tuple(list(leixing)+['U'])
 
-    dangqianyue = pd.to_datetime('2017-09-01')
-    for i in range(3):
-        chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'金额',leixing='终端')
-        # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
+        df = pd.read_sql_query('select max(订单日期) from quandan',cnx)
+        dangqianyue = pd.to_datetime(df.ix[0][0])
+        dangqianyue = pd.to_datetime('%04d-%02d-01' %(dangqianyue.year,dangqianyue.month))
+        print(dangqianyue)
+        if leixingset == '终端客户':
+            for fenbuset in fenbulist:
+                if fenbuset == '销售部':
+                    fenbu = tuple(dfquyu['区域'])
+                else:
+                    fenbu = tuple((dfquyu[dfquyu['分部'] == fenbuset])['区域'])
 
-    chubiaoyueleiji(df,dangqianyue,'金额')
+                df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',fenbu,leixing),cnx)
+                df.index = pd.to_datetime(df['订单日期'])
+                # df['单均'] = df['金额'] / df['单数']
+                for k in range(10):
+                    chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu=fenbuset)
+                    # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
+                chubiaoyueleiji(df, dangqianyue, '金额', leixing=leixingset, quyu=fenbuset)
+        else:
+            fenbu = tuple(dfquyu['区域'])
+            df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',fenbu,leixing),cnx)
+            df.index = pd.to_datetime(df['订单日期'])
+            # df['单均'] = df['金额'] / df['单数']
+            for k in range(10):
+                chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu='销售部')
+                # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
+            chubiaoyueleiji(df,dangqianyue,'金额',leixing=leixingset,quyu='销售部')
 
 
 
@@ -267,13 +276,14 @@ def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',nianshu=3):
 
     nianyue = '%04d年'%(riqicur.year)
     biaoti = leixing+quyu+nianyue+xiangmu
-    df.cumsum().plot(title=('%s月累积年' %biaoti))
+    df.cumsum().plot(title=('%s月累积' %biaoti))
     # df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
     plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
-    plt.savefig('img\\%s（月累积年）.png' %biaoti)
+    plt.savefig('img\\%s（月累积）.png' %biaoti)
     plt.close()
-    df.plot(title=('%s月折线年') %biaoti)
-    plt.savefig('img\\%s（月度折线）.png' %biaoti)
+    df.plot(title=('%s月折线') %biaoti)
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
+    plt.savefig('img\\%s（月折线）.png' %biaoti)
     plt.close()
     # plt.show()
     # ds1.plot()
@@ -291,9 +301,10 @@ def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',nianshu=3):
     # df['jine'].plot()
     # plt.show()
 
+
 #日（整月）累积对比图，当月、环比、同期比
 #riqi形如2017-10-01，代表2017年10月为标的月份
-def chubiaorileiji(df,riqi,xiangmu,quyu='',leixing=''):
+def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing=''):
     riqicur = pd.to_datetime(riqi)
     riqibefore = riqicur+pd.DateOffset(months=-1)
     riqilast = riqicur+pd.DateOffset(years=-1)
@@ -336,15 +347,16 @@ def chubiaorileiji(df,riqi,xiangmu,quyu='',leixing=''):
     zuobiao = pd.DataFrame(dates).apply(lambda r:rizi(r),axis=1)
     df.index= zuobiao
     descdb(df)
+    nianyue = '%04d%02d'%(riqicur.year,riqicur.month)
+    biaoti = leixing+quyu+nianyue+xiangmu
     if len(df) > 12:
         # print(len(df))
-        df.cumsum().plot(title=leixing+quyu+xiangmu+'日累积')
+        df.cumsum().plot(title=biaoti+'日累积')
     else:
-        df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
+        df.cumsum().plot(title=biaoti+'日累积')
 
     plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
-    nianyue = '%04d%02d'%(riqicur.year,riqicur.month)
-    plt.savefig('img\\'+leixing+quyu+nianyue+xiangmu+'（日累积月）.png' )
+    plt.savefig('img\\'+biaoti+'（日累积月）.png' )
     # plt.show()
     plt.close()
     # ds1.plot()
