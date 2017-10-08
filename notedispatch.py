@@ -2,7 +2,7 @@
 # 处理配送全单数据
 #
 
-import pandas as pd, sqlite3 as lite, os, datetime, time, matplotlib.pyplot as plt,calendar
+import pandas as pd, sqlite3 as lite, os, datetime, time, matplotlib.pyplot as plt, numpy as np,calendar
 from pylab import *
 
 # plot中显示中文
@@ -92,6 +92,15 @@ def dataokay(cnx):
                          '送达日期', '车辆', '送货人', '收款日期', '收款人', '拒收品项']]
         df.to_sql(name='quandan', con=cnx, schema=sql_df, if_exists='replace', chunksize=1000)
 
+    if gengxinfou('data\\xiaoshoushuju.txt',cnx,'fileread') or True:
+        df = pd.read_csv('data\\xiaoshoushuju.txt',sep='\t',header=0,parse_dates=[0],dtype={'5':np.str,'8':np.str,'12':np.float64,'14':np.float64})
+        # descdb(df)
+        df.columns = ['日期','单据编号','单据类型','职员名称','职员销售明细表','备注','商品备注','规格','商品编号','商品全名','型号','产地','单价','单位','数量','金额','含税单价','价税合计','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']
+        descdb(df)
+        sql_df=df.loc[:,['日期','单据编号','单据类型','职员名称','职员销售明细表','备注','商品备注','规格','商品编号','商品全名','单价','单位','数量','金额','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']]
+        descdb(df)
+        df.to_sql(name='xiaoshoumingxi', con=cnx, schema=sql_df, if_exists='replace', chunksize=1000)
+
     if gengxinfou('data\\jiaqi.txt',cnx,'fileread'):
         df = pd.read_csv('data\\jiaqi.txt',sep=',',header=None)
         dfjiaqi = []
@@ -176,9 +185,9 @@ def ceshizashua(cnx):
 def fenxi(cnx):
     # df = pd.read_sql_query('select 收款日期,count(终端编码) as danshu,sum(实收金额) as jine from quandan where (配货人!=\'%s\' or 配货人 is null) and (订单日期 >\'%s\') group by 收款日期' %('作废','2016-03-29'),cnx)
     dfquyu= pd.read_sql('select * from quyu',cnx,index_col='index')
-    descdb(dfquyu)
+    # descdb(dfquyu)
     dfleixing= pd.read_sql('select * from leixing',cnx,index_col='index')
-    descdb(dfleixing)
+    # descdb(dfleixing)
     fenbulist = ['一部','二部','汉口','汉阳','销售部']
     leixinglist = ['终端客户','连锁客户','渠道客户','直销客户','公关客户','其他客户','全渠道']
 
@@ -205,7 +214,7 @@ def fenxi(cnx):
                 df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',fenbu,leixing),cnx)
                 df.index = pd.to_datetime(df['订单日期'])
                 # df['单均'] = df['金额'] / df['单数']
-                for k in range(10):
+                for k in range(dangqianyue.month):
                     chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu=fenbuset)
                     # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
                 chubiaoyueleiji(df, dangqianyue, '金额', leixing=leixingset, quyu=fenbuset)
@@ -214,7 +223,7 @@ def fenxi(cnx):
             df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',fenbu,leixing),cnx)
             df.index = pd.to_datetime(df['订单日期'])
             # df['单均'] = df['金额'] / df['单数']
-            for k in range(10):
+            for k in range(dangqianyue.month):
                 chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu='销售部')
                 # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
             chubiaoyueleiji(df,dangqianyue,'金额',leixing=leixingset,quyu='销售部')
@@ -272,7 +281,7 @@ def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',nianshu=3):
     zuobiao = pd.DataFrame(df.index).apply(lambda r:yuezi(r),axis=1)
     df.index= zuobiao
 
-    descdb(df)
+    # descdb(df)
 
     nianyue = '%04d年'%(riqicur.year)
     biaoti = leixing+quyu+nianyue+xiangmu
@@ -332,7 +341,7 @@ def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing=''):
     # descdb(ds3)
 
     dates = pd.date_range(riqicur,periods=tianshu,freq='D')
-    print(dates)
+    # print(dates)
     ds2 = ds.reindex(dates,fill_value=0)
     # ds2 =ds2.resample('M').sum()
     # descdb(ds2)
@@ -346,7 +355,7 @@ def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing=''):
     # descdb(df)
     zuobiao = pd.DataFrame(dates).apply(lambda r:rizi(r),axis=1)
     df.index= zuobiao
-    descdb(df)
+    # descdb(df)
     nianyue = '%04d%02d'%(riqicur.year,riqicur.month)
     biaoti = leixing+quyu+nianyue+xiangmu
     if len(df) > 12:
@@ -378,7 +387,7 @@ cnx = lite.connect('data\\quandan.db')
 
 dataokay(cnx)
 desclitedb(cnx)
-fenxi(cnx)
+# fenxi(cnx)
 
 
 # cur = cnx.cursor()
