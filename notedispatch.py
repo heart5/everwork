@@ -16,7 +16,7 @@ def descdb(df):
     if type(df) == pd.DataFrame:
         print(df.columns)
     print(len(df))
-    # print(df.describe())
+    print(df.describe())
 
 def gengxinfou(filename,conn,tablename='fileread'):
     rt = False
@@ -70,36 +70,47 @@ def dataokay(cnx):
         df = pd.read_excel('data\\系统表.xlsx',sheetname='区域')
         df['区域'] = pd.DataFrame(df['区域']).apply(lambda r: '%02d' %r, axis=1)
         print(df)
-        sql_df=df.loc[:,['区域','区域名称', '分部']]
-        df.to_sql(name='quyu', con=cnx, schema=sql_df, if_exists='replace')
+        df=df.loc[:,['区域','区域名称', '分部']]
+        df.to_sql(name='quyu', con=cnx, if_exists='replace')
 
         df = pd.read_excel('data\\系统表.xlsx', sheetname='小区')
         df['小区'] = pd.DataFrame(df['小区']).apply(lambda r: '%03d' %r, axis=1)
         print(df)
-        sql_df = df.loc[:, ['小区']]
-        df.to_sql(name='xiaoqu', con=cnx, schema=sql_df, if_exists='replace')
+        df.to_sql(name='xiaoqu', con=cnx, if_exists='replace')
 
         df = pd.read_excel('data\\系统表.xlsx', sheetname='终端类型')
         print(df)
-        sql_df = df.loc[:, ['编码','描述','类型']]
-        df.to_sql(name='leixing', con=cnx, schema=sql_df, if_exists='replace')
+        df.to_sql(name='leixing', con=cnx, if_exists='replace')
+
+        df = pd.read_excel('data\\系统表.xlsx', sheetname='产品档案')
+        print(df)
+        df.to_sql(name='product', con=cnx, if_exists='replace')
+
+        df = pd.read_excel('data\\系统表.xlsx', sheetname='客户档案')
+        df = df.loc[:,['往来单位','往来单位编号']]
+        print(df)
+        df.to_sql(name='customer', con=cnx, if_exists='replace')
 
     if gengxinfou('data\\2017年全单统计管理.xlsm',cnx,'fileread'):
         df = pd.read_excel('data\\2017年全单统计管理.xlsm',sheetname='全单统计管理',na_values=[0])
         # descdb(df)
-        sql_df=df.loc[:,['订单日期', '配货人', '配货准确', '业务主管', '终端编码', '终端名称', '积欠', '送货金额',
+        df=df.loc[:,['订单日期', '配货人', '配货准确', '业务主管', '终端编码', '终端名称', '积欠', '送货金额',
                          '实收金额', '收款方式', '退货金额', '客户拒收', '无货金额', '少配金额', '配错未要',
                          '送达日期', '车辆', '送货人', '收款日期', '收款人', '拒收品项']]
-        df.to_sql(name='quandan', con=cnx, schema=sql_df, if_exists='replace', chunksize=1000)
+        df.to_sql(name='quandan', con=cnx, if_exists='replace', chunksize=100000)
 
-    if gengxinfou('data\\xiaoshoushuju.txt',cnx,'fileread') or True:
-        df = pd.read_csv('data\\xiaoshoushuju.txt',sep='\t',header=0,parse_dates=[0],dtype={'5':np.str,'8':np.str,'12':np.float64,'14':np.float64})
+    if gengxinfou('data\\xiaoshoushujumingxi.txt',cnx,'fileread'):# or True:
+        # df = pd.read_csv('data\\xiaoshoushujumingxi.txt',sep='\t',header=None,parse_dates=[0],dtype={'5':np.str,'8':np.str,'12':np.float64,'14':np.float64})
+        df = pd.read_csv('data\\xiaoshoushujumingxi.txt',sep='\t',header=None,parse_dates=[0],dtype={4:object,5:object,10:object},low_memory=False,verbose=True)
         # descdb(df)
         df.columns = ['日期','单据编号','单据类型','职员名称','职员销售明细表','备注','商品备注','规格','商品编号','商品全名','型号','产地','单价','单位','数量','金额','含税单价','价税合计','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']
+        # descdb(df)
+        # sql_df=df.loc[:,['日期','单据编号','单据类型','职员名称','职员销售明细表','备注','商品备注','规格','商品编号','商品全名','单价','单位','数量','金额','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']]
+        df=df.loc[:,['日期','单据编号','单据类型','职员名称','职员销售明细表','备注','商品备注','商品编号','商品全名','单价','单位','数量','金额','单位全名','仓库全名','部门全名']]
+        df['单价'] = (df['单价']).fillna(0)
+        df['金额'] = (df['金额']).fillna(0)
         descdb(df)
-        sql_df=df.loc[:,['日期','单据编号','单据类型','职员名称','职员销售明细表','备注','商品备注','规格','商品编号','商品全名','单价','单位','数量','金额','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']]
-        descdb(df)
-        df.to_sql(name='xiaoshoumingxi', con=cnx, schema=sql_df, if_exists='replace', chunksize=1000)
+        df.to_sql(name='xiaoshoumingxi', con=cnx, if_exists='replace', chunksize=100000)
 
     if gengxinfou('data\\jiaqi.txt',cnx,'fileread'):
         df = pd.read_csv('data\\jiaqi.txt',sep=',',header=None)
@@ -139,7 +150,7 @@ def desclitedb(cnx):
 
 def ceshizashua(cnx):
     # desclitedb(cnx)
-    # cnx.cursor().execute('drop table quyu')
+    # cnx.cursor().execute('drop table xiaoshoumingxi')
     # cnx.cursor().execute('drop table xiaoqu')
     # cnx.cursor().execute("insert into fileread values('白晔峰','万寿无疆','2016-06-12','43838883','4099','2016-09-30')")
     # cnx.commit()
@@ -211,22 +222,34 @@ def fenxi(cnx):
                 else:
                     fenbu = tuple((dfquyu[dfquyu['分部'] == fenbuset])['区域'])
 
-                df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',fenbu,leixing),cnx)
-                df.index = pd.to_datetime(df['订单日期'])
+                # df = pd.read_sql_query(
+                #     "select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" % (
+                #     '作废', fenbu, leixing), cnx)
+                # df = pd.read_sql_query("select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型 from xiaoshoumingxi,customer where (customer.往来单位 = xiaoshoumingxi.单位全名) and(区域 in %s) and(类型 in %s) group by 日期" %(fenbu,leixing),cnx)
+                df = pd.read_sql_query(
+                    "select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in %s) and(类型 in %s) and(品牌 = %s) group by 日期" % (
+                        fenbu, leixing, '\'创食人\''), cnx)
+                df.index = pd.to_datetime(df['日期'])
                 # df['单均'] = df['金额'] / df['单数']
                 for k in range(dangqianyue.month):
-                    chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu=fenbuset)
+                    chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu=fenbuset,pinpai='创食人')
                     # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
-                chubiaoyueleiji(df, dangqianyue, '金额', leixing=leixingset, quyu=fenbuset)
+                chubiaoyueleiji(df, dangqianyue, '金额', leixing=leixingset, quyu=fenbuset,pinpai='创食人',nianshu=5)
         else:
             fenbu = tuple(dfquyu['区域'])
-            df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',fenbu,leixing),cnx)
-            df.index = pd.to_datetime(df['订单日期'])
+            # df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',fenbu,leixing),cnx)
+            # df = pd.read_sql_query(
+            #     "select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型 from xiaoshoumingxi,customer where (customer.往来单位 = xiaoshoumingxi.单位全名) and(区域 in %s) and(类型 in %s) group by 日期" % (
+            #     fenbu, leixing), cnx)
+            df = pd.read_sql_query(
+                "select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in %s) and(类型 in %s) and(品牌 = %s) group by 日期" % (
+                fenbu, leixing,'\'创食人\''), cnx)
+            df.index = pd.to_datetime(df['日期'])
             # df['单均'] = df['金额'] / df['单数']
             for k in range(dangqianyue.month):
-                chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu='销售部')
+                chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu='销售部',pinpai='创食人')
                 # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
-            chubiaoyueleiji(df,dangqianyue,'金额',leixing=leixingset,quyu='销售部')
+            chubiaoyueleiji(df,dangqianyue,'金额',leixing=leixingset,quyu='销售部',pinpai='创食人',nianshu=5)
 
 
 
@@ -252,7 +275,7 @@ def yuezi(df):
 # quyu，销售区域或区域聚合（分部）
 # leixing，终端类型
 # nianshu，用来对比的年份数，从当前年份向回数
-def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',nianshu=3):
+def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',pinpai='',nianshu=3):
     riqicur = pd.to_datetime(riqi)
     nianlist = []
     for i in range(nianshu):
@@ -284,7 +307,7 @@ def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',nianshu=3):
     # descdb(df)
 
     nianyue = '%04d年'%(riqicur.year)
-    biaoti = leixing+quyu+nianyue+xiangmu
+    biaoti = leixing+quyu+pinpai+nianyue+xiangmu
     df.cumsum().plot(title=('%s月累积' %biaoti))
     # df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
     plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
@@ -313,7 +336,7 @@ def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',nianshu=3):
 
 #日（整月）累积对比图，当月、环比、同期比
 #riqi形如2017-10-01，代表2017年10月为标的月份
-def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing=''):
+def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing='',pinpai=''):
     riqicur = pd.to_datetime(riqi)
     riqibefore = riqicur+pd.DateOffset(months=-1)
     riqilast = riqicur+pd.DateOffset(years=-1)
@@ -357,7 +380,7 @@ def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing=''):
     df.index= zuobiao
     # descdb(df)
     nianyue = '%04d%02d'%(riqicur.year,riqicur.month)
-    biaoti = leixing+quyu+nianyue+xiangmu
+    biaoti = leixing+quyu+pinpai+nianyue+xiangmu
     if len(df) > 12:
         # print(len(df))
         df.cumsum().plot(title=biaoti+'日累积')
@@ -385,16 +408,16 @@ def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing=''):
 
 cnx = lite.connect('data\\quandan.db')
 
+# ceshizashua(cnx)
 dataokay(cnx)
 desclitedb(cnx)
-# fenxi(cnx)
+fenxi(cnx)
 
 
 # cur = cnx.cursor()
 # result = cur.execute('PRAGMA count_changes')
 # print(result.fetchone()[0])
 
-# ceshizashua(cnx)
 
 cnx.close()
 
