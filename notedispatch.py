@@ -21,10 +21,16 @@ def descdb(df):
 def gengxinfou(filename,conn,tablename='fileread'):
     rt = False
     try:
-        create_tb_cmd = "CREATE TABLE IF NOT EXISTS %s ('文件名' TEXT,'绝对路径' TEXT, '修改时间' TIMESTAMP,'设备编号' INTEGER,'文件大小' INTEGER,'登录时间' TIMESTAMP); " %tablename
+        create_tb_cmd = "CREATE TABLE IF NOT EXISTS %s " \
+                        "('文件名' TEXT," \
+                        "'绝对路径' TEXT, " \
+                        "'修改时间' TIMESTAMP," \
+                        "'设备编号' INTEGER," \
+                        "'文件大小' INTEGER," \
+                        "'登录时间' TIMESTAMP); " % tablename
         conn.execute(create_tb_cmd)
-    except:
-        print("创建数据表%s失败！" %tablename)
+    except Exception:
+        print("创建数据表%s失败！" % tablename)
         return rt
 
     fna = os.path.abspath(filename)
@@ -45,16 +51,21 @@ def gengxinfou(filename,conn,tablename='fileread'):
     # conn.commit()
     fncount = (result.fetchone())[0]
     if fncount == 0:
-        print("文件《"+fn+"》无记录，录入信息！\t",end='\t')
-        result = c.execute("insert into %s values(?,?,?,?,?,?)" %tablename,(fn,fna,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)),str(fstat.st_dev),str(fstat.st_size),time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())))
+        print("文件《"+fn+"》无记录，录入信息！\t", end='\t')
+        result = c.execute("insert into %s values(?,?,?,?,?,?)"
+                           % tablename, (fn, fna,
+                                         time.strftime('%Y-%m-%d %H:%M:%S',
+                                                       time.localtime(fstat.st_mtime)),
+                                         str(fstat.st_dev), str(fstat.st_size),
+                                         time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())))
         print('添加成功。')
         rt = True
     else:
         print("文件《"+fn+"》已有 "+str(fncount)+" 条记录，看是否最新？\t",end='\t')
-        sql = "select max(修改时间) as xg from %s where 文件名 = \'%s\'" %(tablename,fn)
+        sql = "select max(修改时间) as xg from %s where 文件名 = \'%s\'" % (tablename,fn)
         result = c.execute(sql)
         if time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)) > (result.fetchone())[0]:
-            result = c.execute("insert into %s values(?,?,?,?,?,?)" %tablename,(fn,fna,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)),str(fstat.st_dev),str(fstat.st_size),time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())))
+            result = c.execute("insert into %s values(?,?,?,?,?,?)" % tablename,(fn,fna,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)),str(fstat.st_dev),str(fstat.st_size),time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())))
             print('更新成功！')
             rt = True
         else:
@@ -66,8 +77,8 @@ def gengxinfou(filename,conn,tablename='fileread'):
     return rt
 
 def dataokay(cnx):
-    if gengxinfou('data\\系统表.xlsx',cnx,'fileread') :#or True:
-        df = pd.read_excel('data\\系统表.xlsx',sheetname='区域')
+    if gengxinfou('data\\系统表.xlsx', cnx, 'fileread'):#or True:
+        df = pd.read_excel('data\\系统表.xlsx', sheetname='区域')
         df['区域'] = pd.DataFrame(df['区域']).apply(lambda r: '%02d' %r, axis=1)
         print(df)
         df=df.loc[:,['区域','区域名称', '分部']]
@@ -135,16 +146,16 @@ def desclitedb(cnx):
         print(ii)
 
     result = cur.execute("select name from sqlite_master where type = 'table' order by name")
-    table_name_list = [tuple[0] for tuple in result.fetchall()]
+    table_name_list = [tuple1[0] for tuple1 in result.fetchall()]
     print(table_name_list)
 
     for table in table_name_list:
-        cur.execute("PRAGMA table_info(%s)" %table)
+        cur.execute("PRAGMA table_info(%s)" % table)
         # print (cur.fetchall())
-        result = cur.execute("select * from %s" %table)
+        result = cur.execute("select * from %s" % table)
         print(len(result.fetchall()),end='\t')
         # print(cur.description)
-        col_name_list = [tuple[0] for tuple in cur.description]
+        col_name_list = [tuple1[0] for tuple1 in cur.description]
         print (col_name_list)
 
 
@@ -227,8 +238,11 @@ def fenxi(cnx):
                 #     '作废', fenbu, leixing), cnx)
                 # df = pd.read_sql_query("select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型 from xiaoshoumingxi,customer where (customer.往来单位 = xiaoshoumingxi.单位全名) and(区域 in %s) and(类型 in %s) group by 日期" %(fenbu,leixing),cnx)
                 df = pd.read_sql_query(
-                    "select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in %s) and(类型 in %s) and(品牌 = %s) group by 日期" % (
-                        fenbu, leixing, '\'创食人\''), cnx)
+                    "select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,"
+                    "substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,"
+                    "customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) "
+                    "and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in %s) "
+                    "and(类型 in %s) and(品牌 = %s) group by 日期" % (fenbu, leixing, '\'创食人\''), cnx)
                 df.index = pd.to_datetime(df['日期'])
                 # df['单均'] = df['金额'] / df['单数']
                 for k in range(dangqianyue.month):
@@ -242,8 +256,11 @@ def fenxi(cnx):
             #     "select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型 from xiaoshoumingxi,customer where (customer.往来单位 = xiaoshoumingxi.单位全名) and(区域 in %s) and(类型 in %s) group by 日期" % (
             #     fenbu, leixing), cnx)
             df = pd.read_sql_query(
-                "select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in %s) and(类型 in %s) and(品牌 = %s) group by 日期" % (
-                fenbu, leixing,'\'创食人\''), cnx)
+                "select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,"
+                "substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,"
+                "customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) "
+                "and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in %s) "
+                "and(类型 in %s) and(品牌 = %s) group by 日期" % (fenbu, leixing,'\'创食人\''), cnx)
             df.index = pd.to_datetime(df['日期'])
             # df['单均'] = df['金额'] / df['单数']
             for k in range(dangqianyue.month):
@@ -405,6 +422,7 @@ def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing='',pinpai=''):
     # plt.show()
     # df['jine'].plot()
     # plt.show()
+
 
 cnx = lite.connect('data\\quandan.db')
 
