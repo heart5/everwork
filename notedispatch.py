@@ -77,7 +77,7 @@ def gengxinfou(filename,conn,tablename='fileread'):
     return rt
 
 def dataokay(cnx):
-    if gengxinfou('data\\系统表.xlsx', cnx, 'fileread'):#or True:
+    if gengxinfou('data\\系统表.xlsx', cnx, 'fileread'):#  or True:
         df = pd.read_excel('data\\系统表.xlsx', sheetname='区域')
         df['区域'] = pd.DataFrame(df['区域']).apply(lambda r: '%02d' %r, axis=1)
         print(df)
