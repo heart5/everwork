@@ -23,7 +23,8 @@ while True:
         break
     try:
         num = int(str_input)
-    except ValueError, NameError:
+        break
+    except ValueError:
         num = random.randint(1,2000)
         print('请输入一个合格的整数值，或者输入exit退出\n为方便演示，自动帮您随机设定为一个2000之内的整数，这次是'+str(num)+'：')
     collatz(num)

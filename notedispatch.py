@@ -110,18 +110,18 @@ def dataokay(cnx):
                          '送达日期', '车辆', '送货人', '收款日期', '收款人', '拒收品项']]
         df.to_sql(name='quandan', con=cnx, if_exists='replace', chunksize=100000)
 
-    if gengxinfou('data\\xiaoshoushujumingxi.txt',cnx,'fileread'):# or True:
-        # df = pd.read_csv('data\\xiaoshoushujumingxi.txt',sep='\t',header=None,parse_dates=[0],dtype={'5':np.str,'8':np.str,'12':np.float64,'14':np.float64})
-        df = pd.read_csv('data\\xiaoshoushujumingxi.txt',sep='\t',header=None,parse_dates=[0],dtype={4:object,5:object,10:object},low_memory=False,verbose=True)
-        # descdb(df)
-        df.columns = ['日期','单据编号','单据类型','职员名称','摘要','备注','商品备注','规格','商品编号','商品全名','型号','产地','单价','单位','数量','金额','含税单价','价税合计','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']
-        # descdb(df)
-        # sql_df=df.loc[:,['日期','单据编号','单据类型','职员名称','职员销售明细表','备注','商品备注','规格','商品编号','商品全名','单价','单位','数量','金额','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']]
-        df=df.loc[:,['日期','单据编号','单据类型','职员名称','摘要','备注','商品备注','商品编号','商品全名','单价','单位','数量','金额','单位全名','仓库全名','部门全名']]
-        df['单价'] = (df['单价']).fillna(0)
-        df['金额'] = (df['金额']).fillna(0)
-        descdb(df)
-        df.to_sql(name='xiaoshoumingxi', con=cnx, if_exists='replace', chunksize=100000)
+    # if gengxinfou('data\\xiaoshoushujumingxi.txt',cnx,'fileread'):# or True:
+    #     # df = pd.read_csv('data\\xiaoshoushujumingxi.txt',sep='\t',header=None,parse_dates=[0],dtype={'5':np.str,'8':np.str,'12':np.float64,'14':np.float64})
+    #     df = pd.read_csv('data\\xiaoshoushujumingxi.txt',sep='\t',header=None,parse_dates=[0],dtype={4:object,5:object,10:object},low_memory=False,verbose=True)
+    #     # descdb(df)
+    #     df.columns = ['日期','单据编号','单据类型','职员名称','摘要','备注','商品备注','规格','商品编号','商品全名','型号','产地','单价','单位','数量','金额','含税单价','价税合计','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']
+    #     # descdb(df)
+    #     # sql_df=df.loc[:,['日期','单据编号','单据类型','职员名称','职员销售明细表','备注','商品备注','规格','商品编号','商品全名','单价','单位','数量','金额','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']]
+    #     df=df.loc[:,['日期','单据编号','单据类型','职员名称','摘要','备注','商品备注','商品编号','商品全名','单价','单位','数量','金额','单位全名','仓库全名','部门全名']]
+    #     df['单价'] = (df['单价']).fillna(0)
+    #     df['金额'] = (df['金额']).fillna(0)
+    #     descdb(df)
+    #     df.to_sql(name='xiaoshoumingxi', con=cnx, if_exists='replace', chunksize=100000)
 
     if gengxinfou('data\\jiaqi.txt',cnx,'fileread'):
         df = pd.read_csv('data\\jiaqi.txt',sep=',',header=None)
