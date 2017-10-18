@@ -77,7 +77,7 @@ def gengxinfou(filename,conn,tablename='fileread'):
     return rt
 
 def dataokay(cnx):
-    if gengxinfou('data\\系统表.xlsx', cnx, 'fileread'):#  or True:
+    if gengxinfou('data\\系统表.xlsx', cnx, 'fileread') or True:
         df = pd.read_excel('data\\系统表.xlsx', sheetname='区域')
         df['区域'] = pd.DataFrame(df['区域']).apply(lambda r: '%02d' %r, axis=1)
         print(df)
@@ -98,7 +98,7 @@ def dataokay(cnx):
         df.to_sql(name='product', con=cnx, if_exists='replace')
 
         df = pd.read_excel('data\\系统表.xlsx', sheetname='客户档案')
-        df = df.loc[:,['往来单位','往来单位编号']]
+        df = df.loc[:,['往来单位','往来单位编号','地址']]
         print(df)
         df.to_sql(name='customer', con=cnx, if_exists='replace')
 
