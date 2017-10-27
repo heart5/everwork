@@ -209,13 +209,13 @@ def fenxi(cnx):
                     "substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,"
                     "customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) "
                     "and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in %s) "
-                    "and(类型 in %s) and(品牌 = %s) group by 日期" % (fenbu, leixing, '\'创食人\''), cnx)
+                    "and(类型 in %s) group by 日期" % (fenbu, leixing), cnx)
                 df.index = pd.to_datetime(df['日期'])
                 # df['单均'] = df['金额'] / df['单数']
                 for k in range(dangqianyue.month):
-                    chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu=fenbuset,pinpai='创食人')
+                    chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu=fenbuset)
                     # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
-                chubiaoyueleiji(df, dangqianyue, '金额', leixing=leixingset, quyu=fenbuset,pinpai='创食人',nianshu=5)
+                chubiaoyueleiji(df, dangqianyue, '金额', leixing=leixingset, quyu=fenbuset,nianshu=5)
         else:
             fenbu = tuple(dfquyu['区域'])
             # df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',fenbu,leixing),cnx)
@@ -227,13 +227,13 @@ def fenxi(cnx):
                 "substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,"
                 "customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) "
                 "and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in %s) "
-                "and(类型 in %s) and(品牌 = %s) group by 日期" % (fenbu, leixing,'\'创食人\''), cnx)
+                "and(类型 in %s) group by 日期" % (fenbu, leixing), cnx)
             df.index = pd.to_datetime(df['日期'])
             # df['单均'] = df['金额'] / df['单数']
             for k in range(dangqianyue.month):
-                chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu='销售部',pinpai='创食人')
+                chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu='销售部')
                 # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
-            chubiaoyueleiji(df,dangqianyue,'金额',leixing=leixingset,quyu='销售部',pinpai='创食人',nianshu=5)
+            chubiaoyueleiji(df,dangqianyue,'金额',leixing=leixingset,quyu='销售部',nianshu=5)
 
 
 
@@ -402,7 +402,7 @@ cnx = lite.connect('data\\quandan.db')
 # ceshizashua(cnx)
 dataokay(cnx)
 # desclitedb(cnx)
-# fenxi(cnx)
+fenxi(cnx)
 
 cnx.close()
 

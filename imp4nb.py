@@ -23,6 +23,7 @@ def descdb(df):
     if type(df) == pd.DataFrame:
         print(df.columns)
         print(df.info())
+        print(df.shape)
     print(df.describe())
 
 
