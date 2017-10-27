@@ -1,22 +1,8 @@
 # encoding:utf-8
 # 处理配送全单数据
 #
+from imp4nb import *
 
-import pandas as pd, sqlite3 as lite, os, datetime, time, matplotlib.pyplot as plt, numpy as np,calendar
-from pylab import *
-
-# plot中显示中文
-mpl.rcParams['font.sans-serif'] = ['SimHei']
-mpl.rcParams['axes.unicode_minus'] = False
-
-def descdb(df):
-    print(df.head(5))
-    print(df.tail(5))
-    print(df.dtypes)
-    if type(df) == pd.DataFrame:
-        print(df.columns)
-    print(len(df))
-    print(df.describe())
 
 def gengxinfou(filename,conn,tablename='fileread'):
     rt = False
@@ -77,7 +63,7 @@ def gengxinfou(filename,conn,tablename='fileread'):
     return rt
 
 def dataokay(cnx):
-    if gengxinfou('data\\系统表.xlsx', cnx, 'fileread') or True:
+    if gengxinfou('data\\系统表.xlsx', cnx, 'fileread'):# or True:
         df = pd.read_excel('data\\系统表.xlsx', sheetname='区域')
         df['区域'] = pd.DataFrame(df['区域']).apply(lambda r: '%02d' %r, axis=1)
         print(df)
@@ -93,7 +79,7 @@ def dataokay(cnx):
         print(df)
         df.to_sql(name='leixing', con=cnx, if_exists='replace')
 
-        df = pd.read_excel('data\\系统表.xlsx', sheetname='产品档案')
+        df = pd.read_excel('data\\系统表.xlsx', sheetname='产品档案',)
         print(df)
         df.to_sql(name='product', con=cnx, if_exists='replace')
 
@@ -139,25 +125,6 @@ def dataokay(cnx):
         sql_df = df.loc[:,df.columns]
         df.to_sql(name='jiaqi',con=cnx,schema=sql_df,if_exists='replace')
 
-def desclitedb(cnx):
-    cur=cnx.cursor()
-    result = cur.execute("select * from sqlite_master")
-    for ii in result.fetchall():
-        print(ii)
-
-    result = cur.execute("select name from sqlite_master where type = 'table' order by name")
-    table_name_list = [tuple1[0] for tuple1 in result.fetchall()]
-    print(table_name_list)
-
-    for table in table_name_list:
-        cur.execute("PRAGMA table_info(%s)" % table)
-        # print (cur.fetchall())
-        result = cur.execute("select * from %s" % table)
-        print(len(result.fetchall()),end='\t')
-        # print(cur.description)
-        col_name_list = [tuple1[0] for tuple1 in cur.description]
-        print (col_name_list)
-
 
 def ceshizashua(cnx):
     # desclitedb(cnx)
@@ -189,12 +156,12 @@ def ceshizashua(cnx):
     print(ddd)
     print('%02d' %ddd.month)
     print('%04d%02d' %(ddd.year,ddd.month))
-    print(calendar.monthrange(2017,2)[1])
+    print(cal.monthrange(2017,2)[1])
 
     for i in range(10):
         nianfen = 2017-i
         print(str(nianfen),end='\t')
-        print(calendar.isleap(int(nianfen)))
+        print(cal.isleap(int(nianfen)))
 
 
     # lxzd = ('A', 'B', 'C', 'S', 'W', 'Y')
@@ -357,7 +324,7 @@ def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing='',pinpai=''):
     riqicur = pd.to_datetime(riqi)
     riqibefore = riqicur+pd.DateOffset(months=-1)
     riqilast = riqicur+pd.DateOffset(years=-1)
-    tianshu = calendar.monthrange(riqicur.year,riqicur.month)[1]
+    tianshu = cal.monthrange(riqicur.year,riqicur.month)[1]
 
     ds = pd.DataFrame(df[xiangmu],index=df.index)
     # print(ds.index)
@@ -425,17 +392,17 @@ def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing='',pinpai=''):
 
 
 cnx = lite.connect('data\\quandan.db')
-
-# ceshizashua(cnx)
-dataokay(cnx)
-desclitedb(cnx)
-# fenxi(cnx)
-
-
 # cur = cnx.cursor()
 # result = cur.execute('PRAGMA count_changes')
 # print(result.fetchone()[0])
+# cur.execute('PRAGMA count_changes=true')
+# result = cur.execute('PRAGMA count_changes')
+# print(result.fetchone()[0])
 
+# ceshizashua(cnx)
+dataokay(cnx)
+# desclitedb(cnx)
+# fenxi(cnx)
 
 cnx.close()
 

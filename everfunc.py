@@ -6,10 +6,13 @@
 
 import time, pandas as pd, sqlite3 as lite
 
+
+
 def timestamp2str(timestamp):
     return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(timestamp))
 
-def yingdacal(x):
+
+def yingdacal(x,cnx):
     ii = (x+pd.DateOffset(days=1)).strftime('%Y-%m-%d')
     dfall = pd.read_sql_query('select tianshu from jiaqi where date =\''+ii+'\'', cnx)
     # print(dfall.columns)
