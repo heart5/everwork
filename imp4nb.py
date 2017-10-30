@@ -33,14 +33,16 @@ def desclitedb(cnx):
     cur=cnx.cursor()
     result = cur.execute("select * from sqlite_master")
     for ii in result.fetchall():
-        print(ii)
+        print(str(ii)+'\n')
 
     result = cur.execute("select name from sqlite_master where type = 'table' order by name")
     table_name_list = [tuple1[0] for tuple1 in result.fetchall()]
     print(table_name_list)
     for table in table_name_list:
-        cur.execute("PRAGMA table_info(%s)" % table)
-        # print (cur.fetchall())
+#        result = cur.execute("PRAGMA table_info(%s)" % table)
+#        for jj in result.fetchall():
+#            print(jj,end='\t')
+        print("%s" %table,end='\t')
         result = cur.execute("select * from %s" % table)
         print(len(result.fetchall()),end='\t')
         # print(cur.description)
