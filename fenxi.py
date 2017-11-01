@@ -18,8 +18,8 @@ def guanlianall(cnx):
     descdb(df)
 
     # df['日期'] = df['日期'].apply(lambda x: pd.to_datetime(x))
-    descdb(df)
-    df.to_sql(name='alldata', con=cnx, if_exists='replace',chunksize=200000)
+    # descdb(df)
+    df.to_sql(name='alldata', con=cnx, if_exists='replace',chunksize=10000)
 
 
 def zashua(cnx):
@@ -32,6 +32,11 @@ def zashua(cnx):
     descdb(df)
 
 cnx = lite.connect('data\\quandan.db')
+# df = pd.read_sql_query("select * from xiaoshoumingxi order by 日期",cnx)
+# print(len(df))
+#
 # guanlianall(cnx)
-zashua(cnx)
+# # zashua(cnx)
+# df = pd.read_sql_query("select * from alldata order by 日期",cnx)
+# print(len(df))
 cnx.close()
