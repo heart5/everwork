@@ -5,6 +5,7 @@ from imp4nb import *
 
 def guanlianall(cnx):
     #关联客户档案、产品档案，获得区域信息和品牌信息
+    tm0 = time.clock()
     df = pd.read_sql_query(
         "select 日期,职员名称 as 业务主管,单据编号 as 销售单号,商品备注 as 订单单号,单据类型,"
         "摘要,xiaoshoumingxi.单位全名 as 客户,customer.往来单位编号 as 编码,"
@@ -15,17 +16,22 @@ def guanlianall(cnx):
         "where (customer.往来单位 = xiaoshoumingxi.单位全名) "
         "and (product.商品全名 = xiaoshoumingxi.商品全名) and (类型编码 = leixing.编码) "
         "order by 日期 desc", cnx)
-    descdb(df)
+    tm1 = time.clock()
+    # descdb(df)
+    tm2 = time.clock()
 
     # df['日期'] = df['日期'].apply(lambda x: pd.to_datetime(x))
     # descdb(df)
-    df.to_sql(name='alldata', con=cnx, if_exists='replace',chunksize=10000)
+    readytablename = "alldata"
+    df.to_sql(name=readytablename, con=cnx, if_exists='replace')
+    tm3 = time.clock()
+    print("起始：%f，关联客户编码、产品品牌和客户类型：%f，描述：%f，写入%s数据表：%f" %(tm0,tm1-tm0,tm2-tm1,readytablename,tm3-tm2))
 
 
 def zashua(cnx):
 
     monnum = 10
-    date1 = pd.read_sql("select date('2017-09-01','-%d months')" %monnum,cnx)
+    date1 = pd.read_sql("select date('2017-10-01','-%d months')" %monnum,cnx)
     riqi = date1.iloc[0,0]
     print(riqi)
     df = pd.read_sql_query('select 日期,sum(金额) as 销售额 from alldata where (日期 > \'%s\')group by 日期 order by 日期 desc' %riqi,cnx)
@@ -36,7 +42,7 @@ cnx = lite.connect('data\\quandan.db')
 # print(len(df))
 #
 # guanlianall(cnx)
-# # zashua(cnx)
+zashua(cnx)
 # df = pd.read_sql_query("select * from alldata order by 日期",cnx)
 # print(len(df))
 cnx.close()
