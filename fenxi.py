@@ -37,12 +37,23 @@ def zashua(cnx):
     df = pd.read_sql_query('select 日期,sum(金额) as 销售额 from alldata where (日期 > \'%s\')group by 日期 order by 日期 desc' %riqi,cnx)
     descdb(df)
 
+tms = []
+tms.append(time.clock())
+
 cnx = lite.connect('data\\quandan.db')
+tms.append(time.clock())
 # df = pd.read_sql_query("select * from xiaoshoumingxi order by 日期",cnx)
 # print(len(df))
 #
 # guanlianall(cnx)
 zashua(cnx)
-# df = pd.read_sql_query("select * from alldata order by 日期",cnx)
-# print(len(df))
+tms.append(time.clock())
+
+df = pd.read_sql_query("select * from alldata order by 日期",cnx)
+print(len(df))
+tms.append(time.clock())
+
 cnx.close()
+
+for i in range(len(tms)):
+    print(tms[i],end='\t')
