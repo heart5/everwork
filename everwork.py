@@ -45,6 +45,8 @@ mpl.rcParams['axes.unicode_minus'] = False
 # and https://dev.evernote.com/doc/articles/bootstrap.php
 
 auth_token = "S=s37:U=3b449f:E=1659f8b7c0f:C=15e47da4ef8:P=1cd:A=en-devtoken:V=2:H=e445e5fcbceff83703151d71df584197"
+auth_token = "S=s37:U=3b449f:E=16017ef9105:C=16012c93380:P=185:A=get-off-the-ground:V=2:H=3de0c5e50f23f1d252b8ebe8f958d368" #一天
+auth_token = "S=s37:U=3b449f:E=1676a821f3c:C=16012d0eff8:P=185:A=get-off-the-ground:V=2:H=1469bc6bfc7ac8a2f68b72c0c0335a29" #一年
 
 if auth_token == "your developer token":
     print ("Please fill in your developer token\nTo get a developer token, visit " \

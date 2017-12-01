@@ -117,7 +117,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
     # tssr.plot()
     # plt.show()
 
-    plt.savefig('wenshifeng.png')
+    plt.savefig('img\\weather\\wenshifeng.png')
     plt.close()
 
     fig, ax1 = plt.subplots()
@@ -137,7 +137,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
     plt.title(u'武汉日出日落图')
     plt.grid(True)
     # plt.show()
-    plt.savefig('sunonoff.png')
+    plt.savefig('img\\weather\\sunonoff.png')
     plt.close()
 
     #
