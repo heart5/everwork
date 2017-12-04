@@ -8,7 +8,7 @@
 # 输出信息笔记标题：武汉天气图，笔记guid：296f57a3-c660-4dd5-885a-56492deb2cee；所在笔记本《行政管理》，
 # 该笔记本guid：31eee750-e240-438b-a1f5-03ce34c904b4
 
-import re, pandas as pd, matplotlib.pyplot as plt, evernote.edam.type.ttypes as Types, time, hashlib, binascii
+import re, pandas as pd, numpy as np, matplotlib.pyplot as plt, evernote.edam.type.ttypes as Types, time, hashlib, binascii
 from bs4 import BeautifulSoup
 
 from matplotlib.ticker import MultipleLocator, FuncFormatter
@@ -64,21 +64,15 @@ def weatherstat(note_store, sourceguid, destguid=None):
         data_list.append(stritem)
 
     print (len(data_list))
-    print (data_list[0])
+    print (data_list[-1])
 
 
     df = pd.DataFrame(data_list,
                       columns=['date', 'gaowen', 'diwen', 'fengsu', 'fengxiang', 'sunon', 'sunoff', 'shidu'])
+    df['richang'] = df['sunoff'] - df['sunon']
+    df['richang'].astype(int)
 
-    # print df.head()
-    # print df.tail()
-    # print df.index
-    # # print df.columns
-    # # print df.values
-    # print df.describe()
-
-    # print df
-    # print type(df)
+    # print(df.head())
 
     # x = list(df['date'])
     # y = list(df['gaowen'])
@@ -106,9 +100,9 @@ def weatherstat(note_store, sourceguid, destguid=None):
     plt.grid(True)
     plt.legend(loc=0)
     ax2 = ax1.twinx()
-    plt.plot(df['date'], df['shidu'], 'c*', lw=1.5, label=u'湿度')
+    plt.plot(df['date'], df['fengsu'], 'c*', lw=1.5, label=u'风速')
     plt.legend(loc=7)
-    plt.ylabel(u'湿度（%）')
+    plt.ylabel(u'风速')
     plt.grid(True)
 
     # tssr = tss.resample('M').max()
@@ -117,27 +111,60 @@ def weatherstat(note_store, sourceguid, destguid=None):
     # tssr.plot()
     # plt.show()
 
-    plt.savefig('img\\weather\\wenshifeng.png')
+    img_wenshifeng_path = "img\\weather\\wenshifeng.png"
+    plt.savefig(img_wenshifeng_path)
     plt.close()
 
-    fig, ax1 = plt.subplots()
+    #
+    # fig, ax1 = plt.subplots()
+    # plt.plot(df['date'], df['sunon'], lw=1.5, label=u'日出')
+    # ax = plt.gca()
+    # ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
+    # plt.xlabel(u'日期')
+    # plt.ylabel(u'日出（时分）')
+    # # plt.axis('tight')
+    # plt.legend(loc=2)
+    # ax2 = ax1.twinx()
+    # plt.plot(df['date'], df['sunoff'], 'yd', lw=1.5, label=u'日落')
+    # ax = plt.gca()
+    # ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用min_formatter函数计算
+    # plt.legend(loc=3)
+    # plt.ylabel(u'日落（时分）')
+    # plt.title(u'武汉日出日落图')
+    # plt.grid(True)
+    plt.figure()
     plt.plot(df['date'], df['sunon'], lw=1.5, label=u'日出')
+    plt.plot(df['date'], df['sunoff'], lw=1.5, label=u'日落')
     ax = plt.gca()
     ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
+    plt.ylim((0,24*60))
+    plt.yticks(np.linspace(0,24*60,25))
     plt.xlabel(u'日期')
-    plt.ylabel(u'日出（时分）')
+    plt.ylabel(u'时间')
     # plt.axis('tight')
-    plt.legend(loc=2)
-    ax2 = ax1.twinx()
-    plt.plot(df['date'], df['sunoff'], 'yd', lw=1.5, label=u'日落')
-    ax = plt.gca()
-    ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用min_formatter函数计算
-    plt.legend(loc=3)
-    plt.ylabel(u'日落（时分）')
-    plt.title(u'武汉日出日落图')
+    plt.legend(loc=5)
+    plt.title(u'武汉日出日落时刻图')
     plt.grid(True)
     # plt.show()
-    plt.savefig('img\\weather\\sunonoff.png')
+    img_sunonoff_path = 'img\\weather\\sunonoff.png'
+    plt.savefig(img_sunonoff_path)
+    plt.close()
+
+    plt.figure()
+    plt.plot(df['date'], df['richang'])
+    ax = plt.gca()
+    ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
+    # ax.set_xticklabels(rotation=45, horizontalalignment='right')
+    plt.ylim((0, 15 * 60))
+    plt.yticks(np.linspace(0, 15 * 60, 16))
+    plt.xlabel(u'日期')
+    plt.ylabel(u'时分')
+    # plt.axis('tight')
+    plt.title(u'武汉白天时长图')
+    plt.grid(True)
+    # plt.show()
+    img_richang_path = 'img\\weather\\richang.png'
+    plt.savefig(img_richang_path)
     plt.close()
 
     #
@@ -152,7 +179,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
     # for the attachment. At a minimum, the Resource contains the binary attachment
     # data, an MD5 hash of the binary data, and the attachment MIME type.
     # It can also include attributes such as filename and location.
-    image = open('wenshifeng.png', 'rb').read()
+    image = open(img_wenshifeng_path, 'rb').read()
     md5 = hashlib.md5()
     md5.update(image)
     hash = md5.digest()
@@ -165,7 +192,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
     resource_wenshifeng.data = data
     # print resource_wenshifeng
 
-    image = open('sunonoff.png', 'rb').read()
+    image = open(img_sunonoff_path, 'rb').read()
     md5 = hashlib.md5()
     md5.update(image)
     hash = md5.digest()
@@ -176,11 +203,24 @@ def weatherstat(note_store, sourceguid, destguid=None):
     resource_sunonoff = Types.Resource()
     resource_sunonoff.mime = 'image/png'
     resource_sunonoff.data = data
+
+    image = open(img_richang_path, 'rb').read()
+    md5 = hashlib.md5()
+    md5.update(image)
+    hash = md5.digest()
+    data = Types.Data() #必须要重新构建一个Data（），否则内容不会变化
+    data.size = len(image)
+    data.bodyHash = hash
+    data.body = image
+    resource_richang = Types.Resource()
+    resource_richang.mime = 'image/png'
+    resource_richang.data = data
     # print resource_sunonoff
     # Now, add the new Resource to the note's list of resources
     note.resources = []
     note.resources.append(resource_wenshifeng)
     note.resources.append(resource_sunonoff)
+    note.resources.append(resource_richang)
 
     # print len(note.resources)
     # # print note.resources
