@@ -70,7 +70,10 @@ def weatherstat(note_store, sourceguid, destguid=None):
     df = pd.DataFrame(data_list,
                       columns=['date', 'gaowen', 'diwen', 'fengsu', 'fengxiang', 'sunon', 'sunoff', 'shidu'])
     df['richang'] = df['sunoff'] - df['sunon']
-    df['richang'].astype(int)
+    df['richang'] = df['richang'].astype(int)
+    df['wendu'] = (df['gaowen'] + df['diwen'])/2
+    df['wendu'] = df['wendu'].astype(int)
+    df['fengsu'] = df['fengsu'].astype(int)
 
     # print(df.head())
 
@@ -88,22 +91,25 @@ def weatherstat(note_store, sourceguid, destguid=None):
     # tss.cumsum()
     # tss.plot()
 
-    plt.title(u'武汉温度湿度风速图')
-    fig, ax1 = plt.subplots()
-    # plt.figure(figsize=(16, 12))
-    plt.plot(df['date'], df['gaowen'], lw=1.5, label=u'日高温')
-    plt.plot(df['date'], df['diwen'], lw=1.5, label=u'日低温')
-    # plt.plot(df['date'], df['fengsu'], lw=1.5, label=u'风速')
-    plt.xlabel(u'日期')
-    plt.ylabel(u'温度（℃）')
-    # plt.axis('tight')
-    plt.grid(True)
-    plt.legend(loc=0)
-    ax2 = ax1.twinx()
-    plt.plot(df['date'], df['fengsu'], 'c*', lw=1.5, label=u'风速')
-    plt.legend(loc=7)
-    plt.ylabel(u'风速')
-    plt.grid(True)
+    df1 = df.iloc[-365:]
+    plt.figure(figsize=(10, 16))
+    ax1 = plt.subplot2grid((7,2),(0,0),colspan=2,rowspan = 3)
+    ax1.plot(df['date'], df['gaowen'], lw=0.3, label=u'日高温')
+    ax1.plot(df['date'], df['diwen'], lw=0.3, label=u'日低温')
+    ax1.plot(df1['date'], df1['wendu'], 'g', lw=1.5, label=u'温度')
+    ax1.set_ylabel(u'（摄氏度℃）')
+    ax1.grid(True)
+    ax1.set_title(u'最高气温、最低气温和均值温度图')
+
+
+    ax2 = plt.subplot2grid((7, 2), (4, 1), colspan=1, rowspan=3)
+    ax2.plot(df1['date'], df1['fengsu'], 'c*', lw=1.5, label=u'风速')
+    ax2.set_title(u'风速图')
+
+    ax3 = plt.subplot2grid((7, 2), (4, 0), colspan=1, rowspan=3)
+    ax3.plot(df1['date'], df1['shidu'], 'g*', lw=1.5, label=u'湿度')
+    ax3.set_ylabel(u'（百分比%）')
+    ax3.set_title(u'湿度图')
 
     # tssr = tss.resample('M').max()
     # tssr = tss.asfreq('10D', method='pad')
@@ -115,57 +121,36 @@ def weatherstat(note_store, sourceguid, destguid=None):
     plt.savefig(img_wenshifeng_path)
     plt.close()
 
-    #
-    # fig, ax1 = plt.subplots()
-    # plt.plot(df['date'], df['sunon'], lw=1.5, label=u'日出')
-    # ax = plt.gca()
-    # ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
-    # plt.xlabel(u'日期')
-    # plt.ylabel(u'日出（时分）')
-    # # plt.axis('tight')
-    # plt.legend(loc=2)
-    # ax2 = ax1.twinx()
-    # plt.plot(df['date'], df['sunoff'], 'yd', lw=1.5, label=u'日落')
-    # ax = plt.gca()
-    # ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用min_formatter函数计算
-    # plt.legend(loc=3)
-    # plt.ylabel(u'日落（时分）')
-    # plt.title(u'武汉日出日落图')
-    # plt.grid(True)
-    plt.figure()
-    plt.plot(df['date'], df['sunon'], lw=1.5, label=u'日出')
-    plt.plot(df['date'], df['sunoff'], lw=1.5, label=u'日落')
+
+    plt.figure(figsize=(10,10))
+    fig,ax1 = plt.subplots()
+    plt.plot(df['date'], df['sunon'], lw=0.8, label=u'日出')
+    plt.plot(df['date'], df['sunoff'], lw=0.8, label=u'日落')
     ax = plt.gca()
     ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
     plt.ylim((0,24*60))
     plt.yticks(np.linspace(0,24*60,25))
     plt.xlabel(u'日期')
-    plt.ylabel(u'时间')
-    # plt.axis('tight')
-    plt.legend(loc=5)
-    plt.title(u'武汉日出日落时刻图')
+    plt.ylabel(u'时刻')
+    plt.legend(loc=6)
+    plt.title(u'日出日落时刻和白天时长图')
     plt.grid(True)
+    ax2 = ax1.twinx()
+    plt.plot(df1['date'], df1['richang'], 'r', lw=1.5, label=u'日长')
+    ax = plt.gca()
+    ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
+    # ax.set_xticklabels(rotation=45, horizontalalignment='right')
+    # plt.ylim((0, 15 * 60))
+    # plt.yticks(np.linspace(0, 15 * 60, 16))
+    plt.ylabel(u'时分')
+    plt.legend(loc=5)
+    plt.grid(True)
+
     # plt.show()
     img_sunonoff_path = 'img\\weather\\sunonoff.png'
     plt.savefig(img_sunonoff_path)
     plt.close()
 
-    plt.figure()
-    plt.plot(df['date'], df['richang'])
-    ax = plt.gca()
-    ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
-    # ax.set_xticklabels(rotation=45, horizontalalignment='right')
-    plt.ylim((0, 15 * 60))
-    plt.yticks(np.linspace(0, 15 * 60, 16))
-    plt.xlabel(u'日期')
-    plt.ylabel(u'时分')
-    # plt.axis('tight')
-    plt.title(u'武汉白天时长图')
-    plt.grid(True)
-    # plt.show()
-    img_richang_path = 'img\\weather\\richang.png'
-    plt.savefig(img_richang_path)
-    plt.close()
 
     #
     # 要更新一个note，生成一个Note（），指定guid，更新其content
@@ -204,23 +189,11 @@ def weatherstat(note_store, sourceguid, destguid=None):
     resource_sunonoff.mime = 'image/png'
     resource_sunonoff.data = data
 
-    image = open(img_richang_path, 'rb').read()
-    md5 = hashlib.md5()
-    md5.update(image)
-    hash = md5.digest()
-    data = Types.Data() #必须要重新构建一个Data（），否则内容不会变化
-    data.size = len(image)
-    data.bodyHash = hash
-    data.body = image
-    resource_richang = Types.Resource()
-    resource_richang.mime = 'image/png'
-    resource_richang.data = data
     # print resource_sunonoff
     # Now, add the new Resource to the note's list of resources
     note.resources = []
     note.resources.append(resource_wenshifeng)
     note.resources.append(resource_sunonoff)
-    note.resources.append(resource_richang)
 
     # print len(note.resources)
     # # print note.resources
