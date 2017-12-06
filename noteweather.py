@@ -69,6 +69,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
 
     df = pd.DataFrame(data_list,
                       columns=['date', 'gaowen', 'diwen', 'fengsu', 'fengxiang', 'sunon', 'sunoff', 'shidu'])
+    df.index = df['date']
     df['richang'] = df['sunoff'] - df['sunon']
     df['richang'] = df['richang'].astype(int)
     df['wendu'] = (df['gaowen'] + df['diwen'])/2
@@ -77,45 +78,29 @@ def weatherstat(note_store, sourceguid, destguid=None):
 
     # print(df.head())
 
-    # x = list(df['date'])
-    # y = list(df['gaowen'])
-    # plt.plot(x,y)
-    # plt.show()
-
-    # tss = pd.Series(list(df['gaowen']),index=pd.date_range('9/19/2016', periods=354))
-    # tss = pd.Series(list(df[0:100]['gaowen']),index=df[0:100]['date'])
-    # tss.cumsum()
-    # tss.plot()
-
-    # tss = pd.Series(list(df['gaowen']), index=df['date'])
-    # tss.cumsum()
-    # tss.plot()
-
     df1 = df.iloc[-365:]
     plt.figure(figsize=(10, 16))
     ax1 = plt.subplot2grid((7,2),(0,0),colspan=2,rowspan = 3)
-    ax1.plot(df['date'], df['gaowen'], lw=0.3, label=u'日高温')
-    ax1.plot(df['date'], df['diwen'], lw=0.3, label=u'日低温')
-    ax1.plot(df1['date'], df1['wendu'], 'g', lw=1.5, label=u'温度')
+    ax1.plot(df['gaowen'], lw=0.3, label=u'日高温')
+    ax1.plot(df['diwen'], lw=0.3, label=u'日低温')
+    ax1.plot(df1['wendu'], 'g', lw=1.5, label=u'温度')
     ax1.set_ylabel(u'（摄氏度℃）')
     ax1.grid(True)
     ax1.set_title(u'最高气温、最低气温和均值温度图')
 
 
     ax2 = plt.subplot2grid((7, 2), (4, 1), colspan=1, rowspan=3)
-    ax2.plot(df1['date'], df1['fengsu'], 'c*', lw=1.5, label=u'风速')
-    ax2.set_title(u'风速图')
+    # ax2.plot(df1['fengsu'], '*', lw=1.5, label=u'风速')
+    ts = df[df.fengsu>9][['fengsu','date']]
+    ax2.plot(list(ts['fengsu']),list(ts['date']),'r*',lw=2)
+    ax2.set_xlabel(u'风级')
+    ax2.set_title(u'十级大风的日子')
 
     ax3 = plt.subplot2grid((7, 2), (4, 0), colspan=1, rowspan=3)
-    ax3.plot(df1['date'], df1['shidu'], 'g*', lw=1.5, label=u'湿度')
+    ax3.plot(df1['shidu'], 'c.', lw=0.3, label=u'湿度')
+    ax3.plot(df1['shidu'].resample('15D').mean(),'g', lw=1.5)
     ax3.set_ylabel(u'（百分比%）')
-    ax3.set_title(u'湿度图')
-
-    # tssr = tss.resample('M').max()
-    # tssr = tss.asfreq('10D', method='pad')
-    # tssr.cumsum()
-    # tssr.plot()
-    # plt.show()
+    ax3.set_title(u'半月平均湿度图')
 
     img_wenshifeng_path = "img\\weather\\wenshifeng.png"
     plt.savefig(img_wenshifeng_path)
@@ -151,6 +136,21 @@ def weatherstat(note_store, sourceguid, destguid=None):
     plt.savefig(img_sunonoff_path)
     plt.close()
 
+    # tss = pd.Series(list(df[-354:]['gaowen']),index=pd.date_range('9/19/2016', periods=354))
+    tss = pd.Series(list(df[-100:]['gaowen']),index=df[-100:]['date'])
+    # tss.cumsum()
+    # tss.plot()
+    #
+    # tss = pd.Series(list(df['gaowen']), index=df['date'])
+    # tss.cumsum()
+    # tss.plot()
+
+    # tssr = tss.resample('M').mean()
+    # # tssr = tss.asfreq('10D', method='pad')
+    # # tssr.cumsum()
+    # tssr.plot()
+    # plt.show()
+    # plt.close()
 
     #
     # 要更新一个note，生成一个Note（），指定guid，更新其content
