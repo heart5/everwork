@@ -60,6 +60,10 @@ def weatherstat(note_store, sourceguid, destguid=None):
                        # pd.Timestamp(jj[6]),
                        int(pd.Timestamp(jj[6]).strftime("%H")) * 60 + int(pd.Timestamp(jj[6]).strftime("%M")),
                        int(jj[7])]
+            datei = stritem[0]
+            dates = "%04d-%02d-%02d" %(datei.year, datei.month, datei.day)
+            # print(str(datei)+'\t'+dates)
+            stritem[0] = pd.to_datetime(dates)
         # print stritem
         data_list.append(stritem)
 
@@ -78,27 +82,47 @@ def weatherstat(note_store, sourceguid, destguid=None):
 
     # print(df.head())
 
-    df1 = df.iloc[-365:]
-    plt.figure(figsize=(10, 16))
-    ax1 = plt.subplot2grid((7,2),(0,0),colspan=2,rowspan = 3)
+    df_recent_year = df.iloc[-364:]
+    df_before_year = df.iloc[:-364]
+
+    plt.figure(figsize=(10, 20))
+    ax1 = plt.subplot2grid((4,2),(0,0),colspan=2,rowspan = 2)
     ax1.plot(df['gaowen'], lw=0.3, label=u'日高温')
     ax1.plot(df['diwen'], lw=0.3, label=u'日低温')
-    ax1.plot(df1['wendu'], 'g', lw=1.5, label=u'温度')
+    ax1.plot(df['wendu'], 'g', lw=0.7, label=u'温度')
+    kedu = df.iloc[-364]
+    # print(kedu)
+    ax1.plot([kedu['date'],kedu['date']],[0,kedu['wendu']],'r--')
+    ax1.scatter([kedu['date'],],[kedu['wendu']],50,color='red')
+    dates = "去年今日%04d-%02d-%02d" % (kedu['date'].year, kedu['date'].month, kedu['date'].day)
+    ax1.annotate(dates,xy=(kedu['date'],kedu['wendu']),xycoords='data',
+            xytext=(-40, +30), textcoords='offset points',
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2"))
+    kedu = df.iloc[-1]
+    # print(kedu)
+    ax1.plot([kedu['date'],kedu['date']],[0,kedu['wendu']],'c--')
+    ax1.scatter([kedu['date'],],[kedu['wendu']],50,color='blue')
+    dates = "%04d-%02d-%02d" % (kedu['date'].year, kedu['date'].month, kedu['date'].day)
+    ax1.annotate(dates,xy=(kedu['date'],kedu['wendu']),xycoords='data',
+            xytext=(-50, +30), textcoords='offset points',
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2"))
+    ax1.plot(df['wendu'].resample('15D').mean(),'b', lw=1.2)
     ax1.set_ylabel(u'（摄氏度℃）')
     ax1.grid(True)
     ax1.set_title(u'最高气温、最低气温和均值温度图')
 
 
-    ax2 = plt.subplot2grid((7, 2), (4, 1), colspan=1, rowspan=3)
+    ax2 = plt.subplot2grid((4, 2), (2, 1), colspan=1, rowspan=2)
     # ax2.plot(df1['fengsu'], '*', lw=1.5, label=u'风速')
     ts = df[df.fengsu>9][['fengsu','date']]
     ax2.plot(list(ts['fengsu']),list(ts['date']),'r*',lw=2)
     ax2.set_xlabel(u'风级')
     ax2.set_title(u'十级大风的日子')
 
-    ax3 = plt.subplot2grid((7, 2), (4, 0), colspan=1, rowspan=3)
-    ax3.plot(df1['shidu'], 'c.', lw=0.3, label=u'湿度')
-    ax3.plot(df1['shidu'].resample('15D').mean(),'g', lw=1.5)
+    ax3 = plt.subplot2grid((4, 2), (2, 0), colspan=1, rowspan=2)
+    # print(type(ax3))
+    ax3.plot(df_recent_year['shidu'], 'c.', lw=0.3, label=u'湿度')
+    ax3.plot(df_recent_year['shidu'].resample('15D').mean(),'g', lw=1.5)
     ax3.set_ylabel(u'（百分比%）')
     ax3.set_title(u'半月平均湿度图')
 
@@ -121,7 +145,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
     plt.title(u'日出日落时刻和白天时长图')
     plt.grid(True)
     ax2 = ax1.twinx()
-    plt.plot(df1['date'], df1['richang'], 'r', lw=1.5, label=u'日长')
+    plt.plot(df_recent_year['date'], df_recent_year['richang'], 'r', lw=1.5, label=u'日长')
     ax = plt.gca()
     ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
     # ax.set_xticklabels(rotation=45, horizontalalignment='right')
@@ -137,7 +161,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
     plt.close()
 
     # tss = pd.Series(list(df[-354:]['gaowen']),index=pd.date_range('9/19/2016', periods=354))
-    tss = pd.Series(list(df[-100:]['gaowen']),index=df[-100:]['date'])
+    # tss = pd.Series(list(df[-100:]['gaowen']),index=df[-100:]['date'])
     # tss.cumsum()
     # tss.plot()
     #
