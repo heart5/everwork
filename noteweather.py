@@ -83,30 +83,94 @@ def weatherstat(note_store, sourceguid, destguid=None):
     # print(df.head())
 
     df_recent_year = df.iloc[-364:]
+    # print(df[df.gaowen == df.iloc[-364:]['gaowen'].max()])
     df_before_year = df.iloc[:-364]
 
-    plt.figure(figsize=(10, 20))
+    plt.figure(figsize=(16, 20))
     ax1 = plt.subplot2grid((4,2),(0,0),colspan=2,rowspan = 2)
     ax1.plot(df['gaowen'], lw=0.3, label=u'日高温')
     ax1.plot(df['diwen'], lw=0.3, label=u'日低温')
     ax1.plot(df['wendu'], 'g', lw=0.7, label=u'温度')
+    ax1.plot(df['wendu'].resample('10D').mean(),'b', lw=1.2)
+    # print(df['wendu'].resample('15D').mean())
+    #起始统计日
+    kedu = df.iloc[0]
+    ax1.plot([kedu['date'],kedu['date']],[0,kedu['wendu']],'c--',lw=0.4)
+    ax1.scatter([kedu['date'],],[kedu['wendu']],50,color='Wheat')
+    ax1.annotate(str(kedu['wendu']),xy=(kedu['date'],kedu['wendu']),xycoords='data',
+            xytext=(-5, +20), textcoords='offset points',
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2",color='Purple'))
+    dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
+    ax1.annotate(dates,xy=(kedu['date'],0),xycoords='data',
+            xytext=(-10, -20), textcoords='offset points',fontsize=8,
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
+    #去年今日
     kedu = df.iloc[-364]
-    # print(kedu)
-    ax1.plot([kedu['date'],kedu['date']],[0,kedu['wendu']],'r--')
-    ax1.scatter([kedu['date'],],[kedu['wendu']],50,color='red')
-    dates = "去年今日%04d-%02d-%02d" % (kedu['date'].year, kedu['date'].month, kedu['date'].day)
-    ax1.annotate(dates,xy=(kedu['date'],kedu['wendu']),xycoords='data',
-            xytext=(-40, +30), textcoords='offset points',
-            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2"))
-    kedu = df.iloc[-1]
-    # print(kedu)
+    print(kedu)
     ax1.plot([kedu['date'],kedu['date']],[0,kedu['wendu']],'c--')
-    ax1.scatter([kedu['date'],],[kedu['wendu']],50,color='blue')
-    dates = "%04d-%02d-%02d" % (kedu['date'].year, kedu['date'].month, kedu['date'].day)
-    ax1.annotate(dates,xy=(kedu['date'],kedu['wendu']),xycoords='data',
-            xytext=(-50, +30), textcoords='offset points',
-            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2"))
-    ax1.plot(df['wendu'].resample('15D').mean(),'b', lw=1.2)
+    ax1.scatter([kedu['date'],],[kedu['wendu']],50,color='Wheat')
+    ax1.annotate(str(kedu['wendu']),xy=(kedu['date'],kedu['wendu']),xycoords='data',
+            xytext=(-5, +20), textcoords='offset points',
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2",color='Purple'))
+    dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
+    ax1.annotate(dates,xy=(kedu['date'],0),xycoords='data',
+            xytext=(-10, -20), textcoords='offset points',fontsize=8,
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
+    #今日
+    kedu = df.iloc[-1]
+    print(kedu)
+    ax1.plot([kedu['date'],kedu['date']],[0,kedu['wendu']],'c--')
+    ax1.scatter([kedu['date'],],[kedu['wendu']],50,color='BlueViolet')
+    dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
+    ax1.annotate(dates,xy=(kedu['date'],0),xycoords='data',
+            xytext=(-10, -20), textcoords='offset points',fontsize=8,
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
+
+    #最近一年最高温
+    kedu = df_recent_year[df_recent_year.gaowen == df_recent_year.iloc[-364:]['gaowen'].max()].iloc[0]
+    print(kedu)
+    ax1.plot([kedu['date'],kedu['date']],[0,kedu['gaowen']],'c--')
+    ax1.scatter([kedu['date'],],[kedu['gaowen']],50,color='Wheat')
+    ax1.annotate(str(kedu['gaowen']),xy=(kedu['date'],kedu['gaowen']),xycoords='data',
+            xytext=(-20, +5), textcoords='offset points',
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2",color='Purple'))
+    dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
+    ax1.annotate(dates,xy=(kedu['date'],0),xycoords='data',
+            xytext=(-10, -20), textcoords='offset points',fontsize=8,
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
+    #最近一年最低温
+    kedu = df_recent_year[df_recent_year.diwen == df_recent_year.iloc[-364:]['diwen'].min()].iloc[0]
+    ax1.plot([kedu['date'],kedu['date']],[0,kedu['diwen']],'c--')
+    ax1.scatter([kedu['date'],],[kedu['diwen']],50,color='Wheat')
+    ax1.annotate(str(kedu['diwen']),xy=(kedu['date'],kedu['diwen']),xycoords='data',
+            xytext=(-20, +5), textcoords='offset points',
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2",color='Purple'))
+    dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
+    ax1.annotate(dates,xy=(kedu['date'],0),xycoords='data',
+            xytext=(-10, -20), textcoords='offset points',fontsize=8,
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
+    #最高温
+    kedu = df[df.gaowen == df['gaowen'].max()].iloc[0]
+    ax1.plot([kedu['date'],kedu['date']],[0,kedu['gaowen']],'c--')
+    ax1.scatter([kedu['date'],],[kedu['gaowen']],50,color='Wheat')
+    ax1.annotate(str(kedu['gaowen']),xy=(kedu['date'],kedu['gaowen']),xycoords='data',
+            xytext=(-20, +5), textcoords='offset points',
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2",color='Purple'))
+    dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
+    ax1.annotate(dates,xy=(kedu['date'],0),xycoords='data',
+            xytext=(-10, -20), textcoords='offset points',fontsize=8,
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
+    #最低温
+    kedu = df[df.diwen == df['diwen'].min()].iloc[0]
+    ax1.plot([kedu['date'],kedu['date']],[0,kedu['diwen']],'c--')
+    ax1.scatter([kedu['date'],],[kedu['diwen']],50,color='Wheat')
+    ax1.annotate(str(kedu['diwen']),xy=(kedu['date'],kedu['diwen']),xycoords='data',
+            xytext=(-20, +5), textcoords='offset points',
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2",color='Purple'))
+    dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
+    ax1.annotate(dates,xy=(kedu['date'],0),xycoords='data',
+            xytext=(-10, -20), textcoords='offset points',fontsize=8,
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
     ax1.set_ylabel(u'（摄氏度℃）')
     ax1.grid(True)
     ax1.set_title(u'最高气温、最低气温和均值温度图')
@@ -131,7 +195,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
     plt.close()
 
 
-    plt.figure(figsize=(10,10))
+    plt.figure(figsize=(16,10))
     fig,ax1 = plt.subplots()
     plt.plot(df['date'], df['sunon'], lw=0.8, label=u'日出')
     plt.plot(df['date'], df['sunoff'], lw=0.8, label=u'日落')
@@ -149,8 +213,8 @@ def weatherstat(note_store, sourceguid, destguid=None):
     ax = plt.gca()
     ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
     # ax.set_xticklabels(rotation=45, horizontalalignment='right')
-    # plt.ylim((0, 15 * 60))
-    # plt.yticks(np.linspace(0, 15 * 60, 16))
+    plt.ylim((3*60, 12 * 60))
+    plt.yticks(np.linspace(3*60, 15 * 60, 13))
     plt.ylabel(u'时分')
     plt.legend(loc=5)
     plt.grid(True)
