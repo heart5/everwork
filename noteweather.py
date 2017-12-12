@@ -106,7 +106,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
             arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
     #去年今日
     kedu = df.iloc[-364]
-    print(kedu)
+    # print(kedu)
     ax1.plot([kedu['date'],kedu['date']],[0,kedu['wendu']],'c--')
     ax1.scatter([kedu['date'],],[kedu['wendu']],50,color='Wheat')
     ax1.annotate(str(kedu['wendu']),xy=(kedu['date'],kedu['wendu']),xycoords='data',
@@ -118,7 +118,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
             arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
     #今日
     kedu = df.iloc[-1]
-    print(kedu)
+    # print(kedu)
     ax1.plot([kedu['date'],kedu['date']],[0,kedu['wendu']],'c--')
     ax1.scatter([kedu['date'],],[kedu['wendu']],50,color='BlueViolet')
     dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
@@ -128,7 +128,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
 
     #最近一年最高温
     kedu = df_recent_year[df_recent_year.gaowen == df_recent_year.iloc[-364:]['gaowen'].max()].iloc[0]
-    print(kedu)
+    # print(kedu)
     ax1.plot([kedu['date'],kedu['date']],[0,kedu['gaowen']],'c--')
     ax1.scatter([kedu['date'],],[kedu['gaowen']],50,color='Wheat')
     ax1.annotate(str(kedu['gaowen']),xy=(kedu['date'],kedu['gaowen']),xycoords='data',

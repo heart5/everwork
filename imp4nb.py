@@ -2,6 +2,8 @@
 
 import pandas as pd, sqlite3 as lite, matplotlib.pyplot as plt, numpy as np,calendar as cal, random as rd, os, re, time
 from pylab import *
+from everfunc import *
+
 
 # plot中显示中文
 mpl.rcParams['font.sans-serif'] = ['SimHei']
@@ -11,6 +13,10 @@ if not os.path.exists('data'):
     os.mkdir('data')
 if not os.path.exists('img'):
     os.mkdir('img')
+if not os.path.exists('img\\weather'):
+    os.mkdir('img\\weather')
+if not os.path.exists('img\\pick'):
+    os.mkdir('img\\pick')
 
 
 # 显示DataFrame或Series的轮廓信息

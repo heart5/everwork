@@ -30,15 +30,15 @@ def yingdacal(x,cnx):
 #测试笔记本（notebook）数据结构每个属性的返回值
 #开发口令（token）的方式调用返回如下
 def printnotebookattributeundertoken(notebook):
-    print ('名称\t'+ notebook.name) #phone
-    print ('guid\t'+ notebook.guid) #f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
-    print ('更新序列号\t'+ notebook.updateSequenceNum) ##8285
-    print ('默认笔记本\t'+ notebook.defaultNotebook) ##False
-    print ('创建时间\t'+ timestamp2str(int(notebook.serviceCreated/1000)))  #2010-09-15 11:37:43
-    print ('更新时间\t'+ timestamp2str(int(notebook.serviceUpdated/1000)))  #2016-08-29 19:38:24
+    print ('名称：'+ notebook.name,end='\t') #phone
+    print ('guid：'+ notebook.guid,end='\t') #f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
+    print ('更新序列号：'+ str(notebook.updateSequenceNum),end='\t') ##8285
+    print ('默认笔记本：'+ str(notebook.defaultNotebook),end='\t') ##False
+    print ('创建时间：'+ timestamp2str(int(notebook.serviceCreated/1000)),end='\t')  #2010-09-15 11:37:43
+    print ('更新时间：'+ timestamp2str(int(notebook.serviceUpdated/1000)),end='\t')  #2016-08-29 19:38:24
     # print '发布中\t', notebook.publishing  #这种权限的调用返回None
     # print '发布过\t', notebook.published  #这种权限的调用返回None
-    print ('笔记本组\t'+ notebook.stack) #手机平板
+    print ('笔记本组：'+ str(notebook.stack)) #手机平板
     # print '共享笔记本id\t', notebook.sharedNotebookIds  #这种权限的调用返回None
     # print '共享笔记本\t', notebook.sharedNotebooks  #这种权限的调用返回None
     # print '商务笔记本\t', notebook.businessNotebook  #这种权限的调用返回None

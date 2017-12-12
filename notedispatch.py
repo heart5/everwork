@@ -88,12 +88,22 @@ def dataokay(cnx):
         print(df)
         df.to_sql(name='customer', con=cnx, if_exists='replace')
 
-    if gengxinfou('data\\2017年全单统计管理.xlsm',cnx,'fileread'):
+    if gengxinfou('data\\2017年全单统计管理.xlsm',cnx,'fileread') or True:
         df = pd.read_excel('data\\2017年全单统计管理.xlsm',sheetname='全单统计管理',na_values=[0])
         # descdb(df)
-        df=df.loc[:,['订单日期', '配货人', '配货准确', '业务主管', '终端编码', '终端名称', '积欠', '送货金额',
+        df=df.loc[:,['订单日期','单号', '配货人', '配货准确', '业务主管', '终端编码', '终端名称', '积欠', '送货金额',
                          '实收金额', '收款方式', '退货金额', '客户拒收', '无货金额', '少配金额', '配错未要',
                          '送达日期', '车辆', '送货人', '收款日期', '收款人', '拒收品项']]
+        df['订单编号'] =df['单号'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['配货人'] =df['配货人'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['业务主管'] =df['业务主管'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['终端编码'] =df['终端编码'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['收款方式'] =df['收款方式'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['车辆'] =df['车辆'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['送货人'] =df['送货人'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['收款人'] =df['收款人'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['拒收品项'] =df['拒收品项'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        # df = df.apply(lambda x:str.strip(x) if type(x) == str else x)
         df.to_sql(name='quandan', con=cnx, if_exists='replace', chunksize=100000)
 
     # if gengxinfou('data\\xiaoshoushujumingxi.txt',cnx,'fileread'):# or True:

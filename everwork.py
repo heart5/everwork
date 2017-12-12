@@ -23,7 +23,9 @@ from evernote.api.client import EvernoteClient
 from pylab import *
 from matplotlib.ticker import MultipleLocator, FuncFormatter
 from noteweather import weatherstat #调用同目录下其他文件（py）中的函数
-# from everfunc import *
+from imp4nb import *
+from notewarehouse import *
+from everfunc import *
 
 # plot中显示中文
 mpl.rcParams['font.sans-serif'] = ['SimHei']
@@ -91,7 +93,7 @@ notebooks = note_store.listNotebooks()
 # printnotebookattributeundertoken(notebooks[1])
 
 #列出笔记本中的笔记信息
-def printnotefromnotebook( notebookguid, notecount):
+def printnotefromnotebook( notebookguid, notecount,titlefind):
     notefilter = NoteStore.NoteFilter()
     notefilter.notebookGuid = notebookguid
     notemetaspec = NoteStore.NotesMetadataResultSpec(includeTitle=True, includeContentLength=True, includeCreated=True,
@@ -107,11 +109,22 @@ def printnotefromnotebook( notebookguid, notecount):
     # print ourNoteList.notes[5] #打印NoteMetadata
 
     for note in ourNoteList.notes:
-        if note.title.find('真元日配送图') >= 0:
+        if note.title.find(titlefind) >= 0:
             print (note.guid, note.title)
 
     print()
 
+# for x in notebooks:
+#     printnotebookattributeundertoken(x)
 
-printnotefromnotebook('31eee750-e240-438b-a1f5-03ce34c904b4',100)
-weatherstat(note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
+#仓库管理 87bbbe9a-4e9c-4f5d-84fb-1e94e62a0ec9
+#行政管理 31eee750-e240-438b-a1f5-03ce34c904b4
+
+#39ed537d-73fa-4ad8-b4fd-bc6f746fb302 真元日配送图
+#1c0830d9-e42f-4ce7-bf36-ead868a55eca 订单配货统计图
+
+printnotefromnotebook('31eee750-e240-438b-a1f5-03ce34c904b4',100,'天气')
+printnotefromnotebook('87bbbe9a-4e9c-4f5d-84fb-1e94e62a0ec9',100,'订单')
+
+# weatherstat(note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
+pickstat(note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
