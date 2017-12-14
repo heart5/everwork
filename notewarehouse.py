@@ -35,14 +35,20 @@ def pickstat(note_store, destguid=None):
         df = pd.read_sql("select * from quandan", cnx)
         df = df[df.配货人 != '作废']
         df['订单日期'] = pd.to_datetime(df['订单日期'])
+        df = df[df['订单日期'] >= pd.to_datetime('2016-04-01')]
         df['送达日期'] = pd.to_datetime(df['送达日期'])
         df['收款日期'] = pd.to_datetime(df['收款日期'])
+
     except:
         pass
 
     print(df.columns)
     dd = pd.DataFrame(df.groupby(['订单日期']).size(), columns=['订单数量'])
+    dd['错配单数'] = df.groupby(['订单日期']).sum()['配货准确']
     dd['订单金额'] = df.groupby(['订单日期']).sum()['送货金额']
+    dd['无货金额'] = df.groupby(['订单日期']).sum()['无货金额']
+    dd['漏配金额'] = df.groupby(['订单日期']).sum()['少配金额']
+    dd['错配金额'] = df.groupby(['订单日期']).sum()['配错未要']
     print(dd)
 
     df['年月'] = df['订单日期'].apply(lambda x: "%04d-%02d" % (x.year, x.month))
@@ -54,7 +60,7 @@ def pickstat(note_store, destguid=None):
     ph['漏配金额'] = df.groupby(['配货人', '年月']).sum()['少配金额']
     ph['错配金额'] = df.groupby(['配货人', '年月']).sum()['配错未要']
 
-    ph.plot()
+    dd.plot()
     # plt.show()
     plt.savefig("img\\pick\\pickstat.png")
     plt.close()
