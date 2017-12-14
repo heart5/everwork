@@ -42,14 +42,41 @@ def pickstat(note_store, destguid=None):
     except:
         pass
 
-    print(df.columns)
+    print(df.dtypes)
     dd = pd.DataFrame(df.groupby(['订单日期']).size(), columns=['订单数量'])
     dd['错配单数'] = df.groupby(['订单日期']).sum()['配货准确']
+    dd['错配比例'] = (dd['错配单数'] / dd['订单数量'])
     dd['订单金额'] = df.groupby(['订单日期']).sum()['送货金额']
     dd['无货金额'] = df.groupby(['订单日期']).sum()['无货金额']
     dd['漏配金额'] = df.groupby(['订单日期']).sum()['少配金额']
     dd['错配金额'] = df.groupby(['订单日期']).sum()['配错未要']
+    dd.insert(0,'日期',dd.index)
+    dd.insert(0,'年月',dd['日期'].apply(lambda x: "%04d%02d" % (x.year, x.month)))
+    dd = dd.fillna(value=0)
+
+    old_width = pd.get_option('display.max_colwidth')
+    pd.set_option('display.max_colwidth', -1)
+    dd.to_html('data\\tmp\\files.html', classes=None, escape=False, index=None, sparsify=True, border=0, index_names=None, justify='right', header=True)
+    pd.set_option('display.max_colwidth', old_width)
+
     print(dd)
+
+    plt.figure(figsize=(16,20))
+    ax1 = plt.subplot2grid((4,2),(0,0),colspan=2,rowspan = 2)
+    ax1.plot(dd['订单数量'])
+    ax1.plot(dd['错配单数'])
+    ax2 = ax1.twinx()
+    plt.plot(dd['错配比例'])
+    ax3 = plt.subplot2grid((4,2),(2,0),colspan=2,rowspan = 2)
+    ax3.plot(dd['订单金额'])
+    ax4 = ax3.twinx()
+    plt.plot(dd['无货金额'])
+    plt.plot(dd['漏配金额'])
+    plt.plot(dd['错配金额'])
+    # plt.show()
+    plt.savefig("img\\pick\\pickstat.png")
+    plt.close()
+
 
     df['年月'] = df['订单日期'].apply(lambda x: "%04d-%02d" % (x.year, x.month))
 
@@ -59,11 +86,6 @@ def pickstat(note_store, destguid=None):
     ph['配货金额'] = df.groupby(['配货人', '年月']).sum()['送货金额']
     ph['漏配金额'] = df.groupby(['配货人', '年月']).sum()['少配金额']
     ph['错配金额'] = df.groupby(['配货人', '年月']).sum()['配错未要']
-
-    dd.plot()
-    # plt.show()
-    plt.savefig("img\\pick\\pickstat.png")
-    plt.close()
 
     print(df.groupby(['业务主管']).size())
 
@@ -139,8 +161,15 @@ def pickstat(note_store, destguid=None):
             str1 = str1[2:-1] #cd34b4b6c8d9279217b03c396ca913df
             # print (str1)
             nBody += "<en-media type=\"%s\" hash=\"%s\" /><br />"  %(resource.mime, str1)
+    nBody += '<br />'
+    fileshtml = open('data\\tmp\\files.html','rU')
+    for line in fileshtml:
+        if line.startswith('<table'):
+            line = "<table border='1'>"
+        nBody += line
     nBody += "</en-note>"
 
+    # print(nBody)
     note.content = nBody
     # print (note.content)
 

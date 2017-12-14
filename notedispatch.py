@@ -88,7 +88,7 @@ def dataokay(cnx):
         print(df)
         df.to_sql(name='customer', con=cnx, if_exists='replace')
 
-    if gengxinfou('data\\2017年全单统计管理.xlsm',cnx,'fileread') or True:
+    if gengxinfou('data\\2017年全单统计管理.xlsm',cnx,'fileread'):# or True:
         df = pd.read_excel('data\\2017年全单统计管理.xlsm',sheetname='全单统计管理',na_values=[0])
         # descdb(df)
         df=df.loc[:,['订单日期','单号', '配货人', '配货准确', '业务主管', '终端编码', '终端名称', '积欠', '送货金额',

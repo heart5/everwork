@@ -11,6 +11,8 @@ mpl.rcParams['axes.unicode_minus'] = False
 
 if not os.path.exists('data'):
     os.mkdir('data')
+if not os.path.exists('data\\tmp'):
+    os.mkdir('data\\tmp')
 if not os.path.exists('img'):
     os.mkdir('img')
 if not os.path.exists('img\\weather'):
