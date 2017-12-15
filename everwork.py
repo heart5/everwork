@@ -73,7 +73,7 @@ currentuser = userStore.getUser()
 
 # printuserattributeundertoken(currentuser)
 
-print (int(time.time()), '\t', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
+print ('当前运行时间：',int(time.time()), '\t', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
 version_ok = userStore.checkVersion(
     "Evernote EDAMTest (Python)",
@@ -126,5 +126,5 @@ def printnotefromnotebook( notebookguid, notecount,titlefind):
 printnotefromnotebook('31eee750-e240-438b-a1f5-03ce34c904b4',100,'天气')
 printnotefromnotebook('87bbbe9a-4e9c-4f5d-84fb-1e94e62a0ec9',100,'订单')
 
-weatherstat(note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
+# weatherstat(note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
 pickstat(note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')

@@ -88,13 +88,15 @@ def dataokay(cnx):
         print(df)
         df.to_sql(name='customer', con=cnx, if_exists='replace')
 
-    if gengxinfou('data\\2017年全单统计管理.xlsm',cnx,'fileread'):# or True:
+    if gengxinfou('data\\2017年全单统计管理.xlsm',cnx,'fileread') :#or True:
         df = pd.read_excel('data\\2017年全单统计管理.xlsm',sheetname='全单统计管理',na_values=[0])
         # descdb(df)
         df=df.loc[:,['订单日期','单号', '配货人', '配货准确', '业务主管', '终端编码', '终端名称', '积欠', '送货金额',
-                         '实收金额', '收款方式', '退货金额', '客户拒收', '无货金额', '少配金额', '配错未要',
-                         '送达日期', '车辆', '送货人', '收款日期', '收款人', '拒收品项']]
-        df['订单编号'] =df['单号'].apply(lambda x:str.strip(x) if type(x) == str else x)
+                         '实收金额', '收款方式','优惠','退货金额', '客户拒收', '无货金额', '少配金额', '配错未要',
+                         '送达日期', '车辆', '送货人', '收款日期', '收款人', '拒收品项','少配明细']]
+        df_dh = df.pop('单号')
+        df.insert(1,'订单编号',df_dh)
+        df['订单编号'] =df['订单编号'].apply(lambda x:str.strip(x) if type(x) == str else x)
         df['配货人'] =df['配货人'].apply(lambda x:str.strip(x) if type(x) == str else x)
         df['业务主管'] =df['业务主管'].apply(lambda x:str.strip(x) if type(x) == str else x)
         df['终端编码'] =df['终端编码'].apply(lambda x:str.strip(x) if type(x) == str else x)
@@ -103,6 +105,7 @@ def dataokay(cnx):
         df['送货人'] =df['送货人'].apply(lambda x:str.strip(x) if type(x) == str else x)
         df['收款人'] =df['收款人'].apply(lambda x:str.strip(x) if type(x) == str else x)
         df['拒收品项'] =df['拒收品项'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['少配明细'] =df['少配明细'].apply(lambda x:str.strip(x) if type(x) == str else x)
         # df['无货金额'] = df['无货金额'].astype(int)
         # df = df.apply(lambda x:str.strip(x) if type(x) == str else x)
         df.to_sql(name='quandan', con=cnx, if_exists='replace', chunksize=100000)
@@ -246,160 +249,6 @@ def fenxi(cnx):
                 # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
             chubiaoyueleiji(df,dangqianyue,'金额',leixing=leixingset,quyu='销售部',nianshu=5)
 
-
-
-#
-# 把纵轴的刻度设置为万
-#
-def y_formatter(x, pos):
-    return r"%d万" %(int(x/10000)) #%d
-
-
-def rizi(df):
-    return '%02d' %(df[0].day)
-
-
-def yuezi(df):
-    return '%02d' %(df[0]+1)
-
-
-# 月度（全年，自然年度）累积对比图，自最早日期起，默认3年
-# df，数据表，必须用DateTime做index
-# riqi，当前月份，可以是DateTIme的各种形式，只要pd能识别成功，形如2017-10-01，代表2017年10月为标的月份
-# xiangmu，主题，画图时写入标题
-# quyu，销售区域或区域聚合（分部）
-# leixing，终端类型
-# nianshu，用来对比的年份数，从当前年份向回数
-def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',pinpai='',nianshu=3):
-    riqicur = pd.to_datetime(riqi)
-    nianlist = []
-    for i in range(nianshu):
-        nianlist.append(riqicur+pd.DateOffset(years=-(i)))
-
-    ds = pd.DataFrame(df[xiangmu],index=df.index)#取出日期索引的数据列
-
-    # 分年份生成按照每天日期重新索引的数据列
-    dslist = []
-    for i in range(nianshu):
-        dstmp = ds.reindex(pd.date_range(pd.to_datetime(str(nianlist[i].year)+'-01-01'),periods=365,freq='D'),fill_value=0)
-        dstmp = dstmp.resample('M').sum()
-        dstmp.columns = ['%04d'%(nianlist[i].year)]
-        dstmp.index = (range(12))
-        dslist.append(dstmp)
-
-    df = dslist[0]
-    for i in range(nianshu-1):
-        df = df.join(dslist[i+1])
-
-    colnames = []
-    for i in range(nianshu):
-        colnames.append((dslist[i].columns)[0])
-    # print(colnames)
-    df = df[colnames]
-    zuobiao = pd.DataFrame(df.index).apply(lambda r:yuezi(r),axis=1)
-    df.index= zuobiao
-
-    # descdb(df)
-
-    nianyue = '%04d年'%(riqicur.year)
-    biaoti = leixing+quyu+pinpai+nianyue+xiangmu
-    df.cumsum().plot(title=('%s月累积' %biaoti))
-    # df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
-    plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
-    plt.savefig('img\\%s（月累积）.png' %biaoti)
-    plt.close()
-    df.plot(title=('%s月折线') %biaoti)
-    plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
-    plt.savefig('img\\%s（月折线）.png' %biaoti)
-    plt.close()
-    # plt.show()
-    # ds1.plot()
-    #
-    # ds2 = ds1.resample('M').sum()
-    # descdb(ds2)
-    # print(ds2.sum())
-    # ds2.plot()
-    # plt.show()
-
-    # dfr = df.reindex(dates,fill_value=0)
-    # descdb(dfr)
-    # df['danshu'].plot()
-    # plt.show()
-    # df['jine'].plot()
-    # plt.show()
-
-
-#日（整月）累积对比图，当月、环比、同期比
-#riqi形如2017-10-01，代表2017年10月为标的月份
-def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing='',pinpai=''):
-    riqicur = pd.to_datetime(riqi)
-    riqibefore = riqicur+pd.DateOffset(months=-1)
-    riqilast = riqicur+pd.DateOffset(years=-1)
-    tianshu = cal.monthrange(riqicur.year,riqicur.month)[1]
-
-    ds = pd.DataFrame(df[xiangmu],index=df.index)
-    # print(ds.index)
-    # print(ds)
-    dates = pd.date_range(riqibefore,periods=tianshu,freq='D')
-    # print(dates)
-    ds1 = ds.reindex(dates,fill_value=0)
-    # ds1 = ds1.resample('M').sum()
-    # descdb(ds1)
-    ds1.index = (range(tianshu))
-    ds1.columns = ['%04d%02d' %(riqibefore.year,riqibefore.month)]
-    # descdb(ds1)
-
-    dates = pd.date_range(riqilast,periods=tianshu,freq='D')
-    # print(dates)
-    ds3 = ds.reindex(dates,fill_value=0)
-    # ds2 =ds2.resample('M').sum()
-    # descdb(ds3)
-    ds3.index = range(tianshu)
-    ds3.columns = ['%04d%02d' %(riqilast.year,riqilast.month)]
-    # descdb(ds3)
-
-    dates = pd.date_range(riqicur,periods=tianshu,freq='D')
-    # print(dates)
-    ds2 = ds.reindex(dates,fill_value=0)
-    # ds2 =ds2.resample('M').sum()
-    # descdb(ds2)
-    ds2.index = range(tianshu)
-    ds2.columns = ['%04d%02d' %(riqicur.year,riqicur.month)]
-    # descdb(ds2)
-
-    df = ds2.join(ds1,how='left')
-    df = df.join(ds3,how='left')
-    df = df[['%04d%02d' %(riqicur.year,riqicur.month),'%04d%02d' %(riqibefore.year,riqibefore.month),'%04d%02d' %(riqilast.year,riqilast.month)]]
-    # descdb(df)
-    zuobiao = pd.DataFrame(dates).apply(lambda r:rizi(r),axis=1)
-    df.index= zuobiao
-    # descdb(df)
-    nianyue = '%04d%02d'%(riqicur.year,riqicur.month)
-    biaoti = leixing+quyu+pinpai+nianyue+xiangmu
-    if len(df) > 12:
-        # print(len(df))
-        df.cumsum().plot(title=biaoti+'日累积')
-    else:
-        df.cumsum().plot(title=biaoti+'日累积')
-
-    plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
-    plt.savefig('img\\'+biaoti+'（日累积月）.png' )
-    # plt.show()
-    plt.close()
-    # ds1.plot()
-    #
-    # ds2 = ds1.resample('M').sum()
-    # descdb(ds2)
-    # print(ds2.sum())
-    # ds2.plot()
-    # plt.show()
-
-    # dfr = df.reindex(dates,fill_value=0)
-    # descdb(dfr)
-    # df['danshu'].plot()
-    # plt.show()
-    # df['jine'].plot()
-    # plt.show()
 
 
 cnx = lite.connect('data\\quandan.db')

@@ -4,8 +4,8 @@
 # 有关evernote的各种探测性函数
 #
 
-import time, pandas as pd, sqlite3 as lite
-
+import time, pandas as pd, sqlite3 as lite,matplotlib.pyplot as plt,calendar as cal
+from pylab import *
 
 
 def timestamp2str(timestamp):
@@ -92,4 +92,171 @@ def printuserattributeundertoken(user):
     # print '头像url\t', str(user.photoUrl)  #这种权限的调用没有返回这个值，报错
     # print '头像最近更新\t', str(user.photoLastUpdated)  #这种权限的调用没有返回这个值，报错
     # print '账户限制\t', str(user.accountLimits)  #这种权限的调用没有返回这个值，报错
+
+
+#
+# 把纵轴的刻度设置为万
+#
+def y_formatter(x, pos):
+    return r"%d万" %(int(x/10000)) #%d
+
+
+def rizi(df):
+    return '%02d' %(df[0].day)
+
+
+def yuezi(df):
+    return '%02d' %(df[0]+1)
+
+
+# 月度（全年，自然年度）累积对比图，自最早日期起，默认3年
+# df，数据表，必须用DateTime做index
+# riqi，当前月份，可以是DateTIme的各种形式，只要pd能识别成功，形如2017-10-01，代表2017年10月为标的月份
+# xiangmu，主题，画图时写入标题
+# quyu，销售区域或区域聚合（分部）
+# leixing，终端类型
+# nianshu，用来对比的年份数，从当前年份向回数
+def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',pinpai='',nianshu=3,imgpath='img\\'):
+    riqicur = pd.to_datetime(riqi)
+    nianlist = []
+    for i in range(nianshu):
+        nianlist.append(riqicur+pd.DateOffset(years=-(i)))
+
+    ds = pd.DataFrame(df[xiangmu],index=df.index)#取出日期索引的数据列
+
+    # 分年份生成按照每天日期重新索引的数据列
+    dslist = []
+    for i in range(nianshu):
+        dstmp = ds.reindex(pd.date_range(pd.to_datetime(str(nianlist[i].year)+'-01-01'),periods=365,freq='D'),fill_value=0)
+        dstmp = dstmp.resample('M').sum()
+        dstmp.columns = ['%04d'%(nianlist[i].year)]
+        dstmp.index = (range(12))
+        dslist.append(dstmp)
+
+    df = dslist[0]
+    for i in range(nianshu-1):
+        df = df.join(dslist[i+1])
+
+    colnames = []
+    for i in range(nianshu):
+        colnames.append((dslist[i].columns)[0])
+    # print(colnames)
+    df = df[colnames]
+    zuobiao = pd.DataFrame(df.index).apply(lambda r:yuezi(r),axis=1)
+    df.index= zuobiao
+
+    # descdb(df)
+
+    nianyue = '%04d年'%(riqicur.year)
+    biaoti = leixing+quyu+pinpai+nianyue+xiangmu
+    df.cumsum().plot(title=('%s月累积' %biaoti))
+    # df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
+    plt.savefig(imgpath+'%s（月累积）.png' %biaoti)
+    plt.close()
+    df.plot(title=('%s月折线') %biaoti)
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
+    plt.savefig(imgpath+'%s（月折线）.png' %biaoti)
+    plt.close()
+    # plt.show()
+    # ds1.plot()
+    #
+    # ds2 = ds1.resample('M').sum()
+    # descdb(ds2)
+    # print(ds2.sum())
+    # ds2.plot()
+    # plt.show()
+
+    # dfr = df.reindex(dates,fill_value=0)
+    # descdb(dfr)
+    # df['danshu'].plot()
+    # plt.show()
+    # df['jine'].plot()
+    # plt.show()
+
+
+#日（整月）累积对比图，当月、环比、同期比
+#riqi形如2017-10-01，代表2017年10月为标的月份
+def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing='',pinpai='',imgpath='img\\'):
+    riqicur = pd.to_datetime(riqi)
+    riqibefore = riqicur+pd.DateOffset(months=-1)
+    riqilast = riqicur+pd.DateOffset(years=-1)
+    tianshu = cal.monthrange(riqicur.year,riqicur.month)[1]
+
+    ds = pd.DataFrame(df[xiangmu],index=df.index)
+    # print(ds.index)
+    # print(ds)
+    dates = pd.date_range(riqibefore,periods=tianshu,freq='D')
+    # print(dates)
+    ds1 = ds.reindex(dates,fill_value=0)
+    # ds1 = ds1.resample('M').sum()
+    # descdb(ds1)
+    ds1.index = (range(1,tianshu+1))
+    ds1.columns = ['%04d%02d' %(riqibefore.year,riqibefore.month)]
+    # descdb(ds1)
+
+    dates = pd.date_range(riqilast,periods=tianshu,freq='D')
+    # print(dates)
+    ds3 = ds.reindex(dates,fill_value=0)
+    # ds2 =ds2.resample('M').sum()
+    # descdb(ds3)
+    ds3.index = range(1,tianshu+1)
+    ds3.columns = ['%04d%02d' %(riqilast.year,riqilast.month)]
+    # descdb(ds3)
+
+    dates = pd.date_range(riqicur,periods=tianshu,freq='D')
+    # print(dates)
+    ds2 = ds.reindex(dates,fill_value=0)
+    # ds2 =ds2.resample('M').sum()
+    # descdb(ds2)
+    ds2.index = range(1,tianshu+1)
+    ds2.columns = ['%04d%02d' %(riqicur.year,riqicur.month)]
+    # descdb(ds2)
+
+    dff = ds2.join(ds1,how='left')
+    dff = dff.join(ds3,how='left')
+    dff = dff[['%04d%02d' %(riqicur.year,riqicur.month),'%04d%02d' %(riqibefore.year,riqibefore.month),'%04d%02d' %(riqilast.year,riqilast.month)]]
+    # descdb(df)
+    zuobiao = pd.DataFrame(dates).apply(lambda r:rizi(r),axis=1)
+    dff.index= zuobiao
+    # descdb(df)
+    nianyue = '%04d%02d'%(riqicur.year,riqicur.month)
+    biaoti = leixing+quyu+pinpai+nianyue+xiangmu
+    if len(df) > 12:
+        # print(len(df))
+        dff.cumsum().plot(title=biaoti+'日累积')
+    else:
+        dff.cumsum().plot(title=biaoti+'日累积')
+
+    date_end = "%02d" %(df.index.max().day)
+    print(date_end)
+    dfc = dff.cumsum()
+    kedu = dfc.loc[date_end]
+    print(kedu)
+    print(kedu.index)
+    print(kedu[[0]])
+    print(kedu[[0]])
+
+    # date_end_zuobiao = "%02d" % (df.index.max().day-1)
+    plt.plot([date_end,date_end],[0,kedu[[0]].ix[0,1]],'c--')
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
+    imgsavepath = imgpath+biaoti+'（日累积月）.png'
+    plt.savefig( imgsavepath)
+    # plt.show()
+    plt.close()
+    # ds1.plot()
+    #
+    # ds2 = ds1.resample('M').sum()
+    # descdb(ds2)
+    # print(ds2.sum())
+    # ds2.plot()
+    # plt.show()
+
+    # dfr = df.reindex(dates,fill_value=0)
+    # descdb(dfr)
+    # df['danshu'].plot()
+    # plt.show()
+    # df['jine'].plot()
+    # plt.show()
+    return imgsavepath
 

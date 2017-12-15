@@ -51,7 +51,7 @@ def pickstat(note_store, destguid=None):
     dd['漏配金额'] = df.groupby(['订单日期']).sum()['少配金额']
     dd['错配金额'] = df.groupby(['订单日期']).sum()['配错未要']
     dd.insert(0,'日期',dd.index)
-    dd.insert(0,'年月',dd['日期'].apply(lambda x: "%04d%02d" % (x.year, x.month)))
+    # dd.insert(0,'年月',dd['日期'].apply(lambda x: "%04d%02d" % (x.year, x.month)))
     dd = dd.fillna(value=0)
 
     old_width = pd.get_option('display.max_colwidth')
@@ -59,7 +59,7 @@ def pickstat(note_store, destguid=None):
     dd.to_html('data\\tmp\\files.html', classes=None, escape=False, index=None, sparsify=True, border=0, index_names=None, justify='right', header=True)
     pd.set_option('display.max_colwidth', old_width)
 
-    print(dd)
+    # print(dd)
 
     plt.figure(figsize=(16,20))
     ax1 = plt.subplot2grid((4,2),(0,0),colspan=2,rowspan = 2)
@@ -77,6 +77,7 @@ def pickstat(note_store, destguid=None):
     plt.savefig("img\\pick\\pickstat.png")
     plt.close()
 
+    imgsavepath = chubiaorileiji(dd,'2017-12-01','订单金额',imgpath='img\\pick\\')
 
     df['年月'] = df['订单日期'].apply(lambda x: "%04d-%02d" % (x.year, x.month))
 
@@ -87,11 +88,11 @@ def pickstat(note_store, destguid=None):
     ph['漏配金额'] = df.groupby(['配货人', '年月']).sum()['少配金额']
     ph['错配金额'] = df.groupby(['配货人', '年月']).sum()['配错未要']
 
-    print(df.groupby(['业务主管']).size())
+    # print(df.groupby(['业务主管']).size())
 
     cnx.close()
 
-    img_wenshifeng_path = "img\\pick\\pickstat.png"
+    img_wenshifeng_path = imgsavepath
     img_sunonoff_path = 'img\\pick\\pickstat.png'
 
     #
