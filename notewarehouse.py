@@ -66,7 +66,7 @@ def pickstat(note_store, destguid=None):
     ax1.plot(dd['订单数量'])
     ax1.plot(dd['错配单数'])
     ax2 = ax1.twinx()
-    plt.plot(dd['错配比例'])
+    plt.plot(dd['错配比例'].resample('15D').mean(),'r-')
     ax3 = plt.subplot2grid((4,2),(2,0),colspan=2,rowspan = 2)
     ax3.plot(dd['订单金额'])
     ax4 = ax3.twinx()

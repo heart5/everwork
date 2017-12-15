@@ -103,6 +103,7 @@ def dataokay(cnx):
         df['送货人'] =df['送货人'].apply(lambda x:str.strip(x) if type(x) == str else x)
         df['收款人'] =df['收款人'].apply(lambda x:str.strip(x) if type(x) == str else x)
         df['拒收品项'] =df['拒收品项'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        # df['无货金额'] = df['无货金额'].astype(int)
         # df = df.apply(lambda x:str.strip(x) if type(x) == str else x)
         df.to_sql(name='quandan', con=cnx, if_exists='replace', chunksize=100000)
 
