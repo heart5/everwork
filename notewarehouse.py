@@ -41,12 +41,12 @@ def pickstat(note_store, destguid=None):
 
     except:
         pass
+    xlswriter = pd.ExcelWriter('data\\ttt.xlsx')
 
-    print(df.dtypes)
-    dd = pd.DataFrame(df.groupby(['订单日期']).size(), columns=['订单数量'])
+    print(df.columns)
+    dd = pd.DataFrame(df.groupby(['订单日期']).size(), columns=['配单数量'])
     dd['错配单数'] = df.groupby(['订单日期']).sum()['配货准确']
-    dd['错配比例'] = (dd['错配单数'] / dd['订单数量'])
-    dd['订单金额'] = df.groupby(['订单日期']).sum()['送货金额']
+    dd['配单金额'] = df.groupby(['订单日期']).sum()['送货金额']
     dd['无货金额'] = df.groupby(['订单日期']).sum()['无货金额']
     dd['漏配金额'] = df.groupby(['订单日期']).sum()['少配金额']
     dd['错配金额'] = df.groupby(['订单日期']).sum()['配错未要']
@@ -54,30 +54,43 @@ def pickstat(note_store, destguid=None):
     # dd.insert(0,'年月',dd['日期'].apply(lambda x: "%04d%02d" % (x.year, x.month)))
     dd = dd.fillna(value=0)
 
-    old_width = pd.get_option('display.max_colwidth')
-    pd.set_option('display.max_colwidth', -1)
-    dd.to_html('data\\tmp\\files.html', classes=None, escape=False, index=None, sparsify=True, border=0, index_names=None, justify='right', header=True)
-    pd.set_option('display.max_colwidth', old_width)
+    ddfirstdate = dd.index.min()
+    ddlastdate = dd.index.max()
+
+    # old_width = pd.get_option('display.max_colwidth')
+    # pd.set_option('display.max_colwidth', -1)
+    # dd.to_html('data\\tmp\\files.html', classes=None, escape=False, index=None, sparsify=True, border=0, index_names=None, justify='right', header=True)
+    # pd.set_option('display.max_colwidth', old_width)
 
     # print(dd)
+    dd.to_excel(xlswriter,'配货日汇总',freeze_panes=[1,1])
 
-    plt.figure(figsize=(16,20))
-    ax1 = plt.subplot2grid((4,2),(0,0),colspan=2,rowspan = 2)
-    ax1.plot(dd['订单数量'])
-    ax1.plot(dd['错配单数'])
+    plt.figure()
+    ax1 = plt.subplot2grid((5,2),(0,0),colspan=2,rowspan = 2)
+    ddm = dd.iloc[-400:,:].resample('M').sum()
+    l1 = ax1.plot(ddm['配单数量'],lw=0.5,label='配单数量')
+    plt.legend()
+    l2 = ax1.plot(ddm['错配单数'],lw=0.5,label= '错配单数')
+    plt.legend()
     ax2 = ax1.twinx()
-    plt.plot(dd['错配比例'].resample('15D').mean(),'r-')
-    ax3 = plt.subplot2grid((4,2),(2,0),colspan=2,rowspan = 2)
-    ax3.plot(dd['订单金额'])
-    ax4 = ax3.twinx()
-    plt.plot(dd['无货金额'])
-    plt.plot(dd['漏配金额'])
-    plt.plot(dd['错配金额'])
-    # plt.show()
+    plt.plot(ddm['错配单数'] / ddm['配单数量'],'r-',label='错单比例')
+    plt.legend()
+    plt.gca().yaxis.set_major_formatter(
+        FuncFormatter(lambda x, pos: "%.1f%%" % (x*100)))  # 纵轴主刻度显示小数为百分数
+    plt.title('错配单数（月度）统计图')
+    ax3 = plt.subplot2grid((5,2),(3,0),colspan=2,rowspan = 2)
+    plt.bar(ddm.index,ddm['漏配金额'],width=5,label='漏配金额')
+    plt.legend()
+    plt.bar(ddm.index,ddm['错配金额'],width=5,bottom=ddm['漏配金额'],label='错配金额')
+    plt.legend()
+    plt.title('错配金额（月度）统计图')
     plt.savefig("img\\pick\\pickstat.png")
     plt.close()
 
-    imgsavepath = chubiaorileiji(dd,'2017-12-01','订单金额',imgpath='img\\pick\\')
+    imgpathlist = []
+    imgpathlist.append(chubiaorileiji(dd,ddlastdate,'配单数量',imgpath='img\\pick\\'))
+    imgpathlist.append(chubiaorileiji(dd,ddlastdate,'配单金额',imgpath='img\\pick\\'))
+    imgpathlist.append("img\\pick\\pickstat.png")
 
     df['年月'] = df['订单日期'].apply(lambda x: "%04d-%02d" % (x.year, x.month))
 
@@ -87,13 +100,18 @@ def pickstat(note_store, destguid=None):
     ph['配货金额'] = df.groupby(['配货人', '年月']).sum()['送货金额']
     ph['漏配金额'] = df.groupby(['配货人', '年月']).sum()['少配金额']
     ph['错配金额'] = df.groupby(['配货人', '年月']).sum()['配错未要']
+    ph = ph.fillna(value=0)
 
-    # print(df.groupby(['业务主管']).size())
+    print(ph.index[[0]])
 
+    # descdb(ph)
+    # phh = ph[ph.index[[0]].isin(['黄传芝','黄国伟','姜明君']).values==True]
+    phh = ph.unstack().T
+    phh.to_excel(xlswriter,'配货人年月汇总',freeze_panes=[1,2])
+    # print(phh)
+
+    xlswriter.save()
     cnx.close()
-
-    img_wenshifeng_path = imgsavepath
-    img_sunonoff_path = 'img\\pick\\pickstat.png'
 
     #
     # 要更新一个note，生成一个Note（），指定guid，更新其content
@@ -107,36 +125,27 @@ def pickstat(note_store, destguid=None):
     # for the attachment. At a minimum, the Resource contains the binary attachment
     # data, an MD5 hash of the binary data, and the attachment MIME type.
     # It can also include attributes such as filename and location.
-    image = open(img_wenshifeng_path, 'rb').read()
-    md5 = hashlib.md5()
-    md5.update(image)
-    hash = md5.digest()
-    data = Types.Data()
-    data.size = len(image)
-    data.bodyHash = hash
-    data.body = image
-    resource_wenshifeng = Types.Resource()
-    resource_wenshifeng.mime = 'image/png'
-    resource_wenshifeng.data = data
-    # print resource_wenshifeng
 
-    image = open(img_sunonoff_path, 'rb').read()
-    md5 = hashlib.md5()
-    md5.update(image)
-    hash = md5.digest()
-    data = Types.Data() #必须要重新构建一个Data（），否则内容不会变化
-    data.size = len(image)
-    data.bodyHash = hash
-    data.body = image
-    resource_sunonoff = Types.Resource()
-    resource_sunonoff.mime = 'image/png'
-    resource_sunonoff.data = data
+    def make_note_resource(imgpath):
+        image = open(imgpath, 'rb').read()
+        md5 = hashlib.md5()
+        md5.update(image)
+        hash = md5.digest()
+        data = Types.Data() #必须要重新构建一个Data（），否则内容不会变化
+        data.size = len(image)
+        data.bodyHash = hash
+        data.body = image
+        resource = Types.Resource()
+        resource.mime = 'image/png'
+        resource.data = data
+        return resource
 
-    # print resource_sunonoff
+
     # Now, add the new Resource to the note's list of resources
     note.resources = []
-    note.resources.append(resource_wenshifeng)
-    note.resources.append(resource_sunonoff)
+    for imgpath in imgpathlist:
+        note.resources.append(make_note_resource(imgpath))
+
 
     # print len(note.resources)
     # # print note.resources
@@ -150,6 +159,7 @@ def pickstat(note_store, destguid=None):
     nBody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
     nBody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
     nBody += "<en-note>"
+    nBody += "数据起始日期：%d-%d-%d，截止日期：%d-%d-%d<br />" %(ddfirstdate.year,ddfirstdate.month,ddfirstdate.day,ddlastdate.year,ddlastdate.month,ddlastdate.day)
     if note.resources:
         # To display the Resource as part of the note's content, include an <en-media>
         # tag in the note's ENML content. The en-media tag identifies the corresponding

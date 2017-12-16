@@ -203,10 +203,10 @@ def fenxi(cnx):
         if len(leixing) == 1:
             leixing = tuple(list(leixing)+['U'])
 
-        df = pd.read_sql_query('select max(订单日期) from quandan',cnx)
-        dangqianyue = pd.to_datetime(df.ix[0][0])
-        dangqianyue = pd.to_datetime('%04d-%02d-01' %(dangqianyue.year,dangqianyue.month))
-        print(dangqianyue)
+        df = pd.read_sql_query('select max(日期) from xiaoshoumingxi',cnx)
+        dangqianyueri = pd.to_datetime(df.ix[0][0])
+        dangqianyue = pd.to_datetime('%04d-%02d-01' %(dangqianyueri.year,dangqianyueri.month))
+        print(dangqianyueri)
         if leixingset == '终端客户':
             for fenbuset in fenbulist:
                 if fenbuset == '销售部':
@@ -227,7 +227,12 @@ def fenxi(cnx):
                 df.index = pd.to_datetime(df['日期'])
                 # df['单均'] = df['金额'] / df['单数']
                 for k in range(dangqianyue.month):
-                    chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu=fenbuset)
+                    if k==0:
+                        riqiendwith = dangqianyueri
+                    else:
+                        shangyue = dangqianyue + pd.DateOffset(months=k*(-1))
+                        riqiendwith = pd.to_datetime("%04d-%02d-%02d" %(shangyue.year,shangyue.month,cal.monthrange(shangyue.year,shangyue.month)[1]))
+                    chubiaorileiji(df,riqiendwith,'金额',leixing=leixingset,quyu=fenbuset)
                     # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
                 chubiaoyueleiji(df, dangqianyue, '金额', leixing=leixingset, quyu=fenbuset,nianshu=5)
         else:
@@ -245,7 +250,12 @@ def fenxi(cnx):
             df.index = pd.to_datetime(df['日期'])
             # df['单均'] = df['金额'] / df['单数']
             for k in range(dangqianyue.month):
-                chubiaorileiji(df,dangqianyue+pd.DateOffset(months=k*(-1)),'金额',leixing=leixingset,quyu='销售部')
+                if k == 0:
+                    riqiendwith = dangqianyueri
+                else:
+                    shangyue = dangqianyue + pd.DateOffset(months=k * (-1))
+                    riqiendwith = pd.to_datetime("%04d-%02d-%02d" % (shangyue.year, shangyue.month, cal.monthrange(shangyue.year, shangyue.month)[1]))
+                chubiaorileiji(df,riqiendwith,'金额',leixing=leixingset,quyu='销售部')
                 # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
             chubiaoyueleiji(df,dangqianyue,'金额',leixing=leixingset,quyu='销售部',nianshu=5)
 

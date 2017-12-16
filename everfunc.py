@@ -177,86 +177,65 @@ def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',pinpai='',nianshu=3,imgpa
 
 #日（整月）累积对比图，当月、环比、同期比
 #riqi形如2017-10-01，代表2017年10月为标的月份
-def chubiaorileiji(df, riqi, xiangmu, quyu='', leixing='',pinpai='',imgpath='img\\'):
-    riqicur = pd.to_datetime(riqi)
-    riqibefore = riqicur+pd.DateOffset(months=-1)
-    riqilast = riqicur+pd.DateOffset(years=-1)
-    tianshu = cal.monthrange(riqicur.year,riqicur.month)[1]
+def chubiaorileiji(df, riqienddate, xiangmu, quyu='', leixing='',pinpai='',imgpath='img\\'):
+    riqicurmonthfirst = pd.to_datetime("%04d-%02d-01" %(riqienddate.year,riqienddate.month))#日期格式的当月1日
+    riqibeforemonthfirst = riqicurmonthfirst+pd.DateOffset(months=-1) # 日期格式的上月1日
+    riqilastmonthfirst = riqicurmonthfirst+pd.DateOffset(years=-1) #日期格式的去年当月1日
+    tianshu = cal.monthrange(riqienddate.year,riqienddate.month)[1] #当月的天数
 
-    ds = pd.DataFrame(df[xiangmu],index=df.index)
-    # print(ds.index)
-    # print(ds)
-    dates = pd.date_range(riqibefore,periods=tianshu,freq='D')
-    # print(dates)
-    ds1 = ds.reindex(dates,fill_value=0)
-    # ds1 = ds1.resample('M').sum()
-    # descdb(ds1)
-    ds1.index = (range(1,tianshu+1))
-    ds1.columns = ['%04d%02d' %(riqibefore.year,riqibefore.month)]
-    # descdb(ds1)
+    ds = pd.DataFrame(df[xiangmu],index=df.index) #处理上月数据
+    dates = pd.date_range(riqibeforemonthfirst,periods=tianshu,freq='D') #上月日期全集，截止到当月天数为止
+    ds1 = ds.reindex(dates,fill_value=0) #重新索引，补全所有日期，空值用0填充
+    ds1.index = (range(1,len(dates)+1)) #索引天日化
+    ds1.columns = ['%04d%02d' %(riqibeforemonthfirst.year,riqibeforemonthfirst.month)] #列命名，形如201709
 
-    dates = pd.date_range(riqilast,periods=tianshu,freq='D')
-    # print(dates)
+    dates = pd.date_range(riqilastmonthfirst,periods=tianshu,freq='D') #处理去年当月数据
     ds3 = ds.reindex(dates,fill_value=0)
-    # ds2 =ds2.resample('M').sum()
-    # descdb(ds3)
-    ds3.index = range(1,tianshu+1)
-    ds3.columns = ['%04d%02d' %(riqilast.year,riqilast.month)]
-    # descdb(ds3)
+    ds3.index = range(1,len(dates)+1)
+    ds3.columns = ['%04d%02d' %(riqilastmonthfirst.year,riqilastmonthfirst.month)]
 
-    dates = pd.date_range(riqicur,periods=tianshu,freq='D')
-    # print(dates)
+    dates = pd.date_range(riqicurmonthfirst,periods=riqienddate.day,freq='D') #处理当月数据，至截止日期
     ds2 = ds.reindex(dates,fill_value=0)
-    # ds2 =ds2.resample('M').sum()
-    # descdb(ds2)
-    ds2.index = range(1,tianshu+1)
-    ds2.columns = ['%04d%02d' %(riqicur.year,riqicur.month)]
-    # descdb(ds2)
+    ds2.index = range(1,len(dates)+1)
+    ds2.columns = ['%04d%02d' %(riqicurmonthfirst.year,riqicurmonthfirst.month)]
 
-    dff = ds2.join(ds1,how='left')
-    dff = dff.join(ds3,how='left')
-    dff = dff[['%04d%02d' %(riqicur.year,riqicur.month),'%04d%02d' %(riqibefore.year,riqibefore.month),'%04d%02d' %(riqilast.year,riqilast.month)]]
-    # descdb(df)
-    zuobiao = pd.DataFrame(dates).apply(lambda r:rizi(r),axis=1)
-    dff.index= zuobiao
-    # descdb(df)
-    nianyue = '%04d%02d'%(riqicur.year,riqicur.month)
+    dff = ds3.join(ds2,how='left') #取去年当月天数做主轴
+    dff = dff.join(ds1,how='left') #列名列表形如：['201610','201710','201709']
+    dff = dff.loc[:,[ds2.columns[0],ds1.columns[0],ds3.columns[0]]]
+
+    nianyue = '%04d%02d' %(riqicurmonthfirst.year,riqicurmonthfirst.month)
     biaoti = leixing+quyu+pinpai+nianyue+xiangmu
-    if len(df) > 12:
-        # print(len(df))
-        dff.cumsum().plot(title=biaoti+'日累积')
-    else:
-        dff.cumsum().plot(title=biaoti+'日累积')
+    dfc = dff.cumsum() #数据累积求和
+    # print(dfc)
+    dfc.plot(title=biaoti+'日累积')
+    plt.ylim(0) #设定纵轴从0开始
 
-    date_end = "%02d" %(df.index.max().day)
-    print(date_end)
-    dfc = dff.cumsum()
-    kedu = dfc.loc[date_end]
-    print(kedu)
-    print(kedu.index)
-    print(kedu[[0]])
-    print(kedu[[0]])
+    kedu = dfc.loc[riqienddate.day]
+    # print(kedu)
+    # print(kedu.index)
+    # print(kedu[[0]])
+    # print(kedu.max())
 
     # date_end_zuobiao = "%02d" % (df.index.max().day-1)
-    plt.plot([date_end,date_end],[0,kedu[[0]].ix[0,1]],'c--')
-    plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
+    plt.plot([riqienddate.day,riqienddate.day],[0,kedu[[0]]],'c--')
+    plt.annotate(str(riqienddate.day),xy=(riqienddate.day,0),xycoords='data',
+            xytext=(-20, -20), textcoords='offset points',color='r',
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
+    for i in range(len(kedu)):
+        plt.scatter([riqienddate.day,],[kedu[[i]]],50,color='Wheat')
+        if kedu.max() >= 10000:
+            kedubiaozhi = "%.1f万"  %(kedu[[i]]/10000)
+            plt.gca().yaxis.set_major_formatter(
+                FuncFormatter(lambda x, pos: "%d万" % (int(x / 10000))))  # 纵轴主刻度文本用y_formatter函数计算
+        else:
+            kedubiaozhi = "%d" %kedu[[i]]
+        plt.annotate(kedubiaozhi, xy=(riqienddate.day, kedu[[i]]), xycoords='data',
+                     xytext=(+(15*(i+1)), +30), textcoords='offset points',
+                     arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
+
     imgsavepath = imgpath+biaoti+'（日累积月）.png'
     plt.savefig( imgsavepath)
-    # plt.show()
     plt.close()
-    # ds1.plot()
-    #
-    # ds2 = ds1.resample('M').sum()
-    # descdb(ds2)
-    # print(ds2.sum())
-    # ds2.plot()
-    # plt.show()
 
-    # dfr = df.reindex(dates,fill_value=0)
-    # descdb(dfr)
-    # df['danshu'].plot()
-    # plt.show()
-    # df['jine'].plot()
-    # plt.show()
     return imgsavepath
 
