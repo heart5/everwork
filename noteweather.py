@@ -90,9 +90,11 @@ def weatherstat(note_store, sourceguid, destguid=None):
     ax1 = plt.subplot2grid((4,2),(0,0),colspan=2,rowspan = 2)
     ax1.plot(df['gaowen'], lw=0.3, label=u'日高温')
     ax1.plot(df['diwen'], lw=0.3, label=u'日低温')
-    ax1.plot(df['wendu'], 'g', lw=0.7, label=u'温度')
-    ax1.plot(df['wendu'].resample('10D').mean(),'b', lw=1.2)
-    # print(df['wendu'].resample('15D').mean())
+    ax1.plot(df['wendu'], 'g', lw=0.7, label=u'日温度（高温低温平均）')
+    quyangtianshu = 10
+    ax1.plot(df['wendu'].resample('%dD' %quyangtianshu).mean(),'b', lw=1.2,label='日温度（每%d天平均）' %quyangtianshu)
+    ax1.plot(df[df.fengsu > 5]['fengsu'],'*',label='风速（大于五级）')
+    plt.legend()
     #起始统计日
     kedu = df.iloc[0]
     ax1.plot([kedu['date'],kedu['date']],[0,kedu['wendu']],'c--',lw=0.4)
@@ -176,14 +178,7 @@ def weatherstat(note_store, sourceguid, destguid=None):
     ax1.set_title(u'最高气温、最低气温和均值温度图')
 
 
-    ax2 = plt.subplot2grid((4, 2), (2, 1), colspan=1, rowspan=2)
-    # ax2.plot(df1['fengsu'], '*', lw=1.5, label=u'风速')
-    ts = df[df.fengsu>9][['fengsu','date']]
-    ax2.plot(list(ts['fengsu']),list(ts['date']),'r*',lw=2)
-    ax2.set_xlabel(u'风级')
-    ax2.set_title(u'十级大风的日子')
-
-    ax3 = plt.subplot2grid((4, 2), (2, 0), colspan=1, rowspan=2)
+    ax3 = plt.subplot2grid((4, 2), (2, 0), colspan=2, rowspan=2)
     # print(type(ax3))
     ax3.plot(df_recent_year['shidu'], 'c.', lw=0.3, label=u'湿度')
     ax3.plot(df_recent_year['shidu'].resample('15D').mean(),'g', lw=1.5)

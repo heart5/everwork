@@ -272,7 +272,7 @@ cnx = lite.connect('data\\quandan.db')
 # ceshizashua(cnx)
 dataokay(cnx)
 # desclitedb(cnx)
-# fenxi(cnx)
+fenxi(cnx)
 
 cnx.close()
 
