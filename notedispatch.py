@@ -185,7 +185,7 @@ def ceshizashua(cnx):
     # lxqb = tuple(list(lxzd) + list(lxqd) + list(lxls) + list(lxqt))
 
 
-def fenxi(cnx):
+def fenxi(note_store,notefenbudf,cnx):
     # df = pd.read_sql_query('select 收款日期,count(终端编码) as danshu,sum(实收金额) as jine from quandan where (配货人!=\'%s\' or 配货人 is null) and (订单日期 >\'%s\') group by 收款日期' %('作废','2016-03-29'),cnx)
     dfquyu= pd.read_sql('select * from quyu',cnx,index_col='index')
     # descdb(dfquyu)
@@ -206,9 +206,10 @@ def fenxi(cnx):
         df = pd.read_sql_query('select max(日期) from xiaoshoumingxi',cnx)
         dangqianyueri = pd.to_datetime(df.ix[0][0])
         dangqianyue = pd.to_datetime('%04d-%02d-01' %(dangqianyueri.year,dangqianyueri.month))
-        print(dangqianyueri)
+        print(str(dangqianyueri)+'\t：\t'+leixingset)
         if leixingset == '终端客户':
             for fenbuset in fenbulist:
+                imglist = []
                 if fenbuset == '销售部':
                     fenbu = tuple(dfquyu['区域'])
                 else:
@@ -232,15 +233,13 @@ def fenxi(cnx):
                     else:
                         shangyue = dangqianyue + pd.DateOffset(months=k*(-1))
                         riqiendwith = pd.to_datetime("%04d-%02d-%02d" %(shangyue.year,shangyue.month,cal.monthrange(shangyue.year,shangyue.month)[1]))
-                    chubiaorileiji(df,riqiendwith,'金额',leixing=leixingset,quyu=fenbuset)
-                    # chubiaorileiji(df,dangqianyue+pd.DateOffset(months=i*(-1)),'单数')
-                chubiaoyueleiji(df, dangqianyue, '金额', leixing=leixingset, quyu=fenbuset,nianshu=5)
+                    chubiaorileiji(df,riqiendwith,'金额',leixing=leixingset,imglist=imglist,quyu=fenbuset,imgpath='img\\'+fenbuset+'\\')
+                if len(imglist) >= 2:
+                    imglist = imglist[:2]
+                chubiaoyueleiji(df, dangqianyue, '金额', leixing=leixingset, imglist=imglist, quyu=fenbuset,nianshu=5,imgpath='img\\'+fenbuset+'\\')
+                imglist2note(note_store, imglist, notefenbudf.loc[fenbuset]['guid'],notefenbudf.loc[fenbuset]['title'])
         else:
             fenbu = tuple(dfquyu['区域'])
-            # df = pd.read_sql_query("select 订单日期,count(终端编码) as 单数,sum(送货金额) as 金额,substr(终端编码,1,2) as 区域 ,substr(终端编码,12,1) as 类型 from quandan where (配货人!=\'%s\') and (送达日期 is not null) and(区域 in %s) and(类型 in %s) group by 订单日期" %('作废',fenbu,leixing),cnx)
-            # df = pd.read_sql_query(
-            #     "select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型 from xiaoshoumingxi,customer where (customer.往来单位 = xiaoshoumingxi.单位全名) and(区域 in %s) and(类型 in %s) group by 日期" % (
-            #     fenbu, leixing), cnx)
             df = pd.read_sql_query(
                 "select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,"
                 "substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,"
@@ -260,7 +259,6 @@ def fenxi(cnx):
             chubiaoyueleiji(df,dangqianyue,'金额',leixing=leixingset,quyu='销售部',nianshu=5)
 
 
-
 cnx = lite.connect('data\\quandan.db')
 # cur = cnx.cursor()
 # result = cur.execute('PRAGMA count_changes')
@@ -272,7 +270,7 @@ cnx = lite.connect('data\\quandan.db')
 # ceshizashua(cnx)
 dataokay(cnx)
 # desclitedb(cnx)
-fenxi(cnx)
+# fenxi(cnx)
 
 cnx.close()
 

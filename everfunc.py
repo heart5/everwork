@@ -4,8 +4,12 @@
 # 有关evernote的各种探测性函数
 #
 
-import time, pandas as pd, sqlite3 as lite,matplotlib.pyplot as plt,calendar as cal
+import time, calendar as cal, hashlib, binascii, re, os,\
+    pandas as pd, sqlite3 as lite,matplotlib.pyplot as plt,\
+    evernote.edam.type.ttypes as Types
 from pylab import *
+from matplotlib.ticker import MultipleLocator, FuncFormatter
+from bs4 import BeautifulSoup
 
 
 def timestamp2str(timestamp):
@@ -113,10 +117,12 @@ def yuezi(df):
 # df，数据表，必须用DateTime做index
 # riqi，当前月份，可以是DateTIme的各种形式，只要pd能识别成功，形如2017-10-01，代表2017年10月为标的月份
 # xiangmu，主题，画图时写入标题
+# imglist，输出图片路径list
 # quyu，销售区域或区域聚合（分部）
 # leixing，终端类型
 # nianshu，用来对比的年份数，从当前年份向回数
-def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',pinpai='',nianshu=3,imgpath='img\\'):
+# imgpath，图片存储路径
+def chubiaoyueleiji(df,riqi,xiangmu,imglist=[], quyu='',leixing='',pinpai='',nianshu=3,imgpath='img\\'):
     riqicur = pd.to_datetime(riqi)
     nianlist = []
     for i in range(nianshu):
@@ -145,39 +151,24 @@ def chubiaoyueleiji(df,riqi,xiangmu,quyu='',leixing='',pinpai='',nianshu=3,imgpa
     zuobiao = pd.DataFrame(df.index).apply(lambda r:yuezi(r),axis=1)
     df.index= zuobiao
 
-    # descdb(df)
-
     nianyue = '%04d年'%(riqicur.year)
     biaoti = leixing+quyu+pinpai+nianyue+xiangmu
     df.cumsum().plot(title=('%s月累积' %biaoti))
     # df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
     plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
     plt.savefig(imgpath+'%s（月累积）.png' %biaoti)
+    imglist.append(imgpath+'%s（月累积）.png' %biaoti)
     plt.close()
     df.plot(title=('%s月折线') %biaoti)
     plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
     plt.savefig(imgpath+'%s（月折线）.png' %biaoti)
+    imglist.append(imgpath+'%s（月折线）.png' %biaoti)
     plt.close()
-    # plt.show()
-    # ds1.plot()
-    #
-    # ds2 = ds1.resample('M').sum()
-    # descdb(ds2)
-    # print(ds2.sum())
-    # ds2.plot()
-    # plt.show()
-
-    # dfr = df.reindex(dates,fill_value=0)
-    # descdb(dfr)
-    # df['danshu'].plot()
-    # plt.show()
-    # df['jine'].plot()
-    # plt.show()
 
 
 #日（整月）累积对比图，当月、环比、同期比
-#riqi形如2017-10-01，代表2017年10月为标的月份
-def chubiaorileiji(df, riqienddate, xiangmu, quyu='', leixing='',pinpai='',imgpath='img\\'):
+#riqienddate形如2017-12-08，代表数据结束点的日期
+def chubiaorileiji(df, riqienddate, xiangmu, imglist=[], quyu='', leixing='',pinpai='',imgpath='img\\'):
     riqicurmonthfirst = pd.to_datetime("%04d-%02d-01" %(riqienddate.year,riqienddate.month))#日期格式的当月1日
     riqibeforemonthfirst = riqicurmonthfirst+pd.DateOffset(months=-1) # 日期格式的上月1日
     riqilastmonthfirst = riqicurmonthfirst+pd.DateOffset(years=-1) #日期格式的去年当月1日
@@ -201,7 +192,7 @@ def chubiaorileiji(df, riqienddate, xiangmu, quyu='', leixing='',pinpai='',imgpa
 
     dff = ds3.join(ds2,how='left') #取去年当月天数做主轴
     dff = dff.join(ds1,how='left') #列名列表形如：['201610','201710','201709']
-    dff = dff.loc[:,[ds2.columns[0],ds1.columns[0],ds3.columns[0]]]
+    dff = dff.loc[:,[ds2.columns[0],ds3.columns[0],ds1.columns[0]]] #列名列表形如：['201710','201610','201709']
 
     nianyue = '%04d%02d' %(riqicurmonthfirst.year,riqicurmonthfirst.month)
     biaoti = leixing+quyu+pinpai+nianyue+xiangmu
@@ -229,13 +220,81 @@ def chubiaorileiji(df, riqienddate, xiangmu, quyu='', leixing='',pinpai='',imgpa
                 FuncFormatter(lambda x, pos: "%d万" % (int(x / 10000))))  # 纵轴主刻度文本用y_formatter函数计算
         else:
             kedubiaozhi = "%d" %kedu[[i]]
+        fontsize = 8
+        if((i%2)) == 0:
+            zhengfu = -1
+        else:
+            zhengfu = 0.4
         plt.annotate(kedubiaozhi, xy=(riqienddate.day, kedu[[i]]), xycoords='data',
-                     xytext=(+(15*(i+1)), +30), textcoords='offset points',
+                     xytext=(len(kedubiaozhi)*fontsize*zhengfu, int(len(kedubiaozhi)*fontsize*(-1)*zhengfu/2)), textcoords='offset points',fontsize = fontsize,
                      arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
 
     imgsavepath = imgpath+biaoti+'（日累积月）.png'
     plt.savefig( imgsavepath)
+    imglist.append(imgsavepath)
     plt.close()
 
-    return imgsavepath
+    # return imgsavepath
+
+#
+#图片列表更新进笔记
+#
+def imglist2note(notestore, imglist, noteguid, notetitle,style='replace'):
+    #
+    # 要更新一个note，生成一个Note（），指定guid，更新其content
+    #
+    note = Types.Note()
+    note.guid = noteguid
+    note.title = notetitle
+
+    # To include an attachment such as an image in a note, first create a Resource
+    # for the attachment. At a minimum, the Resource contains the binary attachment
+    # data, an MD5 hash of the binary data, and the attachment MIME type.
+    # It can also include attributes such as filename and location.
+
+    # Now, add the new Resource to the note's list of resources
+    note.resources = []
+    for img in imglist:
+        image = open(img, 'rb').read()
+        md5 = hashlib.md5()
+        md5.update(image)
+        hash = md5.digest()
+        data = Types.Data()  # 必须要重新构建一个Data（），否则内容不会变化
+        data.size = len(image)
+        data.bodyHash = hash
+        data.body = image
+        resource = Types.Resource()
+        resource.mime = 'image/png'
+        resource.data = data
+        note.resources.append(resource)
+
+    # The content of an Evernote note is represented using Evernote Markup Language
+    # (ENML). The full ENML specification can be found in the Evernote API Overview
+    # at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
+    nBody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+    nBody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+    nBody += "<en-note>"
+    if note.resources:
+        # To display the Resource as part of the note's content, include an <en-media>
+        # tag in the note's ENML content. The en-media tag identifies the corresponding
+        # Resource using the MD5 hash.
+        # nBody += "<br />" * 2
+        for resource in note.resources:
+            hexhash = binascii.hexlify(resource.data.bodyHash)
+            str1 = "%s" %hexhash #b'cd34b4b6c8d9279217b03c396ca913df'
+            # print (str1)
+            str1 = str1[2:-1] #cd34b4b6c8d9279217b03c396ca913df
+            # print (str1)
+            nBody += "<en-media type=\"%s\" hash=\"%s\" /><br />"  %(resource.mime, str1)
+    nBody += "</en-note>"
+
+    note.content = nBody
+    # print (note.content)
+
+    # Finally, send the new note to Evernote using the updateNote method
+    # The new Note object that is returned will contain server-generated
+    # attributes such as the new note's unique GUID.
+    updated_note = notestore.updateNote(note)
+    # print(updated_note)
+    print ("Successfully updated a note with GUID: ", updated_note.guid, updated_note.title)
 

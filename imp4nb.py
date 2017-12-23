@@ -1,7 +1,5 @@
 # encoding:utf-8
 
-import pandas as pd, sqlite3 as lite, matplotlib.pyplot as plt, numpy as np,calendar as cal, random as rd, os, re, time
-from pylab import *
 from everfunc import *
 
 
@@ -19,6 +17,16 @@ if not os.path.exists('img\\weather'):
     os.mkdir('img\\weather')
 if not os.path.exists('img\\pick'):
     os.mkdir('img\\pick')
+if not os.path.exists('img\\一部'):
+    os.mkdir('img\\一部')
+if not os.path.exists('img\\二部'):
+    os.mkdir('img\\二部')
+if not os.path.exists('img\\汉口'):
+    os.mkdir('img\\汉口')
+if not os.path.exists('img\\汉阳'):
+    os.mkdir('img\\汉阳')
+if not os.path.exists('img\\销售部'):
+    os.mkdir('img\\销售部')
 
 
 # 显示DataFrame或Series的轮廓信息

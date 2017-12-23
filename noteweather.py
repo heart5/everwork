@@ -8,7 +8,7 @@
 # 输出信息笔记标题：武汉天气图，笔记guid：296f57a3-c660-4dd5-885a-56492deb2cee；所在笔记本《行政管理》，
 # 该笔记本guid：31eee750-e240-438b-a1f5-03ce34c904b4
 
-import re, pandas as pd, numpy as np, matplotlib.pyplot as plt, evernote.edam.type.ttypes as Types, time, hashlib, binascii
+from imp4nb import *
 from bs4 import BeautifulSoup
 
 from matplotlib.ticker import MultipleLocator, FuncFormatter
@@ -99,9 +99,12 @@ def weatherstat(note_store, sourceguid, destguid=None):
     kedu = df.iloc[0]
     ax1.plot([kedu['date'],kedu['date']],[0,kedu['wendu']],'c--',lw=0.4)
     ax1.scatter([kedu['date'],],[kedu['wendu']],50,color='Wheat')
-    ax1.annotate(str(kedu['wendu']),xy=(kedu['date'],kedu['wendu']),xycoords='data',
-            xytext=(-5, +20), textcoords='offset points',
+    fsize = 8
+    txt = str(kedu['wendu'])
+    ax1.annotate(txt,xy=(kedu['date'],kedu['wendu']),xycoords='data',
+            xytext=(-(len(txt)*fsize), +20), textcoords='offset points',fontsize=fsize,
             arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2",color='Purple'))
+
     dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
     ax1.annotate(dates,xy=(kedu['date'],0),xycoords='data',
             xytext=(-10, -20), textcoords='offset points',fontsize=8,
@@ -187,6 +190,9 @@ def weatherstat(note_store, sourceguid, destguid=None):
 
     img_wenshifeng_path = "img\\weather\\wenshifeng.png"
     plt.savefig(img_wenshifeng_path)
+
+    imglist = []
+    imglist.append(img_wenshifeng_path)
     plt.close()
 
 
@@ -217,99 +223,8 @@ def weatherstat(note_store, sourceguid, destguid=None):
     # plt.show()
     img_sunonoff_path = 'img\\weather\\sunonoff.png'
     plt.savefig(img_sunonoff_path)
+    imglist.append(img_sunonoff_path)
     plt.close()
 
-    # tss = pd.Series(list(df[-354:]['gaowen']),index=pd.date_range('9/19/2016', periods=354))
-    # tss = pd.Series(list(df[-100:]['gaowen']),index=df[-100:]['date'])
-    # tss.cumsum()
-    # tss.plot()
-    #
-    # tss = pd.Series(list(df['gaowen']), index=df['date'])
-    # tss.cumsum()
-    # tss.plot()
+    imglist2note(note_store,imglist,destguid,'武汉天气图')
 
-    # tssr = tss.resample('M').mean()
-    # # tssr = tss.asfreq('10D', method='pad')
-    # # tssr.cumsum()
-    # tssr.plot()
-    # plt.show()
-    # plt.close()
-
-    #
-    # 要更新一个note，生成一个Note（），指定guid，更新其content
-    #
-    note = Types.Note()
-    note.title = "武汉天气图"
-    note.guid = destguid
-    # note.notebookGuid = '31eee750-e240-438b-a1f5-03ce34c904b4'
-
-    # To include an attachment such as an image in a note, first create a Resource
-    # for the attachment. At a minimum, the Resource contains the binary attachment
-    # data, an MD5 hash of the binary data, and the attachment MIME type.
-    # It can also include attributes such as filename and location.
-    image = open(img_wenshifeng_path, 'rb').read()
-    md5 = hashlib.md5()
-    md5.update(image)
-    hash = md5.digest()
-    data = Types.Data()
-    data.size = len(image)
-    data.bodyHash = hash
-    data.body = image
-    resource_wenshifeng = Types.Resource()
-    resource_wenshifeng.mime = 'image/png'
-    resource_wenshifeng.data = data
-    # print resource_wenshifeng
-
-    image = open(img_sunonoff_path, 'rb').read()
-    md5 = hashlib.md5()
-    md5.update(image)
-    hash = md5.digest()
-    data = Types.Data() #必须要重新构建一个Data（），否则内容不会变化
-    data.size = len(image)
-    data.bodyHash = hash
-    data.body = image
-    resource_sunonoff = Types.Resource()
-    resource_sunonoff.mime = 'image/png'
-    resource_sunonoff.data = data
-
-    # print resource_sunonoff
-    # Now, add the new Resource to the note's list of resources
-    note.resources = []
-    note.resources.append(resource_wenshifeng)
-    note.resources.append(resource_sunonoff)
-
-    # print len(note.resources)
-    # # print note.resources
-    # print note.resources[0]
-    # print note.resources[1]
-
-
-    # The content of an Evernote note is represented using Evernote Markup Language
-    # (ENML). The full ENML specification can be found in the Evernote API Overview
-    # at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
-    nBody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-    nBody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
-    nBody += "<en-note>"
-    if note.resources:
-        # To display the Resource as part of the note's content, include an <en-media>
-        # tag in the note's ENML content. The en-media tag identifies the corresponding
-        # Resource using the MD5 hash.
-        # nBody += "<br />" * 2
-        for resource in note.resources:
-            hexhash = binascii.hexlify(resource.data.bodyHash)
-            str1 = "%s" %hexhash #b'cd34b4b6c8d9279217b03c396ca913df'
-            # print (str1)
-            str1 = str1[2:-1] #cd34b4b6c8d9279217b03c396ca913df
-            # print (str1)
-            nBody += "<en-media type=\"%s\" hash=\"%s\" /><br />"  %(resource.mime, str1)
-    nBody += "</en-note>"
-
-    note.content = nBody
-    # print (note.content)
-
-    # Finally, send the new note to Evernote using the updateNote method
-    # The new Note object that is returned will contain server-generated
-    # attributes such as the new note's unique GUID.
-    updated_note = note_store.updateNote(note)
-    # print(updated_note)
-    print ("Successfully updated a note with GUID: ", updated_note.guid, updated_note.title)

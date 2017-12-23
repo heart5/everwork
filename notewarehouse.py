@@ -88,8 +88,8 @@ def pickstat(note_store, destguid=None):
     plt.close()
 
     imgpathlist = []
-    imgpathlist.append(chubiaorileiji(dd,ddlastdate,'配单数量',imgpath='img\\pick\\'))
-    imgpathlist.append(chubiaorileiji(dd,ddlastdate,'配单金额',imgpath='img\\pick\\'))
+    chubiaorileiji(dd,ddlastdate,'配单数量',imgpathlist,imgpath='img\\pick\\')
+    chubiaorileiji(dd,ddlastdate,'配单金额',imgpathlist,imgpath='img\\pick\\')
     imgpathlist.append("img\\pick\\pickstat.png")
 
     df['年月'] = df['订单日期'].apply(lambda x: "%04d-%02d" % (x.year, x.month))
