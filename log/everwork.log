@@ -1,0 +1,125 @@
+2017/12/24 04:10:17 PM - everwork_logger - INFO: 当前运行时间：1514103017	2017-12-24 16:10:17
+2017/12/24 04:10:41 PM - everwork_logger - INFO: 当前运行时间：1514103041	2017-12-24 16:10:41
+2017/12/24 04:10:45 PM - everwork_logger - INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 04:13:29 PM - everwork_logger - INFO: 当前运行时间：1514103209	2017-12-24 16:13:29
+2017/12/24 04:13:33 PM - everwork_logger - INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 04:16:17 PM - ew_logger - INFO: 当前运行时间：1514103377	2017-12-24 16:16:17
+2017/12/24 04:16:22 PM - ew_logger - INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 08:59:17 PM - ew_logger - INFO: 当前运行时间：1514120357	2017-12-24 20:59:17
+2017/12/24 08:59:17 PM - ew_logger - CRITICAL: 请填入从evernote官方网站申请的有效token！程序终止并退出！！！
+2017/12/24 09:09:54 PM - ew_logger - INFO: 当前运行时间：1514120994	2017-12-24 21:09:54
+2017/12/24 09:09:59 PM - ew_logger - INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 09:36:36 PM - ew_logger - INFO: 程序启动……
+2017/12/24 09:36:41 PM - ew_logger - INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 21:39:01 - ew_logger - INFO: 程序启动……
+2017/12/24 21:39:06 - ew_logger - INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 21:49:01	ew_logger	D:/heart5/prores/everwork/everwork.pyeverwork.py[<module>]	MainThread	INFO: 程序启动……
+2017/12/24 21:49:06	ew_logger	D:\heart5\prores\everwork\everfunc.pyeverfunc.py[imglist2note]	MainThread	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 21:56:15	ew_logger	D:/heart5/prores/everwork/everwork.py[<module>]	MainThread - 1380 - 12468	INFO: 程序启动……
+2017/12/24 21:56:20	ew_logger	D:\heart5\prores\everwork\everfunc.py[imglist2note]	MainThread - 1380 - 12468	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 21:58:37	ewer	everwork.py[<module>]	MainThread - 12596 - 10976	INFO: 程序启动……
+2017/12/24 21:58:42	ewer	everfunc.py[imglist2note]	MainThread - 12596 - 10976	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:11:30	ewer	everwork.py - [<module>]	MainThread - 14032 - 4132	INFO: 程序启动……
+2017-12-24 22:11:36	ewer	everfunc.py - [imglist2note]	MainThread - 14032 - 4132	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:16:38	ewer	everwork.py - [<module>]	MainThread - 14752 - 9032	DEBUG: 程序启动……
+2017-12-24 22:16:43	ewer	everfunc.py - [imglist2note]	MainThread - 14752 - 9032	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:17:24	ewer	everwork.py - [<module>]	MainThread - 13396 - 3016	DEBUG: 程序启动……
+2017-12-24 22:17:29	ewer	everfunc.py - [imglist2note]	MainThread - 13396 - 3016	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:17:29	ewer	everwork.py - [<module>]	MainThread - 13396 - 3016	DEBUG: 程序结束！
+2017-12-24 22:18:33	ewer	everwork.py - [<module>]	MainThread - 4160 - 6212	DEBUG: 程序启动……
+2017-12-24 22:18:38	ewer	everfunc.py - [imglist2note]	MainThread - 4160 - 6212	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:18:38	ewer	everwork.py - [<module>]	MainThread - 4160 - 6212	DEBUG: 程序结束！
+2017-12-24 22:22:11	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:23:23	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-24 22:23:33	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-24 22:23:43	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-24 22:23:54	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-24 22:24:05	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-24 22:26:41	ewer	everwork.py - [<module>]	MainThread - 12684 - 10164	DEBUG: 程序启动……
+2017-12-24 22:26:46	ewer	everfunc.py - [imglist2note]	MainThread - 12684 - 10164	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:26:46	ewer	everwork.py - [<module>]	MainThread - 12684 - 10164	DEBUG: 程序结束！
+2017-12-24 22:27:57	ewer	everwork.py - [<module>]	MainThread - 7604 - 4716	DEBUG: 程序启动……
+2017-12-24 22:28:02	ewer	everfunc.py - [imglist2note]	MainThread - 7604 - 4716	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 22:28:05	ewer	everfunc.py - [imglist2note]	MainThread - 7604 - 4716	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:28:05	ewer	everwork.py - [<module>]	MainThread - 7604 - 4716	DEBUG: 程序结束！
+2017-12-24 22:37:12	ewer	everwork.py - [<module>]	MainThread - 2496 - 9504	DEBUG: 程序启动……
+2017-12-24 22:37:17	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 22:37:20	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:37:20	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-24 22:37:30	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-24 22:37:41	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-24 22:37:51	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-24 22:38:01	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-24 22:38:13	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-24 22:38:13	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	连锁客户
+2017-12-24 22:38:22	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	渠道客户
+2017-12-24 22:38:32	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	直销客户
+2017-12-24 22:38:34	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	公关客户
+2017-12-24 22:38:37	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	其他客户
+2017-12-24 22:38:46	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	全渠道
+2017-12-24 22:38:56	ewer	everwork.py - [<module>]	MainThread - 2496 - 9504	DEBUG: 程序结束！
+2017-12-24 22:54:54	ewer	everwork.py - [<module>]	MainThread - 5532 - 4228	DEBUG: 程序启动……
+2017-12-24 22:54:59	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 22:55:02	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:55:02	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-24 22:55:13	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-24 22:55:23	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-24 22:55:34	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-24 22:55:44	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-24 22:55:56	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-24 22:55:56	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	连锁客户
+2017-12-24 22:56:05	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	渠道客户
+2017-12-24 22:56:14	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	直销客户
+2017-12-24 22:56:17	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	公关客户
+2017-12-24 22:56:19	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	其他客户
+2017-12-24 22:56:28	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	全渠道
+2017-12-24 22:56:38	ewer	everwork.py - [<module>]	MainThread - 5532 - 4228	DEBUG: 程序结束！
+2017-12-24 22:59:23	ewer	everwork.py - [<module>]	MainThread - 1204 - 7284	DEBUG: 程序启动……
+2017-12-24 22:59:28	ewer	everfunc.py - [imglist2note]	MainThread - 1204 - 7284	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 22:59:31	ewer	everfunc.py - [imglist2note]	MainThread - 1204 - 7284	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:59:31	ewer	everwork.py - [<module>]	MainThread - 1204 - 7284	DEBUG: 程序结束！
+2017-12-24 23:09:44	ewer	everwork.py - [<module>]	MainThread - 11000 - 7588	DEBUG: 程序启动……
+2017-12-24 23:09:50	ewer	everfunc.py - [imglist2note]	MainThread - 11000 - 7588	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:09:53	ewer	everfunc.py - [imglist2note]	MainThread - 11000 - 7588	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 23:09:53	ewer	everwork.py - [<module>]	MainThread - 11000 - 7588	DEBUG: 程序结束！
+2017-12-24 23:25:07	ewer	everwork.py - [<module>]	MainThread - 14340 - 6316	DEBUG: 程序启动……
+2017-12-24 23:25:22	ewer	everfunc.py - [imglist2note]	MainThread - 14340 - 6316	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:28:09	ewer	everwork.py - [<module>]	MainThread - 14340 - 6316	DEBUG: 程序结束！
+2017-12-24 23:32:48	ewer	everwork.py - [<module>]	MainThread - 3532 - 13788	DEBUG: 程序启动……
+2017-12-24 23:32:59	ewer	everfunc.py - [imglist2note]	MainThread - 3532 - 13788	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:34:03	ewer	everwork.py - [<module>]	MainThread - 3532 - 13788	DEBUG: 程序结束！
+2017-12-24 23:35:47	ewer	everwork.py - [<module>]	MainThread - 1380 - 7208	DEBUG: 程序启动……
+2017-12-24 23:35:56	ewer	everfunc.py - [imglist2note]	MainThread - 1380 - 7208	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:37:38	ewer	everwork.py - [<module>]	MainThread - 1380 - 7208	DEBUG: 程序结束！
+2017-12-24 23:45:48	ewer	everwork.py - [<module>]	MainThread - 10784 - 8388	DEBUG: 程序启动……
+2017-12-24 23:45:57	ewer	everfunc.py - [imglist2note]	MainThread - 10784 - 8388	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:46:56	ewer	everwork.py - [<module>]	MainThread - 10784 - 8388	DEBUG: 程序结束！
+2017-12-24 23:47:28	ewer	everwork.py - [<module>]	MainThread - 5556 - 5144	DEBUG: 程序启动……
+2017-12-24 23:47:32	ewer	everfunc.py - [imglist2note]	MainThread - 5556 - 5144	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:47:32	ewer	everwork.py - [<module>]	MainThread - 5556 - 5144	DEBUG: 程序结束！
+2017-12-24 23:50:15	ewer	everwork.py - [<module>]	MainThread - 15276 - 6404	DEBUG: 程序启动……
+2017-12-24 23:50:19	ewer	everfunc.py - [imglist2note]	MainThread - 15276 - 6404	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:50:20	ewer	notedispatch.py - [ceshizashua]	MainThread - 15276 - 6404	WARNING: 从数据表《销售明细》中删除‘单位全名’值为‘无单位’的纪录172条，值为‘无名单位’的纪录4条！！！
+2017-12-24 23:50:20	ewer	everwork.py - [<module>]	MainThread - 15276 - 6404	DEBUG: 程序结束！
+2017-12-24 23:51:59	ewer	everwork.py - [<module>]	MainThread - 3536 - 15152	DEBUG: 程序启动……
+2017-12-24 23:52:03	ewer	everfunc.py - [imglist2note]	MainThread - 3536 - 15152	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:52:04	ewer	everwork.py - [<module>]	MainThread - 3536 - 15152	DEBUG: 程序结束！
+2017-12-25 00:05:57	ewer	everwork.py - [<module>]	MainThread - 5308 - 11372	DEBUG: 程序启动……
+2017-12-25 00:18:25	ewer	everwork.py - [<module>]	MainThread - 5308 - 11372	DEBUG: 程序结束！
+2017-12-25 00:28:43	ewer	<ipython-input-4-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: 数据表“销售明细”中有1444120条记录
+2017-12-25 00:29:47	ewer	<ipython-input-4-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: 数据表“销售明细”和“客户”、“品牌”、“区域”关联后有效记录数为：1434642条
+2017-12-25 00:31:22	ewer	<ipython-input-4-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	DEBUG: 处理关联客户品牌区域等信息的数据表，把‘日期’处理成了日期格式
+2017-12-25 00:40:43	ewer	<ipython-input-4-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: 把关联并规整后的数据写入了“alldata”数据表
+2017-12-25 00:53:49	ewer	everwork.py - [<module>]	MainThread - 1856 - 12868	DEBUG: 程序启动……
+2017-12-25 00:53:50	ewer	everwork.py - [<module>]	MainThread - 1856 - 12868	DEBUG: 程序结束！
+2017-12-25 00:55:38	ewer	<ipython-input-5-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: 数据表“销售明细”中有1444120条记录
+2017-12-25 00:56:40	ewer	<ipython-input-5-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: 数据表“销售明细”和“客户”、“品牌”、“区域”关联后有效记录数为：1434642条
+2017-12-25 00:58:36	ewer	<ipython-input-5-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	DEBUG: 处理关联客户品牌区域等信息的数据表，把‘日期’处理成了日期格式
+2017-12-25 01:06:45	ewer	<ipython-input-5-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: 把关联并规整后的数据写入了“alldata”数据表
+2017-12-25 01:07:35	ewer	everwork.py - [<module>]	MainThread - 13684 - 10132	DEBUG: 程序启动……
+2017-12-25 01:07:36	ewer	notedispatch.py - [gengxinfou]	MainThread - 13684 - 10132	INFO: 文件《系统表.xlsx》已有15条记录，有新文件，更新之。
+2017-12-25 01:07:43	ewer	everwork.py - [<module>]	MainThread - 13684 - 10132	DEBUG: 程序结束！
+2017-12-25 01:09:51	ewer	<ipython-input-6-c766a8bc8789> - [<module>]	MainThread - 4432 - 9844	INFO: 数据表“销售明细”中有1444120条记录
+2017-12-25 01:11:28	ewer	<ipython-input-6-c766a8bc8789> - [<module>]	MainThread - 4432 - 9844	INFO: 数据表“销售明细”和“客户”、“品牌”、“区域”关联后有效记录数为：1444120条
+2017-12-25 01:12:58	ewer	<ipython-input-6-c766a8bc8789> - [<module>]	MainThread - 4432 - 9844	DEBUG: 处理关联客户品牌区域等信息的数据表，把‘日期’处理成了日期格式
+2017-12-25 01:22:45	ewer	<ipython-input-6-c766a8bc8789> - [<module>]	MainThread - 4432 - 9844	INFO: 把关联并规整后的数据写入了“alldata”数据表

@@ -7,28 +7,6 @@ from everfunc import *
 mpl.rcParams['font.sans-serif'] = ['SimHei']
 mpl.rcParams['axes.unicode_minus'] = False
 
-if not os.path.exists('data'):
-    os.mkdir('data')
-if not os.path.exists('data\\tmp'):
-    os.mkdir('data\\tmp')
-if not os.path.exists('img'):
-    os.mkdir('img')
-if not os.path.exists('img\\weather'):
-    os.mkdir('img\\weather')
-if not os.path.exists('img\\pick'):
-    os.mkdir('img\\pick')
-if not os.path.exists('img\\一部'):
-    os.mkdir('img\\一部')
-if not os.path.exists('img\\二部'):
-    os.mkdir('img\\二部')
-if not os.path.exists('img\\汉口'):
-    os.mkdir('img\\汉口')
-if not os.path.exists('img\\汉阳'):
-    os.mkdir('img\\汉阳')
-if not os.path.exists('img\\销售部'):
-    os.mkdir('img\\销售部')
-
-
 # 显示DataFrame或Series的轮廓信息
 # df，DataFrame或Series
 def descdb(df):

@@ -16,7 +16,7 @@ def gengxinfou(filename,conn,tablename='fileread'):
                         "'登录时间' TIMESTAMP); " % tablename
         conn.execute(create_tb_cmd)
     except Exception:
-        print("创建数据表%s失败！" % tablename)
+        log.critical("创建数据表%s失败！" % tablename)
         return rt
 
     fna = os.path.abspath(filename)
@@ -45,6 +45,7 @@ def gengxinfou(filename,conn,tablename='fileread'):
                                          str(fstat.st_dev), str(fstat.st_size),
                                          time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())))
         print('添加成功。')
+        log.info('文件《%s》无记录，录入信息。' %fn)
         rt = True
     else:
         print("文件《"+fn+"》已有 "+str(fncount)+" 条记录，看是否最新？\t",end='\t')
@@ -53,6 +54,7 @@ def gengxinfou(filename,conn,tablename='fileread'):
         if time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)) > (result.fetchone())[0]:
             result = c.execute("insert into %s values(?,?,?,?,?,?)" % tablename,(fn,fna,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)),str(fstat.st_dev),str(fstat.st_size),time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())))
             print('更新成功！')
+            log.info('文件《%s》已有%d条记录，有新文件，更新之。' %(fn,fncount))
             rt = True
         else:
             print('无需更新。')
@@ -145,7 +147,9 @@ def ceshizashua(cnx):
     # cnx.cursor().execute('drop table xiaoshoumingxi')
     # cnx.cursor().execute('drop table xiaoqu')
     # cnx.cursor().execute("insert into fileread values('白晔峰','万寿无疆','2016-06-12','43838883','4099','2016-09-30')")
+    # cnx.cursor().execute("delete from xiaoshoumingxi where 单位全名 like \'%单位%\'")
     # cnx.commit()
+    # log.warning('从数据表《销售明细》中删除‘单位全名’值为‘无单位’的纪录172条，值为‘无名单位’的纪录4条！！！')
 
     ttt = '2017-09-01'
     # result = cnx.cursor().execute('select * from jiaqi where 日期 > \'%s\'' %ttt)
@@ -206,7 +210,7 @@ def fenxi(note_store,notefenbudf,cnx):
         df = pd.read_sql_query('select max(日期) from xiaoshoumingxi',cnx)
         dangqianyueri = pd.to_datetime(df.ix[0][0])
         dangqianyue = pd.to_datetime('%04d-%02d-01' %(dangqianyueri.year,dangqianyueri.month))
-        print(str(dangqianyueri)+'\t：\t'+leixingset)
+        log.debug(str(dangqianyueri)+'\t：\t'+leixingset)
         if leixingset == '终端客户':
             for fenbuset in fenbulist:
                 imglist = []
@@ -259,7 +263,7 @@ def fenxi(note_store,notefenbudf,cnx):
             chubiaoyueleiji(df,dangqianyue,'金额',leixing=leixingset,quyu='销售部',nianshu=5)
 
 
-cnx = lite.connect('data\\quandan.db')
+# cnx = lite.connect('data\\quandan.db')
 # cur = cnx.cursor()
 # result = cur.execute('PRAGMA count_changes')
 # print(result.fetchone()[0])
@@ -267,10 +271,10 @@ cnx = lite.connect('data\\quandan.db')
 # result = cur.execute('PRAGMA count_changes')
 # print(result.fetchone()[0])
 
-# ceshizashua(cnx)
-dataokay(cnx)
-# desclitedb(cnx)
-# fenxi(cnx)
-
-cnx.close()
+# # ceshizashua(cnx)
+# dataokay(cnx)
+# # desclitedb(cnx)
+# # fenxi(cnx)
+#
+# cnx.close()
 

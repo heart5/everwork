@@ -14,12 +14,6 @@ from bs4 import BeautifulSoup
 from matplotlib.ticker import MultipleLocator, FuncFormatter
 
 
-#
-# 把分钟数转换成分时的显示方式，用于纵轴标签
-#
-def min_formatter(x, pos):
-    return r"%02d:%02d" %(int(x/60), int(x%60)) #%02d，用两位数显示数字，不足位数则前导0填充
-
 
 def weatherstat(note_store, sourceguid, destguid=None):
     soup = BeautifulSoup(note_store.getNoteContent(sourceguid), "html.parser")
@@ -201,7 +195,8 @@ def weatherstat(note_store, sourceguid, destguid=None):
     plt.plot(df['date'], df['sunon'], lw=0.8, label=u'日出')
     plt.plot(df['date'], df['sunoff'], lw=0.8, label=u'日落')
     ax = plt.gca()
-    ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
+    # ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x,pos: "%02d:%02d" %(int(x/60), int(x%60))))  # 主刻度文本用pi_formatter函数计算
     plt.ylim((0,24*60))
     plt.yticks(np.linspace(0,24*60,25))
     plt.xlabel(u'日期')
@@ -212,7 +207,8 @@ def weatherstat(note_store, sourceguid, destguid=None):
     ax2 = ax1.twinx()
     plt.plot(df_recent_year['date'], df_recent_year['richang'], 'r', lw=1.5, label=u'日长')
     ax = plt.gca()
-    ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
+    # ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x,pos: "%02d:%02d" %(int(x/60), int(x%60))))  # 主刻度文本用pi_formatter函数计算
     # ax.set_xticklabels(rotation=45, horizontalalignment='right')
     plt.ylim((3*60, 12 * 60))
     plt.yticks(np.linspace(3*60, 15 * 60, 13))

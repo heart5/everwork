@@ -4,12 +4,60 @@
 # 有关evernote的各种探测性函数
 #
 
-import time, calendar as cal, hashlib, binascii, re, os,\
-    pandas as pd, sqlite3 as lite,matplotlib.pyplot as plt,\
-    evernote.edam.type.ttypes as Types
+import time, calendar as cal, hashlib, binascii, re, os, logging, pandas as pd, sqlite3 as lite,\
+    matplotlib.pyplot as plt, evernote.edam.type.ttypes as Types, evernote.edam.userstore.constants as UserStoreConstants, \
+    evernote.edam.notestore.NoteStore as NoteStore
 from pylab import *
 from matplotlib.ticker import MultipleLocator, FuncFormatter
+from evernote.api.client import EvernoteClient
 from bs4 import BeautifulSoup
+
+def workbefore():
+    if not os.path.exists('data'):
+        os.mkdir('data')
+    if not os.path.exists('data\\tmp'):
+        os.mkdir('data\\tmp')
+    if not os.path.exists('img'):
+        os.mkdir('img')
+    if not os.path.exists('img\\weather'):
+        os.mkdir('img\\weather')
+    if not os.path.exists('img\\pick'):
+        os.mkdir('img\\pick')
+    if not os.path.exists('img\\一部'):
+        os.mkdir('img\\一部')
+    if not os.path.exists('img\\二部'):
+        os.mkdir('img\\二部')
+    if not os.path.exists('img\\汉口'):
+        os.mkdir('img\\汉口')
+    if not os.path.exists('img\\汉阳'):
+        os.mkdir('img\\汉阳')
+    if not os.path.exists('img\\销售部'):
+        os.mkdir('img\\销售部')
+    if not os.path.exists('log'):
+        os.mkdir('log')
+
+def mylog():
+    log = logging.getLogger('ewer')
+    logHandler = logging.FileHandler(filename='log\\everwork.log')
+    formats = logging.Formatter('%(asctime)s\t%(name)s\t%(filename)s - [%(funcName)s]\t%(threadName)s - %(thread)d - %(process)d\t%(levelname)s: %(message)s',
+                            datefmt='%Y-%m-%d %H:%M:%S')
+    logHandler.setFormatter(formats)
+    log.setLevel(logging.DEBUG)
+    log.addHandler(logHandler)
+
+    #################################################################################################
+    # 定义一个StreamHandler，将INFO级别或更高的日志信息打印到标准错误，并将其添加到当前的日志处理对象#
+    console = logging.StreamHandler()
+    console.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s\t%(name)-12s: %(levelname)-8s %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+    #################################################################################################
+
+    return log
+
+workbefore()
+log = mylog()
 
 
 def timestamp2str(timestamp):
@@ -29,6 +77,89 @@ def yingdacal(x,cnx):
         return x+pd.DateOffset(days=2)
     else:
         return x + pd.DateOffset(days=1)
+
+
+def get_notestore(token='your developer token'):
+    # Real applications authenticate with Evernote using OAuth, but for the
+    # purpose of exploring the API, you can get a developer token that allows
+    # you to access your own Evernote account. To get a developer token, visit
+    # https://SERVICE_HOST/api/DeveloperToken.action
+    #
+    # There are three Evernote services:
+    #
+    # Sandbox: https://sandbox.evernote.com/
+    # Production (International): https://www.evernote.com/
+    # Production (China): https://app.yinxiang.com/
+    #
+    # For more information about Sandbox and Evernote China services, please
+    # refer to https://dev.evernote.com/doc/articles/testing.php
+    # and https://dev.evernote.com/doc/articles/bootstrap.php
+
+    # auth_token = "S=s37:U=3b449f:E=1659f8b7c0f:C=15e47da4ef8:P=1cd:A=en-devtoken:V=2:H=e445e5fcbceff83703151d71df584197"
+    # auth_token = "S=s37:U=3b449f:E=16017ef9105:C=16012c93380:P=185:A=get-off-the-ground:V=2:H=3de0c5e50f23f1d252b8ebe8f958d368"  # 一天
+    auth_token = "S=s37:U=3b449f:E=1676a821f3c:C=16012d0eff8:P=185:A=get-off-the-ground:V=2:H=1469bc6bfc7ac8a2f68b72c0c0335a29"  # 一年
+    # auth_token = token
+
+    if auth_token == "your developer token":
+        print("Please fill in your developer token\nTo get a developer token, visit " \
+              "https://sandbox.evernote.com/api/DeveloperToken.action")
+        log.critical('请填入从evernote官方网站申请的有效token！程序终止并退出！！！')
+        exit(1)
+
+    # To access Sandbox service, set sandbox to True
+    # To access production (International) service, set both sandbox and china to False
+    # To access production (China) service, set sandbox to False and china to True
+    sandbox = False
+    china = False
+
+    # Initial development is performed on our sandbox server. To use the production
+    # service, change sandbox=False and replace your
+    # developer token above with a token from
+    # https://www.evernote.com/api/DeveloperToken.action
+    client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
+
+    userStore = client.get_user_store()
+
+    # currentuser = userStore.getUser()
+    # printuserattributeundertoken(currentuser)
+
+    version_ok = userStore.checkVersion(
+        "Evernote EDAMTest (Python)",
+        UserStoreConstants.EDAM_VERSION_MAJOR,
+        UserStoreConstants.EDAM_VERSION_MINOR
+    )
+    print("Is my Evernote API version up to date? ", str(version_ok))
+
+    if not version_ok:
+        log.critical('Evernote API版本过时，请更新之！程序终止并退出！！！')
+        exit(1)
+
+    note_store = client.get_note_store()
+
+    return note_store
+
+
+#列出笔记本中的笔记信息
+def printnotefromnotebook( note_store,token,notebookguid, notecount,titlefind):
+    notefilter = NoteStore.NoteFilter()
+    notefilter.notebookGuid = notebookguid
+    notemetaspec = NoteStore.NotesMetadataResultSpec(includeTitle=True, includeContentLength=True, includeCreated=True,
+                                              includeUpdated=True, includeDeleted=True, includeUpdateSequenceNum=True,
+                                              includeNotebookGuid=True, includeTagGuids=True, includeAttributes=True,
+                                              includeLargestResourceMime=True, includeLargestResourceSize=True)
+    ourNoteList=note_store.findNotesMetadata(token, notefilter, 0, notecount, notemetaspec)
+
+    # print ourNoteList.notes[-1].title  #测试打印指定note的标题
+    # print note_store.getNoteContent(ourNoteList.notes[-1].guid)  #测试打印指定note的内容
+    # note = note_store.getNote(auth_token, ourNoteList.notes[9].guid, True, True, True, True)  #获得Note并打印其中的值
+    # printnoteattributeundertoken(note)
+    # print ourNoteList.notes[5] #打印NoteMetadata
+
+    for note in ourNoteList.notes:
+        if note.title.find(titlefind) >= 0:
+            print (note.guid, note.title)
+
+    print()
 
 
 #测试笔记本（notebook）数据结构每个属性的返回值
@@ -296,5 +427,6 @@ def imglist2note(notestore, imglist, noteguid, notetitle,style='replace'):
     # attributes such as the new note's unique GUID.
     updated_note = notestore.updateNote(note)
     # print(updated_note)
-    print ("Successfully updated a note with GUID: ", updated_note.guid, updated_note.title)
+    # print ("Successfully updated a note with GUID: ", updated_note.guid, updated_note.title)
+    log.info('成功更新了笔记《%s》，guid：%s。' %(updated_note.title,updated_note.guid))
 
