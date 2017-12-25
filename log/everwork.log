@@ -1,125 +1,723 @@
-2017/12/24 04:10:17 PM - everwork_logger - INFO: ��ǰ����ʱ�䣺1514103017	2017-12-24 16:10:17
-2017/12/24 04:10:41 PM - everwork_logger - INFO: ��ǰ����ʱ�䣺1514103041	2017-12-24 16:10:41
-2017/12/24 04:10:45 PM - everwork_logger - INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017/12/24 04:13:29 PM - everwork_logger - INFO: ��ǰ����ʱ�䣺1514103209	2017-12-24 16:13:29
-2017/12/24 04:13:33 PM - everwork_logger - INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017/12/24 04:16:17 PM - ew_logger - INFO: ��ǰ����ʱ�䣺1514103377	2017-12-24 16:16:17
-2017/12/24 04:16:22 PM - ew_logger - INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017/12/24 08:59:17 PM - ew_logger - INFO: ��ǰ����ʱ�䣺1514120357	2017-12-24 20:59:17
-2017/12/24 08:59:17 PM - ew_logger - CRITICAL: �������evernote�ٷ���վ�������Чtoken��������ֹ���˳�������
-2017/12/24 09:09:54 PM - ew_logger - INFO: ��ǰ����ʱ�䣺1514120994	2017-12-24 21:09:54
-2017/12/24 09:09:59 PM - ew_logger - INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017/12/24 09:36:36 PM - ew_logger - INFO: ������������
-2017/12/24 09:36:41 PM - ew_logger - INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017/12/24 21:39:01 - ew_logger - INFO: ������������
-2017/12/24 21:39:06 - ew_logger - INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017/12/24 21:49:01	ew_logger	D:/heart5/prores/everwork/everwork.pyeverwork.py[<module>]	MainThread	INFO: ������������
-2017/12/24 21:49:06	ew_logger	D:\heart5\prores\everwork\everfunc.pyeverfunc.py[imglist2note]	MainThread	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017/12/24 21:56:15	ew_logger	D:/heart5/prores/everwork/everwork.py[<module>]	MainThread - 1380 - 12468	INFO: ������������
-2017/12/24 21:56:20	ew_logger	D:\heart5\prores\everwork\everfunc.py[imglist2note]	MainThread - 1380 - 12468	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017/12/24 21:58:37	ewer	everwork.py[<module>]	MainThread - 12596 - 10976	INFO: ������������
-2017/12/24 21:58:42	ewer	everfunc.py[imglist2note]	MainThread - 12596 - 10976	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017-12-24 22:11:30	ewer	everwork.py - [<module>]	MainThread - 14032 - 4132	INFO: ������������
-2017-12-24 22:11:36	ewer	everfunc.py - [imglist2note]	MainThread - 14032 - 4132	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017-12-24 22:16:38	ewer	everwork.py - [<module>]	MainThread - 14752 - 9032	DEBUG: ������������
-2017-12-24 22:16:43	ewer	everfunc.py - [imglist2note]	MainThread - 14752 - 9032	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017-12-24 22:17:24	ewer	everwork.py - [<module>]	MainThread - 13396 - 3016	DEBUG: ������������
-2017-12-24 22:17:29	ewer	everfunc.py - [imglist2note]	MainThread - 13396 - 3016	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017-12-24 22:17:29	ewer	everwork.py - [<module>]	MainThread - 13396 - 3016	DEBUG: ���������
-2017-12-24 22:18:33	ewer	everwork.py - [<module>]	MainThread - 4160 - 6212	DEBUG: ������������
-2017-12-24 22:18:38	ewer	everfunc.py - [imglist2note]	MainThread - 4160 - 6212	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017-12-24 22:18:38	ewer	everwork.py - [<module>]	MainThread - 4160 - 6212	DEBUG: ���������
-2017-12-24 22:22:11	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017-12-24 22:23:23	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: �ɹ������˱ʼǡ����һ������ҵ��ͼ������guid��88c20442-6b4f-4bef-8c0b-ef6878397bf5��
-2017-12-24 22:23:33	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: �ɹ������˱ʼǡ������������ҵ��ͼ������guid��b8e0dc4a-933f-4753-a14b-b5635bc122d0��
-2017-12-24 22:23:43	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: �ɹ������˱ʼǡ����ڰ�����ҵ��ͼ������guid��cd7c4002-80ee-4741-8ccb-eb58f45023a1��
-2017-12-24 22:23:54	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: �ɹ������˱ʼǡ�����������ҵ��ͼ������guid��8a0606e4-ffac-4935-84e5-c235926e3fab��
-2017-12-24 22:24:05	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: �ɹ������˱ʼǡ�����ҵ��ͼ������guid��1717d56c-1308-4447-a22e-9d6648631716��
-2017-12-24 22:26:41	ewer	everwork.py - [<module>]	MainThread - 12684 - 10164	DEBUG: ������������
-2017-12-24 22:26:46	ewer	everfunc.py - [imglist2note]	MainThread - 12684 - 10164	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017-12-24 22:26:46	ewer	everwork.py - [<module>]	MainThread - 12684 - 10164	DEBUG: ���������
-2017-12-24 22:27:57	ewer	everwork.py - [<module>]	MainThread - 7604 - 4716	DEBUG: ������������
-2017-12-24 22:28:02	ewer	everfunc.py - [imglist2note]	MainThread - 7604 - 4716	INFO: �ɹ������˱ʼǡ��人����ͼ����guid��296f57a3-c660-4dd5-885a-56492deb2cee��
-2017-12-24 22:28:05	ewer	everfunc.py - [imglist2note]	MainThread - 7604 - 4716	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017-12-24 22:28:05	ewer	everwork.py - [<module>]	MainThread - 7604 - 4716	DEBUG: ���������
-2017-12-24 22:37:12	ewer	everwork.py - [<module>]	MainThread - 2496 - 9504	DEBUG: ������������
-2017-12-24 22:37:17	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: �ɹ������˱ʼǡ��人����ͼ����guid��296f57a3-c660-4dd5-885a-56492deb2cee��
-2017-12-24 22:37:20	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017-12-24 22:37:20	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	��	�ն˿ͻ�
-2017-12-24 22:37:30	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: �ɹ������˱ʼǡ����һ������ҵ��ͼ������guid��88c20442-6b4f-4bef-8c0b-ef6878397bf5��
-2017-12-24 22:37:41	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: �ɹ������˱ʼǡ������������ҵ��ͼ������guid��b8e0dc4a-933f-4753-a14b-b5635bc122d0��
-2017-12-24 22:37:51	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: �ɹ������˱ʼǡ����ڰ�����ҵ��ͼ������guid��cd7c4002-80ee-4741-8ccb-eb58f45023a1��
-2017-12-24 22:38:01	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: �ɹ������˱ʼǡ�����������ҵ��ͼ������guid��8a0606e4-ffac-4935-84e5-c235926e3fab��
-2017-12-24 22:38:13	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: �ɹ������˱ʼǡ�����ҵ��ͼ������guid��1717d56c-1308-4447-a22e-9d6648631716��
-2017-12-24 22:38:13	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	��	�����ͻ�
-2017-12-24 22:38:22	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	��	�����ͻ�
-2017-12-24 22:38:32	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	��	ֱ���ͻ�
-2017-12-24 22:38:34	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	��	���ؿͻ�
-2017-12-24 22:38:37	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	��	�����ͻ�
-2017-12-24 22:38:46	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	��	ȫ����
-2017-12-24 22:38:56	ewer	everwork.py - [<module>]	MainThread - 2496 - 9504	DEBUG: ���������
-2017-12-24 22:54:54	ewer	everwork.py - [<module>]	MainThread - 5532 - 4228	DEBUG: ������������
-2017-12-24 22:54:59	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: �ɹ������˱ʼǡ��人����ͼ����guid��296f57a3-c660-4dd5-885a-56492deb2cee��
-2017-12-24 22:55:02	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017-12-24 22:55:02	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	��	�ն˿ͻ�
-2017-12-24 22:55:13	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: �ɹ������˱ʼǡ����һ������ҵ��ͼ������guid��88c20442-6b4f-4bef-8c0b-ef6878397bf5��
-2017-12-24 22:55:23	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: �ɹ������˱ʼǡ������������ҵ��ͼ������guid��b8e0dc4a-933f-4753-a14b-b5635bc122d0��
-2017-12-24 22:55:34	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: �ɹ������˱ʼǡ����ڰ�����ҵ��ͼ������guid��cd7c4002-80ee-4741-8ccb-eb58f45023a1��
-2017-12-24 22:55:44	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: �ɹ������˱ʼǡ�����������ҵ��ͼ������guid��8a0606e4-ffac-4935-84e5-c235926e3fab��
-2017-12-24 22:55:56	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: �ɹ������˱ʼǡ�����ҵ��ͼ������guid��1717d56c-1308-4447-a22e-9d6648631716��
-2017-12-24 22:55:56	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	��	�����ͻ�
-2017-12-24 22:56:05	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	��	�����ͻ�
-2017-12-24 22:56:14	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	��	ֱ���ͻ�
-2017-12-24 22:56:17	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	��	���ؿͻ�
-2017-12-24 22:56:19	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	��	�����ͻ�
-2017-12-24 22:56:28	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	��	ȫ����
-2017-12-24 22:56:38	ewer	everwork.py - [<module>]	MainThread - 5532 - 4228	DEBUG: ���������
-2017-12-24 22:59:23	ewer	everwork.py - [<module>]	MainThread - 1204 - 7284	DEBUG: ������������
-2017-12-24 22:59:28	ewer	everfunc.py - [imglist2note]	MainThread - 1204 - 7284	INFO: �ɹ������˱ʼǡ��人����ͼ����guid��296f57a3-c660-4dd5-885a-56492deb2cee��
-2017-12-24 22:59:31	ewer	everfunc.py - [imglist2note]	MainThread - 1204 - 7284	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017-12-24 22:59:31	ewer	everwork.py - [<module>]	MainThread - 1204 - 7284	DEBUG: ���������
-2017-12-24 23:09:44	ewer	everwork.py - [<module>]	MainThread - 11000 - 7588	DEBUG: ������������
-2017-12-24 23:09:50	ewer	everfunc.py - [imglist2note]	MainThread - 11000 - 7588	INFO: �ɹ������˱ʼǡ��人����ͼ����guid��296f57a3-c660-4dd5-885a-56492deb2cee��
-2017-12-24 23:09:53	ewer	everfunc.py - [imglist2note]	MainThread - 11000 - 7588	INFO: �ɹ������˱ʼǡ��������ͳ��ͼ����guid��1c0830d9-e42f-4ce7-bf36-ead868a55eca��
-2017-12-24 23:09:53	ewer	everwork.py - [<module>]	MainThread - 11000 - 7588	DEBUG: ���������
-2017-12-24 23:25:07	ewer	everwork.py - [<module>]	MainThread - 14340 - 6316	DEBUG: ������������
-2017-12-24 23:25:22	ewer	everfunc.py - [imglist2note]	MainThread - 14340 - 6316	INFO: �ɹ������˱ʼǡ��人����ͼ����guid��296f57a3-c660-4dd5-885a-56492deb2cee��
-2017-12-24 23:28:09	ewer	everwork.py - [<module>]	MainThread - 14340 - 6316	DEBUG: ���������
-2017-12-24 23:32:48	ewer	everwork.py - [<module>]	MainThread - 3532 - 13788	DEBUG: ������������
-2017-12-24 23:32:59	ewer	everfunc.py - [imglist2note]	MainThread - 3532 - 13788	INFO: �ɹ������˱ʼǡ��人����ͼ����guid��296f57a3-c660-4dd5-885a-56492deb2cee��
-2017-12-24 23:34:03	ewer	everwork.py - [<module>]	MainThread - 3532 - 13788	DEBUG: ���������
-2017-12-24 23:35:47	ewer	everwork.py - [<module>]	MainThread - 1380 - 7208	DEBUG: ������������
-2017-12-24 23:35:56	ewer	everfunc.py - [imglist2note]	MainThread - 1380 - 7208	INFO: �ɹ������˱ʼǡ��人����ͼ����guid��296f57a3-c660-4dd5-885a-56492deb2cee��
-2017-12-24 23:37:38	ewer	everwork.py - [<module>]	MainThread - 1380 - 7208	DEBUG: ���������
-2017-12-24 23:45:48	ewer	everwork.py - [<module>]	MainThread - 10784 - 8388	DEBUG: ������������
-2017-12-24 23:45:57	ewer	everfunc.py - [imglist2note]	MainThread - 10784 - 8388	INFO: �ɹ������˱ʼǡ��人����ͼ����guid��296f57a3-c660-4dd5-885a-56492deb2cee��
-2017-12-24 23:46:56	ewer	everwork.py - [<module>]	MainThread - 10784 - 8388	DEBUG: ���������
-2017-12-24 23:47:28	ewer	everwork.py - [<module>]	MainThread - 5556 - 5144	DEBUG: ������������
-2017-12-24 23:47:32	ewer	everfunc.py - [imglist2note]	MainThread - 5556 - 5144	INFO: �ɹ������˱ʼǡ��人����ͼ����guid��296f57a3-c660-4dd5-885a-56492deb2cee��
-2017-12-24 23:47:32	ewer	everwork.py - [<module>]	MainThread - 5556 - 5144	DEBUG: ���������
-2017-12-24 23:50:15	ewer	everwork.py - [<module>]	MainThread - 15276 - 6404	DEBUG: ������������
-2017-12-24 23:50:19	ewer	everfunc.py - [imglist2note]	MainThread - 15276 - 6404	INFO: �ɹ������˱ʼǡ��人����ͼ����guid��296f57a3-c660-4dd5-885a-56492deb2cee��
-2017-12-24 23:50:20	ewer	notedispatch.py - [ceshizashua]	MainThread - 15276 - 6404	WARNING: �����ݱ���������ϸ����ɾ������λȫ����ֵΪ���޵�λ���ļ�¼172����ֵΪ��������λ���ļ�¼4��������
-2017-12-24 23:50:20	ewer	everwork.py - [<module>]	MainThread - 15276 - 6404	DEBUG: ���������
-2017-12-24 23:51:59	ewer	everwork.py - [<module>]	MainThread - 3536 - 15152	DEBUG: ������������
-2017-12-24 23:52:03	ewer	everfunc.py - [imglist2note]	MainThread - 3536 - 15152	INFO: �ɹ������˱ʼǡ��人����ͼ����guid��296f57a3-c660-4dd5-885a-56492deb2cee��
-2017-12-24 23:52:04	ewer	everwork.py - [<module>]	MainThread - 3536 - 15152	DEBUG: ���������
-2017-12-25 00:05:57	ewer	everwork.py - [<module>]	MainThread - 5308 - 11372	DEBUG: ������������
-2017-12-25 00:18:25	ewer	everwork.py - [<module>]	MainThread - 5308 - 11372	DEBUG: ���������
-2017-12-25 00:28:43	ewer	<ipython-input-4-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: ���ݱ���������ϸ������1444120����¼
-2017-12-25 00:29:47	ewer	<ipython-input-4-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: ���ݱ���������ϸ���͡��ͻ�������Ʒ�ơ��������򡱹�������Ч��¼��Ϊ��1434642��
-2017-12-25 00:31:22	ewer	<ipython-input-4-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	DEBUG: ���������ͻ�Ʒ���������Ϣ�����ݱ����ѡ����ڡ������������ڸ�ʽ
-2017-12-25 00:40:43	ewer	<ipython-input-4-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: �ѹ����������������д���ˡ�alldata�����ݱ�
-2017-12-25 00:53:49	ewer	everwork.py - [<module>]	MainThread - 1856 - 12868	DEBUG: ������������
-2017-12-25 00:53:50	ewer	everwork.py - [<module>]	MainThread - 1856 - 12868	DEBUG: ���������
-2017-12-25 00:55:38	ewer	<ipython-input-5-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: ���ݱ���������ϸ������1444120����¼
-2017-12-25 00:56:40	ewer	<ipython-input-5-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: ���ݱ���������ϸ���͡��ͻ�������Ʒ�ơ��������򡱹�������Ч��¼��Ϊ��1434642��
-2017-12-25 00:58:36	ewer	<ipython-input-5-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	DEBUG: ���������ͻ�Ʒ���������Ϣ�����ݱ����ѡ����ڡ������������ڸ�ʽ
-2017-12-25 01:06:45	ewer	<ipython-input-5-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: �ѹ����������������д���ˡ�alldata�����ݱ�
-2017-12-25 01:07:35	ewer	everwork.py - [<module>]	MainThread - 13684 - 10132	DEBUG: ������������
-2017-12-25 01:07:36	ewer	notedispatch.py - [gengxinfou]	MainThread - 13684 - 10132	INFO: �ļ���ϵͳ��.xlsx������15����¼�������ļ�������֮��
-2017-12-25 01:07:43	ewer	everwork.py - [<module>]	MainThread - 13684 - 10132	DEBUG: ���������
-2017-12-25 01:09:51	ewer	<ipython-input-6-c766a8bc8789> - [<module>]	MainThread - 4432 - 9844	INFO: ���ݱ���������ϸ������1444120����¼
-2017-12-25 01:11:28	ewer	<ipython-input-6-c766a8bc8789> - [<module>]	MainThread - 4432 - 9844	INFO: ���ݱ���������ϸ���͡��ͻ�������Ʒ�ơ��������򡱹�������Ч��¼��Ϊ��1444120��
-2017-12-25 01:12:58	ewer	<ipython-input-6-c766a8bc8789> - [<module>]	MainThread - 4432 - 9844	DEBUG: ���������ͻ�Ʒ���������Ϣ�����ݱ����ѡ����ڡ������������ڸ�ʽ
-2017-12-25 01:22:45	ewer	<ipython-input-6-c766a8bc8789> - [<module>]	MainThread - 4432 - 9844	INFO: �ѹ����������������д���ˡ�alldata�����ݱ�
+2017/12/24 04:10:17 PM - everwork_logger - INFO: 当前运行时间：1514103017	2017-12-24 16:10:17
+2017/12/24 04:10:41 PM - everwork_logger - INFO: 当前运行时间：1514103041	2017-12-24 16:10:41
+2017/12/24 04:10:45 PM - everwork_logger - INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 04:13:29 PM - everwork_logger - INFO: 当前运行时间：1514103209	2017-12-24 16:13:29
+2017/12/24 04:13:33 PM - everwork_logger - INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 04:16:17 PM - ew_logger - INFO: 当前运行时间：1514103377	2017-12-24 16:16:17
+2017/12/24 04:16:22 PM - ew_logger - INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 08:59:17 PM - ew_logger - INFO: 当前运行时间：1514120357	2017-12-24 20:59:17
+2017/12/24 08:59:17 PM - ew_logger - CRITICAL: 请填入从evernote官方网站申请的有效token！程序终止并退出！！！
+2017/12/24 09:09:54 PM - ew_logger - INFO: 当前运行时间：1514120994	2017-12-24 21:09:54
+2017/12/24 09:09:59 PM - ew_logger - INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 09:36:36 PM - ew_logger - INFO: 程序启动……
+2017/12/24 09:36:41 PM - ew_logger - INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 21:39:01 - ew_logger - INFO: 程序启动……
+2017/12/24 21:39:06 - ew_logger - INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 21:49:01	ew_logger	D:/heart5/prores/everwork/everwork.pyeverwork.py[<module>]	MainThread	INFO: 程序启动……
+2017/12/24 21:49:06	ew_logger	D:\heart5\prores\everwork\everfunc.pyeverfunc.py[imglist2note]	MainThread	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 21:56:15	ew_logger	D:/heart5/prores/everwork/everwork.py[<module>]	MainThread - 1380 - 12468	INFO: 程序启动……
+2017/12/24 21:56:20	ew_logger	D:\heart5\prores\everwork\everfunc.py[imglist2note]	MainThread - 1380 - 12468	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017/12/24 21:58:37	ewer	everwork.py[<module>]	MainThread - 12596 - 10976	INFO: 程序启动……
+2017/12/24 21:58:42	ewer	everfunc.py[imglist2note]	MainThread - 12596 - 10976	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:11:30	ewer	everwork.py - [<module>]	MainThread - 14032 - 4132	INFO: 程序启动……
+2017-12-24 22:11:36	ewer	everfunc.py - [imglist2note]	MainThread - 14032 - 4132	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:16:38	ewer	everwork.py - [<module>]	MainThread - 14752 - 9032	DEBUG: 程序启动……
+2017-12-24 22:16:43	ewer	everfunc.py - [imglist2note]	MainThread - 14752 - 9032	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:17:24	ewer	everwork.py - [<module>]	MainThread - 13396 - 3016	DEBUG: 程序启动……
+2017-12-24 22:17:29	ewer	everfunc.py - [imglist2note]	MainThread - 13396 - 3016	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:17:29	ewer	everwork.py - [<module>]	MainThread - 13396 - 3016	DEBUG: 程序结束！
+2017-12-24 22:18:33	ewer	everwork.py - [<module>]	MainThread - 4160 - 6212	DEBUG: 程序启动……
+2017-12-24 22:18:38	ewer	everfunc.py - [imglist2note]	MainThread - 4160 - 6212	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:18:38	ewer	everwork.py - [<module>]	MainThread - 4160 - 6212	DEBUG: 程序结束！
+2017-12-24 22:22:11	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:23:23	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-24 22:23:33	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-24 22:23:43	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-24 22:23:54	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-24 22:24:05	ewer	everfunc.py - [imglist2note]	MainThread - 1200 - 12248	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-24 22:26:41	ewer	everwork.py - [<module>]	MainThread - 12684 - 10164	DEBUG: 程序启动……
+2017-12-24 22:26:46	ewer	everfunc.py - [imglist2note]	MainThread - 12684 - 10164	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:26:46	ewer	everwork.py - [<module>]	MainThread - 12684 - 10164	DEBUG: 程序结束！
+2017-12-24 22:27:57	ewer	everwork.py - [<module>]	MainThread - 7604 - 4716	DEBUG: 程序启动……
+2017-12-24 22:28:02	ewer	everfunc.py - [imglist2note]	MainThread - 7604 - 4716	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 22:28:05	ewer	everfunc.py - [imglist2note]	MainThread - 7604 - 4716	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:28:05	ewer	everwork.py - [<module>]	MainThread - 7604 - 4716	DEBUG: 程序结束！
+2017-12-24 22:37:12	ewer	everwork.py - [<module>]	MainThread - 2496 - 9504	DEBUG: 程序启动……
+2017-12-24 22:37:17	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 22:37:20	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:37:20	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-24 22:37:30	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-24 22:37:41	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-24 22:37:51	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-24 22:38:01	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-24 22:38:13	ewer	everfunc.py - [imglist2note]	MainThread - 2496 - 9504	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-24 22:38:13	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	连锁客户
+2017-12-24 22:38:22	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	渠道客户
+2017-12-24 22:38:32	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	直销客户
+2017-12-24 22:38:34	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	公关客户
+2017-12-24 22:38:37	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	其他客户
+2017-12-24 22:38:46	ewer	notedispatch.py - [fenxi]	MainThread - 2496 - 9504	DEBUG: 2017-12-16 00:00:00	：	全渠道
+2017-12-24 22:38:56	ewer	everwork.py - [<module>]	MainThread - 2496 - 9504	DEBUG: 程序结束！
+2017-12-24 22:54:54	ewer	everwork.py - [<module>]	MainThread - 5532 - 4228	DEBUG: 程序启动……
+2017-12-24 22:54:59	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 22:55:02	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:55:02	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-24 22:55:13	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-24 22:55:23	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-24 22:55:34	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-24 22:55:44	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-24 22:55:56	ewer	everfunc.py - [imglist2note]	MainThread - 5532 - 4228	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-24 22:55:56	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	连锁客户
+2017-12-24 22:56:05	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	渠道客户
+2017-12-24 22:56:14	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	直销客户
+2017-12-24 22:56:17	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	公关客户
+2017-12-24 22:56:19	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	其他客户
+2017-12-24 22:56:28	ewer	notedispatch.py - [fenxi]	MainThread - 5532 - 4228	DEBUG: 2017-12-16 00:00:00	：	全渠道
+2017-12-24 22:56:38	ewer	everwork.py - [<module>]	MainThread - 5532 - 4228	DEBUG: 程序结束！
+2017-12-24 22:59:23	ewer	everwork.py - [<module>]	MainThread - 1204 - 7284	DEBUG: 程序启动……
+2017-12-24 22:59:28	ewer	everfunc.py - [imglist2note]	MainThread - 1204 - 7284	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 22:59:31	ewer	everfunc.py - [imglist2note]	MainThread - 1204 - 7284	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 22:59:31	ewer	everwork.py - [<module>]	MainThread - 1204 - 7284	DEBUG: 程序结束！
+2017-12-24 23:09:44	ewer	everwork.py - [<module>]	MainThread - 11000 - 7588	DEBUG: 程序启动……
+2017-12-24 23:09:50	ewer	everfunc.py - [imglist2note]	MainThread - 11000 - 7588	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:09:53	ewer	everfunc.py - [imglist2note]	MainThread - 11000 - 7588	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-24 23:09:53	ewer	everwork.py - [<module>]	MainThread - 11000 - 7588	DEBUG: 程序结束！
+2017-12-24 23:25:07	ewer	everwork.py - [<module>]	MainThread - 14340 - 6316	DEBUG: 程序启动……
+2017-12-24 23:25:22	ewer	everfunc.py - [imglist2note]	MainThread - 14340 - 6316	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:28:09	ewer	everwork.py - [<module>]	MainThread - 14340 - 6316	DEBUG: 程序结束！
+2017-12-24 23:32:48	ewer	everwork.py - [<module>]	MainThread - 3532 - 13788	DEBUG: 程序启动……
+2017-12-24 23:32:59	ewer	everfunc.py - [imglist2note]	MainThread - 3532 - 13788	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:34:03	ewer	everwork.py - [<module>]	MainThread - 3532 - 13788	DEBUG: 程序结束！
+2017-12-24 23:35:47	ewer	everwork.py - [<module>]	MainThread - 1380 - 7208	DEBUG: 程序启动……
+2017-12-24 23:35:56	ewer	everfunc.py - [imglist2note]	MainThread - 1380 - 7208	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:37:38	ewer	everwork.py - [<module>]	MainThread - 1380 - 7208	DEBUG: 程序结束！
+2017-12-24 23:45:48	ewer	everwork.py - [<module>]	MainThread - 10784 - 8388	DEBUG: 程序启动……
+2017-12-24 23:45:57	ewer	everfunc.py - [imglist2note]	MainThread - 10784 - 8388	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:46:56	ewer	everwork.py - [<module>]	MainThread - 10784 - 8388	DEBUG: 程序结束！
+2017-12-24 23:47:28	ewer	everwork.py - [<module>]	MainThread - 5556 - 5144	DEBUG: 程序启动……
+2017-12-24 23:47:32	ewer	everfunc.py - [imglist2note]	MainThread - 5556 - 5144	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:47:32	ewer	everwork.py - [<module>]	MainThread - 5556 - 5144	DEBUG: 程序结束！
+2017-12-24 23:50:15	ewer	everwork.py - [<module>]	MainThread - 15276 - 6404	DEBUG: 程序启动……
+2017-12-24 23:50:19	ewer	everfunc.py - [imglist2note]	MainThread - 15276 - 6404	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:50:20	ewer	notedispatch.py - [ceshizashua]	MainThread - 15276 - 6404	WARNING: 从数据表《销售明细》中删除‘单位全名’值为‘无单位’的纪录172条，值为‘无名单位’的纪录4条！！！
+2017-12-24 23:50:20	ewer	everwork.py - [<module>]	MainThread - 15276 - 6404	DEBUG: 程序结束！
+2017-12-24 23:51:59	ewer	everwork.py - [<module>]	MainThread - 3536 - 15152	DEBUG: 程序启动……
+2017-12-24 23:52:03	ewer	everfunc.py - [imglist2note]	MainThread - 3536 - 15152	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-24 23:52:04	ewer	everwork.py - [<module>]	MainThread - 3536 - 15152	DEBUG: 程序结束！
+2017-12-25 00:05:57	ewer	everwork.py - [<module>]	MainThread - 5308 - 11372	DEBUG: 程序启动……
+2017-12-25 00:18:25	ewer	everwork.py - [<module>]	MainThread - 5308 - 11372	DEBUG: 程序结束！
+2017-12-25 00:28:43	ewer	<ipython-input-4-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: 数据表“销售明细”中有1444120条记录
+2017-12-25 00:29:47	ewer	<ipython-input-4-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: 数据表“销售明细”和“客户”、“品牌”、“区域”关联后有效记录数为：1434642条
+2017-12-25 00:31:22	ewer	<ipython-input-4-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	DEBUG: 处理关联客户品牌区域等信息的数据表，把‘日期’处理成了日期格式
+2017-12-25 00:40:43	ewer	<ipython-input-4-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: 把关联并规整后的数据写入了“alldata”数据表
+2017-12-25 00:53:49	ewer	everwork.py - [<module>]	MainThread - 1856 - 12868	DEBUG: 程序启动……
+2017-12-25 00:53:50	ewer	everwork.py - [<module>]	MainThread - 1856 - 12868	DEBUG: 程序结束！
+2017-12-25 00:55:38	ewer	<ipython-input-5-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: 数据表“销售明细”中有1444120条记录
+2017-12-25 00:56:40	ewer	<ipython-input-5-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: 数据表“销售明细”和“客户”、“品牌”、“区域”关联后有效记录数为：1434642条
+2017-12-25 00:58:36	ewer	<ipython-input-5-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	DEBUG: 处理关联客户品牌区域等信息的数据表，把‘日期’处理成了日期格式
+2017-12-25 01:06:45	ewer	<ipython-input-5-f220f08c42ce> - [<module>]	MainThread - 4432 - 9844	INFO: 把关联并规整后的数据写入了“alldata”数据表
+2017-12-25 01:07:35	ewer	everwork.py - [<module>]	MainThread - 13684 - 10132	DEBUG: 程序启动……
+2017-12-25 01:07:36	ewer	notedispatch.py - [gengxinfou]	MainThread - 13684 - 10132	INFO: 文件《系统表.xlsx》已有15条记录，有新文件，更新之。
+2017-12-25 01:07:43	ewer	everwork.py - [<module>]	MainThread - 13684 - 10132	DEBUG: 程序结束！
+2017-12-25 01:09:51	ewer	<ipython-input-6-c766a8bc8789> - [<module>]	MainThread - 4432 - 9844	INFO: 数据表“销售明细”中有1444120条记录
+2017-12-25 01:11:28	ewer	<ipython-input-6-c766a8bc8789> - [<module>]	MainThread - 4432 - 9844	INFO: 数据表“销售明细”和“客户”、“品牌”、“区域”关联后有效记录数为：1444120条
+2017-12-25 01:12:58	ewer	<ipython-input-6-c766a8bc8789> - [<module>]	MainThread - 4432 - 9844	DEBUG: 处理关联客户品牌区域等信息的数据表，把‘日期’处理成了日期格式
+2017-12-25 01:22:45	ewer	<ipython-input-6-c766a8bc8789> - [<module>]	MainThread - 4432 - 9844	INFO: 把关联并规整后的数据写入了“alldata”数据表
+2017-12-25 17:16:00	ewer	everwork.py - [<module>]	MainThread - 10000 - 8812	DEBUG: 程序启动……
+2017-12-25 17:16:00	ewer	everwork.py - [<module>]	MainThread - 10000 - 8812	DEBUG: 口令读取成功
+2017-12-25 17:16:02	ewer	everwork.py - [<module>]	MainThread - 10000 - 8812	DEBUG: 程序结束！
+2017-12-25 17:30:46	ewer	everwork.py - [<module>]	MainThread - 12412 - 7832	DEBUG: 程序启动……
+2017-12-25 17:30:46	ewer	everwork.py - [<module>]	MainThread - 12412 - 7832	DEBUG: 口令读取成功
+2017-12-25 17:35:25	ewer	everwork.py - [<module>]	MainThread - 3796 - 8308	DEBUG: 程序启动……
+2017-12-25 17:35:25	ewer	everwork.py - [<module>]	MainThread - 3796 - 8308	DEBUG: 口令读取成功
+2017-12-25 17:35:26	ewer	everwork.py - [<module>]	MainThread - 3796 - 8308	DEBUG: 程序结束！
+2017-12-25 17:51:15	ewer	everwork.py - [<module>]	MainThread - 8136 - 1204	DEBUG: 程序启动……
+2017-12-25 17:51:15	ewer	everwork.py - [<module>]	MainThread - 8136 - 1204	DEBUG: 口令读取成功
+2017-12-25 17:57:51	ewer	everwork.py - [<module>]	MainThread - 2060 - 14012	DEBUG: 程序启动……
+2017-12-25 17:57:51	ewer	everwork.py - [<module>]	MainThread - 2060 - 14012	DEBUG: 口令读取成功
+2017-12-25 18:00:56	ewer	everwork.py - [<module>]	MainThread - 1740 - 9120	DEBUG: 程序启动……
+2017-12-25 18:00:56	ewer	everwork.py - [<module>]	MainThread - 1740 - 9120	DEBUG: 口令读取成功
+2017-12-25 18:04:41	ewer	everwork.py - [<module>]	MainThread - 12388 - 9188	DEBUG: 程序启动……
+2017-12-25 18:04:41	ewer	everwork.py - [<module>]	MainThread - 12388 - 9188	DEBUG: 口令读取成功
+2017-12-25 18:04:41	ewer	everfunc.py - [get_notestore]	MainThread - 12388 - 9188	DEBUG: 成功连接Evernote！
+2017-12-25 18:06:36	ewer	everwork.py - [<module>]	MainThread - 7352 - 6112	DEBUG: 程序启动……
+2017-12-25 18:06:36	ewer	everwork.py - [<module>]	MainThread - 7352 - 6112	DEBUG: 口令读取成功
+2017-12-25 18:06:36	ewer	everfunc.py - [get_notestore]	MainThread - 7352 - 6112	DEBUG: 成功连接Evernote！
+2017-12-25 18:08:06	ewer	everwork.py - [<module>]	MainThread - 2592 - 468	DEBUG: 程序启动……
+2017-12-25 18:08:06	ewer	everwork.py - [<module>]	MainThread - 2592 - 468	DEBUG: 口令读取成功
+2017-12-25 18:08:07	ewer	everfunc.py - [get_notestore]	MainThread - 2592 - 468	CRITICAL: 连接Evernote出现错误，无法成功！
+2017-12-25 18:09:07	ewer	everwork.py - [<module>]	MainThread - 7084 - 9488	DEBUG: 程序启动……
+2017-12-25 18:09:07	ewer	everwork.py - [<module>]	MainThread - 7084 - 9488	DEBUG: 口令读取成功
+2017-12-25 18:09:08	ewer	everfunc.py - [get_notestore]	MainThread - 7084 - 9488	CRITICAL: 连接Evernote出现错误，无法成功！
+2017-12-25 18:15:30	ewer	everwork.py - [<module>]	MainThread - 2060 - 12664	DEBUG: 程序启动……
+2017-12-25 18:15:30	ewer	everwork.py - [<module>]	MainThread - 2060 - 12664	DEBUG: 口令读取成功
+2017-12-25 18:15:31	ewer	everfunc.py - [get_notestore]	MainThread - 2060 - 12664	DEBUG: 成功连接Evernote服务器！
+2017-12-25 18:15:31	ewer	everwork.py - [<module>]	MainThread - 2060 - 12664	DEBUG: 程序结束！
+2017-12-25 18:16:07	ewer	everwork.py - [<module>]	MainThread - 4700 - 1860	DEBUG: 程序启动……
+2017-12-25 18:16:07	ewer	everwork.py - [<module>]	MainThread - 4700 - 1860	DEBUG: 口令读取成功
+2017-12-25 18:16:08	ewer	everfunc.py - [get_notestore]	MainThread - 4700 - 1860	CRITICAL: 连接Evernote出现错误，无法成功！
+2017-12-25 18:16:29	ewer	everwork.py - [<module>]	MainThread - 9724 - 5008	DEBUG: 程序启动……
+2017-12-25 18:16:29	ewer	everwork.py - [<module>]	MainThread - 9724 - 5008	DEBUG: 口令读取成功
+2017-12-25 18:16:30	ewer	everfunc.py - [get_notestore]	MainThread - 9724 - 5008	CRITICAL: 连接Evernote出现错误，无法成功！
+2017-12-25 18:17:32	ewer	everwork.py - [<module>]	MainThread - 8564 - 948	DEBUG: 程序启动……
+2017-12-25 18:17:32	ewer	everwork.py - [<module>]	MainThread - 8564 - 948	DEBUG: 口令读取成功
+2017-12-25 18:17:33	ewer	everfunc.py - [get_notestore]	MainThread - 8564 - 948	CRITICAL: 连接Evernote出现错误，无法成功！
+2017-12-25 18:24:03	ewer	everwork.py - [<module>]	MainThread - 9724 - 14292	DEBUG: 程序启动……
+2017-12-25 18:24:03	ewer	everwork.py - [<module>]	MainThread - 9724 - 14292	DEBUG: 口令读取成功
+2017-12-25 18:24:04	ewer	everfunc.py - [get_notestore]	MainThread - 9724 - 14292	DEBUG: 成功连接Evernote服务器！
+2017-12-25 18:24:05	ewer	everwork.py - [<module>]	MainThread - 9724 - 14292	DEBUG: 程序结束！
+2017-12-25 18:24:14	ewer	everwork.py - [<module>]	MainThread - 2996 - 15280	DEBUG: 程序启动……
+2017-12-25 18:24:14	ewer	everwork.py - [<module>]	MainThread - 2996 - 15280	DEBUG: 口令读取成功
+2017-12-25 18:24:15	ewer	everfunc.py - [get_notestore]	MainThread - 2996 - 15280	CRITICAL: 连接Evernote出现错误，无法成功！
+2017-12-25 18:28:33	ewer	everwork.py - [<module>]	MainThread - 11352 - 6556	DEBUG: 程序启动……
+2017-12-25 18:28:33	ewer	everwork.py - [<module>]	MainThread - 11352 - 6556	DEBUG: 口令读取成功
+2017-12-25 18:29:29	ewer	everwork.py - [<module>]	MainThread - 14412 - 4140	DEBUG: 程序启动……
+2017-12-25 18:29:29	ewer	everwork.py - [<module>]	MainThread - 14412 - 4140	DEBUG: 口令读取成功
+2017-12-25 18:29:30	ewer	everfunc.py - [get_notestore]	MainThread - 14412 - 4140	CRITICAL: 连接Evernote出现错误，无法成功！
+2017-12-25 18:30:19	ewer	everwork.py - [<module>]	MainThread - 928 - 12720	DEBUG: 程序启动……
+2017-12-25 18:30:19	ewer	everwork.py - [<module>]	MainThread - 928 - 12720	DEBUG: 口令读取成功
+2017-12-25 18:30:20	ewer	everfunc.py - [get_notestore]	MainThread - 928 - 12720	CRITICAL: 连接Evernote出现错误，无法成功！
+2017-12-25 18:32:40	ewer	everwork.py - [<module>]	MainThread - 5912 - 1548	DEBUG: 程序启动……
+2017-12-25 18:32:40	ewer	everwork.py - [<module>]	MainThread - 5912 - 1548	DEBUG: 口令读取成功
+2017-12-25 18:32:41	ewer	everfunc.py - [get_notestore]	MainThread - 5912 - 1548	CRITICAL: getaddrinfo failed，可能是外网不通
+2017-12-25 18:32:41	ewer	everfunc.py - [get_notestore]	MainThread - 5912 - 1548	CRITICAL: 连接Evernote出现错误，无法成功！
+2017-12-25 18:34:41	ewer	everwork.py - [<module>]	MainThread - 936 - 7600	DEBUG: 程序启动……
+2017-12-25 18:34:41	ewer	everwork.py - [<module>]	MainThread - 936 - 7600	DEBUG: 口令读取成功
+2017-12-25 18:34:42	ewer	everfunc.py - [get_notestore]	MainThread - 936 - 7600	DEBUG: 成功连接Evernote服务器！
+2017-12-25 18:36:48	ewer	everwork.py - [<module>]	MainThread - 3904 - 10728	DEBUG: 程序启动……
+2017-12-25 18:36:48	ewer	everwork.py - [<module>]	MainThread - 3904 - 10728	DEBUG: 口令读取成功
+2017-12-25 18:36:50	ewer	everfunc.py - [get_notestore]	MainThread - 3904 - 10728	CRITICAL: 连接Evernote服务器出现错误！
+2017-12-25 18:42:04	ewer	everwork.py - [<module>]	MainThread - 876 - 10424	DEBUG: 程序启动……
+2017-12-25 18:42:04	ewer	everwork.py - [<module>]	MainThread - 876 - 10424	DEBUG: 口令读取成功
+2017-12-25 18:46:14	ewer	everwork.py - [<module>]	MainThread - 12160 - 6632	DEBUG: 程序启动……
+2017-12-25 18:46:14	ewer	everwork.py - [<module>]	MainThread - 12160 - 6632	DEBUG: 口令读取成功
+2017-12-25 18:47:30	ewer	everwork.py - [<module>]	MainThread - 14264 - 7460	DEBUG: 程序启动……
+2017-12-25 18:47:30	ewer	everwork.py - [<module>]	MainThread - 14264 - 7460	DEBUG: 口令读取成功
+2017-12-25 18:47:32	ewer	everfunc.py - [get_notestore]	MainThread - 14264 - 7460	CRITICAL: EDAMUserException(errorCode=2, parameter='authenticationToken')，口令有误。连接Evernote服务器出现错误！
+2017-12-25 18:48:05	ewer	everwork.py - [<module>]	MainThread - 14644 - 11792	DEBUG: 程序启动……
+2017-12-25 18:48:05	ewer	everwork.py - [<module>]	MainThread - 14644 - 11792	DEBUG: 配置文件读取成功
+2017-12-25 18:48:07	ewer	everfunc.py - [get_notestore]	MainThread - 14644 - 11792	CRITICAL: EDAMUserException(errorCode=2, parameter='authenticationToken')，口令有误。连接Evernote服务器出现错误！
+2017-12-25 18:48:20	ewer	everwork.py - [<module>]	MainThread - 13056 - 8736	DEBUG: 程序启动……
+2017-12-25 18:48:20	ewer	everwork.py - [<module>]	MainThread - 13056 - 8736	DEBUG: 配置文件读取成功
+2017-12-25 18:48:21	ewer	everfunc.py - [get_notestore]	MainThread - 13056 - 8736	DEBUG: 成功连接Evernote服务器！
+2017-12-25 18:48:21	ewer	everwork.py - [<module>]	MainThread - 13056 - 8736	DEBUG: 程序结束！
+2017-12-25 18:49:05	ewer	everwork.py - [<module>]	MainThread - 12188 - 15020	DEBUG: 程序启动……
+2017-12-25 18:49:05	ewer	everwork.py - [<module>]	MainThread - 12188 - 15020	DEBUG: 配置文件读取成功
+2017-12-25 18:49:06	ewer	everfunc.py - [get_notestore]	MainThread - 12188 - 15020	CRITICAL: [Errno 11001] getaddrinfo failed，可能是外网不通。连接Evernote服务器出现错误！
+2017-12-25 18:50:19	ewer	everwork.py - [<module>]	MainThread - 1476 - 6316	DEBUG: 程序启动……
+2017-12-25 18:50:19	ewer	everwork.py - [<module>]	MainThread - 1476 - 6316	DEBUG: 配置文件读取成功
+2017-12-25 18:50:20	ewer	everfunc.py - [get_notestore]	MainThread - 1476 - 6316	DEBUG: 成功连接Evernote服务器！
+2017-12-25 18:51:26	ewer	everwork.py - [<module>]	MainThread - 8012 - 5972	DEBUG: 程序启动……
+2017-12-25 18:51:26	ewer	everwork.py - [<module>]	MainThread - 8012 - 5972	DEBUG: 配置文件读取成功
+2017-12-25 18:51:27	ewer	everfunc.py - [get_notestore]	MainThread - 8012 - 5972	DEBUG: 成功连接Evernote服务器！
+2017-12-25 18:51:30	ewer	everfunc.py - [imglist2note]	MainThread - 8012 - 5972	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-25 18:52:31	ewer	notedispatch.py - [fenxi]	MainThread - 8012 - 5972	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-25 18:52:42	ewer	everfunc.py - [imglist2note]	MainThread - 8012 - 5972	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-25 18:52:53	ewer	everfunc.py - [imglist2note]	MainThread - 8012 - 5972	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-25 18:53:03	ewer	everfunc.py - [imglist2note]	MainThread - 8012 - 5972	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-25 18:53:13	ewer	everfunc.py - [imglist2note]	MainThread - 8012 - 5972	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-25 18:53:26	ewer	everfunc.py - [imglist2note]	MainThread - 8012 - 5972	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-25 18:53:26	ewer	notedispatch.py - [fenxi]	MainThread - 8012 - 5972	DEBUG: 2017-12-16 00:00:00	：	连锁客户
+2017-12-25 18:53:36	ewer	notedispatch.py - [fenxi]	MainThread - 8012 - 5972	DEBUG: 2017-12-16 00:00:00	：	渠道客户
+2017-12-25 18:53:45	ewer	notedispatch.py - [fenxi]	MainThread - 8012 - 5972	DEBUG: 2017-12-16 00:00:00	：	直销客户
+2017-12-25 18:53:54	ewer	notedispatch.py - [fenxi]	MainThread - 8012 - 5972	DEBUG: 2017-12-16 00:00:00	：	公关客户
+2017-12-25 18:54:03	ewer	notedispatch.py - [fenxi]	MainThread - 8012 - 5972	DEBUG: 2017-12-16 00:00:00	：	其他客户
+2017-12-25 18:54:12	ewer	notedispatch.py - [fenxi]	MainThread - 8012 - 5972	DEBUG: 2017-12-16 00:00:00	：	全渠道
+2017-12-25 19:02:10	ewer	everwork.py - [<module>]	MainThread - 8012 - 5972	DEBUG: 程序结束！
+2017-12-25 21:18:30	ewer	everwork.py - [<module>]	MainThread - 10108 - 2752	DEBUG: 程序启动……
+2017-12-25 21:18:30	ewer	everwork.py - [<module>]	MainThread - 10108 - 2752	DEBUG: 配置文件读取成功
+2017-12-25 21:22:11	ewer	everwork.py - [<module>]	MainThread - 2992 - 9764	DEBUG: 程序启动……
+2017-12-25 21:22:11	ewer	everwork.py - [<module>]	MainThread - 2992 - 9764	DEBUG: 配置文件读取成功
+2017-12-25 21:22:13	ewer	everfunc.py - [get_notestore]	MainThread - 2992 - 9764	DEBUG: 成功连接Evernote服务器！
+2017-12-25 21:22:18	ewer	everfunc.py - [imglist2note]	MainThread - 2992 - 9764	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-25 21:22:21	ewer	everfunc.py - [imglist2note]	MainThread - 2992 - 9764	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-25 21:22:21	ewer	everwork.py - [<module>]	MainThread - 2992 - 9764	DEBUG: 程序结束！
+2017-12-25 21:24:52	ewer	everwork.py - [<module>]	MainThread - 12336 - 9688	DEBUG: 程序启动……
+2017-12-25 21:24:52	ewer	everwork.py - [<module>]	MainThread - 12336 - 9688	DEBUG: 配置文件读取成功
+2017-12-25 21:24:54	ewer	everfunc.py - [get_notestore]	MainThread - 12336 - 9688	DEBUG: 成功连接Evernote服务器！
+2017-12-25 21:24:57	ewer	everfunc.py - [imglist2note]	MainThread - 12336 - 9688	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-25 21:25:00	ewer	everfunc.py - [imglist2note]	MainThread - 12336 - 9688	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-25 21:25:00	ewer	everwork.py - [<module>]	MainThread - 12336 - 9688	DEBUG: 程序结束！
+2017-12-25 21:27:35	ewer	everwork.py - [<module>]	MainThread - 7196 - 14140	DEBUG: 程序启动……
+2017-12-25 21:27:35	ewer	everwork.py - [<module>]	MainThread - 7196 - 14140	DEBUG: 配置文件读取成功
+2017-12-25 21:27:37	ewer	everfunc.py - [get_notestore]	MainThread - 7196 - 14140	DEBUG: 成功连接Evernote服务器！
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:37	ewer	everfunc.py - [wrapper]	MainThread - 7196 - 14140	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:27:40	ewer	everfunc.py - [imglist2note]	MainThread - 7196 - 14140	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-25 21:27:43	ewer	everfunc.py - [imglist2note]	MainThread - 7196 - 14140	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-25 21:27:43	ewer	everwork.py - [<module>]	MainThread - 7196 - 14140	DEBUG: 程序结束！
+2017-12-25 21:29:08	ewer	everwork.py - [<module>]	MainThread - 12240 - 11684	DEBUG: 程序启动……
+2017-12-25 21:29:08	ewer	everwork.py - [<module>]	MainThread - 12240 - 11684	DEBUG: 配置文件读取成功
+2017-12-25 21:29:10	ewer	everfunc.py - [get_notestore]	MainThread - 12240 - 11684	DEBUG: 成功连接Evernote服务器！
+2017-12-25 21:29:10	ewer	everfunc.py - [wrapper]	MainThread - 12240 - 11684	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:29:13	ewer	everfunc.py - [imglist2note]	MainThread - 12240 - 11684	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-25 21:29:16	ewer	everfunc.py - [imglist2note]	MainThread - 12240 - 11684	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-25 21:29:16	ewer	everwork.py - [<module>]	MainThread - 12240 - 11684	DEBUG: 程序结束！
+2017-12-25 21:29:35	ewer	everwork.py - [<module>]	MainThread - 14868 - 9960	DEBUG: 程序启动……
+2017-12-25 21:29:35	ewer	everwork.py - [<module>]	MainThread - 14868 - 9960	DEBUG: 配置文件读取成功
+2017-12-25 21:29:37	ewer	everfunc.py - [get_notestore]	MainThread - 14868 - 9960	DEBUG: 成功连接Evernote服务器！
+2017-12-25 21:29:37	ewer	everfunc.py - [wrapper]	MainThread - 14868 - 9960	WARNING: printnotebookattributeundertoken 启动运行
+2017-12-25 21:29:40	ewer	everfunc.py - [imglist2note]	MainThread - 14868 - 9960	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-25 21:29:43	ewer	everfunc.py - [imglist2note]	MainThread - 14868 - 9960	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-25 21:29:43	ewer	everwork.py - [<module>]	MainThread - 14868 - 9960	DEBUG: 程序结束！
+2017-12-25 21:31:41	ewer	everwork.py - [<module>]	MainThread - 11800 - 12840	DEBUG: 程序启动……
+2017-12-25 21:31:41	ewer	everwork.py - [<module>]	MainThread - 11800 - 12840	DEBUG: 配置文件读取成功
+2017-12-25 21:31:42	ewer	everfunc.py - [get_notestore]	MainThread - 11800 - 12840	DEBUG: 成功连接Evernote服务器！
+2017-12-25 21:31:43	ewer	everfunc.py - [wrapper]	MainThread - 11800 - 12840	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-25 21:31:46	ewer	everfunc.py - [imglist2note]	MainThread - 11800 - 12840	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-25 21:31:49	ewer	everfunc.py - [imglist2note]	MainThread - 11800 - 12840	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-25 21:31:49	ewer	everwork.py - [<module>]	MainThread - 11800 - 12840	DEBUG: 程序结束！
+2017-12-25 21:32:55	ewer	everwork.py - [<module>]	MainThread - 3124 - 5036	DEBUG: 程序启动……
+2017-12-25 21:32:55	ewer	everwork.py - [<module>]	MainThread - 3124 - 5036	DEBUG: 配置文件读取成功
+2017-12-25 21:32:55	ewer	everfunc.py - [wrapper]	MainThread - 3124 - 5036	DEBUG: get_notestore 启动运行
+2017-12-25 21:32:57	ewer	everfunc.py - [get_notestore]	MainThread - 3124 - 5036	DEBUG: 成功连接Evernote服务器！
+2017-12-25 21:32:57	ewer	everfunc.py - [wrapper]	MainThread - 3124 - 5036	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-25 21:33:00	ewer	everfunc.py - [imglist2note]	MainThread - 3124 - 5036	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-25 21:33:03	ewer	everfunc.py - [imglist2note]	MainThread - 3124 - 5036	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-25 21:33:03	ewer	everwork.py - [<module>]	MainThread - 3124 - 5036	DEBUG: 程序结束！
+2017-12-25 22:13:54	ewer	everwork.py - [<module>]	MainThread - 10736 - 5684	DEBUG: 程序启动……
+2017-12-25 22:13:54	ewer	everwork.py - [<module>]	MainThread - 10736 - 5684	DEBUG: 配置文件读取成功
+2017-12-25 22:13:54	ewer	everfunc.py - [wrapper]	MainThread - 10736 - 5684	DEBUG: get_notestore 启动运行
+2017-12-25 22:13:55	ewer	everfunc.py - [get_notestore]	MainThread - 10736 - 5684	DEBUG: 成功连接Evernote服务器！
+2017-12-25 22:13:56	ewer	everfunc.py - [wrapper]	MainThread - 10736 - 5684	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-25 22:13:56	ewer	everfunc.py - [gengxinfou]	MainThread - 10736 - 5684	INFO: 文件《2017年全单统计管理.xlsm》已有17条记录，有新文件，更新之。
+2017-12-25 22:14:10	ewer	everfunc.py - [imglist2note]	MainThread - 10736 - 5684	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
+2017-12-25 22:14:10	ewer	everwork.py - [<module>]	MainThread - 10736 - 5684	DEBUG: 程序结束！
+2017-12-25 22:24:18	ewer	everwork.py - [<module>]	MainThread - 8136 - 7016	DEBUG: 程序启动……
+2017-12-25 22:24:18	ewer	everwork.py - [<module>]	MainThread - 8136 - 7016	DEBUG: 配置文件读取成功
+2017-12-25 22:24:18	ewer	everfunc.py - [wrapper]	MainThread - 8136 - 7016	DEBUG: get_notestore 启动运行
+2017-12-25 22:24:20	ewer	everfunc.py - [get_notestore]	MainThread - 8136 - 7016	DEBUG: 成功连接Evernote服务器！
+2017-12-25 22:24:20	ewer	everfunc.py - [wrapper]	MainThread - 8136 - 7016	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-25 22:24:20	ewer	everwork.py - [<module>]	MainThread - 8136 - 7016	DEBUG: 程序结束！
+2017-12-25 22:25:05	ewer	everwork.py - [<module>]	MainThread - 14628 - 10868	DEBUG: 程序启动……
+2017-12-25 22:25:05	ewer	everwork.py - [<module>]	MainThread - 14628 - 10868	DEBUG: 配置文件读取成功
+2017-12-25 22:25:05	ewer	everfunc.py - [wrapper]	MainThread - 14628 - 10868	DEBUG: get_notestore 启动运行
+2017-12-25 22:25:06	ewer	everfunc.py - [get_notestore]	MainThread - 14628 - 10868	DEBUG: 成功连接Evernote服务器！
+2017-12-25 22:25:07	ewer	everfunc.py - [wrapper]	MainThread - 14628 - 10868	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-25 22:25:07	ewer	everwork.py - [<module>]	MainThread - 14628 - 10868	DEBUG: 程序结束！
+2017-12-25 22:34:08	ewer	everwork.py - [<module>]	MainThread - 7488 - 9612	DEBUG: 程序启动……
+2017-12-25 22:34:08	ewer	everwork.py - [<module>]	MainThread - 7488 - 9612	DEBUG: 配置文件读取成功
+2017-12-25 22:34:08	ewer	everfunc.py - [wrapper]	MainThread - 7488 - 9612	DEBUG: get_notestore 启动运行
+2017-12-25 22:34:10	ewer	everfunc.py - [get_notestore]	MainThread - 7488 - 9612	DEBUG: 成功连接Evernote服务器！
+2017-12-25 22:34:11	ewer	everfunc.py - [wrapper]	MainThread - 7488 - 9612	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-25 22:34:11	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-25 22:34:11	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-25 22:34:22	ewer	everfunc.py - [imglist2note]	MainThread - 7488 - 9612	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-25 22:34:22	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '07', '08', '10', '11', '12', '13')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-25 22:34:32	ewer	everfunc.py - [imglist2note]	MainThread - 7488 - 9612	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-25 22:34:32	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('21', '22', '23', '24', '25', '26', '27')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-25 22:34:43	ewer	everfunc.py - [imglist2note]	MainThread - 7488 - 9612	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-25 22:34:43	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('31', '32', '33', '34')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-25 22:34:54	ewer	everfunc.py - [imglist2note]	MainThread - 7488 - 9612	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-25 22:34:54	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-25 22:35:06	ewer	everfunc.py - [imglist2note]	MainThread - 7488 - 9612	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-25 22:35:06	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: 2017-12-16 00:00:00	：	连锁客户
+2017-12-25 22:35:06	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('L', 'Z')) group by 日期
+2017-12-25 22:35:16	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: 2017-12-16 00:00:00	：	渠道客户
+2017-12-25 22:35:16	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('O', 'P', 'Q')) group by 日期
+2017-12-25 22:35:25	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: 2017-12-16 00:00:00	：	直销客户
+2017-12-25 22:35:25	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('G', 'U')) group by 日期
+2017-12-25 22:35:34	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: 2017-12-16 00:00:00	：	公关客户
+2017-12-25 22:35:34	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('N', 'U')) group by 日期
+2017-12-25 22:35:43	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: 2017-12-16 00:00:00	：	其他客户
+2017-12-25 22:35:43	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('X', 'U')) group by 日期
+2017-12-25 22:35:52	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: 2017-12-16 00:00:00	：	全渠道
+2017-12-25 22:35:52	ewer	notedispatch.py - [fenxi]	MainThread - 7488 - 9612	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y', 'O', 'P', 'Q', 'L', 'Z', 'G', 'N', 'X')) group by 日期
+2017-12-25 22:36:03	ewer	everwork.py - [<module>]	MainThread - 7488 - 9612	DEBUG: 程序结束！
+2017-12-25 22:38:12	ewer	everwork.py - [<module>]	MainThread - 11644 - 6528	DEBUG: 程序启动……
+2017-12-25 22:38:12	ewer	everwork.py - [<module>]	MainThread - 11644 - 6528	DEBUG: 配置文件读取成功
+2017-12-25 22:38:12	ewer	everfunc.py - [wrapper]	MainThread - 11644 - 6528	DEBUG: get_notestore 启动运行
+2017-12-25 22:38:14	ewer	everfunc.py - [get_notestore]	MainThread - 11644 - 6528	DEBUG: 成功连接Evernote服务器！
+2017-12-25 22:38:15	ewer	everfunc.py - [wrapper]	MainThread - 11644 - 6528	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-25 22:38:15	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-25 22:38:15	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-25 22:38:27	ewer	everfunc.py - [imglist2note]	MainThread - 11644 - 6528	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-25 22:38:27	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '07', '08', '10', '11', '12', '13')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-25 22:38:39	ewer	everfunc.py - [imglist2note]	MainThread - 11644 - 6528	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-25 22:38:39	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('21', '22', '23', '24', '25', '26', '27')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-25 22:38:50	ewer	everfunc.py - [imglist2note]	MainThread - 11644 - 6528	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-25 22:38:50	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('31', '32', '33', '34')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-25 22:39:01	ewer	everfunc.py - [imglist2note]	MainThread - 11644 - 6528	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-25 22:39:01	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-25 22:39:14	ewer	everfunc.py - [imglist2note]	MainThread - 11644 - 6528	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-25 22:39:15	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: 2017-12-16 00:00:00	：	连锁客户
+2017-12-25 22:39:15	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('L', 'Z')) group by 日期
+2017-12-25 22:39:24	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: 2017-12-16 00:00:00	：	渠道客户
+2017-12-25 22:39:24	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('O', 'P', 'Q')) group by 日期
+2017-12-25 22:39:34	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: 2017-12-16 00:00:00	：	直销客户
+2017-12-25 22:39:34	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('G', 'U')) group by 日期
+2017-12-25 22:39:42	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: 2017-12-16 00:00:00	：	公关客户
+2017-12-25 22:39:42	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('N', 'U')) group by 日期
+2017-12-25 22:39:52	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: 2017-12-16 00:00:00	：	其他客户
+2017-12-25 22:39:52	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('X', 'U')) group by 日期
+2017-12-25 22:40:01	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: 2017-12-16 00:00:00	：	全渠道
+2017-12-25 22:40:01	ewer	notedispatch.py - [fenxi]	MainThread - 11644 - 6528	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y', 'O', 'P', 'Q', 'L', 'Z', 'G', 'N', 'X')) group by 日期
+2017-12-25 22:40:12	ewer	everwork.py - [<module>]	MainThread - 11644 - 6528	DEBUG: 程序结束！
+2017-12-25 23:57:16	ewer	everwork.py - [<module>]	MainThread - 14456 - 12332	DEBUG: 程序启动……
+2017-12-25 23:57:16	ewer	everwork.py - [<module>]	MainThread - 14456 - 12332	DEBUG: 配置文件读取成功
+2017-12-25 23:57:16	ewer	everfunc.py - [wrapper]	MainThread - 14456 - 12332	DEBUG: get_notestore 启动运行
+2017-12-25 23:57:18	ewer	everfunc.py - [get_notestore]	MainThread - 14456 - 12332	DEBUG: 成功连接Evernote服务器！
+2017-12-25 23:57:18	ewer	everfunc.py - [wrapper]	MainThread - 14456 - 12332	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-25 23:57:19	ewer	notedispatch.py - [fenxi]	MainThread - 14456 - 12332	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-25 23:57:19	ewer	notedispatch.py - [fenxi]	MainThread - 14456 - 12332	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:00:23	ewer	everwork.py - [<module>]	MainThread - 10128 - 8188	DEBUG: 程序启动……
+2017-12-26 00:00:23	ewer	everwork.py - [<module>]	MainThread - 10128 - 8188	DEBUG: 配置文件读取成功
+2017-12-26 00:00:23	ewer	everfunc.py - [wrapper]	MainThread - 10128 - 8188	DEBUG: get_notestore 启动运行
+2017-12-26 00:00:24	ewer	everfunc.py - [get_notestore]	MainThread - 10128 - 8188	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:00:25	ewer	everfunc.py - [wrapper]	MainThread - 10128 - 8188	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:00:25	ewer	notedispatch.py - [fenxi]	MainThread - 10128 - 8188	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:00:25	ewer	notedispatch.py - [fenxi]	MainThread - 10128 - 8188	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:01:16	ewer	everwork.py - [<module>]	MainThread - 9428 - 10404	DEBUG: 程序启动……
+2017-12-26 00:01:16	ewer	everwork.py - [<module>]	MainThread - 9428 - 10404	DEBUG: 配置文件读取成功
+2017-12-26 00:01:16	ewer	everfunc.py - [wrapper]	MainThread - 9428 - 10404	DEBUG: get_notestore 启动运行
+2017-12-26 00:01:18	ewer	everfunc.py - [get_notestore]	MainThread - 9428 - 10404	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:01:18	ewer	everfunc.py - [wrapper]	MainThread - 9428 - 10404	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:01:19	ewer	notedispatch.py - [fenxi]	MainThread - 9428 - 10404	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:01:19	ewer	notedispatch.py - [fenxi]	MainThread - 9428 - 10404	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:02:13	ewer	everwork.py - [<module>]	MainThread - 3752 - 12032	DEBUG: 程序启动……
+2017-12-26 00:02:13	ewer	everwork.py - [<module>]	MainThread - 3752 - 12032	DEBUG: 配置文件读取成功
+2017-12-26 00:02:13	ewer	everfunc.py - [wrapper]	MainThread - 3752 - 12032	DEBUG: get_notestore 启动运行
+2017-12-26 00:02:15	ewer	everfunc.py - [get_notestore]	MainThread - 3752 - 12032	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:02:15	ewer	everfunc.py - [wrapper]	MainThread - 3752 - 12032	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:02:16	ewer	notedispatch.py - [fenxi]	MainThread - 3752 - 12032	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:02:16	ewer	notedispatch.py - [fenxi]	MainThread - 3752 - 12032	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:03:14	ewer	everwork.py - [<module>]	MainThread - 4052 - 9416	DEBUG: 程序启动……
+2017-12-26 00:03:14	ewer	everwork.py - [<module>]	MainThread - 4052 - 9416	DEBUG: 配置文件读取成功
+2017-12-26 00:03:14	ewer	everfunc.py - [wrapper]	MainThread - 4052 - 9416	DEBUG: get_notestore 启动运行
+2017-12-26 00:03:15	ewer	everfunc.py - [get_notestore]	MainThread - 4052 - 9416	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:03:16	ewer	everfunc.py - [wrapper]	MainThread - 4052 - 9416	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:03:16	ewer	notedispatch.py - [fenxi]	MainThread - 4052 - 9416	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:03:16	ewer	notedispatch.py - [fenxi]	MainThread - 4052 - 9416	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:05:08	ewer	everwork.py - [<module>]	MainThread - 7320 - 13640	DEBUG: 程序启动……
+2017-12-26 00:05:08	ewer	everwork.py - [<module>]	MainThread - 7320 - 13640	DEBUG: 配置文件读取成功
+2017-12-26 00:05:08	ewer	everfunc.py - [wrapper]	MainThread - 7320 - 13640	DEBUG: get_notestore 启动运行
+2017-12-26 00:05:10	ewer	everfunc.py - [get_notestore]	MainThread - 7320 - 13640	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:05:10	ewer	everfunc.py - [wrapper]	MainThread - 7320 - 13640	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:05:11	ewer	notedispatch.py - [fenxi]	MainThread - 7320 - 13640	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:05:11	ewer	notedispatch.py - [fenxi]	MainThread - 7320 - 13640	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:08:15	ewer	everwork.py - [<module>]	MainThread - 9892 - 2996	DEBUG: 程序启动……
+2017-12-26 00:08:15	ewer	everwork.py - [<module>]	MainThread - 9892 - 2996	DEBUG: 配置文件读取成功
+2017-12-26 00:08:15	ewer	everfunc.py - [wrapper]	MainThread - 9892 - 2996	DEBUG: get_notestore 启动运行
+2017-12-26 00:08:17	ewer	everfunc.py - [get_notestore]	MainThread - 9892 - 2996	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:08:18	ewer	everfunc.py - [wrapper]	MainThread - 9892 - 2996	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:08:18	ewer	notedispatch.py - [fenxi]	MainThread - 9892 - 2996	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:08:18	ewer	notedispatch.py - [fenxi]	MainThread - 9892 - 2996	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:09:35	ewer	everwork.py - [<module>]	MainThread - 14916 - 10520	DEBUG: 程序启动……
+2017-12-26 00:09:35	ewer	everwork.py - [<module>]	MainThread - 14916 - 10520	DEBUG: 配置文件读取成功
+2017-12-26 00:09:35	ewer	everfunc.py - [wrapper]	MainThread - 14916 - 10520	DEBUG: get_notestore 启动运行
+2017-12-26 00:09:36	ewer	everfunc.py - [get_notestore]	MainThread - 14916 - 10520	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:09:37	ewer	everfunc.py - [wrapper]	MainThread - 14916 - 10520	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:09:38	ewer	notedispatch.py - [fenxi]	MainThread - 14916 - 10520	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:09:38	ewer	notedispatch.py - [fenxi]	MainThread - 14916 - 10520	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:11:48	ewer	everwork.py - [<module>]	MainThread - 468 - 12080	DEBUG: 程序启动……
+2017-12-26 00:11:48	ewer	everwork.py - [<module>]	MainThread - 468 - 12080	DEBUG: 配置文件读取成功
+2017-12-26 00:11:48	ewer	everfunc.py - [wrapper]	MainThread - 468 - 12080	DEBUG: get_notestore 启动运行
+2017-12-26 00:11:49	ewer	everfunc.py - [get_notestore]	MainThread - 468 - 12080	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:11:50	ewer	everfunc.py - [wrapper]	MainThread - 468 - 12080	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:11:50	ewer	notedispatch.py - [fenxi]	MainThread - 468 - 12080	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:11:50	ewer	notedispatch.py - [fenxi]	MainThread - 468 - 12080	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:13:46	ewer	everwork.py - [<module>]	MainThread - 3136 - 12720	DEBUG: 程序启动……
+2017-12-26 00:13:46	ewer	everwork.py - [<module>]	MainThread - 3136 - 12720	DEBUG: 配置文件读取成功
+2017-12-26 00:13:46	ewer	everfunc.py - [wrapper]	MainThread - 3136 - 12720	DEBUG: get_notestore 启动运行
+2017-12-26 00:13:48	ewer	everfunc.py - [get_notestore]	MainThread - 3136 - 12720	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:13:48	ewer	everfunc.py - [wrapper]	MainThread - 3136 - 12720	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:13:49	ewer	notedispatch.py - [fenxi]	MainThread - 3136 - 12720	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:13:49	ewer	notedispatch.py - [fenxi]	MainThread - 3136 - 12720	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:14:41	ewer	everwork.py - [<module>]	MainThread - 9036 - 12912	DEBUG: 程序启动……
+2017-12-26 00:14:41	ewer	everwork.py - [<module>]	MainThread - 9036 - 12912	DEBUG: 配置文件读取成功
+2017-12-26 00:14:41	ewer	everfunc.py - [wrapper]	MainThread - 9036 - 12912	DEBUG: get_notestore 启动运行
+2017-12-26 00:14:42	ewer	everfunc.py - [get_notestore]	MainThread - 9036 - 12912	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:14:43	ewer	everfunc.py - [wrapper]	MainThread - 9036 - 12912	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:14:43	ewer	notedispatch.py - [fenxi]	MainThread - 9036 - 12912	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:14:43	ewer	notedispatch.py - [fenxi]	MainThread - 9036 - 12912	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:17:10	ewer	everwork.py - [<module>]	MainThread - 7420 - 13412	DEBUG: 程序启动……
+2017-12-26 00:17:10	ewer	everwork.py - [<module>]	MainThread - 7420 - 13412	DEBUG: 配置文件读取成功
+2017-12-26 00:17:10	ewer	everfunc.py - [wrapper]	MainThread - 7420 - 13412	DEBUG: get_notestore 启动运行
+2017-12-26 00:17:11	ewer	everfunc.py - [get_notestore]	MainThread - 7420 - 13412	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:17:12	ewer	everfunc.py - [wrapper]	MainThread - 7420 - 13412	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:17:12	ewer	notedispatch.py - [fenxi]	MainThread - 7420 - 13412	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:17:12	ewer	notedispatch.py - [fenxi]	MainThread - 7420 - 13412	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:19:06	ewer	everwork.py - [<module>]	MainThread - 2404 - 13660	DEBUG: 程序启动……
+2017-12-26 00:19:06	ewer	everwork.py - [<module>]	MainThread - 2404 - 13660	DEBUG: 配置文件读取成功
+2017-12-26 00:19:06	ewer	everfunc.py - [wrapper]	MainThread - 2404 - 13660	DEBUG: get_notestore 启动运行
+2017-12-26 00:19:07	ewer	everfunc.py - [get_notestore]	MainThread - 2404 - 13660	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:19:07	ewer	everfunc.py - [wrapper]	MainThread - 2404 - 13660	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:19:08	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:19:08	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:19:19	ewer	everfunc.py - [imglist2note]	MainThread - 2404 - 13660	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-26 00:19:19	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '07', '08', '10', '11', '12', '13')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:19:30	ewer	everfunc.py - [imglist2note]	MainThread - 2404 - 13660	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-26 00:19:30	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('21', '22', '23', '24', '25', '26', '27')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:19:41	ewer	everfunc.py - [imglist2note]	MainThread - 2404 - 13660	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-26 00:19:41	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('31', '32', '33', '34')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:19:52	ewer	everfunc.py - [imglist2note]	MainThread - 2404 - 13660	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-26 00:19:52	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:20:04	ewer	everfunc.py - [imglist2note]	MainThread - 2404 - 13660	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-26 00:20:04	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: 2017-12-16 00:00:00	：	连锁客户
+2017-12-26 00:20:04	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('L', 'Z')) group by 日期
+2017-12-26 00:20:13	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: 2017-12-16 00:00:00	：	渠道客户
+2017-12-26 00:20:13	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('O', 'P', 'Q')) group by 日期
+2017-12-26 00:20:22	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: 2017-12-16 00:00:00	：	直销客户
+2017-12-26 00:20:22	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('G', 'U')) group by 日期
+2017-12-26 00:20:32	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: 2017-12-16 00:00:00	：	公关客户
+2017-12-26 00:20:32	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('N', 'U')) group by 日期
+2017-12-26 00:20:42	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: 2017-12-16 00:00:00	：	其他客户
+2017-12-26 00:20:42	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('X', 'U')) group by 日期
+2017-12-26 00:20:51	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: 2017-12-16 00:00:00	：	全渠道
+2017-12-26 00:20:51	ewer	notedispatch.py - [fenxi]	MainThread - 2404 - 13660	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y', 'O', 'P', 'Q', 'L', 'Z', 'G', 'N', 'X')) group by 日期
+2017-12-26 00:21:01	ewer	everwork.py - [<module>]	MainThread - 2404 - 13660	DEBUG: 程序结束！
+2017-12-26 00:22:02	ewer	everwork.py - [<module>]	MainThread - 11288 - 3884	DEBUG: 程序启动……
+2017-12-26 00:22:02	ewer	everwork.py - [<module>]	MainThread - 11288 - 3884	DEBUG: 配置文件读取成功
+2017-12-26 00:22:02	ewer	everfunc.py - [wrapper]	MainThread - 11288 - 3884	DEBUG: get_notestore 启动运行
+2017-12-26 00:22:04	ewer	everfunc.py - [get_notestore]	MainThread - 11288 - 3884	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:22:04	ewer	everfunc.py - [wrapper]	MainThread - 11288 - 3884	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:22:05	ewer	notedispatch.py - [fenxi]	MainThread - 11288 - 3884	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:22:05	ewer	notedispatch.py - [fenxi]	MainThread - 11288 - 3884	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:23:21	ewer	everwork.py - [<module>]	MainThread - 1356 - 5220	DEBUG: 程序启动……
+2017-12-26 00:23:21	ewer	everwork.py - [<module>]	MainThread - 1356 - 5220	DEBUG: 配置文件读取成功
+2017-12-26 00:23:21	ewer	everfunc.py - [wrapper]	MainThread - 1356 - 5220	DEBUG: get_notestore 启动运行
+2017-12-26 00:23:23	ewer	everfunc.py - [get_notestore]	MainThread - 1356 - 5220	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:23:23	ewer	everfunc.py - [wrapper]	MainThread - 1356 - 5220	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:23:24	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:23:24	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:23:35	ewer	everfunc.py - [imglist2note]	MainThread - 1356 - 5220	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-26 00:23:35	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '07', '08', '10', '11', '12', '13')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:23:45	ewer	everfunc.py - [imglist2note]	MainThread - 1356 - 5220	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-26 00:23:45	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('21', '22', '23', '24', '25', '26', '27')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:23:56	ewer	everfunc.py - [imglist2note]	MainThread - 1356 - 5220	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-26 00:23:56	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('31', '32', '33', '34')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:24:07	ewer	everfunc.py - [imglist2note]	MainThread - 1356 - 5220	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-26 00:24:07	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:24:19	ewer	everfunc.py - [imglist2note]	MainThread - 1356 - 5220	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-26 00:24:20	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: 2017-12-16 00:00:00	：	连锁客户
+2017-12-26 00:24:20	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('L', 'Z')) group by 日期
+2017-12-26 00:24:29	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: 2017-12-16 00:00:00	：	渠道客户
+2017-12-26 00:24:29	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('O', 'P', 'Q')) group by 日期
+2017-12-26 00:24:38	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: 2017-12-16 00:00:00	：	直销客户
+2017-12-26 00:24:38	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('G', 'U')) group by 日期
+2017-12-26 00:24:47	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: 2017-12-16 00:00:00	：	公关客户
+2017-12-26 00:24:47	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('N', 'U')) group by 日期
+2017-12-26 00:24:56	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: 2017-12-16 00:00:00	：	其他客户
+2017-12-26 00:24:56	ewer	notedispatch.py - [fenxi]	MainThread - 1356 - 5220	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('X', 'U')) group by 日期
+2017-12-26 00:25:28	ewer	everwork.py - [<module>]	MainThread - 7460 - 7796	DEBUG: 程序启动……
+2017-12-26 00:25:28	ewer	everwork.py - [<module>]	MainThread - 7460 - 7796	DEBUG: 配置文件读取成功
+2017-12-26 00:25:28	ewer	everfunc.py - [wrapper]	MainThread - 7460 - 7796	DEBUG: get_notestore 启动运行
+2017-12-26 00:25:29	ewer	everfunc.py - [get_notestore]	MainThread - 7460 - 7796	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:25:30	ewer	everfunc.py - [wrapper]	MainThread - 7460 - 7796	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:25:30	ewer	notedispatch.py - [fenxi]	MainThread - 7460 - 7796	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:25:30	ewer	notedispatch.py - [fenxi]	MainThread - 7460 - 7796	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:26:23	ewer	everwork.py - [<module>]	MainThread - 3972 - 10700	DEBUG: 程序启动……
+2017-12-26 00:26:23	ewer	everwork.py - [<module>]	MainThread - 3972 - 10700	DEBUG: 配置文件读取成功
+2017-12-26 00:26:23	ewer	everfunc.py - [wrapper]	MainThread - 3972 - 10700	DEBUG: get_notestore 启动运行
+2017-12-26 00:26:24	ewer	everfunc.py - [get_notestore]	MainThread - 3972 - 10700	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:26:25	ewer	everfunc.py - [wrapper]	MainThread - 3972 - 10700	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:26:25	ewer	notedispatch.py - [fenxi]	MainThread - 3972 - 10700	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:26:25	ewer	notedispatch.py - [fenxi]	MainThread - 3972 - 10700	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:27:30	ewer	everwork.py - [<module>]	MainThread - 13900 - 944	DEBUG: 程序启动……
+2017-12-26 00:27:30	ewer	everwork.py - [<module>]	MainThread - 13900 - 944	DEBUG: 配置文件读取成功
+2017-12-26 00:27:30	ewer	everfunc.py - [wrapper]	MainThread - 13900 - 944	DEBUG: get_notestore 启动运行
+2017-12-26 00:27:31	ewer	everfunc.py - [get_notestore]	MainThread - 13900 - 944	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:27:32	ewer	everfunc.py - [wrapper]	MainThread - 13900 - 944	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:27:32	ewer	notedispatch.py - [fenxi]	MainThread - 13900 - 944	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:27:32	ewer	notedispatch.py - [fenxi]	MainThread - 13900 - 944	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:27:42	ewer	everfunc.py - [imglist2note]	MainThread - 13900 - 944	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-26 00:27:42	ewer	notedispatch.py - [fenxi]	MainThread - 13900 - 944	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '07', '08', '10', '11', '12', '13')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:27:53	ewer	everfunc.py - [imglist2note]	MainThread - 13900 - 944	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-26 00:27:53	ewer	notedispatch.py - [fenxi]	MainThread - 13900 - 944	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('21', '22', '23', '24', '25', '26', '27')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:28:04	ewer	everfunc.py - [imglist2note]	MainThread - 13900 - 944	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-26 00:28:04	ewer	notedispatch.py - [fenxi]	MainThread - 13900 - 944	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('31', '32', '33', '34')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:28:14	ewer	everfunc.py - [imglist2note]	MainThread - 13900 - 944	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-26 00:28:14	ewer	notedispatch.py - [fenxi]	MainThread - 13900 - 944	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:28:26	ewer	everfunc.py - [imglist2note]	MainThread - 13900 - 944	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-26 00:28:26	ewer	notedispatch.py - [fenxi]	MainThread - 13900 - 944	DEBUG: 2017-12-16 00:00:00	：	连锁客户
+2017-12-26 00:28:26	ewer	notedispatch.py - [fenxi]	MainThread - 13900 - 944	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('L', 'Z')) group by 日期
+2017-12-26 00:28:36	ewer	notedispatch.py - [fenxi]	MainThread - 13900 - 944	DEBUG: 2017-12-16 00:00:00	：	渠道客户
+2017-12-26 00:28:36	ewer	notedispatch.py - [fenxi]	MainThread - 13900 - 944	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('O', 'P', 'Q')) group by 日期
+2017-12-26 00:28:45	ewer	notedispatch.py - [fenxi]	MainThread - 13900 - 944	DEBUG: 2017-12-16 00:00:00	：	直销客户
+2017-12-26 00:28:45	ewer	notedispatch.py - [fenxi]	MainThread - 13900 - 944	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('G', 'U')) group by 日期
+2017-12-26 00:28:56	ewer	everwork.py - [<module>]	MainThread - 11924 - 9596	DEBUG: 程序启动……
+2017-12-26 00:28:56	ewer	everwork.py - [<module>]	MainThread - 11924 - 9596	DEBUG: 配置文件读取成功
+2017-12-26 00:28:56	ewer	everfunc.py - [wrapper]	MainThread - 11924 - 9596	DEBUG: get_notestore 启动运行
+2017-12-26 00:28:57	ewer	everfunc.py - [get_notestore]	MainThread - 11924 - 9596	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:28:58	ewer	everfunc.py - [wrapper]	MainThread - 11924 - 9596	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:28:58	ewer	notedispatch.py - [fenxi]	MainThread - 11924 - 9596	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:28:58	ewer	notedispatch.py - [fenxi]	MainThread - 11924 - 9596	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:29:09	ewer	everfunc.py - [imglist2note]	MainThread - 11924 - 9596	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-26 00:29:09	ewer	notedispatch.py - [fenxi]	MainThread - 11924 - 9596	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '07', '08', '10', '11', '12', '13')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:29:19	ewer	everfunc.py - [imglist2note]	MainThread - 11924 - 9596	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-26 00:29:19	ewer	notedispatch.py - [fenxi]	MainThread - 11924 - 9596	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('21', '22', '23', '24', '25', '26', '27')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:30:01	ewer	everwork.py - [<module>]	MainThread - 7600 - 9912	DEBUG: 程序启动……
+2017-12-26 00:30:01	ewer	everwork.py - [<module>]	MainThread - 7600 - 9912	DEBUG: 配置文件读取成功
+2017-12-26 00:30:01	ewer	everfunc.py - [wrapper]	MainThread - 7600 - 9912	DEBUG: get_notestore 启动运行
+2017-12-26 00:30:02	ewer	everfunc.py - [get_notestore]	MainThread - 7600 - 9912	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:30:03	ewer	everfunc.py - [wrapper]	MainThread - 7600 - 9912	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:30:03	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:30:03	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:30:14	ewer	everfunc.py - [imglist2note]	MainThread - 7600 - 9912	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-26 00:30:14	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '07', '08', '10', '11', '12', '13')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:30:25	ewer	everfunc.py - [imglist2note]	MainThread - 7600 - 9912	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-26 00:30:25	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('21', '22', '23', '24', '25', '26', '27')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:30:35	ewer	everfunc.py - [imglist2note]	MainThread - 7600 - 9912	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-26 00:30:35	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('31', '32', '33', '34')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:30:47	ewer	everfunc.py - [imglist2note]	MainThread - 7600 - 9912	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-26 00:30:47	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:30:59	ewer	everfunc.py - [imglist2note]	MainThread - 7600 - 9912	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-26 00:30:59	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: 2017-12-16 00:00:00	：	连锁客户
+2017-12-26 00:30:59	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('L', 'Z')) group by 日期
+2017-12-26 00:31:09	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: 2017-12-16 00:00:00	：	渠道客户
+2017-12-26 00:31:09	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('O', 'P', 'Q')) group by 日期
+2017-12-26 00:31:18	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: 2017-12-16 00:00:00	：	直销客户
+2017-12-26 00:31:18	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('G', 'U')) group by 日期
+2017-12-26 00:31:27	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: 2017-12-16 00:00:00	：	公关客户
+2017-12-26 00:31:27	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('N', 'U')) group by 日期
+2017-12-26 00:31:36	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: 2017-12-16 00:00:00	：	其他客户
+2017-12-26 00:31:36	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('X', 'U')) group by 日期
+2017-12-26 00:31:45	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: 2017-12-16 00:00:00	：	全渠道
+2017-12-26 00:31:45	ewer	notedispatch.py - [fenxi]	MainThread - 7600 - 9912	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y', 'O', 'P', 'Q', 'L', 'Z', 'G', 'N', 'X')) group by 日期
+2017-12-26 00:31:56	ewer	everwork.py - [<module>]	MainThread - 7600 - 9912	DEBUG: 程序结束！
+2017-12-26 00:32:42	ewer	everwork.py - [<module>]	MainThread - 8528 - 5592	DEBUG: 程序启动……
+2017-12-26 00:32:42	ewer	everwork.py - [<module>]	MainThread - 8528 - 5592	DEBUG: 配置文件读取成功
+2017-12-26 00:32:42	ewer	everfunc.py - [wrapper]	MainThread - 8528 - 5592	DEBUG: get_notestore 启动运行
+2017-12-26 00:32:44	ewer	everfunc.py - [get_notestore]	MainThread - 8528 - 5592	DEBUG: 成功连接Evernote服务器！
+2017-12-26 00:32:44	ewer	everfunc.py - [wrapper]	MainThread - 8528 - 5592	DEBUG: printnotebookattributeundertoken 启动运行
+2017-12-26 00:32:45	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: 2017-12-16 00:00:00	：	终端客户
+2017-12-26 00:32:45	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('01', '02', '03', '04', '05', '06', '09')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:32:55	ewer	everfunc.py - [imglist2note]	MainThread - 8528 - 5592	INFO: 成功更新了笔记《武昌一部销售业绩图表》，guid：88c20442-6b4f-4bef-8c0b-ef6878397bf5。
+2017-12-26 00:32:55	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '07', '08', '10', '11', '12', '13')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:33:05	ewer	everfunc.py - [imglist2note]	MainThread - 8528 - 5592	INFO: 成功更新了笔记《武昌二部销售业绩图表》，guid：b8e0dc4a-933f-4753-a14b-b5635bc122d0。
+2017-12-26 00:33:05	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('21', '22', '23', '24', '25', '26', '27')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:33:16	ewer	everfunc.py - [imglist2note]	MainThread - 8528 - 5592	INFO: 成功更新了笔记《汉口办销售业绩图表》，guid：cd7c4002-80ee-4741-8ccb-eb58f45023a1。
+2017-12-26 00:33:16	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('31', '32', '33', '34')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:33:26	ewer	everfunc.py - [imglist2note]	MainThread - 8528 - 5592	INFO: 成功更新了笔记《汉阳办销售业绩图表》，guid：8a0606e4-ffac-4935-84e5-c235926e3fab。
+2017-12-26 00:33:26	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y')) group by 日期
+2017-12-26 00:33:38	ewer	everfunc.py - [imglist2note]	MainThread - 8528 - 5592	INFO: 成功更新了笔记《销售业绩图表》，guid：1717d56c-1308-4447-a22e-9d6648631716。
+2017-12-26 00:33:39	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: 2017-12-16 00:00:00	：	连锁客户
+2017-12-26 00:33:39	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('L', 'Z')) group by 日期
+2017-12-26 00:33:48	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: 2017-12-16 00:00:00	：	渠道客户
+2017-12-26 00:33:48	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('O', 'P', 'Q')) group by 日期
+2017-12-26 00:33:57	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: 2017-12-16 00:00:00	：	直销客户
+2017-12-26 00:33:57	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('G', 'U')) group by 日期
+2017-12-26 00:34:07	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: 2017-12-16 00:00:00	：	公关客户
+2017-12-26 00:34:07	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('N', 'U')) group by 日期
+2017-12-26 00:34:16	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: 2017-12-16 00:00:00	：	其他客户
+2017-12-26 00:34:16	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('X', 'U')) group by 日期
+2017-12-26 00:34:25	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: 2017-12-16 00:00:00	：	全渠道
+2017-12-26 00:34:25	ewer	notedispatch.py - [fenxi]	MainThread - 8528 - 5592	DEBUG: select 日期,count(*) as 单数,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi,customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in ('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '40', '49', '90', '91', '92', '93', '94', '95', '96', '99')) and(类型 in ('A', 'B', 'C', 'S', 'W', 'Y', 'O', 'P', 'Q', 'L', 'Z', 'G', 'N', 'X')) group by 日期
+2017-12-26 00:34:36	ewer	everwork.py - [<module>]	MainThread - 8528 - 5592	DEBUG: 程序结束！

@@ -42,3 +42,51 @@ def desclitedb(cnx):
         # print(cur.description)
         col_name_list = [tuple1[0] for tuple1 in cur.description]
         print (col_name_list)
+
+
+def swissknife(cnx):
+    # desclitedb(cnx)
+    # cnx.cursor().execute('drop table xiaoshoumingxi')
+    # cnx.cursor().execute('drop table xiaoqu')
+    # cnx.cursor().execute("insert into fileread values('白晔峰','万寿无疆','2016-06-12','43838883','4099','2016-09-30')")
+    # cnx.cursor().execute("delete from xiaoshoumingxi where 单位全名 like \'%单位%\'")
+    # cnx.commit()
+    # log.warning('从数据表《销售明细》中删除‘单位全名’值为‘无单位’的纪录172条，值为‘无名单位’的纪录4条！！！')
+
+    ttt = '2017-09-01'
+    # result = cnx.cursor().execute('select * from jiaqi where 日期 > \'%s\'' %ttt)
+    # for ii in result.fetchall():
+    #     print(ii)
+
+    # result = cnx.cursor().execute('select * from quandan limit 10')
+    # for ii in result.fetchall():
+    #     print(ii)
+
+    result = cnx.cursor().execute("select * from fileread where 修改时间 >\'%s\'" % ttt)
+    for ii in result.fetchall():
+        print(ii)
+
+    result = cnx.cursor().execute('select max(修改时间) as xg from fileread')
+    print(result.fetchone()[0])
+
+    ddd = '2017-03-31'
+    ddd =pd.to_datetime(ddd)+pd.DateOffset(months=-1)
+    print(ddd)
+    ddd =pd.to_datetime(ddd)+pd.DateOffset(years=-1)
+    print(ddd)
+    print('%02d' %ddd.month)
+    print('%04d%02d' %(ddd.year,ddd.month))
+    print(cal.monthrange(2017,2)[1])
+
+    for i in range(10):
+        nianfen = 2017-i
+        print(str(nianfen),end='\t')
+        print(cal.isleap(int(nianfen)))
+
+
+    # lxzd = ('A', 'B', 'C', 'S', 'W', 'Y')
+    # lxqd = ('O', 'P', 'Q')
+    # lxls = ('L', 'Z')
+    # lxqt = ('G', 'N', 'X')
+    # lxqb = tuple(list(lxzd) + list(lxqd) + list(lxls) + list(lxqt))
+

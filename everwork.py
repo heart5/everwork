@@ -16,12 +16,20 @@ from notedispatch import *
 #                                                                     time.localtime(time.time()))
 log.debug('程序启动……')
 
-note_store = get_notestore()
+cfp =ConfigParser()
+cfp.read('data\\everwork.ini')
+cfp.sections()
+token = cfp.get('evernote','token')
+# print(token)
+log.debug('配置文件读取成功')
+
+
+note_store = get_notestore(token)
 
 # 列出账户中的全部笔记本
-# notebooks = note_store.listNotebooks()
-# # printnotebookattributeundertoken(notebooks[1])
-#
+notebooks = note_store.listNotebooks()
+printnotebookattributeundertoken(notebooks[-1])
+
 # for x in notebooks:
 #     printnotebookattributeundertoken(x)
 # printnotefromnotebook('31eee750-e240-438b-a1f5-03ce34c904b4',100,'天气')
@@ -64,10 +72,17 @@ notefenbudf.index = notefenbudf['fenbu']
 # print(notefenbudf.loc['汉口']['title'])
 # print(notefenbulist[0])
 cnx = lite.connect('data\\quandan.db')
-dataokay(cnx)
+# dataokay(cnx)
 # pickstat(note_store,cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca','订单配货统计图')
-# fenxi(note_store,notefenbudf,cnx)
+
+qrystr = "select 日期,count(*) as 单数,sum(金额) as %s,substr(customer.往来单位编号,1,2) as 区域 ," \
+         "substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi," \
+         "customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) " \
+         "and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in %s) " \
+         "and(类型 in %s) group by 日期"
+# print(qrystr %('金额','(01,02,03)','()'))
+fenxi(note_store,qrystr,'金额',notefenbudf,cnx)
 # desclitedb(cnx)
-# ceshizashua(cnx)
+# swissknife(cnx)
 cnx.close()
 log.debug('程序结束！')

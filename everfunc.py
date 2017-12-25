@@ -1,18 +1,29 @@
-#
-# encoding:utf-8
-#
-# 有关evernote的各种探测性函数
-#
+#  encoding:utf-8
 
-import time, calendar as cal, hashlib, binascii, re, os, logging, pandas as pd, sqlite3 as lite,\
-    matplotlib.pyplot as plt, evernote.edam.type.ttypes as Types, evernote.edam.userstore.constants as UserStoreConstants, \
+'''
+everwork的各种函数
+import大集合
+'''
+
+import time, calendar as cal, hashlib, binascii, re, os, socket, logging, pandas as pd, sqlite3 as lite,\
+    matplotlib.pyplot as plt, evernote.edam.type.ttypes as Ttypes, evernote.edam.error.ttypes as Etypes,\
+    evernote.edam.userstore.constants as UserStoreConstants, \
     evernote.edam.notestore.NoteStore as NoteStore
 from pylab import *
+from configparser import ConfigParser
 from matplotlib.ticker import MultipleLocator, FuncFormatter
 from evernote.api.client import EvernoteClient
 from bs4 import BeautifulSoup
 
+
 def workbefore():
+    '''workbefore(),准备目录结构
+
+    构建data、img、log
+
+    :returns
+        null
+    '''
     if not os.path.exists('data'):
         os.mkdir('data')
     if not os.path.exists('data\\tmp'):
@@ -37,8 +48,13 @@ def workbefore():
         os.mkdir('log')
 
 def mylog():
+    '''mylog(),日志函数，定义输出文件和格式等内容
+    
+    :returns
+        返回log对象
+    '''''
     log = logging.getLogger('ewer')
-    logHandler = logging.FileHandler(filename='log\\everwork.log')
+    logHandler = logging.FileHandler('log\\everwork.log',encoding='utf-8') #此处指定log文件的编码方式，否则可能乱码
     formats = logging.Formatter('%(asctime)s\t%(name)s\t%(filename)s - [%(funcName)s]\t%(threadName)s - %(thread)d - %(process)d\t%(levelname)s: %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
     logHandler.setFormatter(formats)
@@ -56,9 +72,18 @@ def mylog():
 
     return log
 
+
 workbefore()
 log = mylog()
 
+def use_logging(level='debug'):
+    def decorator(func):
+        def wrapper(*args,**kwargs):
+            if level == 'debug':
+                log.debug("%s 启动运行" %func.__name__)
+            return func(*args)
+        return wrapper
+    return decorator
 
 def timestamp2str(timestamp):
     return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(timestamp))
@@ -78,7 +103,7 @@ def yingdacal(x,cnx):
     else:
         return x + pd.DateOffset(days=1)
 
-
+@use_logging()
 def get_notestore(token='your developer token'):
     # Real applications authenticate with Evernote using OAuth, but for the
     # purpose of exploring the API, you can get a developer token that allows
@@ -95,10 +120,7 @@ def get_notestore(token='your developer token'):
     # refer to https://dev.evernote.com/doc/articles/testing.php
     # and https://dev.evernote.com/doc/articles/bootstrap.php
 
-    # auth_token = "S=s37:U=3b449f:E=1659f8b7c0f:C=15e47da4ef8:P=1cd:A=en-devtoken:V=2:H=e445e5fcbceff83703151d71df584197"
-    # auth_token = "S=s37:U=3b449f:E=16017ef9105:C=16012c93380:P=185:A=get-off-the-ground:V=2:H=3de0c5e50f23f1d252b8ebe8f958d368"  # 一天
-    auth_token = "S=s37:U=3b449f:E=1676a821f3c:C=16012d0eff8:P=185:A=get-off-the-ground:V=2:H=1469bc6bfc7ac8a2f68b72c0c0335a29"  # 一年
-    # auth_token = token
+    auth_token = token
 
     if auth_token == "your developer token":
         print("Please fill in your developer token\nTo get a developer token, visit " \
@@ -116,25 +138,37 @@ def get_notestore(token='your developer token'):
     # service, change sandbox=False and replace your
     # developer token above with a token from
     # https://www.evernote.com/api/DeveloperToken.action
+
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
-    userStore = client.get_user_store()
+    try:
+        userStore = client.get_user_store()
+        version_ok = userStore.checkVersion(
+            "Evernote EDAMTest (Python)",
+            UserStoreConstants.EDAM_VERSION_MAJOR,
+            UserStoreConstants.EDAM_VERSION_MINOR
+        )
+        if not version_ok:
+            log.critical('Evernote API版本过时，请更新之！程序终止并退出！！！')
+            exit(1)
+        print("Is my Evernote API version up to date? ", str(version_ok))
+        note_store = client.get_note_store()
+    except Exception as e:
+        print(type(e))
+        print(e.args)
+        print(e)
+        errorstr = '连接Evernote服务器出现错误！'
+        if type(e) == socket.gaierror: #getaddrinfo failed
+            log.critical(str(e)+'，可能是外网不通。'+errorstr)
+        elif type(e) == Etypes.EDAMUserException: # EDAMUserException(errorCode=2, parameter='authenticationToken')
+            log.critical(str(e)+'，口令有误。'+errorstr)
+        exit(1)
+        # pass
+    else:
+        log.debug('成功连接Evernote服务器！')
 
     # currentuser = userStore.getUser()
     # printuserattributeundertoken(currentuser)
-
-    version_ok = userStore.checkVersion(
-        "Evernote EDAMTest (Python)",
-        UserStoreConstants.EDAM_VERSION_MAJOR,
-        UserStoreConstants.EDAM_VERSION_MINOR
-    )
-    print("Is my Evernote API version up to date? ", str(version_ok))
-
-    if not version_ok:
-        log.critical('Evernote API版本过时，请更新之！程序终止并退出！！！')
-        exit(1)
-
-    note_store = client.get_note_store()
 
     return note_store
 
@@ -164,6 +198,7 @@ def printnotefromnotebook( note_store,token,notebookguid, notecount,titlefind):
 
 #测试笔记本（notebook）数据结构每个属性的返回值
 #开发口令（token）的方式调用返回如下
+@use_logging()
 def printnotebookattributeundertoken(notebook):
     print ('名称：'+ notebook.name,end='\t') #phone
     print ('guid：'+ notebook.guid,end='\t') #f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
@@ -229,69 +264,201 @@ def printuserattributeundertoken(user):
     # print '账户限制\t', str(user.accountLimits)  #这种权限的调用没有返回这个值，报错
 
 
-#
-# 把纵轴的刻度设置为万
-#
-def y_formatter(x, pos):
-    return r"%d万" %(int(x/10000)) #%d
+def gengxinfou(filename,conn,tablename='fileread'):
+    rt = False
+    try:
+        create_tb_cmd = "CREATE TABLE IF NOT EXISTS %s " \
+                        "('文件名' TEXT," \
+                        "'绝对路径' TEXT, " \
+                        "'修改时间' TIMESTAMP," \
+                        "'设备编号' INTEGER," \
+                        "'文件大小' INTEGER," \
+                        "'登录时间' TIMESTAMP); " % tablename
+        conn.execute(create_tb_cmd)
+    except Exception:
+        log.critical("创建数据表%s失败！" % tablename)
+        return rt
+
+    fna = os.path.abspath(filename)
+    fn = os.path.basename(fna)
+    fstat = os.stat(filename)
+    # print(fn)
+
+    # sql = "delete from %s where 文件大小 > 0" %tablename
+    # print(sql)
+    # result = conn.cursor().execute(sql)
+    # conn.commit()
+    # print(('共删除了'+str(result.fetchone())[0])+'条记录')
+
+    c = conn.cursor()
+    sql = "select count(*) from %s where 文件名 = \'%s\'" %(tablename,fn)
+    result = c.execute(sql)
+    # print(result.lastrowid)
+    # conn.commit()
+    fncount = (result.fetchone())[0]
+    if fncount == 0:
+        print("文件《"+fn+"》无记录，录入信息！\t", end='\t')
+        result = c.execute("insert into %s values(?,?,?,?,?,?)"
+                           % tablename, (fn, fna,
+                                         time.strftime('%Y-%m-%d %H:%M:%S',
+                                                       time.localtime(fstat.st_mtime)),
+                                         str(fstat.st_dev), str(fstat.st_size),
+                                         time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())))
+        print('添加成功。')
+        log.info('文件《%s》无记录，录入信息。' %fn)
+        rt = True
+    else:
+        print("文件《"+fn+"》已有 "+str(fncount)+" 条记录，看是否最新？\t",end='\t')
+        sql = "select max(修改时间) as xg from %s where 文件名 = \'%s\'" % (tablename,fn)
+        result = c.execute(sql)
+        if time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)) > (result.fetchone())[0]:
+            result = c.execute("insert into %s values(?,?,?,?,?,?)" % tablename,(fn,fna,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_mtime)),str(fstat.st_dev),str(fstat.st_size),time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())))
+            print('更新成功！')
+            log.info('文件《%s》已有%d条记录，有新文件，更新之。' %(fn,fncount))
+            rt = True
+        else:
+            print('无需更新。')
+            rt = False
+    # print(fstat.st_mtime, '\t', time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_atime)),'\t', '\t', time.strftime('%Y-%m-%d %H:%M',time.localtime(fstat.st_mtime)),'\t', '\t', time.strftime('%Y-%m-%d %H:%M',time.localtime(fstat.st_ctime)),'\t', fstat.st_dev)
+    conn.commit()
+
+    return rt
 
 
-def rizi(df):
-    return '%02d' %(df[0].day)
 
+def dataokay(cnx):
+    if gengxinfou('data\\系统表.xlsx', cnx, 'fileread'):# or True:
+        df = pd.read_excel('data\\系统表.xlsx', sheetname='区域')
+        df['区域'] = pd.DataFrame(df['区域']).apply(lambda r: '%02d' %r, axis=1)
+        print(df)
+        df=df.loc[:,['区域','区域名称', '分部']]
+        df.to_sql(name='quyu', con=cnx, if_exists='replace')
 
-def yuezi(df):
-    return '%02d' %(df[0]+1)
+        df = pd.read_excel('data\\系统表.xlsx', sheetname='小区')
+        df['小区'] = pd.DataFrame(df['小区']).apply(lambda r: '%03d' %r, axis=1)
+        print(df)
+        df.to_sql(name='xiaoqu', con=cnx, if_exists='replace')
+
+        df = pd.read_excel('data\\系统表.xlsx', sheetname='终端类型')
+        print(df)
+        df.to_sql(name='leixing', con=cnx, if_exists='replace')
+
+        df = pd.read_excel('data\\系统表.xlsx', sheetname='产品档案',)
+        print(df)
+        df.to_sql(name='product', con=cnx, if_exists='replace')
+
+        df = pd.read_excel('data\\系统表.xlsx', sheetname='客户档案')
+        df = df.loc[:,['往来单位','往来单位编号','地址']]
+        print(df)
+        df.to_sql(name='customer', con=cnx, if_exists='replace')
+
+    if gengxinfou('data\\2017年全单统计管理.xlsm',cnx,'fileread') :#or True:
+        df = pd.read_excel('data\\2017年全单统计管理.xlsm',sheetname='全单统计管理',na_values=[0])
+        # descdb(df)
+        df=df.loc[:,['订单日期','单号', '配货人', '配货准确', '业务主管', '终端编码', '终端名称', '积欠', '送货金额',
+                         '实收金额', '收款方式','优惠','退货金额', '客户拒收', '无货金额', '少配金额', '配错未要',
+                         '送达日期', '车辆', '送货人', '收款日期', '收款人', '拒收品项','少配明细']]
+        df_dh = df.pop('单号')
+        df.insert(1,'订单编号',df_dh)
+        df['订单编号'] =df['订单编号'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['配货人'] =df['配货人'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['业务主管'] =df['业务主管'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['终端编码'] =df['终端编码'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['收款方式'] =df['收款方式'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['车辆'] =df['车辆'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['送货人'] =df['送货人'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['收款人'] =df['收款人'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['拒收品项'] =df['拒收品项'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        df['少配明细'] =df['少配明细'].apply(lambda x:str.strip(x) if type(x) == str else x)
+        # df['无货金额'] = df['无货金额'].astype(int)
+        # df = df.apply(lambda x:str.strip(x) if type(x) == str else x)
+        df.to_sql(name='quandan', con=cnx, if_exists='replace', chunksize=100000)
+
+    # if gengxinfou('data\\xiaoshoushujumingxi.txt',cnx,'fileread'):# or True:
+    #     # df = pd.read_csv('data\\xiaoshoushujumingxi.txt',sep='\t',header=None,parse_dates=[0],dtype={'5':np.str,'8':np.str,'12':np.float64,'14':np.float64})
+    #     df = pd.read_csv('data\\xiaoshoushujumingxi.txt',sep='\t',header=None,parse_dates=[0],dtype={4:object,5:object,10:object},low_memory=False,verbose=True)
+    #     # descdb(df)
+    #     df.columns = ['日期','单据编号','单据类型','职员名称','摘要','备注','商品备注','规格','商品编号','商品全名','型号','产地','单价','单位','数量','金额','含税单价','价税合计','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']
+    #     # descdb(df)
+    #     # sql_df=df.loc[:,['日期','单据编号','单据类型','职员名称','职员销售明细表','备注','商品备注','规格','商品编号','商品全名','单价','单位','数量','金额','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']]
+    #     df=df.loc[:,['日期','单据编号','单据类型','职员名称','摘要','备注','商品备注','商品编号','商品全名','单价','单位','数量','金额','单位全名','仓库全名','部门全名']]
+    #     df['单价'] = (df['单价']).fillna(0)
+    #     df['金额'] = (df['金额']).fillna(0)
+    #     descdb(df)
+    #     df.to_sql(name='xiaoshoumingxi', con=cnx, if_exists='replace', chunksize=100000)
+
+    if gengxinfou('data\\jiaqi.txt',cnx,'fileread'):
+        df = pd.read_csv('data\\jiaqi.txt',sep=',',header=None)
+        dfjiaqi = []
+        for ii in df[0]:
+            slist = ii.split('，')
+            slist[0] = pd.to_datetime(slist[0])
+            slist[2] = int(slist[2])
+            dfjiaqi.append(slist)
+        df = pd.DataFrame(dfjiaqi)
+        df.sort_values(by=[0], ascending=[1], inplace=True)
+        df.columns = ['日期','假休','天数']
+        # df.index = df['日期']
+        # descdb(df)
+        sql_df = df.loc[:,df.columns]
+        df.to_sql(name='jiaqi',con=cnx,schema=sql_df,if_exists='replace')
 
 
 # 月度（全年，自然年度）累积对比图，自最早日期起，默认3年
 # df，数据表，必须用DateTime做index
-# riqi，当前月份，可以是DateTIme的各种形式，只要pd能识别成功，形如2017-10-01，代表2017年10月为标的月份
+# riqi，数据记录的最近日期，可以是DateTIme的各种形式，只要pd能识别成功，形如2017-10-06
 # xiangmu，主题，画图时写入标题
 # imglist，输出图片路径list
 # quyu，销售区域或区域聚合（分部）
 # leixing，终端类型
 # nianshu，用来对比的年份数，从当前年份向回数
 # imgpath，图片存储路径
-def chubiaoyueleiji(df,riqi,xiangmu,imglist=[], quyu='',leixing='',pinpai='',nianshu=3,imgpath='img\\'):
-    riqicur = pd.to_datetime(riqi)
+def chubiaoyueleiji(df, riqi, xiangmu, imglist=[], quyu='', leixing='', pinpai='', nianshu=3, imgpath='img\\'):
+    monthcur = pd.to_datetime("%04d-%02d-01" %(riqi.year,riqi.month)) # 2017-10-01
     nianlist = []
     for i in range(nianshu):
-        nianlist.append(riqicur+pd.DateOffset(years=-(i)))
+        nianlist.append(monthcur+pd.DateOffset(years=-(i))) # 2017-10-01,2016-10-01,2015-10-01
 
-    ds = pd.DataFrame(df[xiangmu],index=df.index)#取出日期索引的数据列
+    ds = pd.DataFrame(df[xiangmu],index=df.index)  # 取出日期索引的数据列
 
     # 分年份生成按照每天日期重新索引的数据列
     dslist = []
     for i in range(nianshu):
-        dstmp = ds.reindex(pd.date_range(pd.to_datetime(str(nianlist[i].year)+'-01-01'),periods=365,freq='D'),fill_value=0)
+        if i == 0:
+            periods = int(riqi.strftime('%j'))
+        else:
+            periods = 365
+        dstmp = ds.reindex(pd.date_range(pd.to_datetime(str(nianlist[i].year)+'-01-01'),periods=periods,freq='D'),fill_value=0)
         dstmp = dstmp.resample('M').sum()
         dstmp.columns = ['%04d'%(nianlist[i].year)]
-        dstmp.index = (range(12))
+        dstmp.index = (range(len(dstmp.index)))
         dslist.append(dstmp)
 
-    df = dslist[0]
-    for i in range(nianshu-1):
-        df = df.join(dslist[i+1])
+    df = dslist[-1] # 5,0 1 2 3 4
+    for i in range(nianshu-1): # 0 1 2 3
+        df = df.join(dslist[-(i+2)]) # -2 -3 -4 -5, 3 2 1 0
 
     colnames = []
     for i in range(nianshu):
-        colnames.append((dslist[i].columns)[0])
+        colnames.append((dslist[-(i+1)].columns)[0]) # -1 -2 -3 -4 -5, 4 3 2 1 0
     # print(colnames)
     df = df[colnames]
-    zuobiao = pd.DataFrame(df.index).apply(lambda r:yuezi(r),axis=1)
-    df.index= zuobiao
+    zuobiao = pd.Series(list(df.index))
+    df.index= zuobiao.apply(lambda x: '%02d' %(x+1))
+    # print(colnames[0]+'\t'+str(type(colnames[0]))+ '\t'+ str(df[str(riqi.year)].max())+'\t' +str(type(riqi.year)))
 
-    nianyue = '%04d年'%(riqicur.year)
+    nianyue = '%04d年'%(monthcur.year)
     biaoti = leixing+quyu+pinpai+nianyue+xiangmu
     df.cumsum().plot(title=('%s月累积' %biaoti))
-    # df.cumsum().plot(table=True,fontsize=12,figsize=(40,20))
-    plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
+    if df[str(riqi.year)].max() > 10000:
+        plt.gca().yaxis.set_major_formatter(FuncFormatter(lambda x, pos: "%d万" %(int(x/10000))))  # 纵轴主刻度文本用y_formatter函数计算
     plt.savefig(imgpath+'%s（月累积）.png' %biaoti)
     imglist.append(imgpath+'%s（月累积）.png' %biaoti)
     plt.close()
+
     df.plot(title=('%s月折线') %biaoti)
-    plt.gca().yaxis.set_major_formatter(FuncFormatter(y_formatter))  # 纵轴主刻度文本用y_formatter函数计算
+    if df[str(riqi.year)].max() > 10000:
+        plt.gca().yaxis.set_major_formatter(FuncFormatter(lambda x, pos: "%.1f万" %((x/10000))))  # 纵轴主刻度文本用y_formatter函数计算
     plt.savefig(imgpath+'%s（月折线）.png' %biaoti)
     imglist.append(imgpath+'%s（月折线）.png' %biaoti)
     plt.close()
@@ -374,7 +541,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle,style='replace'):
     #
     # 要更新一个note，生成一个Note（），指定guid，更新其content
     #
-    note = Types.Note()
+    note = Ttypes.Note()
     note.guid = noteguid
     note.title = notetitle
 
@@ -390,11 +557,11 @@ def imglist2note(notestore, imglist, noteguid, notetitle,style='replace'):
         md5 = hashlib.md5()
         md5.update(image)
         hash = md5.digest()
-        data = Types.Data()  # 必须要重新构建一个Data（），否则内容不会变化
+        data = Ttypes.Data()  # 必须要重新构建一个Data（），否则内容不会变化
         data.size = len(image)
         data.bodyHash = hash
         data.body = image
-        resource = Types.Resource()
+        resource = Ttypes.Resource()
         resource.mime = 'image/png'
         resource.data = data
         note.resources.append(resource)
