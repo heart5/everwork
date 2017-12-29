@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 
 
 def workbefore():
-    '''workbefore(),准备目录结构
+    '''准备目录结构
 
     构建data、img、log
 
@@ -48,10 +48,9 @@ def workbefore():
         os.mkdir('log')
 
 def mylog():
-    '''mylog(),日志函数，定义输出文件和格式等内容
+    '''日志函数，定义输出文件和格式等内容
     
-    :returns
-        返回log对象
+    :returns    返回log对象
     '''''
     log = logging.getLogger('ewer')
     logHandler = logging.FileHandler('log\\everwork.log',encoding='utf-8') #此处指定log文件的编码方式，否则可能乱码
