@@ -44,6 +44,22 @@ def workbefore():
         os.mkdir('img\\汉阳')
     if not os.path.exists('img\\销售部'):
         os.mkdir('img\\销售部')
+    if not os.path.exists('img\\终端客户'):
+        os.mkdir('img\\终端客户')
+    if not os.path.exists('img\\连锁客户'):
+        os.mkdir('img\\连锁客户')
+    if not os.path.exists('img\\渠道客户'):
+        os.mkdir('img\\渠道客户')
+    if not os.path.exists('img\\直销客户'):
+        os.mkdir('img\\直销客户')
+    if not os.path.exists('img\\公关客户'):
+        os.mkdir('img\\公关客户')
+    if not os.path.exists('img\\其他客户'):
+        os.mkdir('img\\其他客户')
+    if not os.path.exists('img\\全渠道'):
+        os.mkdir('img\\全渠道')
+    if not os.path.exists('img\\非终端'):
+        os.mkdir('img\\非终端')
     if not os.path.exists('log'):
         os.mkdir('log')
 
@@ -88,16 +104,20 @@ def timestamp2str(timestamp):
     return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(timestamp))
 
 
-def readinisection2df(cfp,section):
+def readinisection2df(cfp,section,biaoti):
     dfsale = cfp.options(section)
     llist = []
     for oo in dfsale:
         str = cfp.get(section, oo)
-        d1 = str.split(':')
-        llist.append(list(d1))
+        llist.append(str)
     df = pd.DataFrame(llist)
-    df.columns = ['guid','title']
+    df.columns = ['guid']
+    df['fenbu'] = dfsale
     df.index = dfsale
+
+    df = pd.DataFrame(df)
+    df['title'] = df['fenbu'].map(lambda x: x + biaoti)
+    del df['fenbu']
     return df
 
 def yingdacal(x,cnx):
@@ -165,12 +185,14 @@ def get_notestore(token='your developer token'):
         print("Is my Evernote API version up to date? ", str(version_ok))
         note_store = client.get_note_store()
     except Exception as e:
-        print(type(e))
+        print(type(e),end='\t\t')
         print(e.args)
         print(e)
         errorstr = '连接Evernote服务器出现错误！'
         if type(e) == socket.gaierror: #getaddrinfo failed
             log.critical(str(e)+'，可能是外网不通。'+errorstr)
+        elif type(e) == Etypes.EDAMSystemException:  # EDAMSystemException(errorCode=19, message=None, rateLimitDuration=1166)
+            log.critical(str(e) + '，使用超限。' + errorstr)
         elif type(e) == Etypes.EDAMUserException: # EDAMUserException(errorCode=2, parameter='authenticationToken')
             log.critical(str(e)+'，口令有误。'+errorstr)
         exit(1)
@@ -185,7 +207,7 @@ def get_notestore(token='your developer token'):
 
 
 #列出笔记本中的笔记信息
-def printnotefromnotebook( note_store,token,notebookguid, notecount,titlefind):
+def findnotefromnotebook( note_store, token, notebookguid, titlefind, notecount=10000):
     notefilter = NoteStore.NoteFilter()
     notefilter.notebookGuid = notebookguid
     notemetaspec = NoteStore.NotesMetadataResultSpec(includeTitle=True, includeContentLength=True, includeCreated=True,
@@ -203,13 +225,14 @@ def printnotefromnotebook( note_store,token,notebookguid, notecount,titlefind):
     for note in ourNoteList.notes:
         if note.title.find(titlefind) >= 0:
             print (note.guid, note.title)
+            return note
 
-    print()
+    return False
 
 
 #测试笔记本（notebook）数据结构每个属性的返回值
 #开发口令（token）的方式调用返回如下
-@use_logging()
+# @use_logging()
 def printnotebookattributeundertoken(notebook):
     print ('名称：'+ notebook.name,end='\t') #phone
     print ('guid：'+ notebook.guid,end='\t') #f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
@@ -273,6 +296,58 @@ def printuserattributeundertoken(user):
     # print '头像url\t', str(user.photoUrl)  #这种权限的调用没有返回这个值，报错
     # print '头像最近更新\t', str(user.photoLastUpdated)  #这种权限的调用没有返回这个值，报错
     # print '账户限制\t', str(user.accountLimits)  #这种权限的调用没有返回这个值，报错
+
+
+def makenote(token, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
+    nBody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+    nBody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+    nBody += "<en-note>%s</en-note>" % notebody
+
+    # Create note object
+    ourNote = Ttypes.Note()
+    ourNote.title = notetitle
+    ourNote.content = nBody
+
+    # parentNotebook is optional; if omitted, default notebook is used
+    if parentnotebook and hasattr(parentnotebook, 'guid'):
+        ourNote.notebookGuid = parentnotebook.guid
+
+    note = findnotefromnotebook(notestore, token, parentnotebook.guid, notetitle)
+    if note:
+        log.info('笔记《'+notetitle+'》已经在笔记本《'+parentnotebook.name+'》中存在。')
+        return note
+
+    # Attempt to create note in Evernote account
+    try:
+        note = notestore.createNote(token, ourNote)
+    except Etypes.EDAMUserException as edec:
+        ## Something was wrong with the note data
+        ## See EDAMErrorCode enumeration for error code explanation
+        ## http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
+        print("EDAMUserException:"+ edec)
+        return None
+    except Etypes.EDAMNotFoundException as ednfe:
+        ## Parent Notebook GUID doesn't correspond to an actual notebook
+        print("EDAMNotFoundException: Invalid parent notebook GUID")
+        return None
+    # Return created note object
+    log.info('笔记《' + notetitle + '》在笔记本《' + parentnotebook.name + '》中创建成功。')
+    return note
+
+
+def updatesection(cfp,fromsection,tosection,inifilepath,token,note_store,zhuti='销售业绩图表'):
+    if not cfp.has_section(tosection):
+        cfp.add_section(tosection)
+    nbfbdf = readinisection2df(cfp, fromsection, zhuti)
+    print(nbfbdf)
+    for aa in nbfbdf.index:
+        note = Ttypes.Note()
+        note.title = nbfbdf.loc[aa]['title']
+        # print(aa + '\t\t' + note.title, end='\t\t')
+        note = makenote(token, note_store, note.title, parentnotebook=note_store.getNotebook(nbfbdf.loc[aa]['guid']))
+        # print(note.guid + '\t\t' + note.title)
+        cfp.set(tosection, aa, note.guid)
+    cfp.write(open(inifilepath, 'w', encoding='utf-8'))
 
 
 def gengxinfou(filename,conn,tablename='fileread'):
@@ -424,7 +499,7 @@ def dataokay(cnx):
 # leixing，终端类型
 # nianshu，用来对比的年份数，从当前年份向回数
 # imgpath，图片存储路径
-def chubiaoyueleiji(df, riqi, xiangmu, imglist=[], quyu='', leixing='', pinpai='', nianshu=3, imgpath='img\\'):
+def chubiaoyuezhexian(df, riqi, xiangmu, cum= False, imglist=[], quyu='', leixing='', pinpai='', nianshu=3, imgpath='img\\'):
     monthcur = pd.to_datetime("%04d-%02d-01" %(riqi.year,riqi.month)) # 2017-10-01
     nianlist = []
     for i in range(nianshu):
@@ -440,7 +515,10 @@ def chubiaoyueleiji(df, riqi, xiangmu, imglist=[], quyu='', leixing='', pinpai='
         else:
             periods = 365
         dstmp = ds.reindex(pd.date_range(pd.to_datetime(str(nianlist[i].year)+'-01-01'),periods=periods,freq='D'),fill_value=0)
-        dstmp = dstmp.resample('M').sum()
+        if cum:
+            dstmp = dstmp.resample('M').sum()
+        else:
+            dstmp = dstmp.resample('M').max()
         dstmp.columns = ['%04d'%(nianlist[i].year)]
         dstmp.index = (range(len(dstmp.index)))
         dslist.append(dstmp)
@@ -460,54 +538,65 @@ def chubiaoyueleiji(df, riqi, xiangmu, imglist=[], quyu='', leixing='', pinpai='
 
     nianyue = '%04d年'%(monthcur.year)
     biaoti = leixing+quyu+pinpai+nianyue+xiangmu
-    df.cumsum().plot(title=('%s月累积' %biaoti))
+    cumstr = ''
+    if cum:
+        cumstr = '月累积'
+        df.cumsum().plot(title=cumstr+biaoti)
+    else:
+        cumstr= '月折线'
+        df.plot(title= biaoti)
     if df[str(riqi.year)].max() > 10000:
         plt.gca().yaxis.set_major_formatter(FuncFormatter(lambda x, pos: "%d万" %(int(x/10000))))  # 纵轴主刻度文本用y_formatter函数计算
-    plt.savefig(imgpath+'%s（月累积）.png' %biaoti)
-    imglist.append(imgpath+'%s（月累积）.png' %biaoti)
+    plt.savefig(imgpath+'%s%s.png' %(biaoti,cumstr))
+    imglist.append(imgpath+'%s%s.png'  %(biaoti,cumstr))
     plt.close()
 
-    df.plot(title=('%s月折线') %biaoti)
+    cumstr='月折线'
+    df.plot(title=('%s%s') %(biaoti,cumstr))
     if df[str(riqi.year)].max() > 10000:
         plt.gca().yaxis.set_major_formatter(FuncFormatter(lambda x, pos: "%.1f万" %((x/10000))))  # 纵轴主刻度文本用y_formatter函数计算
-    plt.savefig(imgpath+'%s（月折线）.png' %biaoti)
-    imglist.append(imgpath+'%s（月折线）.png' %biaoti)
+    plt.savefig(imgpath+'%s%s.png' %(biaoti,cumstr))
+    imglist.append(imgpath+'%s%s.png' %(biaoti,cumstr))
     plt.close()
 
 
 #日（整月）累积对比图，当月、环比、同期比
 #riqienddate形如2017-12-08，代表数据结束点的日期
-def chubiaorileiji(df, riqienddate, xiangmu, imglist=[], quyu='', leixing='',pinpai='',imgpath='img\\'):
-    riqicurmonthfirst = pd.to_datetime("%04d-%02d-01" %(riqienddate.year,riqienddate.month))#日期格式的当月1日
+def chubiaorizhexian(df, riqienddate, xiangmu, cum = False,imglist=[], quyu='', leixing='',pinpai='',imgpath='img\\'):
+    riqicurmonthfirst = pd.to_datetime("%04d-%02d-01" % (riqienddate.year, riqienddate.month))#日期格式的当月1日
     riqibeforemonthfirst = riqicurmonthfirst+pd.DateOffset(months=-1) # 日期格式的上月1日
     riqilastmonthfirst = riqicurmonthfirst+pd.DateOffset(years=-1) #日期格式的去年当月1日
     tianshu = cal.monthrange(riqienddate.year,riqienddate.month)[1] #当月的天数
 
+    # print(df)
     ds = pd.DataFrame(df[xiangmu],index=df.index) #处理上月数据
     dates = pd.date_range(riqibeforemonthfirst,periods=tianshu,freq='D') #上月日期全集，截止到当月天数为止
     ds1 = ds.reindex(dates,fill_value=0) #重新索引，补全所有日期，空值用0填充
     ds1.index = (range(1,len(dates)+1)) #索引天日化
-    ds1.columns = ['%04d%02d' %(riqibeforemonthfirst.year,riqibeforemonthfirst.month)] #列命名，形如201709
+    ds1.columns = ['%04d%02d' % (riqibeforemonthfirst.year, riqibeforemonthfirst.month)] #列命名，形如201709
 
-    dates = pd.date_range(riqilastmonthfirst,periods=tianshu,freq='D') #处理去年当月数据
+    dates = pd.date_range(riqilastmonthfirst, periods=tianshu, freq='D') #处理去年当月数据
     ds3 = ds.reindex(dates,fill_value=0)
     ds3.index = range(1,len(dates)+1)
-    ds3.columns = ['%04d%02d' %(riqilastmonthfirst.year,riqilastmonthfirst.month)]
+    ds3.columns = ['%04d%02d' % (riqilastmonthfirst.year, riqilastmonthfirst.month)]
 
-    dates = pd.date_range(riqicurmonthfirst,periods=riqienddate.day,freq='D') #处理当月数据，至截止日期
+    dates = pd.date_range(riqicurmonthfirst, periods=riqienddate.day, freq='D') #处理当月数据，至截止日期
     ds2 = ds.reindex(dates,fill_value=0)
     ds2.index = range(1,len(dates)+1)
-    ds2.columns = ['%04d%02d' %(riqicurmonthfirst.year,riqicurmonthfirst.month)]
+    ds2.columns = ['%04d%02d' % (riqicurmonthfirst.year, riqicurmonthfirst.month)]
 
     dff = ds3.join(ds2,how='left') #取去年当月天数做主轴
     dff = dff.join(ds1,how='left') #列名列表形如：['201610','201710','201709']
-    dff = dff.loc[:,[ds2.columns[0],ds3.columns[0],ds1.columns[0]]] #列名列表形如：['201710','201610','201709']
+    dff = dff.loc[:,[ds2.columns[0], ds3.columns[0], ds1.columns[0]]] #列名列表形如：['201710','201610','201709']
 
-    nianyue = '%04d%02d' %(riqicurmonthfirst.year,riqicurmonthfirst.month)
+    nianyue = '%04d%02d' % (riqicurmonthfirst.year, riqicurmonthfirst.month)
     biaoti = leixing+quyu+pinpai+nianyue+xiangmu
-    dfc = dff.cumsum() #数据累积求和
+    dfc = dff
+    if cum:
+        dfc = dff.cumsum() #数据累积求和
+        biaoti = biaoti+'日累积'
     # print(dfc)
-    dfc.plot(title=biaoti+'日累积')
+    dfc.plot(title=biaoti)
     plt.ylim(0) #设定纵轴从0开始
 
     kedu = dfc.loc[riqienddate.day]
@@ -548,7 +637,7 @@ def chubiaorileiji(df, riqienddate, xiangmu, imglist=[], quyu='', leixing='',pin
 #
 #图片列表更新进笔记
 #
-def imglist2note(notestore, imglist, noteguid, notetitle,style='replace'):
+def imglist2note(notestore, imglist, noteguid, notetitle, sty='replace'):
     #
     # 要更新一个note，生成一个Note（），指定guid，更新其content
     #
@@ -603,7 +692,13 @@ def imglist2note(notestore, imglist, noteguid, notetitle,style='replace'):
     # Finally, send the new note to Evernote using the updateNote method
     # The new Note object that is returned will contain server-generated
     # attributes such as the new note's unique GUID.
-    updated_note = notestore.updateNote(note)
+    try:
+        updated_note = notestore.updateNote(note)
+    except Exception as e:
+        if e.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
+            print("Rate limit reached, Retry your request in %d seconds" % e.rateLimitDuration)
+        log.critical('更新笔记时出现严重错误：'+str(e))
+        exit(1)
     # print(updated_note)
     # print ("Successfully updated a note with GUID: ", updated_note.guid, updated_note.title)
     log.info('成功更新了笔记《%s》，guid：%s。' %(updated_note.title,updated_note.guid))

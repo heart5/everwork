@@ -17,33 +17,25 @@ from notedispatch import *
 log.debug('程序启动……')
 
 cfp =ConfigParser()
-cfp.read('data\\everwork.ini',encoding='utf-8')
-cfp.sections()
+inifilepath = 'data\\everwork.ini'
+cfp.read(inifilepath,encoding='utf-8')
+# cfp.sections()
 token = cfp.get('evernote','token')
 # print(token)
+
 
 log.debug('配置文件读取成功')
 
 
 note_store = get_notestore(token)
 
-# 列出账户中的全部笔记本
+# #列出账户中的全部笔记本
 # notebooks = note_store.listNotebooks()
-# printnotebookattributeundertoken(notebooks[-1])
-
+# # printnotebookattributeundertoken(notebooks[-1])
+#
 # for x in notebooks:
 #     printnotebookattributeundertoken(x)
-# printnotefromnotebook('31eee750-e240-438b-a1f5-03ce34c904b4',100,'天气')
-# printnotefromnotebook('87bbbe9a-4e9c-4f5d-84fb-1e94e62a0ec9',100,'订单')
-# printnotefromnotebook(note_store,token,'f9a9338f-ee36-49c3-b9fb-351305546b94',100,'客户开发')
 
-#仓库管理 87bbbe9a-4e9c-4f5d-84fb-1e94e62a0ec9
-#行政管理 31eee750-e240-438b-a1f5-03ce34c904b4
-#武昌一部营销推广管理 bc69c8c1-1c51-4ab2-b7ff-d3ad649b647e
-#武昌二部营销推广管理    guid：8cab2a52-c8a4-488c-b8e8-4180d06efc3b
-#汉阳办营销推广管理    guid：1e365487-d2e1-4562-bf68-8189d347f589
-#汉口办营销推广管理    guid：f9a9338f-ee36-49c3-b9fb-351305546b94
-#经营    guid：ba1423ed-5da1-4883-a2cc-070c93bf7e98
 
 #e5d81ffa-89e7-49ff-bd4c-a5a71ae14320 武汉雨天记录
 #296f57a3-c660-4dd5-885a-56492deb2cee 武汉天气图
@@ -51,30 +43,51 @@ note_store = get_notestore(token)
 #39ed537d-73fa-4ad8-b4fd-bc6f746fb302 真元日配送图
 #1c0830d9-e42f-4ce7-bf36-ead868a55eca 订单配货统计图
 
-weatherstat(note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
+# findnotefromnotebook(note_store,token,'ba1423ed-5da1-4883-a2cc-070c93bf7e98','图表') #从笔记本中查找标题中包含指定字符串的笔记
 
-notefbxsdf = readinisection2df(cfp,'sale')
-print(notefbxsdf)
-notefbkhdf = readinisection2df(cfp,'kehu')
-print(notefbkhdf)
+# weatherstat(note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
+
+nbfbdf = readinisection2df(cfp,'guidfenbunb','销售业绩图表')
+for aa in nbfbdf.index:
+    cpath = 'img\\'+aa
+    if not os.path.exists(cpath):
+        os.mkdir(cpath)
+        log.debug('目录《' + cpath + '》被创建')
 
 cnx = lite.connect('data\\quandan.db')
-dataokay(cnx)
-pickstat(note_store,cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca','订单配货统计图')
+# dataokay(cnx)
+# pickstat(note_store,cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca','订单配货统计图')
+brandlist = ['','创食人','旭东','新丰园']
+for br in brandlist:
+    updatesection(cfp,'guidfenbunb',br+'kehuguidfenbu',inifilepath,token,note_store,br+'客户开发图表')
+    updatesection(cfp,'guidfenbunb',br+'saleguidfenbu',inifilepath,token,note_store,br+'销售业绩图表')
+    updatesection(cfp,'guidleixingnb',br+'kehuguidleixing',inifilepath,token,note_store,br+'客户开发图表')
+    updatesection(cfp,'guidleixingnb',br+'saleguidleixing',inifilepath,token,note_store,br+'销售业绩图表')
 
-# qrystr = "select 日期,count(单位全名) as %s,sum(金额) as 金额,substr(customer.往来单位编号,1,2) as 区域 ," \
-#          "substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi," \
-#          "customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) " \
-#          "and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in %s) " \
-#          "and(类型 in %s) group by 日期"
-# fenxiyueduibi(note_store,qrystr,'客户数',notefbkhdf,cnx)
+    notelxxsdf = readinisection2df(cfp,br+'saleguidleixing',br+'销售业绩图表')
+    notefbxsdf = readinisection2df(cfp,br+'saleguidfenbu',br+'销售业绩图表')
+    # print(notefbxsdf)
+    qrystr = "select 日期,strftime('%Y%m',日期) as 年月,customer.往来单位编号 as 客户编码,sum(金额) as 金额," \
+             "substr(customer.往来单位编号,1,2) as 区域 ,"  "substr(customer.往来单位编号,12,1) as 类型, " \
+             "product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product " \
+             "where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) "
+    if len(br) > 0:
+        qrystr += ' and (品牌 = \'%s\')' %br
+    qrystr += ' group by 日期,客户编码 order by 日期'
+    fenxiyueduibi(note_store, qrystr, '金额', notefbxsdf, notelxxsdf, cnx, pinpai=br, cum=True)
 
-# qrystr = "select 日期,count(*) as 单数,sum(金额) as %s,substr(customer.往来单位编号,1,2) as 区域 ," \
-#          "substr(customer.往来单位编号,12,1) as 类型,product.品牌名称  as 品牌 from xiaoshoumingxi," \
-#          "customer,product where (customer.往来单位 = xiaoshoumingxi.单位全名) " \
-#          "and (product.商品全名 = xiaoshoumingxi.商品全名) and(区域 in %s) " \
-#          "and(类型 in %s) group by 日期"
-# fenxiriyueleiji(note_store,qrystr,'金额',notefbxsdf,cnx)
+    notelxkhdf = readinisection2df(cfp, br+'kehuguidleixing', br+'客户开发图表')
+    notefbkhdf = readinisection2df(cfp, br+'kehuguidfenbu', br+'客户开发图表')
+    # print(notefbkhdf)
+    qrystr = "select 日期,strftime('%Y%m',日期) as 年月,customer.往来单位编号 as 客户编码,count(*) as 成交客户数," \
+             "sum(金额) as 金额," \
+             "substr(customer.往来单位编号,1,2) as 区域 ,"  "substr(customer.往来单位编号,12,1) as 类型, " \
+             "product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product " \
+             "where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) "
+    if len(br) > 0:
+        qrystr += ' and (品牌 = \'%s\')' %br
+    qrystr += ' group by 日期,客户编码 order by 日期'
+    fenxiyueduibi(note_store, qrystr,'成交客户数', notefbkhdf, notelxkhdf, cnx, pinpai=br)
 # desclitedb(cnx)
 # swissknife(cnx)
 cnx.close()
