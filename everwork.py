@@ -57,8 +57,12 @@ for aa in nbfbdf.index:
 cnx = lite.connect('data\\quandan.db')
 # dataokay(cnx)
 # pickstat(note_store,cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca','订单配货统计图')
-brandlist = ['','创食人','旭东','新丰园']
+brandlist = ['欢夫','爽口佳','津津友味','鲜多鲜','丽芝士','麦小呆','抓鱼的猫','渔米之湘','劲仔','新丰园','旭东','创食人','']
+brandlist = ['爽口佳','津津友味','鲜多鲜','丽芝士','麦小呆','抓鱼的猫','渔米之湘','劲仔','新丰园','旭东','创食人','']
+brandlist = ['津津友味','鲜多鲜','丽芝士','麦小呆','抓鱼的猫','渔米之湘','劲仔','新丰园','旭东','创食人']
+# brandlist = []
 for br in brandlist:
+    myrndsleep(200)
     updatesection(cfp,'guidfenbunb',br+'kehuguidfenbu',inifilepath,token,note_store,br+'客户开发图表')
     updatesection(cfp,'guidfenbunb',br+'saleguidfenbu',inifilepath,token,note_store,br+'销售业绩图表')
     updatesection(cfp,'guidleixingnb',br+'kehuguidleixing',inifilepath,token,note_store,br+'客户开发图表')

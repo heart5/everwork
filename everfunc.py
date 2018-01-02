@@ -5,7 +5,7 @@ everwork的各种函数
 import大集合
 '''
 
-import time, calendar as cal, hashlib, binascii, re, os, socket, logging, pandas as pd, sqlite3 as lite,\
+import time, calendar as cal, hashlib, binascii, re, os, socket, random, logging, pandas as pd, sqlite3 as lite,\
     matplotlib.pyplot as plt, evernote.edam.type.ttypes as Ttypes, evernote.edam.error.ttypes as Etypes,\
     evernote.edam.userstore.constants as UserStoreConstants, \
     evernote.edam.notestore.NoteStore as NoteStore
@@ -90,6 +90,11 @@ def mylog():
 
 workbefore()
 log = mylog()
+
+def myrndsleep(second=20):
+    rnd = np.random.randint(0,second)
+    time.sleep(rnd)
+    log.debug('休息一哈！这次是'+str(rnd)+'秒……')
 
 def use_logging(level='debug'):
     def decorator(func):
@@ -536,27 +541,27 @@ def chubiaoyuezhexian(df, riqi, xiangmu, cum= False, imglist=[], quyu='', leixin
     df.index= zuobiao.apply(lambda x: '%02d' %(x+1))
     # print(colnames[0]+'\t'+str(type(colnames[0]))+ '\t'+ str(df[str(riqi.year)].max())+'\t' +str(type(riqi.year)))
 
-    nianyue = '%04d年'%(monthcur.year)
+    nianyue = '%04d年' % monthcur.year
     biaoti = leixing+quyu+pinpai+nianyue+xiangmu
     cumstr = ''
     if cum:
         cumstr = '月累积'
-        df.cumsum().plot(title=cumstr+biaoti)
+        df.cumsum().plot(title=biaoti+cumstr)
     else:
         cumstr= '月折线'
         df.plot(title= biaoti)
     if df[str(riqi.year)].max() > 10000:
         plt.gca().yaxis.set_major_formatter(FuncFormatter(lambda x, pos: "%d万" %(int(x/10000))))  # 纵轴主刻度文本用y_formatter函数计算
-    plt.savefig(imgpath+'%s%s.png' %(biaoti,cumstr))
-    imglist.append(imgpath+'%s%s.png'  %(biaoti,cumstr))
+    plt.savefig(imgpath+'%s%s.png' % (biaoti, cumstr))
+    imglist.append(imgpath+'%s%s.png' % (biaoti, cumstr))
     plt.close()
 
     cumstr='月折线'
     df.plot(title=('%s%s') %(biaoti,cumstr))
     if df[str(riqi.year)].max() > 10000:
         plt.gca().yaxis.set_major_formatter(FuncFormatter(lambda x, pos: "%.1f万" %((x/10000))))  # 纵轴主刻度文本用y_formatter函数计算
-    plt.savefig(imgpath+'%s%s.png' %(biaoti,cumstr))
-    imglist.append(imgpath+'%s%s.png' %(biaoti,cumstr))
+    plt.savefig(imgpath+'%s%s.png' % (biaoti, cumstr))
+    imglist.append(imgpath+'%s%s.png' % (biaoti, cumstr))
     plt.close()
 
 

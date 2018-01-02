@@ -25,17 +25,14 @@ def getgroupdf( dfs,xiangmu,period='month'):
 def fenxiyueduibi(note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, pinpai='', cum=False):
     dfquyu= pd.read_sql('select * from quyu',cnx,index_col='index')
     dfleixing= pd.read_sql('select * from leixing',cnx,index_col='index')
-    fenbulist = ['一部','二部','汉口','汉阳','销售部']
-    # fenbulist = list(set(dfquyu[dfquyu.分部 != '非终端']['分部']))
     fenbulist = list(notefenbudf.index)
     print(fenbulist)
     leixinglist = ['终端客户','连锁客户','渠道客户','直销客户','公关客户','其他客户','全渠道']
-    leixinglist = list(noteleixingdf.index)
 
     df = pd.read_sql_query(sqlstr, cnx)
     log.info(sqlstr)
 
-    df['日期'] = df['日期'].apply(lambda x: pd.to_datetime(x))
+    df['日期'] = pd.to_datetime(df['日期'])
     print(df.tail(5))
 
     for leixingset in leixinglist:
@@ -50,12 +47,15 @@ def fenxiyueduibi(note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, 
         log.debug(str(df['日期'].max())+'\t：\t'+leixingset)
         if leixingset == '终端客户':
             for fenbuset in fenbulist:
-                if fenbuset == '销售部':
+                if fenbuset == '所有分部':
                     fenbu = tuple(set(dfquyu['区域']))
                 else:
                     fenbu = tuple((dfquyu[dfquyu['分部'] == fenbuset])['区域'])
 
                 dfs = df[(df.类型.isin(leixing).values == True) & (df.区域.isin(fenbu).values == True)]
+                if dfs.shape[0] == 0:
+                    log.info('在客户类型为“'+str(leixingset)+'”且所在位置为“'+fenbuset+'”时无数据！')
+                    continue
                 if cum:
                     dfmoban = dfs.groupby('日期')[xiangmu].sum()
                     dfmoban = pd.DataFrame(dfmoban, index=pd.to_datetime(dfmoban.index))
@@ -77,9 +77,13 @@ def fenxiyueduibi(note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, 
                 # if not cum:
                 #     dfmoban = getgroupdf(dfs, xiangmu,'year')
                 chubiaoyuezhexian(dfmoban, dangqianyueri, xiangmu, cum =cum, leixing=leixingset, imglist=imglist, quyu=fenbuset, pinpai=pinpai, nianshu=5, imgpath='img\\'+fenbuset+'\\')
+                myrndsleep()
                 imglist2note(note_store, imglist, notefenbudf.loc[fenbuset]['guid'],notefenbudf.loc[fenbuset]['title'])
         else:
             dfs = df[df.类型.isin(leixing).values == True]
+            if dfs.shape[0] == 0:
+                log.info('在客户类型“' + str(leixingset) + '”中时无数据！')
+                continue
             if cum:
                 dfmoban = dfs.groupby('日期')[xiangmu].sum()
                 dfmoban = pd.DataFrame(dfmoban,index=pd.to_datetime(dfmoban.index))
@@ -101,8 +105,8 @@ def fenxiyueduibi(note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, 
             # if not cum:
             #     dfmoban = getgroupdf(dfs, xiangmu, 'year')
             chubiaoyuezhexian(dfmoban, dangqianyueri, xiangmu, cum=cum, leixing=leixingset, pinpai=pinpai, imglist=imglist, nianshu=5, imgpath='img\\'+leixingset+'\\')
-            targetleixing = ['全渠道','连锁客户','渠道客户']
-            if leixingset in targetleixing:
+            if leixingset in list(noteleixingdf.index):
+                myrndsleep()
                 imglist2note(note_store, imglist, noteleixingdf.loc[leixingset]['guid'], noteleixingdf.loc[leixingset]['title'])
 
 
