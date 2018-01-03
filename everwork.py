@@ -16,14 +16,7 @@ from notedispatch import *
 #                                                                     time.localtime(time.time()))
 log.debug('程序启动……')
 
-cfp =ConfigParser()
-inifilepath = 'data\\everwork.ini'
-cfp.read(inifilepath,encoding='utf-8')
-# cfp.sections()
 token = cfp.get('evernote','token')
-# print(token)
-
-
 log.debug('配置文件读取成功')
 
 
@@ -57,17 +50,20 @@ for aa in nbfbdf.index:
 cnx = lite.connect('data\\quandan.db')
 # dataokay(cnx)
 # pickstat(note_store,cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca','订单配货统计图')
-brandlist = ['欢夫','爽口佳','津津友味','鲜多鲜','丽芝士','麦小呆','抓鱼的猫','渔米之湘','劲仔','新丰园','旭东','创食人','']
-brandlist = ['爽口佳','津津友味','鲜多鲜','丽芝士','麦小呆','抓鱼的猫','渔米之湘','劲仔','新丰园','旭东','创食人','']
-brandlist = ['津津友味','鲜多鲜','丽芝士','麦小呆','抓鱼的猫','渔米之湘','劲仔','新丰园','旭东','创食人']
+brandlist = ['U品部落','非凡','鲜客','童年时代','可可哥','倍儿爽','小鹏','醉吃香']
+# brandlist = ['爽口佳','津津友味','鲜多鲜','丽芝士','麦小呆','抓鱼的猫','渔米之湘','劲仔','新丰园','旭东','创食人','']
+# brandlist = ['劲仔','新丰园','旭东','创食人']
+# brandlist = ['旭东','创食人']
+brandlist = ['兴仁居','有友','光头祥','大霸王','卫龙','凤将军','馋大嘴','儿时代','咚咚']
 # brandlist = []
 for br in brandlist:
-    myrndsleep(200)
     updatesection(cfp,'guidfenbunb',br+'kehuguidfenbu',inifilepath,token,note_store,br+'客户开发图表')
     updatesection(cfp,'guidfenbunb',br+'saleguidfenbu',inifilepath,token,note_store,br+'销售业绩图表')
     updatesection(cfp,'guidleixingnb',br+'kehuguidleixing',inifilepath,token,note_store,br+'客户开发图表')
     updatesection(cfp,'guidleixingnb',br+'saleguidleixing',inifilepath,token,note_store,br+'销售业绩图表')
+    # myrndsleep(300)
 
+    # notelxxsdf = ['']
     notelxxsdf = readinisection2df(cfp,br+'saleguidleixing',br+'销售业绩图表')
     notefbxsdf = readinisection2df(cfp,br+'saleguidfenbu',br+'销售业绩图表')
     # print(notefbxsdf)
@@ -80,6 +76,8 @@ for br in brandlist:
     qrystr += ' group by 日期,客户编码 order by 日期'
     fenxiyueduibi(note_store, qrystr, '金额', notefbxsdf, notelxxsdf, cnx, pinpai=br, cum=True)
 
+    # myrndsleep(300)
+    # notelxkhdf = ['']
     notelxkhdf = readinisection2df(cfp, br+'kehuguidleixing', br+'客户开发图表')
     notefbkhdf = readinisection2df(cfp, br+'kehuguidfenbu', br+'客户开发图表')
     # print(notefbkhdf)
@@ -95,4 +93,9 @@ for br in brandlist:
 # desclitedb(cnx)
 # swissknife(cnx)
 cnx.close()
+
+cfp.set('evernote', 'apicount', '%d' % ENtimes)
+cfp.set('evernote', 'apilasttime', '%s' % str(datetime.datetime.now()))
+cfp.write(open(inifilepath, 'w', encoding='utf-8'))
+
 log.debug('程序结束！')

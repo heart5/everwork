@@ -77,7 +77,7 @@ def fenxiyueduibi(note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, 
                 # if not cum:
                 #     dfmoban = getgroupdf(dfs, xiangmu,'year')
                 chubiaoyuezhexian(dfmoban, dangqianyueri, xiangmu, cum =cum, leixing=leixingset, imglist=imglist, quyu=fenbuset, pinpai=pinpai, nianshu=5, imgpath='img\\'+fenbuset+'\\')
-                myrndsleep()
+                # myrndsleep()
                 imglist2note(note_store, imglist, notefenbudf.loc[fenbuset]['guid'],notefenbudf.loc[fenbuset]['title'])
         else:
             dfs = df[df.类型.isin(leixing).values == True]
@@ -105,8 +105,10 @@ def fenxiyueduibi(note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, 
             # if not cum:
             #     dfmoban = getgroupdf(dfs, xiangmu, 'year')
             chubiaoyuezhexian(dfmoban, dangqianyueri, xiangmu, cum=cum, leixing=leixingset, pinpai=pinpai, imglist=imglist, nianshu=5, imgpath='img\\'+leixingset+'\\')
-            if leixingset in list(noteleixingdf.index):
-                myrndsleep()
+            targetlist = list(noteleixingdf.index)
+            # targetlist = []
+            if leixingset in targetlist:
+                # myrndsleep()
                 imglist2note(note_store, imglist, noteleixingdf.loc[leixingset]['guid'], noteleixingdf.loc[leixingset]['title'])
 
 

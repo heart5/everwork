@@ -6,7 +6,8 @@ import大集合
 '''
 
 import time, calendar as cal, hashlib, binascii, re, os, socket, random, logging, pandas as pd, sqlite3 as lite,\
-    matplotlib.pyplot as plt, evernote.edam.type.ttypes as Ttypes, evernote.edam.error.ttypes as Etypes,\
+    matplotlib.pyplot as plt, \
+    evernote.edam.type.ttypes as Ttypes, evernote.edam.error.ttypes as Etypes, \
     evernote.edam.userstore.constants as UserStoreConstants, \
     evernote.edam.notestore.NoteStore as NoteStore
 from pylab import *
@@ -90,11 +91,27 @@ def mylog():
 
 workbefore()
 log = mylog()
+cfp =ConfigParser()
+inifilepath = 'data\\everwork.ini'
+cfp.read(inifilepath,encoding='utf-8')
+ENtimes = cfp.get('evernote','apicount')
+apilasttime = pd.to_datetime(cfp.get('evernote','apilasttime'))
+apilasttimehouzhengdian = pd.to_datetime((apilasttime+datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:00:00'))
+if datetime.datetime.now() > apilasttimehouzhengdian:
+    ENtimes = 0
+
+
+def jiayi():
+    global ENtimes, cfp, inifilepath
+    ENtimes += 1
+    log.debug('动用了Evernote API %d 次……' % ENtimes)
+
 
 def myrndsleep(second=20):
     rnd = np.random.randint(0,second)
     time.sleep(rnd)
     log.debug('休息一哈！这次是'+str(rnd)+'秒……')
+
 
 def use_logging(level='debug'):
     def decorator(func):
@@ -104,6 +121,7 @@ def use_logging(level='debug'):
             return func(*args)
         return wrapper
     return decorator
+
 
 def timestamp2str(timestamp):
     return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(timestamp))
@@ -125,6 +143,7 @@ def readinisection2df(cfp,section,biaoti):
     del df['fenbu']
     return df
 
+
 def yingdacal(x,cnx):
     ii = (x+pd.DateOffset(days=1)).strftime('%Y-%m-%d')
     dfall = pd.read_sql_query('select tianshu from jiaqi where date =\''+ii+'\'', cnx)
@@ -138,6 +157,7 @@ def yingdacal(x,cnx):
         return x+pd.DateOffset(days=2)
     else:
         return x + pd.DateOffset(days=1)
+
 
 @use_logging()
 def get_notestore(token='your developer token'):
@@ -177,9 +197,10 @@ def get_notestore(token='your developer token'):
 
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
+    errorstr = '连接Evernote服务器出现错误！'
     try:
-        userStore = client.get_user_store()
-        version_ok = userStore.checkVersion(
+        userstore = client.get_user_store()
+        version_ok = userstore.checkVersion(
             "Evernote EDAMTest (Python)",
             UserStoreConstants.EDAM_VERSION_MAJOR,
             UserStoreConstants.EDAM_VERSION_MINOR
@@ -189,26 +210,24 @@ def get_notestore(token='your developer token'):
             exit(1)
         print("Is my Evernote API version up to date? ", str(version_ok))
         note_store = client.get_note_store()
-    except Exception as e:
-        print(type(e),end='\t\t')
-        print(e.args)
-        print(e)
-        errorstr = '连接Evernote服务器出现错误！'
-        if type(e) == socket.gaierror: #getaddrinfo failed
-            log.critical(str(e)+'，可能是外网不通。'+errorstr)
-        elif type(e) == Etypes.EDAMSystemException:  # EDAMSystemException(errorCode=19, message=None, rateLimitDuration=1166)
-            log.critical(str(e) + '，使用超限。' + errorstr)
-        elif type(e) == Etypes.EDAMUserException: # EDAMUserException(errorCode=2, parameter='authenticationToken')
-            log.critical(str(e)+'，口令有误。'+errorstr)
-        exit(1)
-        # pass
-    else:
+        jiayi()
         log.debug('成功连接Evernote服务器！')
-
-    # currentuser = userStore.getUser()
-    # printuserattributeundertoken(currentuser)
-
-    return note_store
+        return note_store
+    except socket.gaierror as e:
+        log.critical('%s可能是网络连接问题。%s' % (errorstr, str(e)))
+        exit(1)
+    except Etypes.EDAMUserException as e:
+        log.critical('%s可能口令有误。%s' % (errorstr, str(e)))
+        exit(1)
+    except Etypes.EDAMSystemException as e:
+        if e.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
+            log.critical('%sAPI使用超限，需要%d秒后重来。%s' % (errorstr, e.rateLimitDuration, str(e)))
+        else:
+            log.critical('%s出现系统错误。%s' % (errorstr, str(e)))
+        exit(1)
+    except Exception as e:
+        log.critical('%s出现系统错误。%s' % (errorstr, str(e)))
+        exit(2)
 
 
 #列出笔记本中的笔记信息
@@ -220,6 +239,7 @@ def findnotefromnotebook( note_store, token, notebookguid, titlefind, notecount=
                                               includeNotebookGuid=True, includeTagGuids=True, includeAttributes=True,
                                               includeLargestResourceMime=True, includeLargestResourceSize=True)
     ourNoteList=note_store.findNotesMetadata(token, notefilter, 0, notecount, notemetaspec)
+    jiayi()
 
     # print ourNoteList.notes[-1].title  #测试打印指定note的标题
     # print note_store.getNoteContent(ourNoteList.notes[-1].guid)  #测试打印指定note的内容
@@ -317,27 +337,31 @@ def makenote(token, notestore, notetitle, notebody='真元商贸——休闲食�
     if parentnotebook and hasattr(parentnotebook, 'guid'):
         ourNote.notebookGuid = parentnotebook.guid
 
-    note = findnotefromnotebook(notestore, token, parentnotebook.guid, notetitle)
-    if note:
-        log.info('笔记《'+notetitle+'》已经在笔记本《'+parentnotebook.name+'》中存在。')
-        return note
+    # note = findnotefromnotebook(notestore, token, parentnotebook.guid, notetitle)
+    # if note:
+    #     log.info('笔记《'+notetitle+'》已经在笔记本《'+parentnotebook.name+'》中存在。')
+    #     return note
 
     # Attempt to create note in Evernote account
     try:
         note = notestore.createNote(token, ourNote)
-    except Etypes.EDAMUserException as edec:
+        jiayi()
+        log.info('笔记《' + notetitle + '》在笔记本《' + parentnotebook.name + '》中创建成功。')
+        return note
+    except Etypes.EDAMUserException as e:
         ## Something was wrong with the note data
         ## See EDAMErrorCode enumeration for error code explanation
         ## http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
-        print("EDAMUserException:"+ edec)
-        return None
-    except Etypes.EDAMNotFoundException as ednfe:
+        log.critical("用户错误！%s" % str(e))
+    except Etypes.EDAMNotFoundException as e:
         ## Parent Notebook GUID doesn't correspond to an actual notebook
-        print("EDAMNotFoundException: Invalid parent notebook GUID")
-        return None
-    # Return created note object
-    log.info('笔记《' + notetitle + '》在笔记本《' + parentnotebook.name + '》中创建成功。')
-    return note
+        print("无效的笔记本guid（识别符）！%s" %str(e))
+    except Etypes.EDAMSystemException as e:
+        if e.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
+            log.critical("API达到调用极限，需要 %d 秒后重来" % e.rateLimitDuration)
+        else:
+            log.critical('创建笔记时出现严重错误：'+str(e))
+        exit(1)
 
 
 def updatesection(cfp,fromsection,tosection,inifilepath,token,note_store,zhuti='销售业绩图表'):
@@ -346,6 +370,13 @@ def updatesection(cfp,fromsection,tosection,inifilepath,token,note_store,zhuti='
     nbfbdf = readinisection2df(cfp, fromsection, zhuti)
     print(nbfbdf)
     for aa in nbfbdf.index:
+        try:
+            guid = cfp.get(tosection,aa)
+            if len(guid) >0:
+                print('笔记《'+str(aa)+zhuti+'》已存在，guid为：'+guid)
+                continue
+        except Exception as e:
+            log.info('笔记《'+str(aa)+zhuti+'》不存在，将被创建……%s' % str(e))
         note = Ttypes.Note()
         note.title = nbfbdf.loc[aa]['title']
         # print(aa + '\t\t' + note.title, end='\t\t')
@@ -414,7 +445,6 @@ def gengxinfou(filename,conn,tablename='fileread'):
     conn.commit()
 
     return rt
-
 
 
 def dataokay(cnx):
@@ -639,12 +669,10 @@ def chubiaorizhexian(df, riqienddate, xiangmu, cum = False,imglist=[], quyu='', 
 
     # return imgsavepath
 
-#
-#图片列表更新进笔记
-#
+
 def imglist2note(notestore, imglist, noteguid, notetitle, sty='replace'):
     #
-    # 要更新一个note，生成一个Note（），指定guid，更新其content
+    # 更新note内容为图片列表
     #
     note = Ttypes.Note()
     note.guid = noteguid
@@ -699,12 +727,11 @@ def imglist2note(notestore, imglist, noteguid, notetitle, sty='replace'):
     # attributes such as the new note's unique GUID.
     try:
         updated_note = notestore.updateNote(note)
-    except Exception as e:
+        jiayi()
+        log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
+    except Etypes.EDAMSystemException as e:
         if e.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
-            print("Rate limit reached, Retry your request in %d seconds" % e.rateLimitDuration)
-        log.critical('更新笔记时出现严重错误：'+str(e))
+            log.critical("API达到调用极限，需要 %d 秒后重来" % e.rateLimitDuration)
+        else:
+            log.critical('更新笔记时出现系统错误：'+str(e))
         exit(1)
-    # print(updated_note)
-    # print ("Successfully updated a note with GUID: ", updated_note.guid, updated_note.title)
-    log.info('成功更新了笔记《%s》，guid：%s。' %(updated_note.title,updated_note.guid))
-
