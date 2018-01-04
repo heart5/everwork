@@ -105,6 +105,13 @@ def jiayi():
     global ENtimes, cfp, inifilepath
     ENtimes += 1
     log.debug('动用了Evernote API %d 次……' % ENtimes)
+    if ENtimes > 200:
+        now = datetime.datetime.now()
+        zhengdian = pd.to_datetime('%4d-%2d-%2d %2d:00:00' % (now.year, now.month, now.day, now.hour+1))
+        sleep_seconds = (zhengdian - now).seconds + 30
+        log.info('Evernote API 调用已达%d次，休息%d秒，待%s再开干……' % (ENtimes, sleep_seconds, str(zhengdian)))
+        time.sleep(sleep_seconds)
+        ENtimes = 0
 
 
 def myrndsleep(second=20):

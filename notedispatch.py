@@ -31,6 +31,9 @@ def fenxiyueduibi(note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, 
 
     df = pd.read_sql_query(sqlstr, cnx)
     log.info(sqlstr)
+    if df.shape[0] == 0:
+        log.info('%s数据查询为空，返回' % pinpai)
+        return
 
     df['日期'] = pd.to_datetime(df['日期'])
     print(df.tail(5))

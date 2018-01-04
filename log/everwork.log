@@ -903,6 +903,13 @@
 2017-12-27 22:29:37	ewer	everfunc.py - [gengxinfou]	MainThread - 5980 - 7124	INFO: 文件《2017年全单统计管理.xlsm》已有18条记录，有新文件，更新之。
 2017-12-27 22:29:58	ewer	everfunc.py - [imglist2note]	MainThread - 5980 - 7124	INFO: 成功更新了笔记《订单配货统计图》，guid：1c0830d9-e42f-4ce7-bf36-ead868a55eca。
 2017-12-27 22:29:58	ewer	everwork.py - [<module>]	MainThread - 5980 - 7124	DEBUG: 程序结束！
+2017-12-28 11:18:17	ewer	everwork.py - [<module>]	MainThread - 8300 - 7212	DEBUG: 程序启动……
+2017-12-28 11:20:18	ewer	everwork.py - [<module>]	MainThread - 13288 - 12364	DEBUG: 程序启动……
+2017-12-28 11:20:18	ewer	everwork.py - [<module>]	MainThread - 13288 - 12364	DEBUG: 配置文件读取成功
+2017-12-28 11:20:18	ewer	everfunc.py - [wrapper]	MainThread - 13288 - 12364	DEBUG: get_notestore 启动运行
+2017-12-28 11:20:21	ewer	everfunc.py - [get_notestore]	MainThread - 13288 - 12364	DEBUG: 成功连接Evernote服务器！
+2017-12-28 11:20:36	ewer	everfunc.py - [imglist2note]	MainThread - 13288 - 12364	INFO: 成功更新了笔记《武汉天气图》，guid：296f57a3-c660-4dd5-885a-56492deb2cee。
+2017-12-28 11:20:36	ewer	everwork.py - [<module>]	MainThread - 13288 - 12364	DEBUG: 程序结束！
 2017-12-28 23:45:32	ewer	everwork.py - [<module>]	MainThread - 13740 - 9260	DEBUG: 程序启动……
 2017-12-28 23:45:32	ewer	everwork.py - [<module>]	MainThread - 13740 - 9260	DEBUG: 配置文件读取成功
 2017-12-28 23:45:32	ewer	everfunc.py - [wrapper]	MainThread - 13740 - 9260	DEBUG: get_notestore 启动运行
