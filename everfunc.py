@@ -94,18 +94,20 @@ log = mylog()
 cfp =ConfigParser()
 inifilepath = 'data\\everwork.ini'
 cfp.read(inifilepath,encoding='utf-8')
-ENtimes = cfp.get('evernote','apicount')
+ENtimes = int(cfp.get('evernote','apicount'))
+# print(type(ENtimes))
 apilasttime = pd.to_datetime(cfp.get('evernote','apilasttime'))
 apilasttimehouzhengdian = pd.to_datetime((apilasttime+datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:02:00'))
 if datetime.datetime.now() > apilasttimehouzhengdian:
-    time.sleep(60)
+    # time.sleep(60)
     ENtimes = 0
 
 
 def jiayi():
     global ENtimes, cfp, inifilepath
+    # print('优化优化')
     ENtimes += 1
-    log.debug('动用了Evernote API %d 次……' % ENtimes)
+    log.debug('动用了Evernote API %s 次……' % ENtimes)
     if ENtimes > 180:
         now = datetime.datetime.now()
         zhengdian = pd.to_datetime('%4d-%2d-%2d %2d:00:00' % (now.year, now.month, now.day, now.hour+1))
@@ -114,6 +116,15 @@ def jiayi():
         time.sleep(sleep_seconds)
         ENtimes = 0
 
+
+def writeini():
+    global ENtimes, cfp, inifilepath
+    print(ENtimes)
+    print(str(datetime.datetime.now()))
+    cfp.set('evernote', 'apicount', '%d' % ENtimes)
+    cfp.set('evernote', 'apilasttime', '%s' % str(datetime.datetime.now()))
+    cfp.write(open(inifilepath, 'w', encoding='utf-8'))
+    log.info('Evernote API调用次数写入配置文件：%s' % ENtimes)
 
 def myrndsleep(second=20):
     rnd = np.random.randint(0,second)
@@ -234,6 +245,7 @@ def get_notestore(token='your developer token'):
             log.critical('%s出现系统错误。%s' % (errorstr, str(e)))
         exit(1)
     except Exception as e:
+        print(e)
         log.critical('%s出现系统错误。%s' % (errorstr, str(e)))
         exit(2)
 

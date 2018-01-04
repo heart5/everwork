@@ -19,7 +19,6 @@ log.debug('程序启动……')
 token = cfp.get('evernote','token')
 log.debug('配置文件读取成功')
 
-
 note_store = get_notestore(token)
 
 # #列出账户中的全部笔记本
@@ -48,7 +47,7 @@ for aa in nbfbdf.index:
         log.debug('目录《' + cpath + '》被创建')
 
 cnx = lite.connect('data\\quandan.db')
-# dataokay(cnx)
+dataokay(cnx)
 # pickstat(note_store,cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca','订单配货统计图')
 brandlist = ['U品部落','非凡','鲜客','童年时代','可可哥','倍儿爽','小鹏','醉吃香']
 # brandlist = ['爽口佳','津津友味','鲜多鲜','丽芝士','麦小呆','抓鱼的猫','渔米之湘','劲仔','新丰园','旭东','创食人','']
@@ -61,17 +60,14 @@ brandlist = ['兴仁居','有友','光头祥','大霸王','卫龙','凤将军','
              '三友','君妃','火卤卤','花氏','洞庭渔王','相思','凤凰园','洁龙','怡口湘','阿林','好巴食','巧大娘',
              '老成都','一品鱼舫','香约','朝启','顶牛','湘俚味','红叶','无穷','快活嘴','花心子','蛋大厨','绿野香',
              '佳宝','湘宝王','乡巴佬','鑫之恋','泰越精厨']
-brandlist = ['心诺','张师傅','农尔康','君思','津尝乐','珍可惠','红帅','先生','好棒美',
-             '三友','君妃','火卤卤','花氏','洞庭渔王','相思','凤凰园','洁龙','怡口湘','阿林','好巴食','巧大娘',
-             '老成都','一品鱼舫','香约','朝启','顶牛','湘俚味','红叶','无穷','快活嘴','花心子','蛋大厨','绿野香',
-             '佳宝','湘宝王','乡巴佬','鑫之恋','泰越精厨']
+brandlist = ['爽口佳','新丰园','津津友味','鲜多鲜','丽芝士','麦小呆','渔米之湘','U品部落','抓鱼的猫','旭东','创食人','']
+# brandlist = ['新丰园']
 # brandlist = []
 for br in brandlist:
     updatesection(cfp,'guidfenbunb',br+'kehuguidfenbu',inifilepath,token,note_store,br+'客户开发图表')
     updatesection(cfp,'guidfenbunb',br+'saleguidfenbu',inifilepath,token,note_store,br+'销售业绩图表')
     updatesection(cfp,'guidleixingnb',br+'kehuguidleixing',inifilepath,token,note_store,br+'客户开发图表')
     updatesection(cfp,'guidleixingnb',br+'saleguidleixing',inifilepath,token,note_store,br+'销售业绩图表')
-    # myrndsleep(300)
 
     # notelxxsdf = ['']
     notelxxsdf = readinisection2df(cfp,br+'saleguidleixing',br+'销售业绩图表')
@@ -86,7 +82,6 @@ for br in brandlist:
     qrystr += ' group by 日期,客户编码 order by 日期'
     fenxiyueduibi(note_store, qrystr, '金额', notefbxsdf, notelxxsdf, cnx, pinpai=br, cum=True)
 
-    # myrndsleep(300)
     # notelxkhdf = ['']
     notelxkhdf = readinisection2df(cfp, br+'kehuguidleixing', br+'客户开发图表')
     notefbkhdf = readinisection2df(cfp, br+'kehuguidfenbu', br+'客户开发图表')
@@ -100,12 +95,10 @@ for br in brandlist:
         qrystr += ' and (品牌 = \'%s\')' %br
     qrystr += ' group by 日期,客户编码 order by 日期'
     fenxiyueduibi(note_store, qrystr,'成交客户数', notefbkhdf, notelxkhdf, cnx, pinpai=br)
+
 # desclitedb(cnx)
 # swissknife(cnx)
 cnx.close()
 
-cfp.set('evernote', 'apicount', '%d' % ENtimes)
-cfp.set('evernote', 'apilasttime', '%s' % str(datetime.datetime.now()))
-cfp.write(open(inifilepath, 'w', encoding='utf-8'))
-
+writeini()
 log.debug('程序结束！')
