@@ -106,7 +106,7 @@ def jiayi():
     global ENtimes, cfp, inifilepath
     ENtimes += 1
     log.debug('动用了Evernote API %d 次……' % ENtimes)
-    if ENtimes > 190:
+    if ENtimes > 180:
         now = datetime.datetime.now()
         zhengdian = pd.to_datetime('%4d-%2d-%2d %2d:00:00' % (now.year, now.month, now.day, now.hour+1))
         sleep_seconds = (zhengdian - now).seconds + 60
