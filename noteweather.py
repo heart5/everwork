@@ -15,7 +15,7 @@ from matplotlib.ticker import MultipleLocator, FuncFormatter
 
 
 
-def weatherstat(note_store, sourceguid, destguid=None):
+def weatherstat(token, note_store, sourceguid, destguid=None):
     soup = BeautifulSoup(note_store.getNoteContent(sourceguid), "html.parser")
     # tags = soup.find('en-note')
     # print tags
@@ -222,5 +222,5 @@ def weatherstat(note_store, sourceguid, destguid=None):
     imglist.append(img_sunonoff_path)
     plt.close()
 
-    imglist2note(note_store,imglist,destguid,'武汉天气图')
+    imglist2note(note_store, imglist, destguid, '武汉天气图', token)
 

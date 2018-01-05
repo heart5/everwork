@@ -22,7 +22,7 @@ def getgroupdf( dfs,xiangmu,period='month'):
     return dfmoban
 
 
-def fenxiyueduibi(note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, pinpai='', cum=False):
+def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, pinpai='', cum=False):
     dfquyu= pd.read_sql('select * from quyu',cnx,index_col='index')
     dfleixing= pd.read_sql('select * from leixing',cnx,index_col='index')
     fenbulist = list(notefenbudf.index)
@@ -81,7 +81,7 @@ def fenxiyueduibi(note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, 
                 #     dfmoban = getgroupdf(dfs, xiangmu,'year')
                 chubiaoyuezhexian(dfmoban, dangqianyueri, xiangmu, cum =cum, leixing=leixingset, imglist=imglist, quyu=fenbuset, pinpai=pinpai, nianshu=5, imgpath='img\\'+fenbuset+'\\')
                 # myrndsleep()
-                imglist2note(note_store, imglist, notefenbudf.loc[fenbuset]['guid'],notefenbudf.loc[fenbuset]['title'])
+                imglist2note(note_store, imglist, notefenbudf.loc[fenbuset]['guid'],notefenbudf.loc[fenbuset]['title'], token)
         else:
             dfs = df[df.类型.isin(leixing).values == True]
             if dfs.shape[0] == 0:
@@ -112,7 +112,7 @@ def fenxiyueduibi(note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, 
             # targetlist = []
             if leixingset in targetlist:
                 # myrndsleep()
-                imglist2note(note_store, imglist, noteleixingdf.loc[leixingset]['guid'], noteleixingdf.loc[leixingset]['title'])
+                imglist2note(note_store, imglist, noteleixingdf.loc[leixingset]['guid'], noteleixingdf.loc[leixingset]['title'], token)
 
 
 

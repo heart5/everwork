@@ -64,6 +64,7 @@ def workbefore():
     if not os.path.exists('log'):
         os.mkdir('log')
 
+
 def mylog():
     '''日志函数，定义输出文件和格式等内容
     
@@ -91,30 +92,16 @@ def mylog():
 
 workbefore()
 log = mylog()
-cfp =ConfigParser()
+cfp = ConfigParser()
 inifilepath = 'data\\everwork.ini'
 cfp.read(inifilepath,encoding='utf-8')
 ENtimes = int(cfp.get('evernote','apicount'))
 # print(type(ENtimes))
 apilasttime = pd.to_datetime(cfp.get('evernote','apilasttime'))
-apilasttimehouzhengdian = pd.to_datetime((apilasttime+datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:02:00'))
+apilasttimehouzhengdian = pd.to_datetime((apilasttime+datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:00:00'))
 if datetime.datetime.now() > apilasttimehouzhengdian:
     # time.sleep(60)
     ENtimes = 0
-
-
-def jiayi():
-    global ENtimes, cfp, inifilepath
-    # print('优化优化')
-    ENtimes += 1
-    log.debug('动用了Evernote API %s 次……' % ENtimes)
-    if ENtimes > 180:
-        now = datetime.datetime.now()
-        zhengdian = pd.to_datetime('%4d-%2d-%2d %2d:00:00' % (now.year, now.month, now.day, now.hour+1))
-        sleep_seconds = (zhengdian - now).seconds + 60
-        log.info('Evernote API 调用已达%d次，休息%d秒，待%s再开干……' % (ENtimes, sleep_seconds, str(zhengdian)))
-        time.sleep(sleep_seconds)
-        ENtimes = 0
 
 
 def writeini():
@@ -125,6 +112,22 @@ def writeini():
     cfp.set('evernote', 'apilasttime', '%s' % str(datetime.datetime.now()))
     cfp.write(open(inifilepath, 'w', encoding='utf-8'))
     log.info('Evernote API调用次数写入配置文件：%s' % ENtimes)
+
+
+def jiayi():
+    global ENtimes, cfp, inifilepath
+    # print('优化优化')
+    ENtimes += 1
+    log.debug('动用了Evernote API %s 次……' % ENtimes)
+    if ENtimes >= 290:
+        now = datetime.datetime.now()
+        zhengdian = pd.to_datetime('%4d-%2d-%2d %2d:00:00' % (now.year, now.month, now.day, now.hour+1))
+        sleep_seconds = (zhengdian - now).seconds + 60
+        log.info('Evernote API 调用已达%d次，休息%d秒，待%s再开干……' % (ENtimes, sleep_seconds, str(zhengdian)))
+        writeini()
+        time.sleep(sleep_seconds)
+        ENtimes = 0
+
 
 def myrndsleep(second=20):
     rnd = np.random.randint(0,second)
@@ -163,16 +166,16 @@ def readinisection2df(cfp,section,biaoti):
     return df
 
 
-def yingdacal(x,cnx):
+def yingdacal(x, cnx):
     ii = (x+pd.DateOffset(days=1)).strftime('%Y-%m-%d')
     dfall = pd.read_sql_query('select tianshu from jiaqi where date =\''+ii+'\'', cnx)
     # print(dfall.columns)
     # print(dfall['tianshu'])
     # print(len(dfall))
     print(int(x.strftime('%w')))
-    if(len(dfall) > 0):
+    if len(dfall) > 0:
         return x+pd.DateOffset(days=int(dfall['tianshu'][0]))
-    elif(int(x.strftime('%w')) == 6):
+    elif int(x.strftime('%w')) == 6:
         return x+pd.DateOffset(days=2)
     else:
         return x + pd.DateOffset(days=1)
@@ -232,21 +235,21 @@ def get_notestore(token='your developer token'):
         jiayi()
         log.debug('成功连接Evernote服务器！')
         return note_store
-    except socket.gaierror as e:
-        log.critical('%s可能是网络连接问题。%s' % (errorstr, str(e)))
+    except socket.gaierror as sge:
+        log.critical('%s可能是网络连接问题。%s' % (errorstr, str(sge)))
         exit(1)
-    except Etypes.EDAMUserException as e:
-        log.critical('%s可能口令有误。%s' % (errorstr, str(e)))
+    except Etypes.EDAMUserException as usere:
+        log.critical('%s可能口令有误。%s' % (errorstr, str(usere)))
         exit(1)
-    except Etypes.EDAMSystemException as e:
-        if e.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
-            log.critical('%sAPI使用超限，需要%d秒后重来。%s' % (errorstr, e.rateLimitDuration, str(e)))
+    except Etypes.EDAMSystemException as systeme:
+        if systeme.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
+            log.critical('%sAPI使用超限，需要%d秒后重来。%s' % (errorstr, systeme.rateLimitDuration, str(systeme)))
         else:
-            log.critical('%s出现系统错误。%s' % (errorstr, str(e)))
+            log.critical('%s出现系统错误。%s' % (errorstr, str(systeme)))
         exit(1)
-    except Exception as e:
-        print(e)
-        log.critical('%s出现系统错误。%s' % (errorstr, str(e)))
+    except Exception as ee:
+        print(ee)
+        log.critical('%s出现系统错误。%s' % (errorstr, str(ee)))
         exit(2)
 
 
@@ -258,7 +261,7 @@ def findnotefromnotebook( note_store, token, notebookguid, titlefind, notecount=
                                               includeUpdated=True, includeDeleted=True, includeUpdateSequenceNum=True,
                                               includeNotebookGuid=True, includeTagGuids=True, includeAttributes=True,
                                               includeLargestResourceMime=True, includeLargestResourceSize=True)
-    ourNoteList=note_store.findNotesMetadata(token, notefilter, 0, notecount, notemetaspec)
+    ournotelist = note_store.findNotesMetadata(token, notefilter, 0, notecount, notemetaspec)
     jiayi()
 
     # print ourNoteList.notes[-1].title  #测试打印指定note的标题
@@ -267,9 +270,10 @@ def findnotefromnotebook( note_store, token, notebookguid, titlefind, notecount=
     # printnoteattributeundertoken(note)
     # print ourNoteList.notes[5] #打印NoteMetadata
 
-    for note in ourNoteList.notes:
+    for note in ournotelist.notes:
         if note.title.find(titlefind) >= 0:
             print (note.guid, note.title)
+            # printnoteattributeundertoken(note)
             return note
 
     return False
@@ -300,24 +304,24 @@ def printnotebookattributeundertoken(notebook):
 #开发口令（token）的方式调用返回如下
 #findNotesMetadata函数获取
 def printnoteattributeundertoken( note):
-    print ('guid\t'+ note.guid)  #
-    print ('标题\t'+ note.title)  #
-    print ('内容长度\t'+ note.contentLength) #762
+    print ('guid\t%s' % note.guid)  #
+    print ('标题\t%s' % note.title)  #
+    print ('内容长度\t%d' % note.contentLength) #762
     print ('内容\t'+ note.content)  #这种权限的调用没有返回这个值，报错；NoteStore.getNoteContent()也无法解析
-    print ('内容哈希值\t'+ str(note.contentHash)) ##8285
-    print ('创建时间\t'+ timestamp2str(int(note.created/1000))) #2017-09-04 22:39:51
-    print ('更新时间\t'+ timestamp2str(int(note.updated/1000))) #2017-09-07 06:38:47
-    print ('删除时间\t'+ note.deleted)  #这种权限的调用返回None
-    print ('活跃\t'+ note.active)  #True
-    print ('更新序列号\t'+ note.updateSequenceNum)  #173514
-    print ('所在笔记本的guid\t'+ note.notebookGuid) #2c8e97b5-421f-461c-8e35-0f0b1a33e91c
-    print ('标签的guid表\t'+ note.tagGuids)  #这种权限的调用返回None
-    print ('资源表\t'+ note.resources) #这种权限的调用返回None
-    print ('属性\t'+ note.attributes) #NoteAttributes(lastEditorId=139947593, placeName=None, sourceURL=None, classifications=None, creatorId=139947593, author=None, reminderTime=None, altitude=0.0, reminderOrder=None, shareDate=None, reminderDoneTime=None, longitude=114.293, lastEditedBy='\xe5\x91\xa8\xe8\x8e\x89 <305664756@qq.com>', source='mobile.android', applicationData=None, sourceApplication=None, latitude=30.4722, contentClass=None, subjectDate=None)
-    print ('标签名称表\t'+ note.tagNames) #这种权限的调用返回None
-    # print '共享的笔记表\t', note.sharedNotes  #这种权限的调用没有返回这个值，报错
-    # print '限定\t', note.restrictions  #这种权限的调用没有返回这个值，报错
-    # print '范围\t', note.limits  #这种权限的调用没有返回这个值，报错
+    print ('内容哈希值\t%s' % note.contentHash) ##8285
+    print ('创建时间\t%s' % timestamp2str(int(note.created/1000))) #2017-09-04 22:39:51
+    print ('更新时间\t%s' % timestamp2str(int(note.updated/1000))) #2017-09-07 06:38:47
+    print ('删除时间\t%s' % note.deleted)  #这种权限的调用返回None
+    print ('活跃\t%s' % note.active)  #True
+    print ('更新序列号\t%d' % note.updateSequenceNum)  #173514
+    print ('所在笔记本的guid\t%s' % note.notebookGuid) #2c8e97b5-421f-461c-8e35-0f0b1a33e91c
+    print ('标签的guid表\t%s' % note.tagGuids)  #这种权限的调用返回None
+    print ('资源表\t%s' % note.resources) #这种权限的调用返回None
+    print ('属性\t%s' % note.attributes) #NoteAttributes(lastEditorId=139947593, placeName=None, sourceURL=None, classifications=None, creatorId=139947593, author=None, reminderTime=None, altitude=0.0, reminderOrder=None, shareDate=None, reminderDoneTime=None, longitude=114.293, lastEditedBy='\xe5\x91\xa8\xe8\x8e\x89 <305664756@qq.com>', source='mobile.android', applicationData=None, sourceApplication=None, latitude=30.4722, contentClass=None, subjectDate=None)
+    print ('标签名称表\t%s' % note.tagNames) #这种权限的调用返回None
+    # print ('共享的笔记表\t%s' % note.sharedNotes)  #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'sharedNotes'
+    # print ('限定\t%s' % note.restrictions)  #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'restrictions'
+    # print ('范围\t%s' % note.limits) #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'limits'
 
 
 # 测试用户（user）数据结构每个属性的返回值
@@ -357,56 +361,54 @@ def makenote(token, notestore, notetitle, notebody='真元商贸——休闲食�
     if parentnotebook and hasattr(parentnotebook, 'guid'):
         ourNote.notebookGuid = parentnotebook.guid
 
-    # note = findnotefromnotebook(notestore, token, parentnotebook.guid, notetitle)
-    # if note:
-    #     log.info('笔记《'+notetitle+'》已经在笔记本《'+parentnotebook.name+'》中存在。')
-    #     return note
-
     # Attempt to create note in Evernote account
     try:
         note = notestore.createNote(token, ourNote)
         jiayi()
         log.info('笔记《' + notetitle + '》在笔记本《' + parentnotebook.name + '》中创建成功。')
         return note
-    except Etypes.EDAMUserException as e:
+    except Etypes.EDAMUserException as usere:
         ## Something was wrong with the note data
         ## See EDAMErrorCode enumeration for error code explanation
         ## http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
-        log.critical("用户错误！%s" % str(e))
-    except Etypes.EDAMNotFoundException as e:
+        log.critical("用户错误！%s" % str(usere))
+    except Etypes.EDAMNotFoundException as notfounde:
         ## Parent Notebook GUID doesn't correspond to an actual notebook
-        print("无效的笔记本guid（识别符）！%s" %str(e))
-    except Etypes.EDAMSystemException as e:
-        if e.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
-            log.critical("API达到调用极限，需要 %d 秒后重来" % e.rateLimitDuration)
+        print("无效的笔记本guid（识别符）！%s" %str(notfounde))
+    except Etypes.EDAMSystemException as systeme:
+        if systeme.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
+            log.critical("API达到调用极限，需要 %d 秒后重来" % systeme.rateLimitDuration)
+            exit(1)
         else:
-            log.critical('创建笔记时出现严重错误：'+str(e))
-        exit(1)
+            log.critical('创建笔记时出现严重错误：'+str(systeme))
+            exit(2)
 
 
-def updatesection(cfp,fromsection,tosection,inifilepath,token,note_store,zhuti='销售业绩图表'):
-    if not cfp.has_section(tosection):
-        cfp.add_section(tosection)
-    nbfbdf = readinisection2df(cfp, fromsection, zhuti)
+def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhuti='销售业绩图表'):
+    if not cfpp.has_section(tosection):
+        cfpp.add_section(tosection)
+    nbfbdf = readinisection2df(cfpp, fromsection, zhuti)
     print(nbfbdf)
     for aa in nbfbdf.index:
         try:
-            guid = cfp.get(tosection,aa)
+            guid = cfpp.get(tosection,aa)
             if len(guid) >0:
                 print('笔记《'+str(aa)+zhuti+'》已存在，guid为：'+guid)
                 continue
-        except Exception as e:
-            log.info('笔记《'+str(aa)+zhuti+'》不存在，将被创建……%s' % str(e))
+        except Exception as ee:
+            log.info('笔记《'+str(aa)+zhuti+'》不存在，将被创建……%s' % str(ee))
         note = Ttypes.Note()
         note.title = nbfbdf.loc[aa]['title']
         # print(aa + '\t\t' + note.title, end='\t\t')
-        note = makenote(token, note_store, note.title, parentnotebook=note_store.getNotebook(nbfbdf.loc[aa]['guid']))
+        parentnotebook = note_store.getNotebook(nbfbdf.loc[aa]['guid'])
+        jiayi()
+        note = makenote(token, note_store, note.title, parentnotebook=parentnotebook)
         # print(note.guid + '\t\t' + note.title)
-        cfp.set(tosection, aa, note.guid)
-    cfp.write(open(inifilepath, 'w', encoding='utf-8'))
+        cfpp.set(tosection, aa, note.guid)
+    cfpp.write(open(inifile, 'w', encoding='utf-8'))
 
 
-def gengxinfou(filename,conn,tablename='fileread'):
+def gengxinfou(filename, conn, tablename='fileread'):
     rt = False
     try:
         create_tb_cmd = "CREATE TABLE IF NOT EXISTS %s " \
@@ -554,7 +556,7 @@ def dataokay(cnx):
 # leixing，终端类型
 # nianshu，用来对比的年份数，从当前年份向回数
 # imgpath，图片存储路径
-def chubiaoyuezhexian(df, riqi, xiangmu, cum= False, imglist=[], quyu='', leixing='', pinpai='', nianshu=3, imgpath='img\\'):
+def chubiaoyuezhexian(df, riqi, xiangmu, cum=False, imglist=[], quyu='', leixing='', pinpai='', nianshu=3, imgpath='img\\'):
     monthcur = pd.to_datetime("%04d-%02d-01" %(riqi.year,riqi.month)) # 2017-10-01
     nianlist = []
     for i in range(nianshu):
@@ -584,7 +586,7 @@ def chubiaoyuezhexian(df, riqi, xiangmu, cum= False, imglist=[], quyu='', leixin
 
     colnames = []
     for i in range(nianshu):
-        colnames.append((dslist[-(i+1)].columns)[0]) # -1 -2 -3 -4 -5, 4 3 2 1 0
+        colnames.append(dslist[-(i+1)].columns[0]) # -1 -2 -3 -4 -5, 4 3 2 1 0
     # print(colnames)
     df = df[colnames]
     zuobiao = pd.Series(list(df.index))
@@ -607,7 +609,7 @@ def chubiaoyuezhexian(df, riqi, xiangmu, cum= False, imglist=[], quyu='', leixin
     plt.close()
 
     cumstr='月折线'
-    df.plot(title=('%s%s') %(biaoti,cumstr))
+    df.plot(title='%s%s' % (biaoti, cumstr))
     if df[str(riqi.year)].max() > 10000:
         plt.gca().yaxis.set_major_formatter(FuncFormatter(lambda x, pos: "%.1f万" %((x/10000))))  # 纵轴主刻度文本用y_formatter函数计算
     plt.savefig(imgpath+'%s%s.png' % (biaoti, cumstr))
@@ -690,7 +692,7 @@ def chubiaorizhexian(df, riqienddate, xiangmu, cum = False,imglist=[], quyu='', 
     # return imgsavepath
 
 
-def imglist2note(notestore, imglist, noteguid, notetitle, sty='replace'):
+def imglist2note(notestore, imglist, noteguid, notetitle, token,  sty='replace'):
     #
     # 更新note内容为图片列表
     #
@@ -705,19 +707,33 @@ def imglist2note(notestore, imglist, noteguid, notetitle, sty='replace'):
 
     # Now, add the new Resource to the note's list of resources
     note.resources = []
+    # print(len(note.resources))
+    note.resources = notestore.getNote(token, noteguid, True, True, True,True).resources
+    jiayi()
+    # print(len(note.resources))
+    # for img, imgtitle in imglist:
     for img in imglist:
         image = open(img, 'rb').read()
         md5 = hashlib.md5()
         md5.update(image)
-        hash = md5.digest()
+        imghash = md5.digest()
         data = Ttypes.Data()  # 必须要重新构建一个Data（），否则内容不会变化
         data.size = len(image)
-        data.bodyHash = hash
+        data.bodyHash = imghash
         data.body = image
         resource = Ttypes.Resource()
+        # resource.name = '真元商贸'
         resource.mime = 'image/png'
         resource.data = data
         note.resources.append(resource)
+    # print(len(note.resources))
+    # guiset = []
+    # for aa in note.resources:
+    #     guiset.append(aa.guid)
+    # print(guiset)
+    # guiset = set(guiset)
+    # print(guiset)
+    # note.resourcesset = tuple(guiset)
 
     # The content of an Evernote note is represented using Evernote Markup Language
     # (ENML). The full ENML specification can be found in the Evernote API Overview
@@ -731,12 +747,13 @@ def imglist2note(notestore, imglist, noteguid, notetitle, sty='replace'):
         # Resource using the MD5 hash.
         # nBody += "<br />" * 2
         for resource in note.resources:
-            hexhash = binascii.hexlify(resource.data.bodyHash)
-            str1 = "%s" %hexhash #b'cd34b4b6c8d9279217b03c396ca913df'
-            # print (str1)
-            str1 = str1[2:-1] #cd34b4b6c8d9279217b03c396ca913df
-            # print (str1)
-            nBody += "<en-media type=\"%s\" hash=\"%s\" /><br />"  %(resource.mime, str1)
+            if resource.guid or True:
+                hexhash = binascii.hexlify(resource.data.bodyHash)
+                str1 = "%s" %hexhash #b'cd34b4b6c8d9279217b03c396ca913df'
+                # print (str1)
+                str1 = str1[2:-1] #cd34b4b6c8d9279217b03c396ca913df
+                # print (str1)
+                nBody += "<en-media type=\"%s\" hash=\"%s\" /><br />"  %(resource.mime, str1)
     nBody += "</en-note>"
 
     note.content = nBody
@@ -749,9 +766,10 @@ def imglist2note(notestore, imglist, noteguid, notetitle, sty='replace'):
         updated_note = notestore.updateNote(note)
         jiayi()
         log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
-    except Etypes.EDAMSystemException as e:
-        if e.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
-            log.critical("API达到调用极限，需要 %d 秒后重来" % e.rateLimitDuration)
+    except Etypes.EDAMSystemException as ee:
+        if ee.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
+            log.critical("API达到调用极限，需要 %d 秒后重来" % ee.rateLimitDuration)
+            exit(1)
         else:
-            log.critical('更新笔记时出现系统错误：'+str(e))
-        exit(1)
+            log.critical('更新笔记时出现系统错误：'+str(ee))
+            exit(2)
