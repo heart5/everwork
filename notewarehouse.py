@@ -14,7 +14,7 @@ from matplotlib.ticker import MultipleLocator, FuncFormatter
 from imp4nb import *
 
 
-def pickstat(note_store,cnx,destguid=None,notetitle=''):
+def pickstat(token, note_store, cnx, destguid=None, notetitle='', cum=False):
     # cnx = lite.connect('data\\quandan.db')
     # df = pd.read_sql('select * from fileread',cnx)
     # sql = "update quandan set 无货金额 = NULL where 无货金额 like '%s'" %('.') #把无货金额字段中非法字符做妥善处理
@@ -81,8 +81,8 @@ def pickstat(note_store,cnx,destguid=None,notetitle=''):
     plt.close()
 
     imgpathlist = []
-    chubiaorileiji(dd,ddlastdate,'配单数量',imgpathlist,imgpath='img\\pick\\')
-    chubiaorileiji(dd,ddlastdate,'配单金额',imgpathlist,imgpath='img\\pick\\')
+    chubiaorizhexian(dd, ddlastdate, '配单数量', cum=cum, imglist=imgpathlist, imgpath='img\\pick\\')
+    chubiaorizhexian(dd, ddlastdate, '配单金额', cum=cum, imglist=imgpathlist, imgpath='img\\pick\\')
     imgpathlist.append("img\\pick\\pickstat.png")
 
     df['年月'] = df['订单日期'].apply(lambda x: "%04d-%02d" % (x.year, x.month))
@@ -105,4 +105,4 @@ def pickstat(note_store,cnx,destguid=None,notetitle=''):
 
     xlswriter.save()
 
-    imglist2note(note_store,imgpathlist,destguid,notetitle)
+    imglist2note(note_store, imgpathlist, destguid, notetitle, token)
