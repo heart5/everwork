@@ -15,6 +15,7 @@ from pylab import *
 from configparser import ConfigParser
 from matplotlib.ticker import MultipleLocator, FuncFormatter
 from evernote.api.client import EvernoteClient
+from pandas.tseries.offsets import *
 from bs4 import BeautifulSoup
 
 
@@ -578,28 +579,33 @@ def dataokay(cnx):
         df.to_sql(name='jiaqi',con=cnx,schema=sql_df,if_exists='replace')
 
 
-def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgcount=3):
+def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount=1):
     # print(dfin.tail())
-    imglist = []
+    imglists = []
     for cln in dfin.columns:
+        imglist = []
         dfmoban = dfin[cln]
-        dfmoban = dfmoban.fillna(0)  # 画图之前把空值填零，填早了还不行（会影响计数），只能在最后关头处理
+        dfmoban = dfmoban.dropna()  # 除去空值，避免折线中断，fillna(0)在reindex的时候使用
+        print(dfmoban.tail())
         dangqianyueri = dfmoban.index.max()
         for k in range(dangqianyueri.month):
             if k == 0:
                 riqiendwith = dangqianyueri
             else:
-                shangyue = dangqianyueri + pd.DateOffset(months=k * (-1))
-                riqiendwith = pd.to_datetime("%04d-%02d-%02d" % (
-                    shangyue.year, shangyue.month, cal.monthrange(shangyue.year, shangyue.month)[1]))
+                riqiendwith = dangqianyueri + MonthEnd(k * (-1))
+            # print(riqiendwith)
             chuturizhexian(dfmoban, riqiendwith, cln, cum=cum, leixing=leixingset, imglist=imglist, quyu=fenbuset,
                            pinpai=pinpai, imgpath='img\\' + fenbuset + '\\')
-        if len(imglist) >= imgcount:
-            imglist = imglist[:imgcount]
+        if len(imglist) >= imgmonthcount:
+            imglist = imglist[:imgmonthcount]
         nianshu = int((dfmoban.index.max() - dfmoban.index.min()).days / 365) + 2
         chubiaoyuezhexian(dfmoban, dangqianyueri, cln, cum=cum, leixing=leixingset, imglist=imglist, quyu=fenbuset,
                           pinpai=pinpai, nianshu=nianshu, imgpath='img\\' + fenbuset + '\\')
-    return imglist
+        imglists.append(imglist)
+    imglistreturn = []
+    for i in range(len(imglists)):
+        imglistreturn += imglists[i]
+    return imglistreturn
 
 # 月度（全年，自然年度）累积对比图，自最早日期起，默认3年
 # df，数据表，必须用DateTime做index
