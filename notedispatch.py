@@ -7,26 +7,32 @@ from imp4nb import *
 
 
 def getgroupdf(dfs, xiangmus, period='month'):
-    dfmobans = dfs.groupby('日期')[xiangmus].count()
-    # print(dfmobans.tail())
+    dfmobans = dfs.groupby('日期')[xiangmus].sum()  # 日期唯一，就是求个框架，值其实随意，这里随意取了当天的sum（对数值有效）
+    dfout = pd.DataFrame()
     for xiangmu in xiangmus:
-        dfmoban = dfs.groupby('日期')[xiangmu].count()  # 获得按照日期汇总后的DataFrame，日期唯一，值其实随意，这里随意取了当天的销售额
-        dfmoban = pd.DataFrame(dfmoban, index=pd.to_datetime(dfmoban.index))
+        if xiangmu in list(dfmobans.columns):
+            dfmoban = dfmobans[xiangmu]
+        else:
+            log.info(str(set(dfs['品牌'])) + xiangmu + '无数据')
+            continue
+        dfmoban = dfmoban.dropna()  # 去除空值避免干扰
+        if dfmoban.shape[0] == 0:  # 无有效数据则轮空，不循环
+            continue
         dates = pd.date_range(dfmoban.index.min(), periods=(dfmoban.index.max() - dfmoban.index.min()).days + 1,
                               freq='D')
-        dfmoban = dfmoban.reindex(dates, fill_value=0)
-        for ix in dfmoban.index:
+        dfman = dfmoban.reindex(dates)
+        for ix in dfman.index:
             if period == 'year':
-                ixyuechudate = pd.to_datetime("%04d-01-01" % (ix.year))
+                yuandiandate = pd.to_datetime('%4d-01-01' % ix.year)  # MonthEnd()好坑，处理不好月头月尾的数据
+                # yuandiandate = ix + YearBegin(-1)  # MonthEnd()好坑，处理不好月头月尾的数据
             else:
-                ixyuechudate = pd.to_datetime("%04d-%02d-01" % (ix.year, ix.month))
-            dftmp = ((dfs[(dfs.日期 >= ixyuechudate) & (dfs.日期 <= ix)]).groupby('客户编码'))[xiangmu].count()
-            dfmoban.loc[ix][xiangmu] = dftmp.shape[0]
-        dfmobans[xiangmu] = dfmoban
-        print(dfmobans.tail())
+                yuandiandate = pd.to_datetime('%4d-%2d-01' % (ix.year, ix.month))
+                # yuandiandate = ix + MonthBegin(-1)
+            dftmp = ((dfs[(dfs.日期 >= yuandiandate) & (dfs.日期 <= ix)]).groupby('客户编码'))[xiangmu].count()
+            dfman[ix] = dftmp.shape[0]
+        dfout = dfout.join(pd.DataFrame(dfman), how='outer')
 
-    print(dfmobans.head())
-    return dfmobans
+    return dfout
 
 
 def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, pinpai='', cum=False):
@@ -43,24 +49,22 @@ def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf
     if len(pinpai) > 0:
         brclause += ' and (品牌 = \'%s\') ' % pinpai
     sqlz = sqlstr % (xmclause, jineclause, brclause)
-    dfz = pd.read_sql_query(sqlz, cnx)
+    dfz = pd.read_sql_query(sqlz, cnx, parse_dates=['日期'])
     log.info(sqlz)
 
     xmclause = xiangmu[1]
     jineclause = ' and (金额 < 0) '
     sqlf = sqlstr % (xmclause, jineclause, brclause)
-    dff = pd.read_sql_query(sqlf, cnx)
+    dff = pd.read_sql_query(sqlf, cnx, parse_dates=['日期'])
     log.info(sqlf)
 
-    df = pd.merge(dfz, dff, how='outer', on=['日期', '年月', '客户编码', '区域', '类型', '品牌'])
+    df = pd.merge(dfz, dff, how='outer', on=['日期', '年月', '客户编码', '区域', '类型', '品牌'], sort=True)
+    print(df.tail(10))
     # df = df.fillna(0)
 
     if df.shape[0] == 0:
         log.info('%s数据查询为空，返回' % pinpai)
         return
-
-    df['日期'] = pd.to_datetime(df['日期'])
-    print(df.tail(10))
 
     for leixingset in leixinglist:
         if leixingset == '全渠道':
@@ -71,7 +75,6 @@ def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf
         if len(leixing) == 1:
             leixing = tuple(list(leixing)+['U'])
 
-        log.debug(str(df['日期'].max())+'\t：\t'+leixingset)
         if leixingset == '终端客户':
             for fenbuset in fenbulist:
                 if fenbuset == '所有分部':
@@ -79,20 +82,20 @@ def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf
                 else:
                     fenbu = tuple((dfquyu[dfquyu['分部'] == fenbuset])['区域'])
 
+                log.debug(str(df['日期'].max()) + '\t：\t' + leixingset + '\t，\t' + fenbuset)
                 dfs = df[(df.类型.isin(leixing).values == True) & (df.区域.isin(fenbu).values == True)]
                 if dfs.shape[0] == 0:
                     log.info('在客户类型为“'+str(leixingset)+'”且所在位置为“'+fenbuset+'”时无数据！')
-                    continue
+                    continue  # 对应fenbuset
                 if cum:
                     dfin = dfs.groupby('日期').sum()
-                    dfin = pd.DataFrame(dfin, index=pd.to_datetime(dfin.index))
-                    # dfmoban.columns = [xiangmu]
                 else:
                     dfin = getgroupdf(dfs, xiangmu)
-                    # print(dfin.tail(5))
+                # print(dfin.tail())
                 imglist = dfin2imglist(dfin, cum=cum, leixingset=leixingset, fenbuset=fenbuset, pinpai=pinpai)
                 imglist2note(note_store, imglist, notefenbudf.loc[fenbuset]['guid'],notefenbudf.loc[fenbuset]['title'], token)
         else:
+            log.debug(str(df['日期'].max()) + '\t：\t' + leixingset)
             dfs = df[df.类型.isin(leixing).values == True]
             if dfs.shape[0] == 0:
                 log.info('在客户类型“' + str(leixingset) + '”中时无数据！')
@@ -102,8 +105,8 @@ def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf
                 dfin = pd.DataFrame(dfin, index=pd.to_datetime(dfin.index))
             else:
                 dfin = getgroupdf(dfs, xiangmu)
-
-            imglist = dfin2imglist(dfin, cum=cum, leixingset=leixingset, pinpai=pinpai, imgcount=3)
+            # print(dfin.tail())
+            imglist = dfin2imglist(dfin, cum=cum, leixingset=leixingset, pinpai=pinpai)
             targetlist = list(noteleixingdf.index)
             # targetlist = []
             if leixingset in targetlist:

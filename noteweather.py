@@ -16,6 +16,10 @@ from matplotlib.ticker import MultipleLocator, FuncFormatter
 
 
 def weatherstat(token, note_store, sourceguid, destguid=None):
+    """
+
+    :rtype: Null
+    """
     soup = BeautifulSoup(note_store.getNoteContent(sourceguid), "html.parser")
     # tags = soup.find('en-note')
     # print tags
