@@ -606,16 +606,17 @@ def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount
             continue
         # print(dfmoban)
         dangqianyueri = dfmoban.index.max()
-        for k in range(dangqianyueri.month):
-            if k == 0:
-                riqiendwith = dangqianyueri
-            else:
-                riqiendwith = dangqianyueri + MonthEnd(k * (-1))
-            # print(riqiendwith)
-            chuturizhexian(dfmoban, riqiendwith, cln, cum=cum, leixing=leixingset, imglist=imglist, quyu=fenbuset,
-                           pinpai=pinpai, imgpath='img\\' + fenbuset + '\\')
-        if len(imglist) >= imgmonthcount:
-            imglist = imglist[:imgmonthcount]
+        if (datetime.datetime.now() - dangqianyueri).month < 3:  # 近两个月还有数据的才做日累计分析
+            for k in range(dangqianyueri.month):
+                if k == 0:
+                    riqiendwith = dangqianyueri
+                else:
+                    riqiendwith = dangqianyueri + MonthEnd(k * (-1))
+                # print(riqiendwith)
+                chuturizhexian(dfmoban, riqiendwith, cln, cum=cum, leixing=leixingset, imglist=imglist, quyu=fenbuset,
+                               pinpai=pinpai, imgpath='img\\' + fenbuset + '\\')
+            if len(imglist) >= imgmonthcount:
+                imglist = imglist[:imgmonthcount]
         nianshu = dfmoban.index.max().year - dfmoban.index.min().year + 1
         chutuyuezhexian(dfmoban, dangqianyueri, cln, cum=cum, leixing=leixingset, imglist=imglist, quyu=fenbuset,
                         pinpai=pinpai, nianshu=nianshu, imgpath='img\\' + fenbuset + '\\')

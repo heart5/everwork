@@ -90,7 +90,7 @@ brandlist = ['丽芝士', '兰花恋人',
 #              '馋大嘴', '卫龙', '凤将军', '馋大嘴', '儿时代', '爽口佳', '新丰园', '津津友味', '鲜多鲜','U品部落',
 #              '光头祥', '大霸王', '丽芝士', '非凡', '鲜客', '童年时代', '麦小呆', '渔米之湘',
 #              'U品部落', '抓鱼的猫', '旭东', '创食人','']
-brandlist = []
+# brandlist = []
 for br in brandlist:
     updatesection(cfp,'guidfenbunb',br+'kehuguidfenbu',inifilepath,token,note_store,br+'客户开发图表')
     updatesection(cfp,'guidfenbunb',br+'saleguidfenbu',inifilepath,token,note_store,br+'销售业绩图表')

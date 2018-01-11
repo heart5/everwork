@@ -29,31 +29,36 @@ def guanlianall(cnx):
 
 
 def zashua(cnx):
+    pass
 
-    monnum = 10
-    date1 = pd.read_sql("select date('2017-10-01','-%d months')" %monnum,cnx)
-    riqi = date1.iloc[0,0]
-    print(riqi)
-    df = pd.read_sql_query('select 日期,sum(金额) as 销售额 from alldata where (日期 > \'%s\')group by 日期 order by 日期 desc' %riqi,cnx)
-    descdb(df)
 
-tms = []
-tms.append(time.clock())
+def timetest():
+    '''
+    用时测试；删除数据表并压缩数据库占用空间；
+    :return:
+    '''
+    tms = []
+    tms.append(time.clock())
 
-cnx = lite.connect('data\\quandan.db')
-tms.append(time.clock())
-# df = pd.read_sql_query("select * from xiaoshoumingxi order by 日期",cnx)
-# print(len(df))
-#
-# guanlianall(cnx)
-zashua(cnx)
-tms.append(time.clock())
+    cnx = lite.connect('data\\quandan.db')
+    tms.append(time.clock())
+    # df = pd.read_sql_query("select * from xiaoshoumingxi order by 日期",cnx)
+    # print(len(df))
+    #
+    # guanlianall(cnx)
+    desclitedb(cnx)
+    tms.append(time.clock())
+    # cnx.cursor().execute('drop table alldata')  # 删除alldata数据表
+    # cnx.cursor().execute('VACUUM')  # 压缩
+    tms.append(time.clock())
 
-df = pd.read_sql_query("select * from alldata order by 日期",cnx)
-print(len(df))
-tms.append(time.clock())
+    # desclitedb(cnx)
 
-cnx.close()
+    df = pd.read_sql_query("select * from xiaoshoumingxi order by 日期", cnx)
+    print(len(df))
+    tms.append(time.clock())
 
-for i in range(len(tms)):
-    print(tms[i],end='\t')
+    cnx.close()
+
+    for i in range(len(tms)):
+        print(tms[i], end='\t')
