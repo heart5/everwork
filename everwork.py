@@ -37,7 +37,6 @@ note_store = get_notestore(token)
 #49eff8eb-5bce-43b9-a95a-c1ee7eab71fa 有友全渠道销售图表
 
 # findnotefromnotebook(note_store,token,'ba1423ed-5da1-4883-a2cc-070c93bf7e98','图表') #从笔记本中查找标题中包含指定字符串的笔记
-# weatherstat(token, note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
 
 # Types.Note getNote(string authenticationToken,
 #                    Types.Guid guid,
@@ -69,6 +68,7 @@ for aa in nbfbdf.index:
 
 cnx = lite.connect('data\\quandan.db')
 dataokay(cnx)
+# weatherstat(token, note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
 brandlist = ['丽芝士', '兰花恋人',
              '易加', '卤帝七号', '呈呈', '伍滋味', '脆马蹄', '鱼友味', '武丰', '柒柒湘', '俊媳妇', '湘寿鸭', '好媳妇',
@@ -90,15 +90,7 @@ brandlist = ['丽芝士', '兰花恋人',
 #              '馋大嘴', '卫龙', '凤将军', '馋大嘴', '儿时代', '爽口佳', '新丰园', '津津友味', '鲜多鲜','U品部落',
 #              '光头祥', '大霸王', '丽芝士', '非凡', '鲜客', '童年时代', '麦小呆', '渔米之湘',
 #              'U品部落', '抓鱼的猫', '旭东', '创食人','']
-brandlist = ['柒柒湘', '俊媳妇', '湘寿鸭', '好媳妇',
-             '香之派', '友意', '大西南', '金昌盛', '康赞', '恒的', '孙妈', '银城湘味', '刘香源', '蜀望', '口口德福',
-             '威龙', '好运', '心诺', '农尔康', '君思', '珍可惠', '红帅', '先生', '好棒美', '三友', '君妃', '火卤卤',
-             '花氏', '洞庭渔王', '相思', '凤凰园', '洁龙', '怡口湘', '阿林', '好巴食', '巧大娘', '老成都', '一品鱼舫',
-             '香约', '朝启', '顶牛', '湘俚味', '红叶', '无穷', '快活嘴', '花心子', '蛋大厨', '绿野香', '佳宝',
-             '湘宝王', '乡巴佬', '鑫之恋', '泰越精厨', '可可哥', '倍儿爽', '小鹏', '醉吃香', '津尝乐', '张师傅',
-             '馋大嘴', '卫龙', '凤将军', '馋大嘴', '儿时代', '爽口佳', '新丰园', '津津友味', '鲜多鲜', 'U品部落',
-             '光头祥', '大霸王', '丽芝士', '非凡', '鲜客', '童年时代', '麦小呆', '渔米之湘',
-             'U品部落', '抓鱼的猫', '旭东', '创食人', '']
+brandlist = []
 for br in brandlist:
     updatesection(cfp,'guidfenbunb',br+'kehuguidfenbu',inifilepath,token,note_store,br+'客户开发图表')
     updatesection(cfp,'guidfenbunb',br+'saleguidfenbu',inifilepath,token,note_store,br+'销售业绩图表')
@@ -116,7 +108,7 @@ for br in brandlist:
              'where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) ' \
              '%s %s group by 日期,客户编码 order by 日期'  # % (xmclause,jineclause, brclause)
     xiangmu = ['销售金额', '退货金额']
-    # fenxiyueduibi(token, note_store, qrystr, xiangmu, notefbxsdf, notelxxsdf, cnx, pinpai=br, cum=True)
+    fenxiyueduibi(token, note_store, qrystr, xiangmu, notefbxsdf, notelxxsdf, cnx, pinpai=br, cum=True)
     # fenximonthduibi(token, note_store, cnx, notefbxsdf, notelxxsdf, '金额', pinpai=br, cum=True)
 
     # notelxkhdf = ['']

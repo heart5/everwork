@@ -132,9 +132,17 @@ inifilepath = 'data\\everwork.ini'
 cfp.read(inifilepath, encoding='utf-8')
 ENtimes = int(cfp.get('evernote', 'apicount'))
 ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
+YWanAnchor = 50000  # 纵轴标识万化锚点
+# time.sleep(400)
 
 evernoteapiclearatzero()
 
+
+def yformat(xx):
+    if xx > 50000:
+        return lambda x, pos: "%d万" % int(x / 10000)
+    else:
+        return lambda x, pos: x
 
 def evernoteapijiayi():
     """
@@ -513,26 +521,26 @@ def dataokay(cnx):
     if gengxinfou('data\\系统表.xlsx', cnx, 'fileread'):  # or True:
         df = pd.read_excel('data\\系统表.xlsx', sheetname='区域')
         df['区域'] = pd.DataFrame(df['区域']).apply(lambda r: '%02d' % r, axis=1)
-        print(df)
+        # print(df)
         df = df.loc[:, ['区域', '区域名称', '分部']]
         df.to_sql(name='quyu', con=cnx, if_exists='replace')
 
         df = pd.read_excel('data\\系统表.xlsx', sheetname='小区')
         df['小区'] = pd.DataFrame(df['小区']).apply(lambda r: '%03d' % r, axis=1)
-        print(df)
+        # print(df)
         df.to_sql(name='xiaoqu', con=cnx, if_exists='replace')
 
         df = pd.read_excel('data\\系统表.xlsx', sheetname='终端类型')
-        print(df)
+        # print(df)
         df.to_sql(name='leixing', con=cnx, if_exists='replace')
 
         df = pd.read_excel('data\\系统表.xlsx', sheetname='产品档案', )
-        print(df)
+        # print(df)
         df.to_sql(name='product', con=cnx, if_exists='replace')
 
         df = pd.read_excel('data\\系统表.xlsx', sheetname='客户档案')
         df = df.loc[:, ['往来单位', '往来单位编号', '地址']]
-        print(df)
+        # print(df)
         df.to_sql(name='customer', con=cnx, if_exists='replace')
 
     if gengxinfou('data\\2017年全单统计管理.xlsm', cnx, 'fileread'):  # or True:
@@ -769,6 +777,48 @@ def chubiaorizhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', l
     # return imgsavepath
 
 
+def biaozhukedu(dfc, weibiao):
+    if weibiao == dfc.index.max():
+        kedus = [dfc.loc[weibiao]]
+    else:
+        kedus = [dfc.loc[weibiao], dfc.loc[dfc.index.max()]]
+    # print(type(kedus[0]))
+    for ii in range(len(kedus)):
+        kedu = kedus[ii]
+        if (len(dfc.index)) > 12:
+            idx = kedu.name
+        else:
+            idx = list(dfc.index).index(kedu.name)
+        if not np.isnan(kedu.iloc[0]):
+            plt.plot([idx, idx], [0, kedu.iloc[0]], 'c--')
+            plt.annotate(str(kedu.name), xy=(idx, 0), xycoords='data', xytext=(-20, -20),
+                         textcoords='offset points', color='r',
+                         arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
+        for i in range(len(kedu)):
+            if np.isnan(kedu.iloc[i]):
+                # print(kedu.iloc[i])
+                # print(type(kedu.iloc[i]))
+                continue
+            plt.scatter([idx, ], [kedu.iloc[i]], 50, color='Wheat')
+            global YWanAnchor
+            if kedu.max() >= YWanAnchor:
+                kedubiaozhi = "%.1f万" % (kedu.iloc[i] / 10000)
+                plt.gca().yaxis.set_major_formatter(
+                    FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
+            else:
+                kedubiaozhi = "%d" % kedu.iloc[i]
+            fontsize = 8
+            if ((i % 2)) == 0:
+                zhengfu = -1
+            else:
+                zhengfu = 0.4
+            plt.annotate(kedubiaozhi, xy=(idx, kedu.iloc[i]), xycoords='data',
+                         xytext=(
+                             len(kedubiaozhi) * fontsize * zhengfu,
+                             int(len(kedubiaozhi) * fontsize * (-1) * zhengfu / 2)),
+                         textcoords='offset points', fontsize=fontsize,
+                         arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
+
 # 月度（全年，自然年度）累积对比图，自最早日期起，默认3年
 # df，数据表，必须用DateTime做index
 # riqi，数据记录的最近日期，可以是DateTIme的各种形式，只要pd能识别成功，形如2017-10-06
@@ -778,11 +828,11 @@ def chubiaorizhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', l
 # leixing，终端类型
 # nianshu，用来对比的年份数，从当前年份向回数
 # imgpath，图片存储路径
-def chutuyuezhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', leixing='', pinpai='', nianshu=3,
+def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=[], quyu='', leixing='', pinpai='', nianshu=3,
                     imgpath='img\\'):
     # print(df.tail(10))
     # monthcur = riqienddate + MonthBegin(-1) # 2017-10-01
-    nianshushiji = df.index.max().year - df.index.min().year + 1
+    nianshushiji = ds.index.max().year - ds.index.min().year + 1
     if nianshushiji > nianshu:
         nianshushiji = nianshu
     nianlist = []
@@ -791,25 +841,27 @@ def chutuyuezhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', le
 
     # if xiangmu == '退货客户数' :
     #     print(df)
-    ds = pd.DataFrame(df)  # 取出日期索引的数据列
+    dfn = pd.DataFrame(ds)  # 取出日期索引的数据列
 
     # 分年份生成按照每天日期重新索引的数据列
     dslist = []
     for i in range(nianshushiji):
+        dfnian = pd.DataFrame()
         if i == 0:
             periods = int(riqienddate.strftime('%j'))
         else:
             periods = 365
-        dstmp = ds.reindex(pd.date_range((riqienddate + YearBegin(-1)), periods=periods, freq='D'), fill_value=0)
-        if xiangmu == '退货客户数':
-            print(dstmp.tail(30))
+        dstmp = dfn.reindex(pd.date_range((riqienddate + YearBegin(-1 - (1 * i))), periods=periods, freq='D'),
+                            fill_value=0)
+        # if xiangmu == '退货客户数':
+        #     print(dstmp.tail(30))
         if cum:
-            dstmp = dstmp.resample('M').sum()
+            dfnian = dstmp.resample('M').sum()
         else:
-            dstmp = dstmp.resample('M').max()
-        dstmp.columns = ['%04d' % (nianlist[i].year)]
-        dstmp.index = (range(len(dstmp.index)))
-        dslist.append(dstmp)
+            dfnian = dstmp.resample('M').max()
+        dfnian.columns = ['%04d' % (nianlist[i].year)]
+        dfnian.index = range(len(dfnian.index))
+        dslist.append(dfnian)
     # 连接年份DataFrame
     if len(dslist) == 0:
         log.info('年度对比数据为空！')
@@ -818,26 +870,38 @@ def chutuyuezhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', le
     for i in range(1, len(dslist)):  # 1 2 3 4
         dfy = dfy.join(dslist[i], how='outer')  # 0 1 2 3 4
 
-    print(dfy)
-    zuobiao = pd.Series(list(dfy.index))
-    dfy.index = zuobiao.apply(lambda x: '%02d' % (x + 1))
+    # print(dfy)
+    zuobiao = pd.Series(range(1, len(dfy.index) + 1))  # 从1开始生成序列，配合月份，日期的话是自动从1开始的，不用特别处理
+    dfy.index = zuobiao.apply(lambda x: '%02d' % (x))
 
     nianyue = '%04d年' % riqienddate.year
     biaoti = leixing + quyu + pinpai + nianyue + xiangmu
+    dslistmax = []
+    dslistabs = [abs(x) for x in dslist]
+    dfyabs = dfy.apply(lambda x: abs(x))
+    # print(dfyabs.max())
+    for clname in dfyabs.columns:
+        dslistmax.append(dfyabs[clname].max())  # 取绝对值的最大，涵盖退货的负值金额
+    # print(type(dslistmax))
+    # print(dslistmax)
+    global YWanAnchor
     if cum:
         cumstr = '月累积'
-        dfy.cumsum().plot(title=biaoti + cumstr)
-        if dfy[str(riqienddate.year)].max() > 10000:
+        dfjieguo = dfy.cumsum()
+        dfjieguo.plot(title=biaoti + cumstr)
+        if max(dslistmax) > YWanAnchor:
             plt.gca().yaxis.set_major_formatter(
-                FuncFormatter(lambda x, pos: "%d万" % (int(x / 10000))))  # 纵轴主刻度文本用y_formatter函数计算
+                FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
+        biaozhukedu(dfjieguo, '%02d' % (riqienddate.month))
         plt.savefig(imgpath + '%s%s.png' % (biaoti, cumstr))
         imglist.append(imgpath + '%s%s.png' % (biaoti, cumstr))
         plt.close()
     cumstr = '月折线'
     dfy.plot(title='%s%s' % (biaoti, cumstr))
-    if dfy[str(riqienddate.year)].max() > 10000:
+    if max(dslistmax) > YWanAnchor:
         plt.gca().yaxis.set_major_formatter(
-            FuncFormatter(lambda x, pos: "%.1f万" % ((x / 10000))))  # 纵轴主刻度文本用y_formatter函数计算
+            FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
+    biaozhukedu(dfy, '%02d' % (riqienddate.month))
     plt.savefig(imgpath + '%s%s.png' % (biaoti, cumstr))
     imglist.append(imgpath + '%s%s.png' % (biaoti, cumstr))
     plt.close()
@@ -861,7 +925,7 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', lei
     riqicurmonthfirst = riqienddate + MonthBegin(-1)  # 日期格式的当月1日
     riqibeforemonthfirst = riqienddate + MonthBegin(-2)  # 日期格式的上月1日
     riqilastmonthfirst = riqienddate + MonthBegin(-13)  # 日期格式的去年当月1日
-    tianshu = (riqienddate + MonthEnd()).day  # 当月的天数
+    tianshu = (riqienddate + MonthEnd(-1)).day  # 当月的天数
 
     # print(df)
     ds = pd.DataFrame(df)
@@ -904,42 +968,7 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', lei
     dfc.plot(title=biaoti)
     # plt.ylim(0) #设定纵轴从0开始
 
-    if riqienddate.day == dfc.index.max():
-        kedus = [dfc.loc[riqienddate.day]]
-    else:
-        kedus = [dfc.loc[riqienddate.day], dfc.loc[dfc.index.max()]]
-    # print(type(kedus[0]))
-    for ii in range(len(kedus)):
-        kedu = kedus[ii]
-        if not np.isnan(kedu.iloc[0]):
-            plt.plot([kedu.name, kedu.name], [0, kedu.iloc[0]], 'c--')
-            plt.annotate(str(kedu.name), xy=(kedu.name, 0), xycoords='data', xytext=(-20, -20),
-                         textcoords='offset points', color='r',
-                         arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
-        for i in range(len(kedu)):
-            if np.isnan(kedu.iloc[i]):
-                # print(kedu.iloc[i])
-                # print(type(kedu.iloc[i]))
-                continue
-            plt.scatter([kedu.name, ], [kedu.iloc[i]], 50, color='Wheat')
-            if kedu.max() >= 10000:
-                kedubiaozhi = "%.1f万" % (kedu.iloc[i] / 10000)
-                plt.gca().yaxis.set_major_formatter(
-                    FuncFormatter(lambda x, pos: "%d万" % (int(x / 10000))))  # 纵轴主刻度文本用y_formatter函数计算
-            else:
-                kedubiaozhi = "%d" % kedu.iloc[i]
-            fontsize = 8
-            if ((i % 2)) == 0:
-                zhengfu = -1
-            else:
-                zhengfu = 0.4
-            plt.annotate(kedubiaozhi, xy=(kedu.name, kedu.iloc[i]), xycoords='data',
-                         xytext=(
-                             len(kedubiaozhi) * fontsize * zhengfu,
-                             int(len(kedubiaozhi) * fontsize * (-1) * zhengfu / 2)),
-                         textcoords='offset points', fontsize=fontsize,
-                         arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
-
+    biaozhukedu(dfc, riqienddate.day)
     imgsavepath = imgpath + biaoti + '（日累积月）.png'
     plt.savefig(imgsavepath)
     imglist.append(imgsavepath)
