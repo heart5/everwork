@@ -62,3 +62,20 @@ def timetest():
 
     for i in range(len(tms)):
         print(tms[i], end='\t')
+
+    mons = (datetime.datetime.now() - pd.to_datetime('2010-02-01'))
+    print(mons.days)
+    print(mons)
+
+
+def getapitimesfromlog():
+    df = pd.read_csv('log\\everwork.log', sep='\t', header=None, names=['asctime', 'name', 'filenamefuncName',
+                                                                        'threadNamethreadprocess', 'levelnamemessage'],
+                     na_filter=True,
+                     skip_blank_lines=True, skipinitialspace=True)
+    dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API').values == True][['asctime', 'levelnamemessage']]
+    jj = re.findall('(?P<counts>\d+)', dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['levelnamemessage'].iloc[0])[0]
+    return [pd.to_datetime(dfapi2.asctime.max()), int(jj)]
+
+
+getapitimesfromlog()

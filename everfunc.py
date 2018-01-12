@@ -94,6 +94,16 @@ def mylog():
     return log
 
 
+def getapitimesfromlog():
+    df = pd.read_csv('log\\everwork.log', sep='\t', header=None, names=['asctime', 'name', 'filenamefuncName',
+                                                                        'threadNamethreadprocess', 'levelnamemessage'],
+                     na_filter=True,
+                     skip_blank_lines=True, skipinitialspace=True)
+    dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API').values == True][['asctime', 'levelnamemessage']]
+    jj = re.findall('(?P<counts>\d+)', dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['levelnamemessage'].iloc[0])[0]
+    return [pd.to_datetime(dfapi2.asctime.max()), int(jj)]
+
+
 def writeini():
     """
     evernote API调用次数写入配置文件以备调用。又及，函数写在这里还有个原因是global全局变量无法跨文件传递。
@@ -130,8 +140,13 @@ log = mylog()
 cfp = ConfigParser()
 inifilepath = 'data\\everwork.ini'
 cfp.read(inifilepath, encoding='utf-8')
+apitime = getapitimesfromlog()
 ENtimes = int(cfp.get('evernote', 'apicount'))
 ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
+if (ENAPIlasttime < apitime[0]):
+    log.info('程序上次异常退出，调用log中的API数据[%s,%d]' % (str(apitime[0]), apitime[1]))
+    ENAPIlasttime = apitime[0]
+    ENtimes = apitime[1] + 1
 YWanAnchor = 50000  # 纵轴标识万化锚点
 # time.sleep(400)
 
@@ -606,7 +621,7 @@ def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount
             continue
         # print(dfmoban)
         dangqianyueri = dfmoban.index.max()
-        if (datetime.datetime.now() - dangqianyueri).month < 3:  # 近两个月还有数据的才做日累计分析
+        if (datetime.datetime.now() - dangqianyueri).days < 60:  # 近两个月还有数据的才做日累计分析
             for k in range(dangqianyueri.month):
                 if k == 0:
                     riqiendwith = dangqianyueri
