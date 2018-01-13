@@ -28,7 +28,10 @@ def guanlianall(cnx):
     print("起始：%f，关联客户编码、产品品牌和客户类型：%f，描述：%f，写入%s数据表：%f" %(tm0,tm1-tm0,tm2-tm1,readytablename,tm3-tm2))
 
 
-def zashua(cnx):
+def zashua():
+    now = datetime.datetime.now()
+    nexthour = now + datetime.timedelta(hours=1)
+    print(nexthour)
     pass
 
 
@@ -75,7 +78,17 @@ def getapitimesfromlog():
                      skip_blank_lines=True, skipinitialspace=True)
     dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API').values == True][['asctime', 'levelnamemessage']]
     jj = re.findall('(?P<counts>\d+)', dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['levelnamemessage'].iloc[0])[0]
-    return [pd.to_datetime(dfapi2.asctime.max()), int(jj)]
+    result = [pd.to_datetime(dfapi2.asctime.max()), int(jj)]
+    print(result)
+    return result
 
 
-getapitimesfromlog()
+cnx = lite.connect('data\\quandan.db')
+# guanlianall(cnx)
+
+zashua()
+# timetest()
+# getapitimesfromlog()
+
+
+cnx.close()

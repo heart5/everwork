@@ -170,7 +170,10 @@ def evernoteapijiayi():
     evernoteapiclearatzero()
     if ENtimes >= 290:
         now = datetime.datetime.now()
-        zhengdian = pd.to_datetime('%4d-%2d-%2d %2d:00:00' % (now.year, now.month, now.day, now.hour + 1))
+        # 强制小时数加一在零点的时候会出错，采用timedelta解决问题
+        nexthour = now + datetime.timedelta(hours=1)
+        zhengdian = pd.to_datetime(
+            '%4d-%2d-%2d %2d:00:00' % (nexthour.year, nexthour.month, nexthour.day, nexthour.hour))
         secondsaferzhengdian = np.random.randint(0, 300)
         sleep_seconds = (zhengdian - now).seconds + secondsaferzhengdian
         starttimeafterzhengdian = pd.to_datetime(zhengdian + datetime.timedelta(seconds=secondsaferzhengdian))
