@@ -1,7 +1,7 @@
 # encoding:utf-8
-'''
+"""
 处理销售明细数据
-'''
+"""
 
 
 from imp4nb import *
@@ -37,11 +37,6 @@ def getgroupdf(dfs, xiangmus, period='month'):
 
 
 def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, pinpai='', cum=False):
-    dfquyu = pd.read_sql('select * from quyu', cnx, index_col='index')
-    dfleixing = pd.read_sql('select * from leixing', cnx, index_col='index')
-    fenbulist = list(notefenbudf.index)
-    print(fenbulist)
-    leixinglist = ['终端客户', '连锁客户', '渠道客户', '直销客户', '公关客户', '其他客户', '全渠道']
 
     log.info(sqlstr)
     xmclause = xiangmu[0]
@@ -62,6 +57,15 @@ def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf
     df = pd.merge(dfz, dff, how='outer', on=['日期', '年月', '客户编码', '区域', '类型', '品牌'], sort=True)
     print(df.tail(10))
     # df = df.fillna(0)
+    kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cnx, pinpai, cum)
+
+
+def kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cnx, pinpai, cum=False):
+    dfquyu = pd.read_sql('select * from quyu', cnx, index_col='index')
+    dfleixing = pd.read_sql('select * from leixing', cnx, index_col='index')
+    fenbulist = list(notefenbudf.index)
+    print(fenbulist)
+    leixinglist = ['终端客户', '连锁客户', '渠道客户', '直销客户', '公关客户', '其他客户', '全渠道']
 
     if df.shape[0] == 0:
         log.info('%s数据查询为空，返回' % pinpai)
@@ -92,7 +96,6 @@ def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf
                     dfin = dfs.groupby('日期').sum()
                 else:
                     dfin = getgroupdf(dfs, xiangmu)
-                # print(dfin.tail())
                 imglist = dfin2imglist(dfin, cum=cum, leixingset=leixingset, fenbuset=fenbuset, pinpai=pinpai)
                 imglist2note(note_store, imglist, notefenbudf.loc[fenbuset]['guid'], notefenbudf.loc[fenbuset]['title'],
                              token)
@@ -107,11 +110,8 @@ def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf
                 dfin = pd.DataFrame(dfin, index=pd.to_datetime(dfin.index))
             else:
                 dfin = getgroupdf(dfs, xiangmu)
-            # print(dfin.tail())
             imglist = dfin2imglist(dfin, cum=cum, leixingset=leixingset, pinpai=pinpai)
             targetlist = list(noteleixingdf.index)
-            # targetlist = []
             if leixingset in targetlist:
-                # myrndsleep()
                 imglist2note(note_store, imglist, noteleixingdf.loc[leixingset]['guid'],
                              noteleixingdf.loc[leixingset]['title'], token)

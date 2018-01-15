@@ -71,16 +71,16 @@ def mylog():
     日志函数，定义输出文件和格式等内容
     :returns    返回log对象
     """
-    log = lg.getLogger('ewer')
-    logHandler = lgh.RotatingFileHandler('log\\everwork.log', encoding='utf-8',  # 此处指定log文件的编码方式，否则可能乱码
+    logew = lg.getLogger('ewer')
+    loghandler = lgh.RotatingFileHandler('log\\everwork.log', encoding='utf-8',  # 此处指定log文件的编码方式，否则可能乱码
                                          maxBytes=2560 * 1024, backupCount=25)
     formats = lg.Formatter('%(asctime)s\t%(name)s\t%(filename)s - [%(funcName)s]'
                            '\t%(threadName)s - %(thread)d - %(process)d'
                            '\t%(levelname)s: %(message)s',
                            datefmt='%Y-%m-%d %H:%M:%S')
-    logHandler.setFormatter(formats)
-    log.setLevel(lg.DEBUG)
-    log.addHandler(logHandler)
+    loghandler.setFormatter(formats)
+    logew.setLevel(lg.DEBUG)
+    logew.addHandler(loghandler)
 
     #################################################################################################
     # 定义一个StreamHandler，将INFO级别或更高的日志信息打印到标准错误，并将其添加到当前的日志处理对象#
@@ -91,10 +91,14 @@ def mylog():
     lg.getLogger('').addHandler(console)
     #################################################################################################
 
-    return log
+    return logew
 
 
 def getapitimesfromlog():
+    """
+    从log中提取API调用次数
+    :return:
+    """
     df = pd.read_csv('log\\everwork.log', sep='\t', header=None,  # names=['asctime', 'name', 'filenamefuncName',
                      # 'threadNamethreadprocess', 'levelnamemessage'],
                      # na_filter=True,
@@ -155,21 +159,15 @@ cfp.read(inifilepath, encoding='utf-8')
 apitime = getapitimesfromlog()
 ENtimes = int(cfp.get('evernote', 'apicount'))
 ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
-if (ENAPIlasttime < apitime[0]):
+# 比较ini和log中API存档的时间，解决异常退出时调用次数无法准确反映的问题
+if ENAPIlasttime < apitime[0]:
     log.info('程序上次异常退出，调用log中的API数据[%s,%d]' % (str(apitime[0]), apitime[1]))
     ENAPIlasttime = apitime[0]
     ENtimes = apitime[1] + 1
 YWanAnchor = 50000  # 纵轴标识万化锚点
-# time.sleep(400)
 
 evernoteapiclearatzero()
 
-
-def yformat(xx):
-    if xx > 50000:
-        return lambda x, pos: "%d万" % int(x / 10000)
-    else:
-        return lambda x, pos: x
 
 def evernoteapijiayi():
     """
@@ -217,18 +215,22 @@ def timestamp2str(timestamp):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
 
 
-def readinisection2df(cfpp: ConfigParser, section: object, biaoti):
-    dfsale = cfpp.options(section)
-    llist = []
-    for oo in dfsale:
-        str = cfpp.get(section, oo)
-        llist.append(str)
-    df = pd.DataFrame(llist)
+def readinisection2df(cfpp: ConfigParser, section: object, biaoti: object):
+    """
+    读取ini中的section，返回df
+    :param cfpp:
+    :param section:
+    :param biaoti:
+    :return: ['guid','title']，index是fenbu，title是fenbu+标题
+    """
+    namelist = cfpp.options(section)
+    valuelist = []
+    for nameitem in namelist:
+        valueitem = cfpp.get(section, nameitem)
+        valuelist.append(valueitem)
+    df = pd.DataFrame(valuelist, index=namelist)
     df.columns = ['guid']
-    df['fenbu'] = dfsale
-    df.index = dfsale
-
-    df = pd.DataFrame(df)
+    df['fenbu'] = df.index
     df['title'] = df['fenbu'].map(lambda x: x + biaoti)
     del df['fenbu']
     return df
@@ -325,8 +327,16 @@ def get_notestore(token='your developer token'):
         exit(2)
 
 
-# 列出笔记本中的笔记信息
 def findnotefromnotebook(note_store, token, notebookguid, titlefind, notecount=10000):
+    """
+    列出笔记本中的笔记信息
+    :param note_store:
+    :param token:
+    :param notebookguid:
+    :param titlefind:
+    :param notecount:
+    :return:
+    """
     notefilter = NoteStore.NoteFilter()
     notefilter.notebookGuid = notebookguid
     notemetaspec = NoteStore.NotesMetadataResultSpec(includeTitle=True, includeContentLength=True, includeCreated=True,
@@ -353,10 +363,13 @@ def findnotefromnotebook(note_store, token, notebookguid, titlefind, notecount=1
     return False
 
 
-# 测试笔记本（notebook）数据结构每个属性的返回值
-# 开发口令（token）的方式调用返回如下
-# @use_logging()
+@use_logging()
 def printnotebookattributeundertoken(notebook):
+    """
+    测试笔记本（notebook）数据结构每个属性的返回值,开发口令（token）的方式调用返回如下
+    :param notebook:
+    :return:
+    """
     print('名称：' + notebook.name, end='\t')  # phone
     print('guid：' + notebook.guid, end='\t')  # f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
     print('更新序列号：' + str(notebook.updateSequenceNum), end='\t')  ##8285
@@ -374,10 +387,12 @@ def printnotebookattributeundertoken(notebook):
     # print '接受人设定\t', notebook.recipientSettings  #这种权限的调用没有返回这个值，报错
 
 
-# 测试笔记（note）数据结构每个属性的返回值
-# 开发口令（token）的方式调用返回如下
-# findNotesMetadata函数获取
 def printnoteattributeundertoken(note):
+    """
+    测试笔记（note）数据结构每个属性的返回值,通过findNotesMetadata函数获取，开发口令（token）的方式调用返回如下:
+    :param note:
+    :return:
+    """
     print('guid\t%s' % note.guid)  #
     print('标题\t%s' % note.title)  #
     print('内容长度\t%d' % note.contentLength)  # 762
@@ -399,9 +414,12 @@ def printnoteattributeundertoken(note):
     # print ('范围\t%s' % note.limits) #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'limits'
 
 
-# 测试用户（user）数据结构每个属性的返回值
-# 开发口令（token）的方式调用返回如下
 def printuserattributeundertoken(user):
+    """
+    # 测试用户（user）数据结构每个属性的返回值,开发口令（token）的方式调用返回如下
+    :param user:
+    :return:
+    """
     print('id\t' + str(user.id))  # 返回3884191
     print('名称\t' + str(user.username))  # 返回heart5
     print('用户名\t' + str(user.name))  # 返回白晔峰
@@ -424,32 +442,41 @@ def printuserattributeundertoken(user):
 
 
 def makenote(token, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
-    nBody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-    nBody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
-    nBody += "<en-note>%s</en-note>" % notebody
+    """
+    创建一个note
+    :param token:
+    :param notestore:
+    :param notetitle:
+    :param notebody:
+    :param parentnotebook:
+    :return:
+    """
+    nbody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+    nbody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+    nbody += "<en-note>%s</en-note>" % notebody
 
     # Create note object
-    ourNote = Ttypes.Note()
-    ourNote.title = notetitle
-    ourNote.content = nBody
+    ournote = Ttypes.Note()
+    ournote.title = notetitle
+    ournote.content = nbody
 
     # parentNotebook is optional; if omitted, default notebook is used
     if parentnotebook and hasattr(parentnotebook, 'guid'):
-        ourNote.notebookGuid = parentnotebook.guid
+        ournote.notebookGuid = parentnotebook.guid
 
     # Attempt to create note in Evernote account
     try:
-        note = notestore.createNote(token, ourNote)
+        note = notestore.createNote(token, ournote)
         evernoteapijiayi()
         log.info('笔记《' + notetitle + '》在笔记本《' + parentnotebook.name + '》中创建成功。')
         return note
     except Etypes.EDAMUserException as usere:
-        ## Something was wrong with the note data
-        ## See EDAMErrorCode enumeration for error code explanation
-        ## http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
+        # Something was wrong with the note data
+        # See EDAMErrorCode enumeration for error code explanation
+        # http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
         log.critical("用户错误！%s" % str(usere))
     except Etypes.EDAMNotFoundException as notfounde:
-        ## Parent Notebook GUID doesn't correspond to an actual notebook
+        # Parent Notebook GUID doesn't correspond to an actual notebook
         print("无效的笔记本guid（识别符）！%s" % str(notfounde))
     except Etypes.EDAMSystemException as systeme:
         if systeme.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
@@ -461,10 +488,21 @@ def makenote(token, notestore, notetitle, notebody='真元商贸——休闲食�
 
 
 def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhuti='销售业绩图表'):
+    """
+    根据fromsection中的值构建新的tosection，fenbu、guid
+    :param cfpp:
+    :param fromsection:
+    :param tosection:
+    :param inifile:
+    :param token:
+    :param note_store:
+    :param zhuti:
+    :return:
+    """
     if not cfpp.has_section(tosection):
         cfpp.add_section(tosection)
     nbfbdf = readinisection2df(cfpp, fromsection, zhuti)
-    print(nbfbdf)
+    # print(nbfbdf)
     for aa in nbfbdf.index:
         try:
             guid = cfpp.get(tosection, aa)
@@ -485,7 +523,6 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
 
 
 def gengxinfou(filename, conn, tablename='fileread'):
-    rt = False
     try:
         create_tb_cmd = "CREATE TABLE IF NOT EXISTS %s " \
                         "('文件名' TEXT," \
@@ -497,7 +534,7 @@ def gengxinfou(filename, conn, tablename='fileread'):
         conn.execute(create_tb_cmd)
     except Exception:
         log.critical("创建数据表%s失败！" % tablename)
-        return rt
+        return False
 
     fna = os.path.abspath(filename)
     fn = os.path.basename(fna)
@@ -541,7 +578,6 @@ def gengxinfou(filename, conn, tablename='fileread'):
         else:
             print('无需更新。')
             rt = False
-    # print(fstat.st_mtime, '\t', time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(fstat.st_atime)),'\t', '\t', time.strftime('%Y-%m-%d %H:%M',time.localtime(fstat.st_mtime)),'\t', '\t', time.strftime('%Y-%m-%d %H:%M',time.localtime(fstat.st_ctime)),'\t', fstat.st_dev)
     conn.commit()
 
     return rt
@@ -595,19 +631,6 @@ def dataokay(cnx):
         # df = df.apply(lambda x:str.strip(x) if type(x) == str else x)
         df.to_sql(name='quandan', con=cnx, if_exists='replace', chunksize=100000)
 
-    # if gengxinfou('data\\xiaoshoushujumingxi.txt',cnx,'fileread'):# or True:
-    #     # df = pd.read_csv('data\\xiaoshoushujumingxi.txt',sep='\t',header=None,parse_dates=[0],dtype={'5':np.str,'8':np.str,'12':np.float64,'14':np.float64})
-    #     df = pd.read_csv('data\\xiaoshoushujumingxi.txt',sep='\t',header=None,parse_dates=[0],dtype={4:object,5:object,10:object},low_memory=False,verbose=True)
-    #     # descdb(df)
-    #     df.columns = ['日期','单据编号','单据类型','职员名称','摘要','备注','商品备注','规格','商品编号','商品全名','型号','产地','单价','单位','数量','金额','含税单价','价税合计','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']
-    #     # descdb(df)
-    #     # sql_df=df.loc[:,['日期','单据编号','单据类型','职员名称','职员销售明细表','备注','商品备注','规格','商品编号','商品全名','单价','单位','数量','金额','成本金额','单位全名','毛利','毛利率','仓库全名','部门全名']]
-    #     df=df.loc[:,['日期','单据编号','单据类型','职员名称','摘要','备注','商品备注','商品编号','商品全名','单价','单位','数量','金额','单位全名','仓库全名','部门全名']]
-    #     df['单价'] = (df['单价']).fillna(0)
-    #     df['金额'] = (df['金额']).fillna(0)
-    #     descdb(df)
-    #     df.to_sql(name='xiaoshoumingxi', con=cnx, if_exists='replace', chunksize=100000)
-
     if gengxinfou('data\\jiaqi.txt', cnx, 'fileread'):
         df = pd.read_csv('data\\jiaqi.txt', sep=',', header=None)
         dfjiaqi = []
@@ -657,157 +680,6 @@ def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount
     return imglistreturn
 
 
-# 月度（全年，自然年度）累积对比图，自最早日期起，默认3年
-# df，数据表，必须用DateTime做index
-# riqi，数据记录的最近日期，可以是DateTIme的各种形式，只要pd能识别成功，形如2017-10-06
-# xiangmu，主题，画图时写入标题
-# imglist，输出图片路径list
-# quyu，销售区域或区域聚合（分部）
-# leixing，终端类型
-# nianshu，用来对比的年份数，从当前年份向回数
-# imgpath，图片存储路径
-def chubiaoyuezhexian(df, riqi, xiangmu, cum=False, imglist=[], quyu='', leixing='', pinpai='', nianshu=3,
-                      imgpath='img\\'):
-    monthcur = pd.to_datetime("%04d-%02d-01" % (riqi.year, riqi.month))  # 2017-10-01
-    nianlist = []
-    for i in range(nianshu):
-        nianlist.append(monthcur + pd.DateOffset(years=-(i)))  # 2017-10-01,2016-10-01,2015-10-01
-
-    ds = pd.DataFrame(df)  # 取出日期索引的数据列
-
-    # 分年份生成按照每天日期重新索引的数据列
-    dslist = []
-    for i in range(nianshu):
-        if i == 0:
-            periods = int(riqi.strftime('%j'))
-        else:
-            periods = 365
-        dstmp = ds.reindex(pd.date_range(pd.to_datetime(str(nianlist[i].year) + '-01-01'), periods=periods, freq='D'),
-                           fill_value=0)
-        if cum:
-            dstmp = dstmp.resample('M').sum()
-        else:
-            dstmp = dstmp.resample('M').max()
-        dstmp.columns = ['%04d' % (nianlist[i].year)]
-        dstmp.index = (range(len(dstmp.index)))
-        dslist.append(dstmp)
-
-    df = dslist[-1]  # 5,0 1 2 3 4
-    for i in range(nianshu - 1):  # 0 1 2 3
-        df = df.join(dslist[-(i + 2)])  # -2 -3 -4 -5, 3 2 1 0
-
-    colnames = []
-    for i in range(nianshu):
-        colnames.append(dslist[-(i + 1)].columns[0])  # -1 -2 -3 -4 -5, 4 3 2 1 0
-    # print(colnames)
-    df = df[colnames]
-    zuobiao = pd.Series(list(df.index))
-    df.index = zuobiao.apply(lambda x: '%02d' % (x + 1))
-    # print(colnames[0]+'\t'+str(type(colnames[0]))+ '\t'+ str(df[str(riqi.year)].max())+'\t' +str(type(riqi.year)))
-
-    nianyue = '%04d年' % monthcur.year
-    biaoti = leixing + quyu + pinpai + nianyue + xiangmu
-    cumstr = ''
-    if cum:
-        cumstr = '月累积'
-        df.cumsum().plot(title=biaoti + cumstr)
-    else:
-        cumstr = '月折线'
-        df.plot(title=biaoti)
-    if df[str(riqi.year)].max() > 10000:
-        plt.gca().yaxis.set_major_formatter(
-            FuncFormatter(lambda x, pos: "%d万" % (int(x / 10000))))  # 纵轴主刻度文本用y_formatter函数计算
-    plt.savefig(imgpath + '%s%s.png' % (biaoti, cumstr))
-    imglist.append(imgpath + '%s%s.png' % (biaoti, cumstr))
-    plt.close()
-
-    cumstr = '月折线'
-    df.plot(title='%s%s' % (biaoti, cumstr))
-    if df[str(riqi.year)].max() > 10000:
-        plt.gca().yaxis.set_major_formatter(
-            FuncFormatter(lambda x, pos: "%.1f万" % ((x / 10000))))  # 纵轴主刻度文本用y_formatter函数计算
-    plt.savefig(imgpath + '%s%s.png' % (biaoti, cumstr))
-    imglist.append(imgpath + '%s%s.png' % (biaoti, cumstr))
-    plt.close()
-
-
-# 日（整月）累积对比图，当月、环比、同期比
-# riqienddate形如2017-12-08，代表数据结束点的日期
-def chubiaorizhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', leixing='', pinpai='', imgpath='img\\'):
-    riqicurmonthfirst = pd.to_datetime("%04d-%02d-01" % (riqienddate.year, riqienddate.month))  # 日期格式的当月1日
-    riqibeforemonthfirst = riqicurmonthfirst + pd.DateOffset(months=-1)  # 日期格式的上月1日
-    riqilastmonthfirst = riqicurmonthfirst + pd.DateOffset(years=-1)  # 日期格式的去年当月1日
-    tianshu = cal.monthrange(riqienddate.year, riqienddate.month)[1]  # 当月的天数
-
-    # print(df)
-    ds = pd.DataFrame(df[xiangmu], index=df.index)  # 处理上月数据
-    dates = pd.date_range(riqibeforemonthfirst, periods=tianshu, freq='D')  # 上月日期全集，截止到当月天数为止
-    ds1 = ds.reindex(dates, fill_value=0)  # 重新索引，补全所有日期，空值用0填充
-    ds1.index = (range(1, len(dates) + 1))  # 索引天日化
-    ds1.columns = ['%04d%02d' % (riqibeforemonthfirst.year, riqibeforemonthfirst.month)]  # 列命名，形如201709
-
-    dates = pd.date_range(riqilastmonthfirst, periods=tianshu, freq='D')  # 处理去年当月数据
-    ds3 = ds.reindex(dates, fill_value=0)
-    ds3.index = range(1, len(dates) + 1)
-    ds3.columns = ['%04d%02d' % (riqilastmonthfirst.year, riqilastmonthfirst.month)]
-
-    dates = pd.date_range(riqicurmonthfirst, periods=riqienddate.day, freq='D')  # 处理当月数据，至截止日期
-    ds2 = ds.reindex(dates, fill_value=0)
-    ds2.index = range(1, len(dates) + 1)
-    ds2.columns = ['%04d%02d' % (riqicurmonthfirst.year, riqicurmonthfirst.month)]
-
-    dff = ds3.join(ds2, how='left')  # 取去年当月天数做主轴
-    dff = dff.join(ds1, how='left')  # 列名列表形如：['201610','201710','201709']
-    dff = dff.loc[:, [ds2.columns[0], ds3.columns[0], ds1.columns[0]]]  # 列名列表形如：['201710','201610','201709']
-
-    nianyue = '%04d%02d' % (riqicurmonthfirst.year, riqicurmonthfirst.month)
-    biaoti = leixing + quyu + pinpai + nianyue + xiangmu
-    dfc = dff
-    if cum:
-        dfc = dff.cumsum()  # 数据累积求和
-        biaoti = biaoti + '日累积'
-    # print(dfc)
-    dfc.plot(title=biaoti)
-    plt.ylim(0)  # 设定纵轴从0开始
-
-    kedu = dfc.loc[riqienddate.day]
-    # print(kedu)
-    # print(kedu.index)
-    # print(kedu[[0]])
-    # print(kedu.max())
-
-    # date_end_zuobiao = "%02d" % (df.index.max().day-1)
-    plt.plot([riqienddate.day, riqienddate.day], [0, kedu[[0]]], 'c--')
-    plt.annotate(str(riqienddate.day), xy=(riqienddate.day, 0), xycoords='data',
-                 xytext=(-20, -20), textcoords='offset points', color='r',
-                 arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
-    for i in range(len(kedu)):
-        plt.scatter([riqienddate.day, ], [kedu[[i]]], 50, color='Wheat')
-        if kedu.max() >= 10000:
-            kedubiaozhi = "%.1f万" % (kedu[[i]] / 10000)
-            plt.gca().yaxis.set_major_formatter(
-                FuncFormatter(lambda x, pos: "%d万" % (int(x / 10000))))  # 纵轴主刻度文本用y_formatter函数计算
-        else:
-            kedubiaozhi = "%d" % kedu[[i]]
-        fontsize = 8
-        if ((i % 2)) == 0:
-            zhengfu = -1
-        else:
-            zhengfu = 0.4
-        plt.annotate(kedubiaozhi, xy=(riqienddate.day, kedu[[i]]), xycoords='data',
-                     xytext=(
-                         len(kedubiaozhi) * fontsize * zhengfu, int(len(kedubiaozhi) * fontsize * (-1) * zhengfu / 2)),
-                     textcoords='offset points', fontsize=fontsize,
-                     arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
-
-    imgsavepath = imgpath + biaoti + '（日累积月）.png'
-    plt.savefig(imgsavepath)
-    imglist.append(imgsavepath)
-    plt.close()
-
-    # return imgsavepath
-
-
 def biaozhukedu(dfc, weibiao):
     if weibiao == dfc.index.max():
         kedus = [dfc.loc[weibiao]]
@@ -839,7 +711,7 @@ def biaozhukedu(dfc, weibiao):
             else:
                 kedubiaozhi = "%d" % kedu.iloc[i]
             fontsize = 8
-            if ((i % 2)) == 0:
+            if (i % 2) == 0:
                 zhengfu = -1
             else:
                 zhengfu = 0.4
@@ -850,17 +722,23 @@ def biaozhukedu(dfc, weibiao):
                          textcoords='offset points', fontsize=fontsize,
                          arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
 
-# 月度（全年，自然年度）累积对比图，自最早日期起，默认3年
-# df，数据表，必须用DateTime做index
-# riqi，数据记录的最近日期，可以是DateTIme的各种形式，只要pd能识别成功，形如2017-10-06
-# xiangmu，主题，画图时写入标题
-# imglist，输出图片路径list
-# quyu，销售区域或区域聚合（分部）
-# leixing，终端类型
-# nianshu，用来对比的年份数，从当前年份向回数
-# imgpath，图片存储路径
+
 def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=[], quyu='', leixing='', pinpai='', nianshu=3,
                     imgpath='img\\'):
+    """
+    月度（全年，自然年度）累积对比图，自最早日期起，默认3年
+    :param ds: 数据表，必须用DateTime做index
+    :param riqienddate: 数据记录的最近日期，可以是DateTIme的各种形式，只要pd能识别成功，形如2017-10-06
+    :param xiangmu: 主题，画图时写入标题
+    :param cum:
+    :param imglist: 输出图片路径list
+    :param quyu: 销售区域或区域聚合（分部）
+    :param leixing: 终端类型
+    :param pinpai:
+    :param nianshu: 用来对比的年份数，从当前年份向回数
+    :param imgpath: 图片存储路径
+    :return:
+    """
     # print(df.tail(10))
     # monthcur = riqienddate + MonthBegin(-1) # 2017-10-01
     nianshushiji = ds.index.max().year - ds.index.min().year + 1
@@ -1009,9 +887,16 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', lei
 
 
 def imglist2note(notestore, imglist, noteguid, notetitle, token, sty='replace'):
-    #
-    # 更新note内容为图片列表
-    #
+    """
+    更新note内容为图片列表
+    :param notestore:
+    :param imglist:
+    :param noteguid:
+    :param notetitle:
+    :param token:
+    :param sty:
+    :return:
+    """
     note = Ttypes.Note()
     # print(type(note))
     note.guid = noteguid
@@ -1047,21 +932,13 @@ def imglist2note(notestore, imglist, noteguid, notetitle, token, sty='replace'):
         resource.mime = 'image/png'
         resource.data = data
         note.resources.append(resource)
-    # print(len(note.resources))
-    # guiset = []
-    # for aa in note.resources:
-    #     guiset.append(aa.guid)
-    # print(guiset)
-    # guiset = set(guiset)
-    # print(guiset)
-    # note.resourcesset = tuple(guiset)
 
     # The content of an Evernote note is represented using Evernote Markup Language
     # (ENML). The full ENML specification can be found in the Evernote API Overview
     # at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
-    nBody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-    nBody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
-    nBody += "<en-note>"
+    nbody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+    nbody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+    nbody += "<en-note>"
     if note.resources:
         # To display the Resource as part of the note's content, include an <en-media>
         # tag in the note's ENML content. The en-media tag identifies the corresponding
@@ -1074,10 +951,10 @@ def imglist2note(notestore, imglist, noteguid, notetitle, token, sty='replace'):
                 # print (str1)
                 str1 = str1[2:-1]  # cd34b4b6c8d9279217b03c396ca913df
                 # print (str1)
-                nBody += "<en-media type=\"%s\" hash=\"%s\" /><br />" % (resource.mime, str1)
-    nBody += "</en-note>"
+                nbody += "<en-media type=\"%s\" hash=\"%s\" /><br />" % (resource.mime, str1)
+    nbody += "</en-note>"
 
-    note.content = nBody
+    note.content = nbody
     # print (note.content)
 
     # Finally, send the new note to Evernote using the updateNote method

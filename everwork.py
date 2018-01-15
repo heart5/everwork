@@ -83,19 +83,17 @@ brandlist = ['丽芝士', '兰花恋人',
 # brandlist = ['津津友味','鲜多鲜','丽芝士','非凡','鲜客','童年时代','麦小呆','渔米之湘','U品部落',
 #              '抓鱼的猫','旭东','创食人','']
 # brandlist = ['津津友味','鲜多鲜','丽芝士','童年时代','渔米之湘','U品部落','抓鱼的猫','卫龙','创食人','']
-brandlist = ['鲜多鲜', 'U品部落',
-             '光头祥', '大霸王', '丽芝士', '非凡', '鲜客', '童年时代', '麦小呆', '渔米之湘',
-             'U品部落', '抓鱼的猫', '旭东', '创食人', '']
+brandlist = ['']
 # brandlist = []
 for br in brandlist:
-    updatesection(cfp, 'guidquyunb', br + 'kehuguidquyu', inifilepath, token, note_store, br + '客户开发图表')
-    updatesection(cfp, 'guidquyunb', br + 'saleguidquyu', inifilepath, token, note_store, br + '销售业绩图表')
-    updatesection(cfp,'guidleixingnb',br+'kehuguidleixing',inifilepath,token,note_store,br+'客户开发图表')
-    updatesection(cfp,'guidleixingnb',br+'saleguidleixing',inifilepath,token,note_store,br+'销售业绩图表')
+    updatesection(cfp, 'guidfenbunb', br + 'kehuguidfenbu', inifilepath, token, note_store, br + '客户开发图表')
+    updatesection(cfp, 'guidfenbunb', br + 'saleguidfenbu', inifilepath, token, note_store, br + '销售业绩图表')
+    updatesection(cfp, 'guidleixingnb', br + 'kehuguidleixing', inifilepath, token, note_store, br + '客户开发图表')
+    updatesection(cfp, 'guidleixingnb', br + 'saleguidleixing', inifilepath, token, note_store, br + '销售业绩图表')
 
     # notelxxsdf = ['']
-    notelxxsdf = readinisection2df(cfp,br+'saleguidleixing',br+'销售图表')
-    notefbxsdf = readinisection2df(cfp, br + 'saleguidquyu', br + '销售图表')
+    notelxxsdf = readinisection2df(cfp, br + 'saleguidleixing', br + '销售图表')
+    notefbxsdf = readinisection2df(cfp, br + 'saleguidfenbu', br + '销售图表')
     # print(notefbxsdf)
 
     qrystr = "select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码," + \
@@ -109,7 +107,7 @@ for br in brandlist:
 
     # notelxkhdf = ['']
     notelxkhdf = readinisection2df(cfp, br+'kehuguidleixing', br+'客户图表')
-    notefbkhdf = readinisection2df(cfp, br + 'kehuguidquyu', br + '客户图表')
+    notefbkhdf = readinisection2df(cfp, br + 'kehuguidfenbu', br + '客户图表')
     # print(notefbkhdf)
     qrystr = "select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码," + \
              'count(*) as %s, substr(customer.往来单位编号,1,2) as 区域 ,' \

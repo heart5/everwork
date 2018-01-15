@@ -14318,3 +14318,97 @@
 2018-01-15 08:17:08	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 11872 - 9428	DEBUG: 动用了Evernote API 290 次……
 2018-01-15 08:17:08	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 11872 - 9428	INFO: Evernote API 调用已达290次，休息2726秒，待2018-01-15 09:02:35再开干……
 2018-01-15 08:17:08	ewer	everfunc.py - [writeini]	MainThread - 11872 - 9428	INFO: Evernote API调用次数：290，写入配置文件data\everwork.ini
+2018-01-15 15:18:28	ewer	everfunc.py - [<module>]	MainThread - 3036 - 3628	INFO: 程序上次异常退出，调用log中的API数据[2018-01-15 08:17:08,290]
+2018-01-15 15:18:28	ewer	everfunc.py - [writeini]	MainThread - 3036 - 3628	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
+2018-01-15 15:18:28	ewer	everwork.py - [<module>]	MainThread - 3036 - 3628	DEBUG: 程序启动……
+2018-01-15 15:18:28	ewer	everwork.py - [<module>]	MainThread - 3036 - 3628	DEBUG: 配置文件读取成功
+2018-01-15 15:18:28	ewer	everfunc.py - [wrapper]	MainThread - 3036 - 3628	DEBUG: get_notestore 启动运行
+2018-01-15 15:18:30	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 3036 - 3628	DEBUG: 动用了Evernote API 1 次……
+2018-01-15 15:18:30	ewer	everfunc.py - [get_notestore]	MainThread - 3036 - 3628	DEBUG: 成功连接Evernote服务器！
+2018-01-15 15:18:30	ewer	everwork.py - [<module>]	MainThread - 3036 - 3628	DEBUG: 目录《img\所有分部》被创建
+2018-01-15 15:18:30	ewer	everfunc.py - [gengxinfou]	MainThread - 3036 - 3628	INFO: 文件《系统表.xlsx》已有20条记录，有新文件，更新之。
+2018-01-15 15:19:19	ewer	everfunc.py - [<module>]	MainThread - 8500 - 7336	INFO: 程序上次异常退出，调用log中的API数据[2018-01-15 15:18:30,1]
+2018-01-15 15:19:19	ewer	everwork.py - [<module>]	MainThread - 8500 - 7336	DEBUG: 程序启动……
+2018-01-15 15:19:19	ewer	everwork.py - [<module>]	MainThread - 8500 - 7336	DEBUG: 配置文件读取成功
+2018-01-15 15:19:19	ewer	everfunc.py - [wrapper]	MainThread - 8500 - 7336	DEBUG: get_notestore 启动运行
+2018-01-15 15:19:21	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 8500 - 7336	DEBUG: 动用了Evernote API 3 次……
+2018-01-15 15:19:21	ewer	everfunc.py - [get_notestore]	MainThread - 8500 - 7336	DEBUG: 成功连接Evernote服务器！
+2018-01-15 15:19:21	ewer	notesaledetails.py - [fenxiyueduibi]	MainThread - 8500 - 7336	INFO: select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码,sum(金额) as %s, substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型, product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) %s %s group by 日期,客户编码 order by 日期
+2018-01-15 15:20:07	ewer	notesaledetails.py - [fenxiyueduibi]	MainThread - 8500 - 7336	INFO: select 日期,strftime('%Y%m',日期) as 年月,customer.往来单位编号 as 客户编码,sum(金额) as 销售金额, substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型, product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名)  and (金额 >= 0)   group by 日期,客户编码 order by 日期
+2018-01-15 15:20:08	ewer	notesaledetails.py - [fenxiyueduibi]	MainThread - 8500 - 7336	INFO: select 日期,strftime('%Y%m',日期) as 年月,customer.往来单位编号 as 客户编码,sum(金额) as 退货金额, substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型, product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名)  and (金额 < 0)   group by 日期,客户编码 order by 日期
+2018-01-15 15:20:09	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 8500 - 7336	DEBUG: 2017-12-26 00:00:00	：	终端客户	，	一部
+2018-01-15 15:20:22	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 8500 - 7336	DEBUG: 动用了Evernote API 4 次……
+2018-01-15 15:20:22	ewer	everfunc.py - [imglist2note]	MainThread - 8500 - 7336	INFO: 成功更新了笔记《一部销售图表》，guid：1393ac7b-2fa9-4496-959a-b18fcf87af13。
+2018-01-15 15:20:22	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 8500 - 7336	DEBUG: 2017-12-26 00:00:00	：	终端客户	，	二部
+2018-01-15 15:22:05	ewer	everfunc.py - [<module>]	MainThread - 2968 - 4160	INFO: 程序上次异常退出，调用log中的API数据[2018-01-15 15:20:22,4]
+2018-01-15 15:22:05	ewer	everwork.py - [<module>]	MainThread - 2968 - 4160	DEBUG: 程序启动……
+2018-01-15 15:22:05	ewer	everwork.py - [<module>]	MainThread - 2968 - 4160	DEBUG: 配置文件读取成功
+2018-01-15 15:22:05	ewer	everfunc.py - [wrapper]	MainThread - 2968 - 4160	DEBUG: get_notestore 启动运行
+2018-01-15 15:22:06	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 6 次……
+2018-01-15 15:22:06	ewer	everfunc.py - [get_notestore]	MainThread - 2968 - 4160	DEBUG: 成功连接Evernote服务器！
+2018-01-15 15:22:06	ewer	notesaledetails.py - [fenxiyueduibi]	MainThread - 2968 - 4160	INFO: select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码,sum(金额) as %s, substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型, product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) %s %s group by 日期,客户编码 order by 日期
+2018-01-15 15:22:12	ewer	notesaledetails.py - [fenxiyueduibi]	MainThread - 2968 - 4160	INFO: select 日期,strftime('%Y%m',日期) as 年月,customer.往来单位编号 as 客户编码,sum(金额) as 销售金额, substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型, product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名)  and (金额 >= 0)   group by 日期,客户编码 order by 日期
+2018-01-15 15:22:13	ewer	notesaledetails.py - [fenxiyueduibi]	MainThread - 2968 - 4160	INFO: select 日期,strftime('%Y%m',日期) as 年月,customer.往来单位编号 as 客户编码,sum(金额) as 退货金额, substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型, product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名)  and (金额 < 0)   group by 日期,客户编码 order by 日期
+2018-01-15 15:22:14	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	终端客户	，	一部
+2018-01-15 15:22:19	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 7 次……
+2018-01-15 15:22:19	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《一部销售图表》，guid：1393ac7b-2fa9-4496-959a-b18fcf87af13。
+2018-01-15 15:22:19	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	终端客户	，	二部
+2018-01-15 15:22:23	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 8 次……
+2018-01-15 15:22:23	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《二部销售图表》，guid：f3e19574-692a-4eda-bbe9-36e4d9668419。
+2018-01-15 15:22:23	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	终端客户	，	汉阳
+2018-01-15 15:22:28	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 9 次……
+2018-01-15 15:22:28	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《汉阳销售图表》，guid：dbebb3bf-fba1-4ad8-964f-7e9bb164a793。
+2018-01-15 15:22:28	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	终端客户	，	汉口
+2018-01-15 15:22:32	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 10 次……
+2018-01-15 15:22:32	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《汉口销售图表》，guid：e1d1dfa8-0639-4346-858c-9949a11a2195。
+2018-01-15 15:22:32	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	终端客户	，	所有分部
+2018-01-15 15:22:37	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 11 次……
+2018-01-15 15:22:37	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《所有分部销售图表》，guid：6d6f2cfe-293c-45a2-ba8e-5afce5f3cf15。
+2018-01-15 15:22:37	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	连锁客户
+2018-01-15 15:22:41	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 12 次……
+2018-01-15 15:22:41	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《连锁客户销售图表》，guid：9deaa51f-b996-4940-ab95-c5025be5f834。
+2018-01-15 15:22:41	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	渠道客户
+2018-01-15 15:22:46	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 13 次……
+2018-01-15 15:22:46	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《渠道客户销售图表》，guid：891b90a2-bc2b-4328-b321-de718a988291。
+2018-01-15 15:22:46	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	直销客户
+2018-01-15 15:22:49	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 14 次……
+2018-01-15 15:22:49	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《直销客户销售图表》，guid：d7c3e155-55bc-4806-a722-ca4a2d0a0368。
+2018-01-15 15:22:49	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	公关客户
+2018-01-15 15:22:50	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	其他客户
+2018-01-15 15:22:53	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	全渠道
+2018-01-15 15:22:57	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 15 次……
+2018-01-15 15:22:57	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《全渠道销售图表》，guid：bd4f8537-567f-4ec3-a5c2-34035f196cbd。
+2018-01-15 15:22:57	ewer	notesaledetails.py - [fenxiyueduibi]	MainThread - 2968 - 4160	INFO: select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码,count(*) as %s, substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型, product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product where (customer.往来单位 = xiaoshoumingxi.单位全名)  and (product.商品全名 = xiaoshoumingxi.商品全名) %s %s group by 日期,客户编码 order by 日期
+2018-01-15 15:23:03	ewer	notesaledetails.py - [fenxiyueduibi]	MainThread - 2968 - 4160	INFO: select 日期,strftime('%Y%m',日期) as 年月,customer.往来单位编号 as 客户编码,count(*) as 销售客户数, substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型, product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product where (customer.往来单位 = xiaoshoumingxi.单位全名)  and (product.商品全名 = xiaoshoumingxi.商品全名)  and (金额 >= 0)   group by 日期,客户编码 order by 日期
+2018-01-15 15:23:04	ewer	notesaledetails.py - [fenxiyueduibi]	MainThread - 2968 - 4160	INFO: select 日期,strftime('%Y%m',日期) as 年月,customer.往来单位编号 as 客户编码,count(*) as 退货客户数, substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型, product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product where (customer.往来单位 = xiaoshoumingxi.单位全名)  and (product.商品全名 = xiaoshoumingxi.商品全名)  and (金额 < 0)   group by 日期,客户编码 order by 日期
+2018-01-15 15:23:04	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	终端客户	，	一部
+2018-01-15 15:23:15	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 16 次……
+2018-01-15 15:23:15	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《一部客户图表》，guid：e07d1bd6-34f0-4ca8-a613-107e00c6232c。
+2018-01-15 15:23:15	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	终端客户	，	二部
+2018-01-15 15:23:26	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 17 次……
+2018-01-15 15:23:26	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《二部客户图表》，guid：a15656d7-0e7b-444f-ba8b-bd48272fcc03。
+2018-01-15 15:23:26	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	终端客户	，	汉阳
+2018-01-15 15:23:36	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 18 次……
+2018-01-15 15:23:36	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《汉阳客户图表》，guid：a91f870b-b9d1-40c5-82fb-5281126b71c1。
+2018-01-15 15:23:36	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	终端客户	，	汉口
+2018-01-15 15:23:45	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 19 次……
+2018-01-15 15:23:45	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《汉口客户图表》，guid：5b9196d0-f466-4b75-9821-6f3e4b271447。
+2018-01-15 15:23:45	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	终端客户	，	所有分部
+2018-01-15 15:24:00	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 20 次……
+2018-01-15 15:24:00	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《所有分部客户图表》，guid：748e9fa7-1a61-42de-b39e-a0b7a749ec88。
+2018-01-15 15:24:00	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	连锁客户
+2018-01-15 15:24:09	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 21 次……
+2018-01-15 15:24:09	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《连锁客户客户图表》，guid：919c781d-1772-463c-81ad-e4a3b2214d15。
+2018-01-15 15:24:09	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	渠道客户
+2018-01-15 15:24:18	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 22 次……
+2018-01-15 15:24:18	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《渠道客户客户图表》，guid：2d69e6a7-589b-43be-9af4-7fa776ae73b6。
+2018-01-15 15:24:18	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	直销客户
+2018-01-15 15:24:24	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 23 次……
+2018-01-15 15:24:24	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《直销客户客户图表》，guid：19654046-4357-4484-aada-ecfbf043f2ef。
+2018-01-15 15:24:24	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	公关客户
+2018-01-15 15:24:26	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	其他客户
+2018-01-15 15:24:29	ewer	notesaledetails.py - [kuangjiachutu]	MainThread - 2968 - 4160	DEBUG: 2018-01-06 00:00:00	：	全渠道
+2018-01-15 15:24:44	ewer	everfunc.py - [evernoteapijiayi]	MainThread - 2968 - 4160	DEBUG: 动用了Evernote API 24 次……
+2018-01-15 15:24:44	ewer	everfunc.py - [imglist2note]	MainThread - 2968 - 4160	INFO: 成功更新了笔记《全渠道客户图表》，guid：4183b9d9-b328-4308-ba61-a4539675a5ca。
+2018-01-15 15:24:45	ewer	everfunc.py - [writeini]	MainThread - 2968 - 4160	INFO: Evernote API调用次数：24，写入配置文件data\everwork.ini
+2018-01-15 15:24:45	ewer	everwork.py - [<module>]	MainThread - 2968 - 4160	DEBUG: 程序结束！
