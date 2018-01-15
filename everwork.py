@@ -11,6 +11,7 @@ from noteweather import weatherstat #调用同目录下其他文件（py）中�
 from notewarehouse import *
 from notedispatch import *
 from notesaledetails import *
+from notejinchujilu import *
 
 # thistime = '当前运行时间：' + str(int(time.time())) + '\t' + time.strftime("%Y-%m-%d %H:%M:%S",
 #                                                                     time.localtime(time.time()))
@@ -28,35 +29,11 @@ note_store = get_notestore(token)
 # for x in notebooks:
 #     printnotebookattributeundertoken(x)
 
-
-#e5d81ffa-89e7-49ff-bd4c-a5a71ae14320 武汉雨天记录
-#296f57a3-c660-4dd5-885a-56492deb2cee 武汉天气图
-#277dff5e-7042-47c0-9d7b-aae270f903b8 武汉每日天气
 #39ed537d-73fa-4ad8-b4fd-bc6f746fb302 真元日配送图
 #1c0830d9-e42f-4ce7-bf36-ead868a55eca 订单配货统计图
 #49eff8eb-5bce-43b9-a95a-c1ee7eab71fa 有友全渠道销售图表
 
-# findnotefromnotebook(note_store,token,'ba1423ed-5da1-4883-a2cc-070c93bf7e98','图表') #从笔记本中查找标题中包含指定字符串的笔记
-
-# Types.Note getNote(string authenticationToken,
-#                    Types.Guid guid,
-#                    bool withContent,
-#                    bool withResourcesData,
-#                    bool withResourcesRecognition,
-#                    bool withResourcesAlternateData)
-#     throws Errors.EDAMUserException, Errors.EDAMSystemException, Errors.EDAMNotFoundException
-
-# note = note_store.getNote(token,'296f57a3-c660-4dd5-885a-56492deb2cee', True, True, True,True)
-# evernoteapijiayi()
-# print(note.content)
-# resources = note.resources
-# print(len(resources))
-# for aa in resources:
-#     print(aa)
-#     # if hasattr(aa,'data'):
-#     #     print(aa.data)
-
-# printnoteattributeundertoken(note)
+# findnotefromnotebook(note_store,token,'31eee750-e240-438b-a1f5-03ce34c904b4','记录') #从笔记本中查找标题中包含指定字符串的笔记
 
 # todo 一体化目录构建
 nbfbdf = readinisection2df(cfp,'guidfenbunb','销售业绩图表')
@@ -68,8 +45,10 @@ for aa in nbfbdf.index:
 
 cnx = lite.connect('data\\quandan.db')
 dataokay(cnx)
-# weatherstat(token, note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
+weatherstat(token, note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
+jilustat(token, note_store, '24aad619-2356-499e-9fa7-f685af3a81b1')
+
 brandlist = ['丽芝士', '兰花恋人',
              '易加', '卤帝七号', '呈呈', '伍滋味', '脆马蹄', '鱼友味', '武丰', '柒柒湘', '俊媳妇', '湘寿鸭', '好媳妇',
               '香之派', '友意', '大西南', '金昌盛', '康赞', '恒的', '孙妈', '银城湘味', '刘香源', '蜀望', '口口德福',
@@ -84,7 +63,7 @@ brandlist = ['丽芝士', '兰花恋人',
 #              '抓鱼的猫','旭东','创食人','']
 # brandlist = ['津津友味','鲜多鲜','丽芝士','童年时代','渔米之湘','U品部落','抓鱼的猫','卫龙','创食人','']
 brandlist = ['']
-# brandlist = []
+brandlist = []
 for br in brandlist:
     updatesection(cfp, 'guidfenbunb', br + 'kehuguidfenbu', inifilepath, token, note_store, br + '客户开发图表')
     updatesection(cfp, 'guidfenbunb', br + 'saleguidfenbu', inifilepath, token, note_store, br + '销售业绩图表')

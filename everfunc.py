@@ -99,25 +99,26 @@ def getapitimesfromlog():
     从log中提取API调用次数
     :return:
     """
-    df = pd.read_csv('log\\everwork.log', sep='\t', header=None,  # names=['asctime', 'name', 'filenamefuncName',
-                     # 'threadNamethreadprocess', 'levelnamemessage'],
-                     # na_filter=True,
+    df = pd.read_csv('log\\everwork.log', sep='\t',  # index_col= False,
+                     header=None, usecols=[0, 1, 2, 3, 4],
+                     names=['asctime', 'name', 'filenamefuncName', 'threadNamethreadprocess', 'levelnamemessage'],
+                     na_filter=True, parse_dates=[0],
                      skip_blank_lines=True, skipinitialspace=True)
-    # for i in range(5, len(df)-1):
-    #     df.iloc[[4]] = df.iloc[[4]] +df.iloc[[i]]
-    # print(df.tail())
-
-    df = df[[0, 1, 2, 3, 4]]
-    df.columns = ['asctime', 'name', 'filenamefuncName', 'threadNamethreadprocess', 'levelnamemessage']
-    # print(df.columns)
-    # print(df['levelnamemessage'].tail())
-    # strtest = 'DEBUG: 动用了Evernote API 290 次……  '
-    # print(strtest.find('动用了Evernote API'))
-    # print(df[df.levelnamemessage.str.contains(u'API ').values == True])
-    dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API ').values == True][['asctime', 'levelnamemessage']]
+    dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API').values == True][['asctime', 'levelnamemessage']]
+    if dfapi2.shape[0] == 0:
+        log.info('log文进中还没有API的调用记录')
+        return False
     # print(dfapi2.tail())
-    jj = re.findall('(?P<counts>\d+)', dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['levelnamemessage'].iloc[0])[0]
-    return [pd.to_datetime(dfapi2.asctime.max()), int(jj)]
+    dfapi2['counts'] = dfapi2['levelnamemessage'].apply(lambda x: int(re.findall('(?P<counts>\d+)', x)[0]))
+    # del dfapi2['levelnamemessage']
+    print(dfapi2.tail())
+    jj = dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['counts'].iloc[-1]
+    print(type(jj))
+    print(jj)
+    result = [dfapi2.asctime.max(), int(jj)]
+    print(dfapi2[dfapi2.asctime == dfapi2.asctime.max()])
+    print(result)
+    return result
 
 
 def writeini():
@@ -156,14 +157,15 @@ log = mylog()
 cfp = ConfigParser()
 inifilepath = 'data\\everwork.ini'
 cfp.read(inifilepath, encoding='utf-8')
-apitime = getapitimesfromlog()
 ENtimes = int(cfp.get('evernote', 'apicount'))
 ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
-# 比较ini和log中API存档的时间，解决异常退出时调用次数无法准确反映的问题
-if ENAPIlasttime < apitime[0]:
-    log.info('程序上次异常退出，调用log中的API数据[%s,%d]' % (str(apitime[0]), apitime[1]))
-    ENAPIlasttime = apitime[0]
-    ENtimes = apitime[1] + 1
+apitime = getapitimesfromlog()
+if apitime:
+    # 比较ini和log中API存档的时间，解决异常退出时调用次数无法准确反映的问题
+    if ENAPIlasttime < apitime[0]:
+        log.info('程序上次异常退出，调用log中的API数据[%s,%d]' % (str(apitime[0]), apitime[1]))
+        ENAPIlasttime = apitime[0]
+        ENtimes = apitime[1] + 1
 YWanAnchor = 50000  # 纵轴标识万化锚点
 
 evernoteapiclearatzero()
@@ -175,8 +177,8 @@ def evernoteapijiayi():
     :return: 
     """
     global ENtimes, cfp, inifilepath
-    ENtimes += 1
     log.debug('动用了Evernote API %s 次……' % ENtimes)
+    ENtimes += 1
     evernoteapiclearatzero()
     if ENtimes >= 290:
         now = datetime.datetime.now()
@@ -358,7 +360,7 @@ def findnotefromnotebook(note_store, token, notebookguid, titlefind, notecount=1
         if note.title.find(titlefind) >= 0:
             print(note.guid, note.title)
             # printnoteattributeundertoken(note)
-            return note
+            # return note
 
     return False
 

@@ -72,20 +72,18 @@ def timetest():
 
 
 def getapitimesfromlog():
-    df = pd.read_csv('log\\everwork.log', sep='\t', header=None,  # names=['asctime', 'name', 'filenamefuncName',
-                     # 'threadNamethreadprocess', 'levelnamemessage'],
-                     na_filter=True,
+    df = pd.read_csv('log\\everwork.log', sep='\t',  # index_col= False,
+                     header=None, usecols=[0, 1, 2, 3, 4],
+                     names=['asctime', 'name', 'filenamefuncName', 'threadNamethreadprocess', 'levelnamemessage'],
+                     na_filter=True, parse_dates=[0],
                      skip_blank_lines=True, skipinitialspace=True)
-    print(df.index)
-    print(df.columns)
-    print(df.dtypes)
-    print(df[[0]])
-    df['asctime'] = df[[0]]
-    df['levelnamemessage'] = df[[4]]
     dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API').values == True][['asctime', 'levelnamemessage']]
-    print(dfapi2.tail())
-    jj = re.findall('(?P<counts>\d+)', dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['levelnamemessage'].iloc[0])[0]
-    result = [pd.to_datetime(dfapi2.asctime.max()), int(jj)]
+    # print(dfapi2.tail())
+    dfapi2['counts'] = dfapi2['levelnamemessage'].apply(lambda x: int(re.findall('(?P<counts>\d+)', x)[0]))
+    # del dfapi2['levelnamemessage']
+    jj = dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['counts']
+    result = [dfapi2.asctime.max(), int(jj)]
+    print(dfapi2[dfapi2.asctime == dfapi2.asctime.max()])
     print(result)
     return result
 
@@ -93,7 +91,7 @@ def getapitimesfromlog():
 cnx = lite.connect('data\\quandan.db')
 # guanlianall(cnx)
 
-zashua()
+# zashua()
 # timetest()
 getapitimesfromlog()
 

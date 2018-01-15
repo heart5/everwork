@@ -1,18 +1,21 @@
 #
 # encoding:utf-8
 #
-# 处理每日天气信息，生成图表呈现
-#
-# 源信息笔记标题：武汉每日天气，笔记guid：277dff5e-7042-47c0-9d7b-aae270f903b8；所在笔记本《行政管理》，
-# 该笔记本guid：31eee750-e240-438b-a1f5-03ce34c904b4
-# 输出信息笔记标题：武汉天气图，笔记guid：296f57a3-c660-4dd5-885a-56492deb2cee；所在笔记本《行政管理》，
-# 该笔记本guid：31eee750-e240-438b-a1f5-03ce34c904b4
+"""
+处理每日天气信息，生成图表呈现
+
+笔记本《行政管理》：31eee750-e240-438b-a1f5-03ce34c904b4
+e5d81ffa-89e7-49ff-bd4c-a5a71ae14320 武汉雨天记录
+277dff5e-7042-47c0-9d7b-aae270f903b8 武汉每日天气
+输出笔记：
+296f57a3-c660-4dd5-885a-56492deb2cee 武汉天气图
+"""
+
 
 from imp4nb import *
 from bs4 import BeautifulSoup
 
 from matplotlib.ticker import MultipleLocator, FuncFormatter
-
 
 
 def weatherstat(token, note_store, sourceguid, destguid=None):
