@@ -95,11 +95,23 @@ def mylog():
 
 
 def getapitimesfromlog():
-    df = pd.read_csv('log\\everwork.log', sep='\t', header=None, names=['asctime', 'name', 'filenamefuncName',
-                                                                        'threadNamethreadprocess', 'levelnamemessage'],
-                     na_filter=True,
+    df = pd.read_csv('log\\everwork.log', sep='\t', header=None,  # names=['asctime', 'name', 'filenamefuncName',
+                     # 'threadNamethreadprocess', 'levelnamemessage'],
+                     # na_filter=True,
                      skip_blank_lines=True, skipinitialspace=True)
-    dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API').values == True][['asctime', 'levelnamemessage']]
+    # for i in range(5, len(df)-1):
+    #     df.iloc[[4]] = df.iloc[[4]] +df.iloc[[i]]
+    # print(df.tail())
+
+    df = df[[0, 1, 2, 3, 4]]
+    df.columns = ['asctime', 'name', 'filenamefuncName', 'threadNamethreadprocess', 'levelnamemessage']
+    # print(df.columns)
+    # print(df['levelnamemessage'].tail())
+    # strtest = 'DEBUG: 动用了Evernote API 290 次……  '
+    # print(strtest.find('动用了Evernote API'))
+    # print(df[df.levelnamemessage.str.contains(u'API ').values == True])
+    dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API ').values == True][['asctime', 'levelnamemessage']]
+    # print(dfapi2.tail())
     jj = re.findall('(?P<counts>\d+)', dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['levelnamemessage'].iloc[0])[0]
     return [pd.to_datetime(dfapi2.asctime.max()), int(jj)]
 

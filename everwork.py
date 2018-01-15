@@ -83,7 +83,9 @@ brandlist = ['丽芝士', '兰花恋人',
 # brandlist = ['津津友味','鲜多鲜','丽芝士','非凡','鲜客','童年时代','麦小呆','渔米之湘','U品部落',
 #              '抓鱼的猫','旭东','创食人','']
 # brandlist = ['津津友味','鲜多鲜','丽芝士','童年时代','渔米之湘','U品部落','抓鱼的猫','卫龙','创食人','']
-brandlist = ['']
+brandlist = ['鲜多鲜', 'U品部落',
+             '光头祥', '大霸王', '丽芝士', '非凡', '鲜客', '童年时代', '麦小呆', '渔米之湘',
+             'U品部落', '抓鱼的猫', '旭东', '创食人', '']
 # brandlist = []
 for br in brandlist:
     updatesection(cfp, 'guidquyunb', br + 'kehuguidquyu', inifilepath, token, note_store, br + '客户开发图表')

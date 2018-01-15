@@ -1,89 +1,71 @@
 # encoding:utf-8
-"""
+'''
 处理销售明细数据
-"""
+'''
+
 
 from imp4nb import *
 
 
-def getgroupdf(dfs, xiangmu, period='month'):
-    dfmoban = dfs.groupby('日期')[xiangmu].count()  # 获得按照日期汇总后的DataFrame，日期唯一，值其实随意，这里随意取了当天的销售额
-    dfmoban = pd.DataFrame(dfmoban, index=pd.to_datetime(dfmoban.index))
-    dates = pd.date_range(dfmoban.index.min(), periods=(dfmoban.index.max() - dfmoban.index.min()).days + 1,
-                          freq='D')
-    dfmoban = dfmoban.reindex(dates, fill_value=0)
-    for ix in dfmoban.index:
-        if period == 'year':
-            ixyuechudate = pd.to_datetime("%04d-01-01" % (ix.year))
+def getgroupdf(dfs, xiangmus, period='month'):
+    dfmobans = dfs.groupby('日期')[xiangmus].sum()  # 日期唯一，就是求个框架，值其实随意，这里随意取了当天的sum（对数值有效）
+    dfout = pd.DataFrame()
+    for xiangmu in xiangmus:
+        if xiangmu in list(dfmobans.columns):
+            dfmoban = dfmobans[xiangmu]
         else:
-            ixyuechudate = pd.to_datetime("%04d-%02d-01" % (ix.year, ix.month))
-        dftmp = ((dfs[(dfs.日期 >= ixyuechudate) & (dfs.日期 <= ix)]).groupby('客户编码'))[xiangmu].count()
-        dfmoban.loc[ix][xiangmu] = dftmp.shape[0]
+            log.info(str(set(dfs['品牌'])) + xiangmu + '无数据')
+            continue
+        dfmoban = dfmoban.dropna()  # 去除空值避免干扰
+        if dfmoban.shape[0] == 0:  # 无有效数据则轮空，不循环
+            continue
+        dates = pd.date_range(dfmoban.index.min(), periods=(dfmoban.index.max() - dfmoban.index.min()).days + 1,
+                              freq='D')
+        dfman = dfmoban.reindex(dates)
+        for ix in dfman.index:
+            if period == 'year':
+                yuandiandate = pd.to_datetime('%4d-01-01' % ix.year)  # MonthEnd()好坑，处理不好月头月尾的数据
+                # yuandiandate = ix + YearBegin(-1)  # MonthEnd()好坑，处理不好月头月尾的数据
+            else:
+                yuandiandate = pd.to_datetime('%4d-%2d-01' % (ix.year, ix.month))
+                # yuandiandate = ix + MonthBegin(-1)
+            dftmp = ((dfs[(dfs.日期 >= yuandiandate) & (dfs.日期 <= ix)]).groupby('客户编码'))[xiangmu].count()
+            dfman[ix] = dftmp.shape[0]
+        dfout = dfout.join(pd.DataFrame(dfman), how='outer')
 
-    return dfmoban
+    return dfout
 
 
-def fenximonthduibi(token, note_store, cnx, notefenbudf, noteleixingdf, xiangmu, pinpai='', cum=False):
+def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, pinpai='', cum=False):
     dfquyu = pd.read_sql('select * from quyu', cnx, index_col='index')
     dfleixing = pd.read_sql('select * from leixing', cnx, index_col='index')
     fenbulist = list(notefenbudf.index)
-    # print(fenbulist)
+    print(fenbulist)
     leixinglist = ['终端客户', '连锁客户', '渠道客户', '直销客户', '公关客户', '其他客户', '全渠道']
 
-    qrystr = "select 日期,sum(金额) as 销售金额 from xiaoshoumingxi " \
-             "where (金额 >= 0)"
+    log.info(sqlstr)
+    xmclause = xiangmu[0]
+    jineclause = ' and (金额 >= 0) '
+    brclause = ''
     if len(pinpai) > 0:
-        qrystr += ' and (品牌 = \'%s\')' % pinpai
-    qrystr += ' group by 日期 order by 日期'
+        brclause += ' and (品牌 = \'%s\') ' % pinpai
+    sqlz = sqlstr % (xmclause, jineclause, brclause)
+    dfz = pd.read_sql_query(sqlz, cnx, parse_dates=['日期'])
+    log.info(sqlz)
 
-    dfz = pd.read_sql_query(qrystr, cnx)
-    log.info(qrystr)
-    print(dfz.shape[0])
-    print(dfz.dtypes)
-    if dfz.shape[0] == 0:
-        log.info('%s数据查询为空，返回' % pinpai)
-        return
+    xmclause = xiangmu[1]
+    jineclause = ' and (金额 < 0) '
+    sqlf = sqlstr % (xmclause, jineclause, brclause)
+    dff = pd.read_sql_query(sqlf, cnx, parse_dates=['日期'])
+    log.info(sqlf)
 
-    dfz['日期'] = pd.to_datetime(dfz['日期'])
-    dfz.index = dfz['日期']
-    del dfz['日期']
-    print(dfz.loc[pd.to_datetime('2017-01-10')])
-    print(dfz.tail(10))
-
-    qrystr = "select 日期,sum(金额) as 退货金额 from xiaoshoumingxi " \
-             "where (金额 < 0)"
-    if len(pinpai) > 0:
-        qrystr += ' and (品牌 = \'%s\')' % pinpai
-    qrystr += ' group by 日期 order by 日期'
-
-    dff = pd.read_sql_query(qrystr, cnx)
-    log.info(qrystr)
-    print(dff.shape[0])
-    print(dff.dtypes)
-    if dff.shape[0] == 0:
-        log.info('%s数据查询为空，返回' % pinpai)
-        return
-
-    dff['日期'] = pd.to_datetime(dff['日期'])
-    dff.index = dff['日期']
-    del dff['日期']
-    print(dff.loc[pd.to_datetime('2017-01-08')])
-    print(dff.tail(10))
-
-    dddd = dfz.join(dff, how='outer')
-    print('………………')
-    print(dddd.tail(10))
-    print('………………')
-    dddd = dddd.fillna(0)
-
-    df = dddd.reindex(pd.date_range(dddd.index.min(), dddd.index.max()), fill_value=0)
-
-    df = df[df.index < '2016-03-15']
-    print(df.shape[0])
-    print(df.dtypes)
+    df = pd.merge(dfz, dff, how='outer', on=['日期', '年月', '客户编码', '区域', '类型', '品牌'], sort=True)
     print(df.tail(10))
+    # df = df.fillna(0)
 
-    # exit(5)
+    if df.shape[0] == 0:
+        log.info('%s数据查询为空，返回' % pinpai)
+        return
 
     for leixingset in leixinglist:
         if leixingset == '全渠道':
@@ -94,7 +76,6 @@ def fenximonthduibi(token, note_store, cnx, notefenbudf, noteleixingdf, xiangmu,
         if len(leixing) == 1:
             leixing = tuple(list(leixing) + ['U'])
 
-        log.debug(f'{str(df.index.max())}\t：\t{leixingset}')
         if leixingset == '终端客户':
             for fenbuset in fenbulist:
                 if fenbuset == '所有分部':
@@ -102,79 +83,35 @@ def fenximonthduibi(token, note_store, cnx, notefenbudf, noteleixingdf, xiangmu,
                 else:
                     fenbu = tuple((dfquyu[dfquyu['分部'] == fenbuset])['区域'])
 
-                # dfs = df[(df.类型.isin(leixing).values == True) & (df.区域.isin(fenbu).values == True)]
-                dfs = df
+                log.debug(str(df['日期'].max()) + '\t：\t' + leixingset + '\t，\t' + fenbuset)
+                dfs = df[(df.类型.isin(leixing).values == True) & (df.区域.isin(fenbu).values == True)]
                 if dfs.shape[0] == 0:
-                    log.info(f'在客户类型为“{str(leixingset)}”且所在位置为“{fenbuset}”时无数据！')
-                    continue
+                    log.info('在客户类型为“' + str(leixingset) + '”且所在位置为“' + fenbuset + '”时无数据！')
+                    continue  # 对应fenbuset
                 if cum:
-                    dfmoban = dfs
+                    dfin = dfs.groupby('日期').sum()
                 else:
-                    dfmoban = dfs
-
-                print(dfmoban.shape[0])
-                print(dfmoban.dtypes)
-                print(dfmoban.tail(10))
-
-                # exit(5)
-
-                dangqianyueri = dfmoban.index.max()
-                imglist = []
-                for k in range(dangqianyueri.month):
-                    if k == 0:
-                        riqiendwith = dangqianyueri
-                    else:
-                        shangyue = dangqianyueri + pd.DateOffset(months=k * (-1))
-                        riqiendwith = pd.to_datetime("%04d-%02d-%02d" % (
-                        shangyue.year, shangyue.month, cal.monthrange(shangyue.year, shangyue.month)[1]))
-                    for cln in dfmoban.columns:
-                        chuturizhexian(dfmoban[cln], riqiendwith, cln, cum=cum, imglist=imglist, quyu=fenbuset,
-                                       leixing=leixingset, pinpai=pinpai, imgpath='img\\' + fenbuset + '\\')
-                if len(imglist) >= 2:
-                    imglist = imglist[:2]
-                # if not cum:
-                #     dfmoban = getgroupdf(dfs, xiangmu,'year')
-                chubiaoyuezhexian(dfmoban, dangqianyueri, xiangmu, cum=cum, leixing=leixingset, imglist=imglist,
-                                  quyu=fenbuset, pinpai=pinpai, nianshu=5, imgpath='img\\' + fenbuset + '\\')
-                # myrndsleep()
-                # imglist2note(note_store, imglist, notefenbudf.loc[fenbuset]['guid'],notefenbudf.loc[fenbuset]['title'], token)
+                    dfin = getgroupdf(dfs, xiangmu)
+                # print(dfin.tail())
+                imglist = dfin2imglist(dfin, cum=cum, leixingset=leixingset, fenbuset=fenbuset, pinpai=pinpai)
+                imglist2note(note_store, imglist, notefenbudf.loc[fenbuset]['guid'], notefenbudf.loc[fenbuset]['title'],
+                             token)
         else:
-            # dfs = df[df.类型.isin(leixing).values == True]
-            dfs = df
+            log.debug(str(df['日期'].max()) + '\t：\t' + leixingset)
+            dfs = df[df.类型.isin(leixing).values == True]
             if dfs.shape[0] == 0:
-                log.info(f'在客户类型“{str(leixingset)}”中时无数据！')
+                log.info('在客户类型“' + str(leixingset) + '”中时无数据！')
                 continue
             if cum:
-                dfmoban = dfs
+                dfin = dfs.groupby('日期').sum()
+                dfin = pd.DataFrame(dfin, index=pd.to_datetime(dfin.index))
             else:
-                dfmoban = dfs
-
-            print(dfmoban.shape[0])
-            print(dfmoban.dtypes)
-            print(dfmoban.tail(10))
-
-            exit(5)
-
-            dangqianyueri = dfmoban.index.max()
-            print(dangqianyueri)
-            imglist = []
-            for k in range(dangqianyueri.month):
-                if k == 0:
-                    riqiendwith = dangqianyueri
-                else:
-                    shangyue = dangqianyueri + pd.DateOffset(months=k * (-1))
-                    riqiendwith = pd.to_datetime("%04d-%02d-%02d" % (
-                    shangyue.year, shangyue.month, cal.monthrange(shangyue.year, shangyue.month)[1]))
-                chuturizhexian(dfmoban, riqiendwith, xiangmu, cum=cum, leixing=leixingset, pinpai=pinpai,
-                               imglist=imglist, imgpath='img\\' + leixingset + '\\')
-            if len(imglist) >= 3:
-                imglist = imglist[:3]
-            # if not cum:
-            #     dfmoban = getgroupdf(dfs, xiangmu, 'year')
-            chubiaoyuezhexian(dfmoban, dangqianyueri, xiangmu, cum=cum, leixing=leixingset, pinpai=pinpai,
-                              imglist=imglist, nianshu=5, imgpath='img\\' + leixingset + '\\')
-            # targetlist = list(noteleixingdf.index)
-            # # targetlist = []
-            # if leixingset in targetlist:
-            #     # myrndsleep()
-            #     imglist2note(note_store, imglist, noteleixingdf.loc[leixingset]['guid'], noteleixingdf.loc[leixingset]['title'], token)
+                dfin = getgroupdf(dfs, xiangmu)
+            # print(dfin.tail())
+            imglist = dfin2imglist(dfin, cum=cum, leixingset=leixingset, pinpai=pinpai)
+            targetlist = list(noteleixingdf.index)
+            # targetlist = []
+            if leixingset in targetlist:
+                # myrndsleep()
+                imglist2note(note_store, imglist, noteleixingdf.loc[leixingset]['guid'],
+                             noteleixingdf.loc[leixingset]['title'], token)
