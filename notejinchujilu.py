@@ -12,6 +12,9 @@ f119e38e-3876-4937-80f1-e6a6b2e5d3d0 白晔峰公司文昌路进出记录
 6fb1e016-01ab-439d-929e-994dc980ddbe 汉口办进出记录
 38f4b1a9-7d6e-4091-928e-c82d7d3717c5 创食人公司进出记录
 
+输出结果笔记：
+2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e 公司进出记录统计图表
+
 """
 
 from imp4nb import *
@@ -20,7 +23,7 @@ from bs4 import BeautifulSoup
 from matplotlib.ticker import MultipleLocator, FuncFormatter
 
 
-def jilustat(token, note_store, sourceguid, destguid=None):
+def jilustat(token, note_store, sourceguid, destguid=None, title=''):
     """
 
     :rtype: Null
@@ -28,8 +31,6 @@ def jilustat(token, note_store, sourceguid, destguid=None):
     soup = BeautifulSoup(note_store.getNoteContent(sourceguid), "html.parser")
     evernoteapijiayi()
     tags = soup.find('p')
-    # print(tags)
-    # print(soup.get_text())
 
     yuefenlist = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'September', 'October', 'December',
                   'November']
@@ -38,7 +39,7 @@ def jilustat(token, note_store, sourceguid, destguid=None):
         yuefennames += '|' + str(yuefenlist[a])
     yuefennames = '(?:' + yuefennames + ')'  # (?:January|February|March|April|May|June|July|September|October|December|November)
     print(yuefennames)
-    pattern = u'(\w*\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)\s：\s(e(?:xit|nter)ed)'
+    # pattern = u'(\w*\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)\s：\s(e(?:xit|nter)ed)'
     pattern = u'(%s\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)\s：\s(e(?:xit|nter)ed)' % yuefennames
     slice = re.split(pattern, soup.get_text())
     print(slice)
@@ -51,33 +52,54 @@ def jilustat(token, note_store, sourceguid, destguid=None):
 
     print(split_item)
     dfjc = pd.DataFrame(split_item, columns=['atime', 'eort'])
-    dfjc['atime'] = dfjc['atime'].apply(
-        lambda x: pd.to_datetime(time.strftime('%Y-%m-%d', time.strptime(x, '%B %d, %Y at %I:%M%p'))))
-    print(dfjc.shape[0])
     dfjc = dfjc.drop_duplicates(['atime', 'eort'])
+    dfjc['atime'] = dfjc['atime'].apply(
+        lambda x: pd.to_datetime(time.strftime('%Y-%m-%d %H:%M', time.strptime(x, '%B %d, %Y at %I:%M%p'))))
     dfjc.index = dfjc['atime']
-    del dfjc['atime']
-    print(dfjc.shape[0])
     dfjc = dfjc.sort_index()
-    dfjc['exit'] = dfjc['eort'].apply(lambda x: True if x == 'exited' else False)
     dfjc['enter'] = dfjc['eort'].apply(lambda x: True if x == 'entered' else False)
+    dfjc['nianyue'] = dfjc['atime'].apply(lambda x: datetime.datetime.strftime(x, '%Y%m'))
+    dfjc['shi'] = dfjc['atime'].apply(lambda x: datetime.datetime.strftime(x, '%H'))
     del dfjc['eort']
-    # dfjc.groupby(dfjc.index)
-    print(dfjc[dfjc.enter == True].tail())
+    print(dfjc.tail())
 
-    # dfre = dfjc.reindex(pd.date_range(dfjc.index.min(),periods=(dfjc.index.max() -dfjc.index.min()).days +1))
-    # print(dfre)
-    dfff = dfjc.resample('D')['enter'].count()
-    print(dfff)
-    dffff = dfff.resample('M').count()
-    print(dffff)
-    # plt.plot(dfff)
+    dfff = dfjc[dfjc.enter == True].groupby(['nianyue', 'shi'])['enter'].count()
+    dffu = dfff.unstack(fill_value=0)
+    print(dffu)
+
+    # 补满小时数和年月份
+    for i in range(24):
+        colname = '%02d' % i
+        if colname not in list(dffu.columns):
+            dffu[colname] = 0
+    lst = sort(list(dffu.columns))
+    dffu = dffu[lst]
+    drange = pd.date_range(dfjc.index.min(), dfjc.index.max() + MonthBegin(), freq='M')
+    ddrange = pd.Series(drange).apply(lambda x: datetime.datetime.strftime(x, "%Y%m"))
+    dffu = dffu.reindex(ddrange, fill_value=0)
+    dffu['nianyue'] = dffu.index
+    dffu['nianyue'] = dffu['nianyue'].apply(lambda x: pd.to_datetime("%s-%s-01" % (x[:4], x[-2:])))
+    dffu.index = dffu['nianyue']
+    del dffu['nianyue']
+
+    # 列尾行尾增加汇总
+    dffu['colsum'] = dffu.apply(lambda x: x.sum(), axis=1)
+    dffu.loc['rowsum'] = dffu.apply(lambda x: x.sum())
+    print(dffu)
+
+    plt.figure()
+    ax1 = plt.subplot2grid((5, 2), (0, 0), colspan=2, rowspan=2)
+    print(dffu['colsum'].iloc[:-1])
+    ax1.plot(dffu['colsum'].iloc[:-1])
+    ax2 = plt.subplot2grid((5, 2), (3, 0), colspan=2, rowspan=2)
+    print(dffu.loc['rowsum'].T.iloc[:-1])
+    ax2.plot(dffu.loc['rowsum'].T.iloc[:-1])
 
     imglist = []
-    plt.show()
-    # img_sunonoff_path = 'img\\weather\\sunonoff.png'
-    # plt.savefig(img_sunonoff_path)
-    # imglist.append(img_sunonoff_path)
+    # plt.show()
+    img_sunonoff_path = 'img\\jichubyfgongsi.png'
+    plt.savefig(img_sunonoff_path)
+    imglist.append(img_sunonoff_path)
     plt.close()
 
-    # imglist2note(note_store, imglist, destguid, '武汉天气图', token)
+    imglist2note(note_store, imglist, destguid, title, token)

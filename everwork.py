@@ -33,7 +33,7 @@ note_store = get_notestore(token)
 #1c0830d9-e42f-4ce7-bf36-ead868a55eca 订单配货统计图
 #49eff8eb-5bce-43b9-a95a-c1ee7eab71fa 有友全渠道销售图表
 
-# findnotefromnotebook(note_store,token,'31eee750-e240-438b-a1f5-03ce34c904b4','记录') #从笔记本中查找标题中包含指定字符串的笔记
+# findnotefromnotebook(note_store,token,'31eee750-e240-438b-a1f5-03ce34c904b4','统计') #从笔记本中查找标题中包含指定字符串的笔记
 
 # todo 一体化目录构建
 nbfbdf = readinisection2df(cfp,'guidfenbunb','销售业绩图表')
@@ -44,10 +44,11 @@ for aa in nbfbdf.index:
         log.debug('目录《' + cpath + '》被创建')
 
 cnx = lite.connect('data\\quandan.db')
-dataokay(cnx)
-weatherstat(token, note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
+# dataokay(cnx)
+# weatherstat(token, note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
-jilustat(token, note_store, '24aad619-2356-499e-9fa7-f685af3a81b1')
+jilustat(token, note_store, '24aad619-2356-499e-9fa7-f685af3a81b1', '2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e',
+         title='公司进出记录统计图表')
 
 brandlist = ['丽芝士', '兰花恋人',
              '易加', '卤帝七号', '呈呈', '伍滋味', '脆马蹄', '鱼友味', '武丰', '柒柒湘', '俊媳妇', '湘寿鸭', '好媳妇',
