@@ -889,7 +889,7 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', lei
     # return imgsavepath
 
 
-def imglist2note(notestore, imglist, noteguid, notetitle, token, sty='replace'):
+def imglist2note(notestore, imglist, noteguid, notetitle, token, sty='replace', neirong=''):
     """
     更新note内容为图片列表
     :param notestore:
@@ -955,6 +955,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, token, sty='replace'):
                 str1 = str1[2:-1]  # cd34b4b6c8d9279217b03c396ca913df
                 # print (str1)
                 nbody += "<en-media type=\"%s\" hash=\"%s\" /><br />" % (resource.mime, str1)
+    nbody += neirong
     nbody += "</en-note>"
 
     note.content = nbody

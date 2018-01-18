@@ -187,7 +187,7 @@ def customerweihu2systable():
     pass
 
 
-filenamenoext = '2018.1.4-2018.1.6职员销售明细表.xls'
-# saledetails2db(filenamenoext)
+filenamenoext = '2018.1.7-2018.1.12职员销售明细表.xls'
+saledetails2db(filenamenoext)
 
-customerweihu2systable()
+# customerweihu2systable()
