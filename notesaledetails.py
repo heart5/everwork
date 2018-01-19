@@ -29,7 +29,9 @@ def getgroupdf(dfs, xiangmus, period='month'):
             else:
                 yuandiandate = pd.to_datetime('%4d-%2d-01' % (ix.year, ix.month))
                 # yuandiandate = ix + MonthBegin(-1)
-            dftmp = ((dfs[(dfs.日期 >= yuandiandate) & (dfs.日期 <= ix)]).groupby('客户编码'))[xiangmu].count()
+            dftmp = (
+            (dfs[(dfs.日期 >= yuandiandate) & (dfs.日期 <= ix) & (dfs[xiangmu].isnull().values == False)]).groupby('客户编码'))[
+                xiangmu].count()
             dfman[ix] = dftmp.shape[0]
         dfout = dfout.join(pd.DataFrame(dfman), how='outer')
 
@@ -97,8 +99,10 @@ def kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cn
                 else:
                     dfin = getgroupdf(dfs, xiangmu)
                 imglist = dfin2imglist(dfin, cum=cum, leixingset=leixingset, fenbuset=fenbuset, pinpai=pinpai)
+                htable = dfin[dfin.index > (dfin.index.max() + pd.Timedelta(days=-365))].sort_index(
+                    ascending=False).to_html().replace('class="dataframe"', '')
                 imglist2note(note_store, imglist, notefenbudf.loc[fenbuset]['guid'], notefenbudf.loc[fenbuset]['title'],
-                             token)
+                             token, neirong=htable)
         else:
             log.debug(str(df['日期'].max()) + '\t：\t' + leixingset)
             dfs = df[df.类型.isin(leixing).values == True]
@@ -113,5 +117,7 @@ def kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cn
             imglist = dfin2imglist(dfin, cum=cum, leixingset=leixingset, pinpai=pinpai)
             targetlist = list(noteleixingdf.index)
             if leixingset in targetlist:
+                htable = dfin[dfin.index > (dfin.index.max() + pd.Timedelta(days=-365))].sort_index(
+                    ascending=False).to_html().replace('class="dataframe"', '')
                 imglist2note(note_store, imglist, noteleixingdf.loc[leixingset]['guid'],
-                             noteleixingdf.loc[leixingset]['title'], token)
+                             noteleixingdf.loc[leixingset]['title'], token, neirong=htable)
