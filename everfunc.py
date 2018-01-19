@@ -114,11 +114,11 @@ def getapitimesfromlog():
     # del dfapi2['levelnamemessage']
     print(dfapi2.tail())
     jj = dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['counts'].iloc[-1]
-    print(type(jj))
-    print(jj)
+    # print(type(jj))
+    # print(jj)
     result = [dfapi2.asctime.max(), int(jj)]
     print(dfapi2[dfapi2.asctime == dfapi2.asctime.max()])
-    print(result)
+    # print(result)
     return result
 
 

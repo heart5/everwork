@@ -14,9 +14,10 @@ def saledetails2db(filenamenoext):
     # 2017.12.9-2017.12.16职员销售明细表.xls
     # 2017.12.17-2017.12.26职员销售明细表.xls
     df = pd.read_excel('data\\%s.xls' % filenamenoext, sheetname='%s' % filenamenoext, index_col=0, parse_dates=True)
-    log.info('读取%s')
+    log.info('读取%s' % filenamenoext)
     # print(list(df.columns))  # ['日期', '单据编号', '摘要', '单据类型', '备注', '商品备注', '商品编号', '商品全名', '规格', '型号', '产地', '单位', '数量', '单价', '金额', '含税单价', '价税合计', '成本金额', '毛利', '毛利率', '单位全名', '仓库全名', '部门全名']
-    totalin = [df.loc[df.index.max()]['数量'], df.loc[df.index.max()]['金额']]  # 从最后一行获取数量合计和金额合计，以备比较
+    totalin = ['%.2f' % df.loc[df.index.max()]['数量'], '%.2f' % df.loc[df.index.max()]['金额']]  # 从最后一行获取数量合计和金额合计，以备比较
+    # print(totalin)
     df['职员名称'] = None
     df = df.loc[:, ['日期', '单据编号', '单据类型', '职员名称', '摘要', '备注', '商品备注', '商品编号', '商品全名',
                     '单价', '单位', '数量', '金额', '单位全名', '仓库全名', '部门全名']]
@@ -45,8 +46,10 @@ def saledetails2db(filenamenoext):
 
     # 读取大数据的起止日期，不交叉、不是前置则可能是合法数据，二次检查后放行
     cnx = lite.connect('data\\quandan.db')
+    # print('%.2f' % dfout.sum()['数量'])
+    # print('%.2f' % dfout.sum()['金额'])
 
-    if ((totalin[0] == dfout.sum()['数量']) & (totalin[1] == dfout.sum()['金额'])):
+    if ((totalin[0] == '%.2f' % dfout.sum()['数量']) & (totalin[1] == '%.2f' % dfout.sum()['金额'])):
         dfall = pd.read_sql_query('select 日期, sum(金额) as 销售额 from xiaoshoumingxi group by 日期 order by 日期', cnx,
                                   parse_dates=['日期'])
         datestr4data = '【待插入S：%s，E：%s】【目标数据S：%s，E：%s】' % (
@@ -58,7 +61,7 @@ def saledetails2db(filenamenoext):
             print('请仔细检查！%s' % datestr4data)
             print('如果确保无误，请放行下面两行代码')
         # dfout.to_sql(name='xiaoshoumingxi', con=cnx, if_exists='append', chunksize=10000)
-        # log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' %(filenamenotext, len(dfout)))
+        # log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' %(filenamenoext, len(dfout)))
     else:
         log.warning('对读入文件《%s》的数据整理有误！总数量和总金额对不上！' % filenamenoext)
 
@@ -188,6 +191,6 @@ def customerweihu2systable():
 
 
 filenamenoext = '2018.1.7-2018.1.12职员销售明细表.xls'
-saledetails2db(filenamenoext)
+# saledetails2db(filenamenoext)
 
 # customerweihu2systable()
