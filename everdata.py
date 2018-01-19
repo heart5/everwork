@@ -190,7 +190,34 @@ def customerweihu2systable():
     pass
 
 
+def jiaoyankehuchanpin():
+    cnx = lite.connect('data\\quandan.db')
+
+    dataokay(cnx)
+
+    df = pd.read_sql_query(
+        'select xiaoshoumingxi.商品全名,xiaoshoumingxi.商品编号,product.* from xiaoshoumingxi left outer join product on '
+        'xiaoshoumingxi.商品全名 = product.商品全名 where product.商品全名 is null', cnx)
+    df.describe()
+    print(df)
+
+    df = pd.read_sql_query('select xiaoshoumingxi.单位全名,customer.* from xiaoshoumingxi left outer join customer on '
+                           'xiaoshoumingxi.单位全名 = customer.往来单位 where customer.往来单位 is null', cnx)
+    df = df.groupby('单位全名').sum()
+    df.describe()
+    print(df)
+
+    df = pd.read_sql_query('select * from xiaoshoumingxi', cnx)
+    df.info()
+    df.describe()
+    dfqc = df.drop_duplicates()
+    dfqc.info()
+
+    cnx.close()
+
 filenamenoext = '2018.1.7-2018.1.12职员销售明细表.xls'
 # saledetails2db(filenamenoext)
 
 # customerweihu2systable()
+
+jiaoyankehuchanpin()

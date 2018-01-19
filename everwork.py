@@ -47,10 +47,10 @@ cnx = lite.connect('data\\quandan.db')
 # dataokay(cnx)
 # weatherstat(token, note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
-jilustat(token, note_store, '24aad619-2356-499e-9fa7-f685af3a81b1', '2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e',
-         title='公司进出记录统计图表')
-jilustat(token, note_store, 'd8fa0226-88ac-4b6c-b8fd-63a9038a6abf', '08a01c35-d16d-4b22-b7f7-61e3993fd2cb',
-         title='家附近出入统计')
+# jilustat(token, note_store, '24aad619-2356-499e-9fa7-f685af3a81b1', '2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e',
+#          title='公司进出记录统计图表')
+# jilustat(token, note_store, 'd8fa0226-88ac-4b6c-b8fd-63a9038a6abf', '08a01c35-d16d-4b22-b7f7-61e3993fd2cb',
+#          title='家附近出入统计')
 
 brandlist = ['丽芝士', '兰花恋人',
              '易加', '卤帝七号', '呈呈', '伍滋味', '脆马蹄', '鱼友味', '武丰', '柒柒湘', '俊媳妇', '湘寿鸭', '好媳妇',
@@ -65,8 +65,15 @@ brandlist = ['丽芝士', '兰花恋人',
 # brandlist = ['津津友味','鲜多鲜','丽芝士','非凡','鲜客','童年时代','麦小呆','渔米之湘','U品部落',
 #              '抓鱼的猫','旭东','创食人','']
 # brandlist = ['津津友味','鲜多鲜','丽芝士','童年时代','渔米之湘','U品部落','抓鱼的猫','卫龙','创食人','']
-brandlist = ['']
-brandlist = []
+# brandlist = ['']
+qrypinpai = "select max(日期) as 最近日期,product.品牌名称 as 品牌 from xiaoshoumingxi,product " \
+            "where (product.商品全名 = xiaoshoumingxi.商品全名) group by 品牌 order by 最近日期"
+dff = pd.read_sql_query(qrypinpai, cnx, parse_dates=['最近日期'])
+print(dff)
+# brandlist = list(dff[dff.最近日期 >= (dff.最近日期.max()+pd.Timedelta(days=-90))]['品牌'])
+brandlist = list(dff['品牌'])
+print(brandlist)
+# brandlist = []
 for br in brandlist:
     updatesection(cfp, 'guidfenbunb', br + 'kehuguidfenbu', inifilepath, token, note_store, br + '客户开发图表')
     updatesection(cfp, 'guidfenbunb', br + 'saleguidfenbu', inifilepath, token, note_store, br + '销售业绩图表')
