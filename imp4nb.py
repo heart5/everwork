@@ -7,6 +7,7 @@ from everfunc import *
 mpl.rcParams['font.sans-serif'] = ['SimHei']
 mpl.rcParams['axes.unicode_minus'] = False
 
+
 # 显示DataFrame或Series的轮廓信息
 # df，DataFrame或Series
 def descdb(df):
@@ -24,7 +25,7 @@ def descdb(df):
 # 显示SQlite数据库的各种信息
 # cnx，数据库连接
 def desclitedb(cnx):
-    cur=cnx.cursor()
+    cur = cnx.cursor()
     result = cur.execute("select * from sqlite_master")
     for ii in result.fetchall():
         print(str(ii)+'\n')
@@ -32,16 +33,16 @@ def desclitedb(cnx):
     result = cur.execute("select name from sqlite_master where type = 'table' order by name")
     table_name_list = [tuple1[0] for tuple1 in result.fetchall()]
     print(table_name_list)
-    for table in table_name_list:
-#        result = cur.execute("PRAGMA table_info(%s)" % table)
-#        for jj in result.fetchall():
-#            print(jj,end='\t')
-        print("%s" %table,end='\t')
-        result = cur.execute("select * from %s" % table)
-        print(len(result.fetchall()),end='\t')
+    for table1 in table_name_list:
+        #        result = cur.execute("PRAGMA table_info(%s)" % table)
+        #        for jj in result.fetchall():
+        #            print(jj,end='\t')
+        print("%s" % table1, end='\t')
+        result = cur.execute("select * from %s" % table1)
+        print(len(result.fetchall()), end='\t')
         # print(cur.description)
         col_name_list = [tuple1[0] for tuple1 in cur.description]
-        print (col_name_list)
+        print(col_name_list)
 
 
 def swissknife(cnx):
@@ -70,9 +71,9 @@ def swissknife(cnx):
     print(result.fetchone()[0])
 
     ddd = '2017-03-31'
-    ddd =pd.to_datetime(ddd)+pd.DateOffset(months=-1)
+    ddd = pd.to_datetime(ddd) + pd.DateOffset(months=-1)
     print(ddd)
-    ddd =pd.to_datetime(ddd)+pd.DateOffset(years=-1)
+    ddd = pd.to_datetime(ddd) + pd.DateOffset(years=-1)
     print(ddd)
     print('%02d' %ddd.month)
     print('%04d%02d' %(ddd.year,ddd.month))
@@ -82,7 +83,6 @@ def swissknife(cnx):
         nianfen = 2017-i
         print(str(nianfen),end='\t')
         print(cal.isleap(int(nianfen)))
-
 
     # lxzd = ('A', 'B', 'C', 'S', 'W', 'Y')
     # lxqd = ('O', 'P', 'Q')
