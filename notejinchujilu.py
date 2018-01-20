@@ -92,7 +92,7 @@ def jilustat(token, note_store, sourceguid, destguid=None, title=''):
     print(dffu)
     h = dffu.to_html()
     h = h.replace('class="dataframe"', '')
-    # print(h)
+    print(h)
 
     # 删掉列尾行尾的合计，并时间序列化index，为plot做准备
     del dffu['行合计']

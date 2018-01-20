@@ -707,7 +707,7 @@ def biaozhukedu(dfc, weibiao):
                 continue
             plt.scatter([idx, ], [kedu.iloc[i]], 50, color='Wheat')
             global YWanAnchor
-            if kedu.max() >= YWanAnchor:
+            if kedu.map(lambda x: abs(x)).max() >= YWanAnchor:
                 kedubiaozhi = "%.1f万" % (kedu.iloc[i] / 10000)
                 plt.gca().yaxis.set_major_formatter(
                     FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
@@ -801,7 +801,7 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=[], quyu='', le
         cumstr = '月累积'
         dfjieguo = dfy.cumsum()
         dfjieguo.plot(title=biaoti + cumstr)
-        if max(dslistmax) > YWanAnchor:
+        if max(map(abs, dslistmax)) > YWanAnchor:
             plt.gca().yaxis.set_major_formatter(
                 FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
         biaozhukedu(dfjieguo, '%02d' % (riqienddate.month))
@@ -810,7 +810,7 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=[], quyu='', le
         plt.close()
     cumstr = '月折线'
     dfy.plot(title='%s%s' % (biaoti, cumstr))
-    if max(dslistmax) > YWanAnchor:
+    if max(map(abs, dslistmax)) > YWanAnchor:
         plt.gca().yaxis.set_major_formatter(
             FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
     biaozhukedu(dfy, '%02d' % (riqienddate.month))

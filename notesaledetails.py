@@ -121,3 +121,48 @@ def kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cn
                     ascending=False).to_html().replace('class="dataframe"', '')
                 imglist2note(note_store, imglist, noteleixingdf.loc[leixingset]['guid'],
                              noteleixingdf.loc[leixingset]['title'], token, neirong=htable)
+
+
+def pinpaifenxi(token, note_store, cnx):
+    qrypinpai = "select max(日期) as 最近日期, sum(金额) as 销售金额, product.品牌名称 as 品牌 from xiaoshoumingxi,product " \
+                "where (product.商品全名 = xiaoshoumingxi.商品全名) group by 品牌 order by 最近日期"
+    dff = pd.read_sql_query(qrypinpai, cnx, parse_dates=['最近日期'])
+    print(dff)
+    # brandlist = list(dff[dff.最近日期 >= (dff.最近日期.max()+pd.Timedelta(days=-90))]['品牌'])
+    brandlist = list(dff['品牌'])
+    brandlist.append('')
+    print(brandlist)
+    for br in brandlist:
+        log.info('第%d个品牌：%s，共有%d个品牌' % (brandlist.index(br) + 1, br, len(brandlist)))
+        updatesection(cfp, 'guidquyunb', br + 'kehuguidquyu', inifilepath, token, note_store, br + '客户开发图表')
+        updatesection(cfp, 'guidquyunb', br + 'saleguidquyu', inifilepath, token, note_store, br + '销售业绩图表')
+        updatesection(cfp, 'guidleixingnb', br + 'kehuguidleixing', inifilepath, token, note_store, br + '客户开发图表')
+        updatesection(cfp, 'guidleixingnb', br + 'saleguidleixing', inifilepath, token, note_store, br + '销售业绩图表')
+
+        # notelxxsdf = ['']
+        notelxxsdf = readinisection2df(cfp, br + 'saleguidleixing', br + '销售图表')
+        notefbxsdf = readinisection2df(cfp, br + 'saleguidquyu', br + '销售图表')
+        # print(notefbxsdf)
+
+        qrystr = "select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码," + \
+                 'sum(金额) as %s, substr(customer.往来单位编号,1,2) as 区域 ,substr(customer.往来单位编号,12,1) as 类型, ' \
+                 'product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product ' \
+                 'where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) ' \
+                 '%s %s group by 日期,客户编码 order by 日期'  # % (xmclause,jineclause, brclause)
+        xiangmu = ['销售金额', '退货金额']
+        fenxiyueduibi(token, note_store, qrystr, xiangmu, notefbxsdf, notelxxsdf, cnx, pinpai=br, cum=True)
+        # fenximonthduibi(token, note_store, cnx, notefbxsdf, notelxxsdf, '金额', pinpai=br, cum=True)
+
+        # notelxkhdf = ['']
+        notelxkhdf = readinisection2df(cfp, br + 'kehuguidleixing', br + '客户图表')
+        notefbkhdf = readinisection2df(cfp, br + 'kehuguidquyu', br + '客户图表')
+        # print(notefbkhdf)
+        qrystr = "select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码," + \
+                 'count(*) as %s, substr(customer.往来单位编号,1,2) as 区域 ,' \
+                 'substr(customer.往来单位编号,12,1) as 类型, ' \
+                 'product.品牌名称 as 品牌 from xiaoshoumingxi, customer, product ' \
+                 'where (customer.往来单位 = xiaoshoumingxi.单位全名)  and (product.商品全名 = xiaoshoumingxi.商品全名) ' \
+                 '%s %s group by 日期,客户编码 order by 日期'  # % (xmclause,jineclause, brclause)
+        xiangmu = ['销售客户数', '退货客户数']
+        fenxiyueduibi(token, note_store, qrystr, xiangmu, notefbkhdf, notelxkhdf, cnx, pinpai=br)
+        # fenximonthduibi(token, note_store, '退货客户数', notefbkhdf, notelxkhdf, cnx, pinpai=br)
