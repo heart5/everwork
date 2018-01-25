@@ -112,7 +112,7 @@ def getapitimesfromlog():
     # print(dfapi2.tail())
     dfapi2['counts'] = dfapi2['levelnamemessage'].apply(lambda x: int(re.findall('(?P<counts>\d+)', x)[0]))
     # del dfapi2['levelnamemessage']
-    print(dfapi2.tail())
+    # print(dfapi2.tail())
     jj = dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['counts'].iloc[-1]
     # print(type(jj))
     # print(jj)
@@ -354,20 +354,20 @@ def findnotefromnotebook(note_store, token, notebookguid, titlefind, notecount=1
     # print ourNoteList.notes[-1].title  #测试打印指定note的标题
     # print note_store.getNoteContent(ourNoteList.notes[-1].guid)  #测试打印指定note的内容
     # note = note_store.getNote(auth_token, ourNoteList.notes[9].guid, True, True, True, True)  #获得Note并打印其中的值
-    # printnoteattributeundertoken(note)
+    # p_noteattributeundertoken(note)
     # print ourNoteList.notes[5] #打印NoteMetadata
 
     for note in ournotelist.notes:
         if note.title.find(titlefind) >= 0:
             print(note.guid, note.title)
-            # printnoteattributeundertoken(note)
+            # p_noteattributeundertoken(note)
             # return note
 
     return False
 
 
 @use_logging()
-def printnotebookattributeundertoken(notebook):
+def p_notebookattributeundertoken(notebook):
     """
     测试笔记本（notebook）数据结构每个属性的返回值,开发口令（token）的方式调用返回如下
     :param notebook:
@@ -390,7 +390,7 @@ def printnotebookattributeundertoken(notebook):
     # print '接受人设定\t', notebook.recipientSettings  #这种权限的调用没有返回这个值，报错
 
 
-def printnoteattributeundertoken(note):
+def p_noteattributeundertoken(note):
     """
     测试笔记（note）数据结构每个属性的返回值,通过findNotesMetadata函数获取，开发口令（token）的方式调用返回如下:
     :param note:
@@ -417,7 +417,7 @@ def printnoteattributeundertoken(note):
     # print ('范围\t%s' % note.limits) #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'limits'
 
 
-def printuserattributeundertoken(user):
+def p_userattributeundertoken(user):
     """
     # 测试用户（user）数据结构每个属性的返回值,开发口令（token）的方式调用返回如下
     :param user:
@@ -841,26 +841,26 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', lei
 
     # print(df)
     ds = pd.DataFrame(df)
-    dates = pd.date_range(riqibeforemonthfirst, periods=tianshu, freq='D')  # 上月日期全集，截止到当月最后一天为止
-    if ds.index.min() <= dates.max():  # 存在有效数据则生成按全月每天索引的DataFrame，否则置空
-        ds1 = ds.reindex(dates, fill_value=0)  # 重新索引，补全所有日期，空值用0填充
-        ds1.index = (range(1, len(dates) + 1))  # 索引天日化
+    datesb = pd.date_range(riqibeforemonthfirst, periods=tianshu, freq='D')  # 上月日期全集，截止到当月最后一天为止
+    if ds.index.min() <= datesb.max():  # 存在有效数据则生成按全月每天索引的DataFrame，否则置空
+        ds1 = ds.reindex(datesb, fill_value=0)  # 重新索引，补全所有日期，空值用0填充
+        ds1.index = (range(1, len(datesb) + 1))  # 索引天日化
         ds1.columns = (f'{riqibeforemonthfirst.year:04d}{riqibeforemonthfirst.month:02d}') + ds1.columns  # 列命名，形如201709
     else:
         ds1 = pd.DataFrame()
 
-    dates = pd.date_range(riqilastmonthfirst, periods=tianshu, freq='D')  # 处理去年当月数据
-    if ds.index.min() <= dates.max():  # 存在有效数据则生成按全月每天索引的DataFrame，否则置空
-        ds3 = ds.reindex(dates, fill_value=0)
-        ds3.index = range(1, len(dates) + 1)
+    datesl = pd.date_range(riqilastmonthfirst, periods=tianshu, freq='D')  # 处理去年当月数据
+    if ds.index.min() <= datesl.max():  # 存在有效数据则生成按全月每天索引的DataFrame，否则置空
+        ds3 = ds.reindex(datesl, fill_value=0)
+        ds3.index = range(1, len(datesl) + 1)
         ds3.columns = ('%04d%02d' % (riqilastmonthfirst.year, riqilastmonthfirst.month)) + ds3.columns
     else:
         ds3 = pd.DataFrame()
 
-    dates = pd.date_range(riqicurmonthfirst, periods=riqienddate.day, freq='D')  # 处理当月数据，至截止日期
-    if ds.index.min() <= dates.max():  # 存在有效数据则生成按按照每天索引的DataFrame，否则置空并退出，避免空转
-        ds2 = ds.reindex(dates, fill_value=0)
-        ds2.index = range(1, len(dates) + 1)
+    datesc = pd.date_range(riqicurmonthfirst, periods=riqienddate.day, freq='D')  # 处理当月数据，至截止日期
+    if ds.index.min() <= datesc.max():  # 存在有效数据则生成按按照每天索引的DataFrame，否则置空并退出，避免空转
+        ds2 = ds.reindex(datesc, fill_value=0)
+        ds2.index = range(1, len(datesc) + 1)
         ds2.columns = ('%04d%02d' % (riqicurmonthfirst.year, riqicurmonthfirst.month)) + ds2.columns
     else:
         return
@@ -954,7 +954,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, token, sty='replace', 
                 # print (str1)
                 str1 = str1[2:-1]  # cd34b4b6c8d9279217b03c396ca913df
                 # print (str1)
-                nbody += "<en-media type=\"%s\" hash=\"%s\" /><br />" % (resource.mime, str1)
+                nbody += "<en-media type=\"%s\" hash=\"%s\" align=\"center\" /><br />" % (resource.mime, str1)
     nbody += neirong
     nbody += "</en-note>"
 

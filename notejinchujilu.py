@@ -89,10 +89,11 @@ def jilustat(token, note_store, sourceguid, destguid=None, title=''):
     # 列尾行尾增加汇总
     dffu['行合计'] = dffu.apply(lambda x: x.sum(), axis=1)
     dffu.loc['列合计'] = dffu.apply(lambda x: x.sum())
-    print(dffu)
-    h = dffu.to_html()
-    h = h.replace('class="dataframe"', '')
-    print(h)
+    # print(dffu)
+    h = dffu.to_html(justify='left')
+    hout = h.replace('class="dataframe"', 'align="center"')
+    # print(h)
+    # print(hout)
 
     # 删掉列尾行尾的合计，并时间序列化index，为plot做准备
     del dffu['行合计']
@@ -117,4 +118,4 @@ def jilustat(token, note_store, sourceguid, destguid=None, title=''):
     imglist.append(img_sunonoff_path)
     plt.close()
 
-    imglist2note(note_store, imglist, destguid, title, token, neirong=h)
+    imglist2note(note_store, imglist, destguid, title, token, neirong=hout)

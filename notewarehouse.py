@@ -43,7 +43,7 @@ def pickstat(token, note_store, cnx, destguid=None, notetitle='', cum=False):
     dd['无货金额'] = df.groupby(['订单日期']).sum()['无货金额']
     dd['漏配金额'] = df.groupby(['订单日期']).sum()['少配金额']
     dd['错配金额'] = df.groupby(['订单日期']).sum()['配错未要']
-    dd.insert(0,'日期',dd.index)
+    # dd.insert(0,'日期',dd.index)
     # dd.insert(0,'年月',dd['日期'].apply(lambda x: "%04d%02d" % (x.year, x.month)))
     dd = dd.fillna(value=0)
 
@@ -81,8 +81,8 @@ def pickstat(token, note_store, cnx, destguid=None, notetitle='', cum=False):
     plt.close()
 
     imgpathlist = []
-    chubiaorizhexian(dd, ddlastdate, '配单数量', cum=cum, imglist=imgpathlist, imgpath='img\\pick\\')
-    chubiaorizhexian(dd, ddlastdate, '配单金额', cum=cum, imglist=imgpathlist, imgpath='img\\pick\\')
+    chuturizhexian(dd['配单数量'], ddlastdate, '配单数量', cum=cum, imglist=imgpathlist, imgpath='img\\pick\\')
+    chuturizhexian(dd['配单金额'], ddlastdate, '配单金额', cum=cum, imglist=imgpathlist, imgpath='img\\pick\\')
     imgpathlist.append("img\\pick\\pickstat.png")
 
     df['年月'] = df['订单日期'].apply(lambda x: "%04d-%02d" % (x.year, x.month))

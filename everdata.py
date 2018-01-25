@@ -3,74 +3,15 @@
 from imp4nb import *
 
 
-def saledetails2db(filenamenoext):
-    # 2017.8.29-2017.9.30职员销售明细表.xls
-    # 2017.10.1-2017.10.10职员销售明细表.xls
-    # 2017.10.11-2017.10.19职员销售明细表.xls
-    # 2017.10.20-2017.10.23职员销售明细表.xlsx
-    # 2017.10.24-2017.11.26职员销售明细表.xls
-    # 2017.11.27-2017.11.30职员销售明细表.xls
-    # 2017.12.1-2017.12.8职员销售明细表.xls
-    # 2017.12.9-2017.12.16职员销售明细表.xls
-    # 2017.12.17-2017.12.26职员销售明细表.xls
-    df = pd.read_excel('data\\%s.xls' % filenamenoext, sheetname='%s' % filenamenoext, index_col=0, parse_dates=True)
-    log.info('读取%s' % filenamenoext)
-    # print(list(df.columns))  # ['日期', '单据编号', '摘要', '单据类型', '备注', '商品备注', '商品编号', '商品全名',
-    #  '规格', '型号', '产地', '单位', '数量', '单价', '金额', '含税单价', '价税合计', '成本金额', '毛利', '毛利率',
-    # '单位全名', '仓库全名', '部门全名']
-    totalin = ['%.2f' % df.loc[df.index.max()]['数量'], '%.2f' % df.loc[df.index.max()]['金额']]  # 从最后一行获取数量合计和金额合计，以备比较
-    # print(totalin)
-    df['职员名称'] = None
-    df = df.loc[:, ['日期', '单据编号', '单据类型', '职员名称', '摘要', '备注', '商品备注', '商品编号', '商品全名',
-                    '单价', '单位', '数量', '金额', '单位全名', '仓库全名', '部门全名']]
-    df['日期'] = pd.to_datetime(df['日期'])
-    df['备注'] = df['备注'].astype(object)
-    dfdel = df[
-        (df.单位全名.isnull().values == True) & ((df.单据编号.isnull().values == True) | (df.单据编号 == '小计') | (df.单据编号 == '合计'))]
-    hangdel = list(dfdel.index)
-    df1 = df.drop(hangdel)  # 丢掉小计和合计行，另起DataFrame
-    dfzhiyuan = df1[df1.单位全名.isnull().values == True]  # 提取出职员名称行号
-    zyhang = list(dfzhiyuan.index)
-    zyming = list(dfzhiyuan['单据编号'])  # 职员名称
+def details2db(filename, sheetname, xiangmu, tablename):
+    """
 
-    # 每次填充df到最后一行，依次滚动更新之
-    for i in range(len(zyhang)):
-        df.loc[zyhang[i]:, '职员名称'] = zyming[i]
-
-    # 丢掉职员名称行，留下纯数据
-    dfdel = df[df.单位全名.isnull().values == True]
-    # print(dfdel[['日期', '单据编号', '数量', '金额']])
-    hangdel = list(dfdel.index)
-    # print(hangdel)
-    dfout = df.drop(hangdel)
-    dfout.index = range(len(dfout))
-    log.info('共有%d条有效记录' % len(dfout))
-
-    # 读取大数据的起止日期，不交叉、不是前置则可能是合法数据，二次检查后放行
-    cnx = lite.connect('data\\quandan.db')
-    # print('%.2f' % dfout.sum()['数量'])
-    # print('%.2f' % dfout.sum()['金额'])
-
-    if (totalin[0] == '%.2f' % dfout.sum()['数量']) & (totalin[1] == '%.2f' % dfout.sum()['金额']):
-        dfall = pd.read_sql_query('select 日期, sum(金额) as 销售额 from xiaoshoumingxi group by 日期 order by 日期', cnx,
-                                  parse_dates=['日期'])
-        datestr4data = '【待插入S：%s，E：%s】【目标数据S：%s，E：%s】' \
-                       % (dfout['日期'].min(), dfout['日期'].max(), dfall['日期'].min(), dfall['日期'].max())
-        if (dfall['日期'].max() >= dfout['日期'].min()) or (dfall['日期'].min() >= dfout['日期'].max()):
-            log.warning('时间交叉了，请检查数据！%s' % datestr4data)
-            exit(2)
-        else:
-            print('请仔细检查！%s' % datestr4data)
-            print('如果确保无误，请放行下面两行代码')
-        # dfout.to_sql(name='xiaoshoumingxi', con=cnx, if_exists='append', chunksize=10000)
-        # log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' %(filenamenoext, len(dfout)))
-    else:
-        log.warning('对读入文件《%s》的数据整理有误！总数量和总金额对不上！' % filenamenoext)
-
-    cnx.close()
-
-
-def productdetails2db(filename, sheetname):
+    :param filename:
+    :param sheetname:
+    :param xiangmu: =['职员名称','商品全名']，['产品名称','经办人']
+    :param tablename:
+    :return:
+    """
     df = pd.read_excel('data\\%s' % filename, sheetname='%s' % sheetname, index_col=0, parse_dates=True)
     log.info('读取%s' % filename)
     print(list(df.columns))
@@ -79,8 +20,8 @@ def productdetails2db(filename, sheetname):
     # '单位全名', '仓库全名', '部门全名']
     totalin = ['%.2f' % df.loc[df.index.max()]['数量'], '%.2f' % df.loc[df.index.max()]['金额']]  # 从最后一行获取数量合计和金额合计，以备比较
     # print(totalin)
-    df['职员名称'] = None
-    df = df.loc[:, ['日期', '单据编号', '单据类型', '职员名称', '摘要', '备注', '商品备注', '商品编号', '商品全名',
+    df[xiangmu[0]] = None
+    df = df.loc[:, ['日期', '单据编号', '单据类型', xiangmu[0], '摘要', '备注', '商品备注', xiangmu[1],
                     '单价', '单位', '数量', '金额', '单位全名', '仓库全名', '部门全名']]
     df['日期'] = pd.to_datetime(df['日期'])
     df['备注'] = df['备注'].astype(object)
@@ -88,15 +29,15 @@ def productdetails2db(filename, sheetname):
         (df.单位全名.isnull().values == True) & ((df.单据编号.isnull().values == True) | (df.单据编号 == '小计') | (df.单据编号 == '合计'))]
     hangdel = list(dfdel.index)
     df1 = df.drop(hangdel)  # 丢掉小计和合计行，另起DataFrame
-    dfzhiyuan = df1[df1.单位全名.isnull().values == True]  # 提取出职员名称行号
+    dfzhiyuan = df1[df1.单位全名.isnull().values == True]  # 提取出项目名称行号
     zyhang = list(dfzhiyuan.index)
-    zyming = list(dfzhiyuan['单据编号'])  # 职员名称
+    zyming = list(dfzhiyuan['单据编号'])  # 项目名称
 
     # 每次填充df到最后一行，依次滚动更新之
     for i in range(len(zyhang)):
-        df.loc[zyhang[i]:, '职员名称'] = zyming[i]
+        df.loc[zyhang[i]:, xiangmu[0]] = zyming[i]
 
-    # 丢掉职员名称行，留下纯数据
+    # 丢掉项目名称行，留下纯数据
     dfdel = df[df.单位全名.isnull().values == True]
     # print(dfdel[['日期', '单据编号', '数量', '金额']])
     hangdel = list(dfdel.index)
@@ -104,35 +45,35 @@ def productdetails2db(filename, sheetname):
     dfout = df.drop(hangdel)
     dfout.index = range(len(dfout))
     log.info('共有%d条有效记录' % len(dfout))
-    # print(dfout.head(10))
 
-    dftt = dfout.groupby(['职员名称', '单价'])['日期'].min().sort_values()
-    print(dftt.dtypes)
-    print(dftt.index)
-    print(dftt.groupby('职员名称'))
+    # return dfout
+    # print(dfout.head(10))
 
     # 读取大数据的起止日期，不交叉、不是前置则可能是合法数据，二次检查后放行
     cnx = lite.connect('data\\quandan.db')
-    # print('%.2f' % dfout.sum()['数量'])
-    # print('%.2f' % dfout.sum()['金额'])
+
+    # dfout.to_sql(name=tablename, con=cnx, if_exists='replace', chunksize=10000)
+    # log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' %(filename, len(dfout)))
 
     if (totalin[0] == '%.2f' % dfout.sum()['数量']) & (totalin[1] == '%.2f' % dfout.sum()['金额']):
-        dfall = pd.read_sql_query('select 日期, sum(金额) as 销售额 from xiaoshoumingxi group by 日期 order by 日期', cnx,
+        dfall = pd.read_sql_query('select 日期, sum(金额) as 销售额 from %s group by 日期 order by 日期' % tablename, cnx,
                                   parse_dates=['日期'])
         datestr4data = '【待插入S：%s，E：%s】【目标数据S：%s，E：%s】' \
                        % (dfout['日期'].min(), dfout['日期'].max(), dfall['日期'].min(), dfall['日期'].max())
         if (dfall['日期'].max() >= dfout['日期'].min()) or (dfall['日期'].min() >= dfout['日期'].max()):
             log.warning('时间交叉了，请检查数据！%s' % datestr4data)
-            exit(2)
+            # exit(2)
         else:
             print('请仔细检查！%s' % datestr4data)
             print('如果确保无误，请放行下面两行代码')
-        # dfout.to_sql(name='xiaoshoumingxi', con=cnx, if_exists='append', chunksize=10000)
-        # log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' %(filenamenoext, len(dfout)))
+            dfout.to_sql(name=tablename, con=cnx, if_exists='append', chunksize=10000)
+            log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' % (filename, len(dfout)))
     else:
         log.warning('对读入文件《%s》的数据整理有误！总数量和总金额对不上！' % filename)
 
     cnx.close()
+
+    return dfout
 
 
 def customerweihu2systable():
@@ -283,9 +224,37 @@ def jiaoyankehuchanpin():
     cnx.close()
 
 
-# filenameno = '2018.1.7-2018.1.12职员销售明细表.xls'
-# saledetails2db(filenameno)
-productdetails2db('商品进货明细表（2012.11.30-2018.1.19）.xls.xls', '尚品进货明细表（2012.11.30-2018.1.19）.x')
+# dfs = details2db('2018.1.7-2018.1.12职员销售明细表.xls.xls',
+#                         '2018.1.7-2018.1.12职员销售明细表.xls',
+#                         ['职员名称','商品全名'],
+#                         'xiaoshoumingxi')
+# print(dfs.columns)
+# dfgs = dfs.groupby(['日期', '职员名称'] , as_index=False)['数量', '金额'].sum()
+# # dfgs['日期', '职员名称'] = dfgs.index
+# descdb(dfgs)
+# dfg = dfgs.groupby(['职员名称'], as_index=False).apply(lambda t: t[t.金额 == t.金额.max()]).sort_values(['金额'], ascending=False)
+# print(dfg.shape[0])
+# print(dfg.tail(30))
+
+dfp = details2db('商品进货明细表（2012.11.30-2018.1.19）.xls.xls',
+                 '尚品进货明细表（2012.11.30-2018.1.19）.x',
+                 ['产品名称', '经办人'],
+                 'jinghuomingxi')
+
+writer = pd.ExcelWriter('data\\进货分析.xlsx')
+dfp.to_excel(writer, sheet_name='商品进货记录', freeze_panes={1, 2})
+
+dfg = dfp.groupby(['产品名称', '单价']).apply(lambda t: t[t.日期 == t.日期.min()][['产品名称', '日期', '单价']])
+# print(dfg.shape[0])
+# print(dfg.tail(10))
+dfg.to_excel(writer, sheet_name='进货价格变动记录', freeze_panes={1, 2})
+
+dfgg = dfp.groupby(['产品名称'], as_index=False).apply(lambda t: t[t.日期 == t.日期.max()]).sort_values(['日期'], ascending=False)
+dfgg.to_excel(writer, sheet_name='进货价格最新', freeze_panes={1, 2})
+
+writer.save()
+writer.close()
+
 # customerweihu2systable()
 
-jiaoyankehuchanpin()
+# jiaoyankehuchanpin()
