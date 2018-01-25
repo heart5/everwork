@@ -18,6 +18,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from evernote.api.client import EvernoteClient
 from pandas.tseries.offsets import *
 from bs4 import BeautifulSoup
+from os import listdir
+from os.path import isfile, join
 
 
 def dirbuildfirst():
