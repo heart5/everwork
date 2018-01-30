@@ -35,41 +35,46 @@ note_store = get_notestore(token)
 
 # weatherstat(token, note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
 
-# dfjinchugoogle = jilugoogle('data\\google')
-# descdb(dfjinchugoogle)
-# print(dfjinchugoogle.groupby('address', as_index=False).count())
-#
-# noteinputlist = [
-#             ['f119e38e-3876-4937-80f1-e6a6b2e5d3d0', 'wenchanglu', 'work'],
-#             ['d8fa0226-88ac-4b6c-b8fd-63a9038a6abf', 'huadianxiaolu', 'home'],
-#             ['1ea50564-dee7-4e82-87b5-39703671e623', 'dingziqiao', 'life'],
-#             ['25967ecd-4062-4eed-bfa2-ac7fbe499154', 'lushan', 'home'],
-#             ['84e9ee0b-30c3-4404-84e2-7b4614980b4b', 'hanyangban', 'work'],
-#             ['6fb1e016-01ab-439d-929e-994dc980ddbe', 'hankouban', 'work'],
-#             ['24aad619-2356-499e-9fa7-f685af3a81b1', 'maotanhuamushichang', 'work'],
-#             ]
-#
-# dfjinchunote = jilunote(note_store, noteinputlist)
-# descdb(dfjinchunote)
-# print(dfjinchunote.groupby('address', as_index=False).count())
-#
-# dfjinchu = dfjinchunote.append(dfjinchugoogle).sort_index()
-# descdb(dfjinchu)
-#
-# noteoutputlist = [
-#     # ['daye', '0fa3222e-1029-4417-a7a2-8ec64f9c9a12', '家（大冶）进出记录统计图表'],
-#     # ['lushan', '987c1d5e-d8ad-41aa-9269-d2b840616410', '老家（鲁山）进出统计图表'],
-#     # ['dingziqiao', '6eef085c-0e84-4753-bf3e-b45473a12274', '丁字桥进出统计图表'],
-#     # ['yangfu\'restraunaut', '06bb4996-d0d8-4266-87d5-f3283d71f58e', '东西湖三秀路进出记录统计图表'],
-#     ['huadianxiaolu', '08a01c35-d16d-4b22-b7f7-61e3993fd2cb', '家附近出入统计图表'],
-#     ['qiwei', '294b584f-f34a-49f0-b4d3-08085a37bfd5', '创食人公司进出记录统计图表'],
-#     ['wenchanglu', '7f4bec82-626b-4022-b3c2-0d9b3d71198d', '公司（文昌路）进出记录统计图表'],
-#     ['hanyangban', 'a7e84055-f075-44ab-8205-5a42f3f05284', '汉阳办进出记录统计图表'],
-#     ['hankouban', '2c5e3728-be69-4e52-a8ff-07860e8593b7', '汉口办进出记录统计图表'],
-#     ['maotanhuamushichang', '2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e', '公司进出记录统计图表'],
-# ]
-#
-# jinchustat(token, note_store, dfjinchu, noteoutputlist)
+dfjinchugoogle = jilugoogle('data\\google')
+descdb(dfjinchugoogle)
+print(dfjinchugoogle.groupby('address', as_index=False).count())
+
+noteinputlist = [
+    ['f119e38e-3876-4937-80f1-e6a6b2e5d3d0', 'wenchanglu', 'work'],
+    ['d8fa0226-88ac-4b6c-b8fd-63a9038a6abf', 'huadianxiaolu', 'home'],
+    ['1ea50564-dee7-4e82-87b5-39703671e623', 'dingziqiao', 'life'],
+    ['25967ecd-4062-4eed-bfa2-ac7fbe499154', 'lushan', 'home'],
+    ['84e9ee0b-30c3-4404-84e2-7b4614980b4b', 'hanyangban', 'work'],
+    ['6fb1e016-01ab-439d-929e-994dc980ddbe', 'hankouban', 'work'],
+    ['24aad619-2356-499e-9fa7-f685af3a81b1', 'maotanhuamushichang', 'work'],
+]
+
+dfjinchunote = jilunote(note_store, noteinputlist)
+descdb(dfjinchunote)
+print(dfjinchunote.groupby('address', as_index=False).count())
+
+dfjinchu = dfjinchunote.append(dfjinchugoogle).sort_index()
+descdb(dfjinchu)
+
+dfjinchu['time'] = dfjinchu.index
+dfjinchu = dfjinchu.drop_duplicates()
+del dfjinchu['time']
+descdb(dfjinchu)
+
+noteoutputlist = [
+    # ['daye', '0fa3222e-1029-4417-a7a2-8ec64f9c9a12', '家（大冶）进出记录统计图表'],
+    # ['lushan', '987c1d5e-d8ad-41aa-9269-d2b840616410', '老家（鲁山）进出统计图表'],
+    # ['dingziqiao', '6eef085c-0e84-4753-bf3e-b45473a12274', '丁字桥进出统计图表'],
+    # ['yangfu\'restraunaut', '06bb4996-d0d8-4266-87d5-f3283d71f58e', '东西湖三秀路进出记录统计图表'],
+    ['huadianxiaolu', '08a01c35-d16d-4b22-b7f7-61e3993fd2cb', '家附近出入统计图表'],
+    ['qiwei', '294b584f-f34a-49f0-b4d3-08085a37bfd5', '创食人公司进出记录统计图表'],
+    ['wenchanglu', '7f4bec82-626b-4022-b3c2-0d9b3d71198d', '公司（文昌路）进出记录统计图表'],
+    ['hanyangban', 'a7e84055-f075-44ab-8205-5a42f3f05284', '汉阳办进出记录统计图表'],
+    ['hankouban', '2c5e3728-be69-4e52-a8ff-07860e8593b7', '汉口办进出记录统计图表'],
+    ['maotanhuamushichang', '2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e', '公司进出记录统计图表'],
+]
+
+jinchustat(token, note_store, dfjinchu, noteoutputlist)
 
 # todo 一体化目录构建
 
