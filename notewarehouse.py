@@ -100,7 +100,7 @@ def pickstat(token, note_store, cnx, destguid=None, notetitle='', cum=False):
     # descdb(ph)
     # phh = ph[ph.index[[0]].isin(['黄传芝','黄国伟','姜明君']).values==True]
     phh = ph.unstack().T
-    phh.to_excel(xlswriter,'配货人年月汇总',freeze_panes=[1,2])
+    phh.to_excel(xlswriter, '配货人年月汇总', freeze_panes=[1, 2])
     # print(phh)
 
     xlswriter.save()

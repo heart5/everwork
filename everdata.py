@@ -66,8 +66,8 @@ def details2db(filename, sheetname, xiangmu, tablename):
         else:
             print('请仔细检查！%s' % datestr4data)
             print('如果确保无误，请放行下面两行代码')
-            dfout.to_sql(name=tablename, con=cnx, if_exists='append', chunksize=10000)
-            log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' % (filename, len(dfout)))
+            # dfout.to_sql(name=tablename, con=cnx, if_exists='append', chunksize=10000)
+            # log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' % (filename, len(dfout)))
     else:
         log.warning('对读入文件《%s》的数据整理有误！总数量和总金额对不上！' % filename)
 
@@ -224,37 +224,35 @@ def jiaoyankehuchanpin():
     cnx.close()
 
 
-# dfs = details2db('2018.1.7-2018.1.12职员销售明细表.xls.xls',
-#                         '2018.1.7-2018.1.12职员销售明细表.xls',
-#                         ['职员名称','商品全名'],
-#                         'xiaoshoumingxi')
+# dfs = details2db('2018.1.13-2018.1.20职员销售明细表.xls.xls', '2018.1.13-2018.1.20职员销售明细表.xls',
+#                  ['职员名称', '商品全名'], 'xiaoshoumingxi')
 # print(dfs.columns)
-# dfgs = dfs.groupby(['日期', '职员名称'] , as_index=False)['数量', '金额'].sum()
+# dfgs = dfs.groupby(['日期', '职员名称'], as_index=False)['数量', '金额'].sum()
 # # dfgs['日期', '职员名称'] = dfgs.index
 # descdb(dfgs)
 # dfg = dfgs.groupby(['职员名称'], as_index=False).apply(lambda t: t[t.金额 == t.金额.max()]).sort_values(['金额'], ascending=False)
 # print(dfg.shape[0])
 # print(dfg.tail(30))
 
-dfp = details2db('商品进货明细表（2012.11.30-2018.1.19）.xls.xls',
-                 '尚品进货明细表（2012.11.30-2018.1.19）.x',
-                 ['产品名称', '经办人'],
-                 'jinghuomingxi')
-
-writer = pd.ExcelWriter('data\\进货分析.xlsx')
-dfp.to_excel(writer, sheet_name='商品进货记录', freeze_panes={1, 2})
-
-dfg = dfp.groupby(['产品名称', '单价']).apply(lambda t: t[t.日期 == t.日期.min()][['产品名称', '日期', '单价']])
-# print(dfg.shape[0])
-# print(dfg.tail(10))
-dfg.to_excel(writer, sheet_name='进货价格变动记录', freeze_panes={1, 2})
-
-dfgg = dfp.groupby(['产品名称'], as_index=False).apply(lambda t: t[t.日期 == t.日期.max()]).sort_values(['日期'], ascending=False)
-dfgg.to_excel(writer, sheet_name='进货价格最新', freeze_panes={1, 2})
-
-writer.save()
-writer.close()
+# dfp = details2db('商品进货明细表（2012.11.30-2018.1.19）.xls.xls',
+#                  '尚品进货明细表（2012.11.30-2018.1.19）.x',
+#                  ['产品名称', '经办人'],
+#                  'jinghuomingxi')
+#
+# writer = pd.ExcelWriter('data\\进货分析.xlsx')
+# dfp.to_excel(writer, sheet_name='商品进货记录', freeze_panes={1, 2})
+#
+# dfg = dfp.groupby(['产品名称', '单价']).apply(lambda t: t[t.日期 == t.日期.min()][['产品名称', '日期', '单价']])
+# # print(dfg.shape[0])
+# # print(dfg.tail(10))
+# dfg.to_excel(writer, sheet_name='进货价格变动记录', freeze_panes={1, 2})
+#
+# dfgg = dfp.groupby(['产品名称'], as_index=False).apply(lambda t: t[t.日期 == t.日期.max()]).sort_values(['日期'], ascending=False)
+# dfgg.to_excel(writer, sheet_name='进货价格最新', freeze_panes={1, 2})
+#
+# writer.save()
+# writer.close()
 
 # customerweihu2systable()
 
-# jiaoyankehuchanpin()
+jiaoyankehuchanpin()

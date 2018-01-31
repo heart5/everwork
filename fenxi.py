@@ -51,6 +51,13 @@ def timetest():
     # guanlianall(cnx)
     desclitedb(cnx)
     tms.append(time.clock())
+
+    # cur = cnx.cursor()
+    # result = cur.execute('select * from xiaoshoumingxi where (单据编号=\'XT-2017-08-14-00061\')')
+    # for row in result:
+    #     print(row)
+    # cur.execute('update xiaoshoumingxi set 职员名称=\'梅富忠\' where (单据编号=\'XT-2017-08-14-00061\') and (职员名称=\'耿华忠\')')
+
     # cnx.cursor().execute('drop table alldata')  # 删除alldata数据表
     # cnx.cursor().execute('VACUUM')  # 压缩
     tms.append(time.clock())

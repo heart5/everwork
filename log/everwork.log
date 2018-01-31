@@ -1005,6 +1005,7 @@
 2018-01-25 21:10:21	ewer	everfunc.py - [get_notestore]	MainThread - 10052 - 10492	DEBUG: 成功连接Evernote服务器！
 2018-01-25 21:10:21	ewer	everfunc.py - [writeini]	MainThread - 10052 - 10492	INFO: Evernote API调用次数：1，写入配置文件data\everwork.ini
 2018-01-25 21:10:21	ewer	everwork.py - [<module>]	MainThread - 10052 - 10492	DEBUG: 程序结束！
+2018-01-30 17:44:30	ewer	everfunc.py - [writeini]	MainThread - 1380 - 8112	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
 2018-01-28 23:55:46	ewer	everfunc.py - [<module>]	MainThread - 14888 - 2612	INFO: 程序上次异常退出，调用log中的API数据[2018-01-25 21:10:21,0]
 2018-01-28 23:55:46	ewer	everfunc.py - [writeini]	MainThread - 14888 - 2612	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
 2018-01-28 23:55:47	ewer	everwork.py - [<module>]	MainThread - 14888 - 2612	DEBUG: 程序启动……
@@ -1136,3 +1137,17 @@
 2018-01-30 17:21:42	ewer	everfunc.py - [imglist2note]	MainThread - 15368 - 340	INFO: 成功更新了笔记《公司进出记录统计图表》，guid：2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e。
 2018-01-30 17:21:42	ewer	everfunc.py - [writeini]	MainThread - 15368 - 340	INFO: Evernote API调用次数：15，写入配置文件data\everwork.ini
 2018-01-30 17:21:42	ewer	everwork.py - [<module>]	MainThread - 15368 - 340	DEBUG: 程序结束！
+2018-01-30 18:53:10	ewer	everfunc.py - [writeini]	MainThread - 1876 - 7240	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
+2018-01-30 19:01:27	ewer	everfunc.py - [writeini]	MainThread - 1520 - 9232	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
+2018-01-30 19:14:59	ewer	everfunc.py - [gengxinfou]	MainThread - 6056 - 5308	INFO: 文件《系统表.xlsx》已有26条记录，有新文件，更新之。
+2018-01-30 20:08:37	ewer	everfunc.py - [writeini]	MainThread - 3180 - 9644	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
+2018-01-30 21:01:11	ewer	everfunc.py - [writeini]	MainThread - 6436 - 8720	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
+2018-01-31 16:11:45	ewer	everfunc.py - [writeini]	MainThread - 5320 - 8984	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
+2018-01-31 18:41:48	ewer	everfunc.py - [writeini]	MainThread - 11148 - 11592	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
+2018-01-31 19:04:44	ewer	everfunc.py - [writeini]	MainThread - 3984 - 12220	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
+2018-01-31 19:11:55	ewer	everdata.py - [details2db]	MainThread - 7292 - 11480	INFO: 读取2018.1.13-2018.1.20职员销售明细表.xls.xls
+2018-01-31 19:11:55	ewer	everdata.py - [details2db]	MainThread - 7292 - 11480	INFO: 共有5046条有效记录
+2018-01-31 19:13:29	ewer	everdata.py - [details2db]	MainThread - 11508 - 8504	INFO: 读取2018.1.13-2018.1.20职员销售明细表.xls.xls
+2018-01-31 19:13:29	ewer	everdata.py - [details2db]	MainThread - 11508 - 8504	INFO: 共有5046条有效记录
+2018-01-31 19:13:33	ewer	everdata.py - [details2db]	MainThread - 11508 - 8504	INFO: 成功从数据文件《2018.1.13-2018.1.20职员销售明细表.xls.xls》中添加5046条记录到总数据表中。
+2018-01-31 19:13:57	ewer	everfunc.py - [gengxinfou]	MainThread - 3416 - 3400	INFO: 文件《系统表.xlsx》已有27条记录，有新文件，更新之。
