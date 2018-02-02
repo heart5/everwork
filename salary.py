@@ -66,4 +66,4 @@ def shuoming(df2):
 dfys = dfy
 # dfys['UIi'] = dfys['年月', '业务主管'].apply(lambda x: shuoming(x))
 # print(dfys)
-cnx.close()
+# cnx.close()

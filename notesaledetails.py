@@ -57,7 +57,7 @@ def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf
     log.info(sqlf)
 
     df = pd.merge(dfz, dff, how='outer', on=['日期', '年月', '客户编码', '区域', '类型', '品牌'], sort=True)
-    print(df.tail(10))
+    # print(df.tail(10))
     # df = df.fillna(0)
     kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cnx, pinpai, cum)
 
@@ -66,7 +66,7 @@ def kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cn
     dfquyu = pd.read_sql('select * from quyu', cnx, index_col='index')
     dfleixing = pd.read_sql('select * from leixing', cnx, index_col='index')
     fenbulist = list(notefenbudf.index)
-    print(fenbulist)
+    # print(fenbulist)
     leixinglist = ['终端客户', '连锁客户', '渠道客户', '直销客户', '公关客户', '其他客户', '全渠道']
 
     if df.shape[0] == 0:
@@ -123,25 +123,27 @@ def kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cn
                              noteleixingdf.loc[leixingset]['title'], token, neirong=htable)
 
 
-def pinpaifenxi(token, note_store, cnx):
+def pinpaifenxi(token, note_store, cnx, daysbefore=90, brandnum=26, fenbu='fenbu'):
     qrypinpai = "select max(日期) as 最近日期, sum(金额) as 销售金额, product.品牌名称 as 品牌 from xiaoshoumingxi,product " \
                 "where (product.商品全名 = xiaoshoumingxi.商品全名) group by 品牌 order by 最近日期"
     dff = pd.read_sql_query(qrypinpai, cnx, parse_dates=['最近日期'])
-    print(dff)
-    # brandlist = list(dff[dff.最近日期 >= (dff.最近日期.max()+pd.Timedelta(days=-90))]['品牌'])
-    brandlist = list(dff['品牌'])
+    # print(dff)
+    brandlist = list(dff[dff.最近日期 >= (dff.最近日期.max() + pd.Timedelta(days=daysbefore * (-1)))]['品牌'])
+    if len(brandlist) > brandnum:
+        brandlist = brandlist[brandnum * (-1):]
+    # brandlist = list(dff['品牌'])
     brandlist.append('')
     print(brandlist)
     for br in brandlist:
         log.info('第%d个品牌：%s，共有%d个品牌' % (brandlist.index(br) + 1, br, len(brandlist)))
-        updatesection(cfp, 'guidquyunb', br + 'kehuguidquyu', inifilepath, token, note_store, br + '客户开发图表')
-        updatesection(cfp, 'guidquyunb', br + 'saleguidquyu', inifilepath, token, note_store, br + '销售业绩图表')
+        updatesection(cfp, 'guid%snb' % fenbu, br + 'kehuguid%s' % fenbu, inifilepath, token, note_store, br + '客户开发图表')
+        updatesection(cfp, 'guid%snb' % fenbu, br + 'saleguid%s' % fenbu, inifilepath, token, note_store, br + '销售业绩图表')
         updatesection(cfp, 'guidleixingnb', br + 'kehuguidleixing', inifilepath, token, note_store, br + '客户开发图表')
         updatesection(cfp, 'guidleixingnb', br + 'saleguidleixing', inifilepath, token, note_store, br + '销售业绩图表')
 
         # notelxxsdf = ['']
         notelxxsdf = readinisection2df(cfp, br + 'saleguidleixing', br + '销售图表')
-        notefbxsdf = readinisection2df(cfp, br + 'saleguidquyu', br + '销售图表')
+        notefbxsdf = readinisection2df(cfp, br + 'saleguid%s' % fenbu, br + '销售图表')
         # print(notefbxsdf)
 
         qrystr = "select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码," + \
@@ -155,7 +157,7 @@ def pinpaifenxi(token, note_store, cnx):
 
         # notelxkhdf = ['']
         notelxkhdf = readinisection2df(cfp, br + 'kehuguidleixing', br + '客户图表')
-        notefbkhdf = readinisection2df(cfp, br + 'kehuguidquyu', br + '客户图表')
+        notefbkhdf = readinisection2df(cfp, br + 'kehuguid%s' % fenbu, br + '客户图表')
         # print(notefbkhdf)
         qrystr = "select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码," + \
                  'count(*) as %s, substr(customer.往来单位编号,1,2) as 区域 ,' \

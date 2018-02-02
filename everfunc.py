@@ -512,7 +512,7 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
         try:
             guid = cfpp.get(tosection, aa)
             if len(guid) > 0:
-                print('笔记《' + str(aa) + zhuti + '》已存在，guid为：' + guid)
+                # print('笔记《' + str(aa) + zhuti + '》已存在，guid为：' + guid)
                 continue
         except Exception as ee:
             log.info('笔记《' + str(aa) + zhuti + '》不存在，将被创建……%s' % str(ee))
@@ -614,8 +614,8 @@ def dataokay(cnx):
         # print(df)
         df.to_sql(name='customer', con=cnx, if_exists='replace')
 
-    if gengxinfou('data\\2017年全单统计管理.xlsm', cnx, 'fileread'):  # or True:
-        df = pd.read_excel('data\\2017年全单统计管理.xlsm', sheetname='全单统计管理', na_values=[0])
+    if gengxinfou('data\\2018年全单统计管理.xlsm', cnx, 'fileread'):  # or True:
+        df = pd.read_excel('data\\2018年全单统计管理.xlsm', sheetname='全单统计管理', na_values=[0])
         # descdb(df)
         df = df.loc[:, ['订单日期', '单号', '配货人', '配货准确', '业务主管', '终端编码', '终端名称', '积欠', '送货金额',
                         '实收金额', '收款方式', '优惠', '退货金额', '客户拒收', '无货金额', '少配金额', '配错未要',
@@ -806,7 +806,11 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=[], quyu='', le
         if max(map(abs, dslistmax)) > YWanAnchor:
             plt.gca().yaxis.set_major_formatter(
                 FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
-        biaozhukedu(dfjieguo, '%02d' % (riqienddate.month))
+        biaozhukedu(dfjieguo, '%02d' % riqienddate.month)
+        if not os.path.exists(imgpath):
+            os.mkdir(imgpath)
+            log.info('%s不存在，将被创建' % imgpath)
+
         plt.savefig(imgpath + '%s%s.png' % (biaoti, cumstr))
         imglist.append(imgpath + '%s%s.png' % (biaoti, cumstr))
         plt.close()
@@ -977,3 +981,6 @@ def imglist2note(notestore, imglist, noteguid, notetitle, token, sty='replace', 
         else:
             log.critical('更新笔记时出现系统错误：' + str(ee))
             exit(2)
+    except TimeoutError as te:
+        log.critical('超时错误。可能断网了')
+        print(te)

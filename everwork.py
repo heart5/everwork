@@ -90,7 +90,7 @@ dataokay(cnx)
 
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
 
-# pinpaifenxi(token, note_store, cnx)
+pinpaifenxi(token, note_store, cnx, daysbefore=30, brandnum=2)
 
 # desclitedb(cnx)
 # swissknife(cnx)

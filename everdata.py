@@ -230,14 +230,15 @@ def jiaoyankehuchanpin():
 # dfgs = dfs.groupby(['日期', '职员名称'], as_index=False)['数量', '金额'].sum()
 # # dfgs['日期', '职员名称'] = dfgs.index
 # descdb(dfgs)
-# dfg = dfgs.groupby(['职员名称'], as_index=False).apply(lambda t: t[t.金额 == t.金额.max()]).sort_values(['金额'], ascending=False)
+# dfg = dfgs.groupby(['职员名称'], as_index=False).apply(lambda t: t[t.金额 == t.金额.max()])\
+#     .sort_values(['金额'], ascending=False)
 # print(dfg.shape[0])
 # print(dfg.tail(30))
 
-# dfp = details2db('商品进货明细表（2012.11.30-2018.1.19）.xls.xls',
-#                  '尚品进货明细表（2012.11.30-2018.1.19）.x',
-#                  ['产品名称', '经办人'],
-#                  'jinghuomingxi')
+dfp = details2db('商品进货明细表（2012.11.30-2018.1.19）.xls.xls',
+                 '尚品进货明细表（2012.11.30-2018.1.19）.x',
+                 ['产品名称', '经办人'],
+                 'jinghuomingxi')
 #
 # writer = pd.ExcelWriter('data\\进货分析.xlsx')
 # dfp.to_excel(writer, sheet_name='商品进货记录', freeze_panes={1, 2})
@@ -247,7 +248,8 @@ def jiaoyankehuchanpin():
 # # print(dfg.tail(10))
 # dfg.to_excel(writer, sheet_name='进货价格变动记录', freeze_panes={1, 2})
 #
-# dfgg = dfp.groupby(['产品名称'], as_index=False).apply(lambda t: t[t.日期 == t.日期.max()]).sort_values(['日期'], ascending=False)
+# dfgg = dfp.groupby(['产品名称'], as_index=False).apply(lambda t: t[t.日期 == t.日期.max()])\
+#     .sort_values(['日期'], ascending=False)
 # dfgg.to_excel(writer, sheet_name='进货价格最新', freeze_panes={1, 2})
 #
 # writer.save()
@@ -255,4 +257,4 @@ def jiaoyankehuchanpin():
 
 # customerweihu2systable()
 
-jiaoyankehuchanpin()
+# jiaoyankehuchanpin()
