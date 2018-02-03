@@ -7567,3 +7567,100 @@
 2018-02-02 16:20:57	ewer	everdata.py - [details2db]	MainThread - 4584 - 7828	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
 2018-02-02 16:20:57	ewer	everdata.py - [details2db]	MainThread - 4584 - 7828	INFO: 共有10783条有效记录
 2018-02-02 16:20:59	ewer	everdata.py - [details2db]	MainThread - 4584 - 7828	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 14:40:13	ewer	everfunc.py - [writeini]	MainThread - 20292 - 20328	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
+2018-02-03 14:40:14	ewer	everdata.py - [details2db]	MainThread - 20292 - 20328	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 14:40:15	ewer	everdata.py - [details2db]	MainThread - 20292 - 20328	INFO: 共有10783条有效记录
+2018-02-03 14:40:17	ewer	everdata.py - [details2db]	MainThread - 20292 - 20328	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 15:45:40	ewer	everfunc.py - [writeini]	MainThread - 20204 - 19768	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
+2018-02-03 15:45:41	ewer	everdata.py - [details2db]	MainThread - 20204 - 19768	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 15:45:42	ewer	everdata.py - [details2db]	MainThread - 20204 - 19768	INFO: 共有10783条有效记录
+2018-02-03 15:45:45	ewer	everdata.py - [details2db]	MainThread - 20204 - 19768	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 15:48:41	ewer	everdata.py - [details2db]	MainThread - 16388 - 5924	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 15:48:41	ewer	everdata.py - [details2db]	MainThread - 16388 - 5924	INFO: 共有10783条有效记录
+2018-02-03 15:48:43	ewer	everdata.py - [details2db]	MainThread - 16388 - 5924	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 15:49:43	ewer	everdata.py - [details2db]	MainThread - 18948 - 18172	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 15:49:43	ewer	everdata.py - [details2db]	MainThread - 18948 - 18172	INFO: 共有10783条有效记录
+2018-02-03 15:49:44	ewer	everdata.py - [details2db]	MainThread - 18948 - 18172	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 15:50:38	ewer	everdata.py - [details2db]	MainThread - 13736 - 5344	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 15:50:38	ewer	everdata.py - [details2db]	MainThread - 13736 - 5344	INFO: 共有10783条有效记录
+2018-02-03 15:50:39	ewer	everdata.py - [details2db]	MainThread - 13736 - 5344	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 15:58:58	ewer	everdata.py - [details2db]	MainThread - 20972 - 20976	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 15:58:58	ewer	everdata.py - [details2db]	MainThread - 20972 - 20976	INFO: 共有10783条有效记录
+2018-02-03 15:58:59	ewer	everdata.py - [details2db]	MainThread - 20972 - 20976	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 15:59:24	ewer	everdata.py - [details2db]	MainThread - 20536 - 20588	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 15:59:25	ewer	everdata.py - [details2db]	MainThread - 20536 - 20588	INFO: 共有10783条有效记录
+2018-02-03 15:59:26	ewer	everdata.py - [details2db]	MainThread - 20536 - 20588	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:01:42	ewer	everfunc.py - [writeini]	MainThread - 20820 - 20556	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
+2018-02-03 16:01:43	ewer	everdata.py - [details2db]	MainThread - 20820 - 20556	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:01:43	ewer	everdata.py - [details2db]	MainThread - 20820 - 20556	INFO: 共有10783条有效记录
+2018-02-03 16:01:44	ewer	everdata.py - [details2db]	MainThread - 20820 - 20556	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:02:05	ewer	everdata.py - [details2db]	MainThread - 16296 - 20940	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:02:05	ewer	everdata.py - [details2db]	MainThread - 16296 - 20940	INFO: 共有10783条有效记录
+2018-02-03 16:02:07	ewer	everdata.py - [details2db]	MainThread - 16296 - 20940	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:27:18	ewer	everdata.py - [details2db]	MainThread - 22400 - 22396	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:27:18	ewer	everdata.py - [details2db]	MainThread - 22400 - 22396	INFO: 共有10783条有效记录
+2018-02-03 16:27:19	ewer	everdata.py - [details2db]	MainThread - 22400 - 22396	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:28:10	ewer	everdata.py - [details2db]	MainThread - 22320 - 22368	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:28:10	ewer	everdata.py - [details2db]	MainThread - 22320 - 22368	INFO: 共有10783条有效记录
+2018-02-03 16:28:11	ewer	everdata.py - [details2db]	MainThread - 22320 - 22368	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:28:42	ewer	everdata.py - [details2db]	MainThread - 21856 - 21792	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:28:42	ewer	everdata.py - [details2db]	MainThread - 21856 - 21792	INFO: 共有10783条有效记录
+2018-02-03 16:28:43	ewer	everdata.py - [details2db]	MainThread - 21856 - 21792	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:29:26	ewer	everdata.py - [details2db]	MainThread - 21616 - 21588	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:29:26	ewer	everdata.py - [details2db]	MainThread - 21616 - 21588	INFO: 共有10783条有效记录
+2018-02-03 16:29:27	ewer	everdata.py - [details2db]	MainThread - 21616 - 21588	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:30:09	ewer	everdata.py - [details2db]	MainThread - 21548 - 20664	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:30:09	ewer	everdata.py - [details2db]	MainThread - 21548 - 20664	INFO: 共有10783条有效记录
+2018-02-03 16:30:10	ewer	everdata.py - [details2db]	MainThread - 21548 - 20664	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:30:45	ewer	everdata.py - [details2db]	MainThread - 13164 - 21860	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:30:45	ewer	everdata.py - [details2db]	MainThread - 13164 - 21860	INFO: 共有10783条有效记录
+2018-02-03 16:30:46	ewer	everdata.py - [details2db]	MainThread - 13164 - 21860	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:31:33	ewer	everdata.py - [details2db]	MainThread - 19376 - 21708	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:31:33	ewer	everdata.py - [details2db]	MainThread - 19376 - 21708	INFO: 共有10783条有效记录
+2018-02-03 16:31:34	ewer	everdata.py - [details2db]	MainThread - 19376 - 21708	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:32:49	ewer	everdata.py - [details2db]	MainThread - 12232 - 21360	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:32:49	ewer	everdata.py - [details2db]	MainThread - 12232 - 21360	INFO: 共有10783条有效记录
+2018-02-03 16:32:50	ewer	everdata.py - [details2db]	MainThread - 12232 - 21360	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:33:43	ewer	everdata.py - [details2db]	MainThread - 22156 - 22232	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:33:43	ewer	everdata.py - [details2db]	MainThread - 22156 - 22232	INFO: 共有10783条有效记录
+2018-02-03 16:33:44	ewer	everdata.py - [details2db]	MainThread - 22156 - 22232	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:40:35	ewer	everdata.py - [details2db]	MainThread - 23524 - 23520	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:40:35	ewer	everdata.py - [details2db]	MainThread - 23524 - 23520	INFO: 共有10783条有效记录
+2018-02-03 16:40:36	ewer	everdata.py - [details2db]	MainThread - 23524 - 23520	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 16:45:32	ewer	everdata.py - [details2db]	MainThread - 21776 - 23416	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 16:45:33	ewer	everdata.py - [details2db]	MainThread - 21776 - 23416	INFO: 共有10783条有效记录
+2018-02-03 16:45:34	ewer	everdata.py - [details2db]	MainThread - 21776 - 23416	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 17:03:18	ewer	everfunc.py - [writeini]	MainThread - 8660 - 19872	INFO: Evernote API调用次数：0，写入配置文件data\everwork.ini
+2018-02-03 17:03:19	ewer	everdata.py - [details2db]	MainThread - 8660 - 19872	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 17:03:19	ewer	everdata.py - [details2db]	MainThread - 8660 - 19872	INFO: 共有10783条有效记录
+2018-02-03 17:03:20	ewer	everdata.py - [details2db]	MainThread - 8660 - 19872	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 17:03:41	ewer	everdata.py - [details2db]	MainThread - 13588 - 23280	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 17:03:41	ewer	everdata.py - [details2db]	MainThread - 13588 - 23280	INFO: 共有10783条有效记录
+2018-02-03 17:03:42	ewer	everdata.py - [details2db]	MainThread - 13588 - 23280	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 17:04:17	ewer	everdata.py - [details2db]	MainThread - 20856 - 23548	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 17:04:17	ewer	everdata.py - [details2db]	MainThread - 20856 - 23548	INFO: 共有10783条有效记录
+2018-02-03 17:04:18	ewer	everdata.py - [details2db]	MainThread - 20856 - 23548	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 17:10:40	ewer	everdata.py - [details2db]	MainThread - 22464 - 3732	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 17:10:40	ewer	everdata.py - [details2db]	MainThread - 22464 - 3732	INFO: 共有10783条有效记录
+2018-02-03 17:10:42	ewer	everdata.py - [details2db]	MainThread - 22464 - 3732	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 17:13:07	ewer	everdata.py - [details2db]	MainThread - 23528 - 6820	INFO: 读取2018.1.21-2018.1.31职员销售明细表.xls.xls
+2018-02-03 17:13:07	ewer	everdata.py - [details2db]	MainThread - 23528 - 6820	INFO: 共有5596条有效记录
+2018-02-03 17:13:09	ewer	everdata.py - [details2db]	MainThread - 23528 - 6820	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 17:13:10	ewer	everdata.py - [details2db]	MainThread - 23528 - 6820	INFO: 共有10783条有效记录
+2018-02-03 17:13:11	ewer	everdata.py - [details2db]	MainThread - 23528 - 6820	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 17:13:53	ewer	everdata.py - [details2db]	MainThread - 22936 - 9592	INFO: 读取2018.1.21-2018.1.31职员销售明细表.xls.xls
+2018-02-03 17:13:53	ewer	everdata.py - [details2db]	MainThread - 22936 - 9592	INFO: 共有5596条有效记录
+2018-02-03 17:13:57	ewer	everdata.py - [details2db]	MainThread - 22936 - 9592	INFO: 成功从数据文件《2018.1.21-2018.1.31职员销售明细表.xls.xls》中添加5596条记录到总数据表中。
+2018-02-03 17:13:58	ewer	everdata.py - [details2db]	MainThread - 22936 - 9592	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 17:13:58	ewer	everdata.py - [details2db]	MainThread - 22936 - 9592	INFO: 共有10783条有效记录
+2018-02-03 17:13:59	ewer	everdata.py - [details2db]	MainThread - 22936 - 9592	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 17:14:40	ewer	everdata.py - [details2db]	MainThread - 21836 - 20888	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 17:14:41	ewer	everdata.py - [details2db]	MainThread - 21836 - 20888	INFO: 共有10783条有效记录
+2018-02-03 17:14:42	ewer	everdata.py - [details2db]	MainThread - 21836 - 20888	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 17:19:17	ewer	everdata.py - [details2db]	MainThread - 23104 - 23564	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 17:19:17	ewer	everdata.py - [details2db]	MainThread - 23104 - 23564	INFO: 共有10783条有效记录
+2018-02-03 17:19:19	ewer	everdata.py - [details2db]	MainThread - 23104 - 23564	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 17:23:39	ewer	everdata.py - [details2db]	MainThread - 24548 - 24556	INFO: 读取商品进货明细表（2012.11.30-2018.1.19）.xls.xls
+2018-02-03 17:23:40	ewer	everdata.py - [details2db]	MainThread - 24548 - 24556	INFO: 共有10783条有效记录
+2018-02-03 17:23:41	ewer	everdata.py - [details2db]	MainThread - 24548 - 24556	WARNING: 时间交叉了，请检查数据！【待插入S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】【目标数据S：2012-12-05 00:00:00，E：2018-01-17 00:00:00】
+2018-02-03 17:23:43	ewer	everfunc.py - [gengxinfou]	MainThread - 24548 - 24556	INFO: 文件《系统表.xlsx》已有28条记录，有新文件，更新之。

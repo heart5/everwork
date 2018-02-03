@@ -224,7 +224,7 @@ def jiaoyankehuchanpin():
     cnx.close()
 
 
-# dfs = details2db('2018.1.13-2018.1.20职员销售明细表.xls.xls', '2018.1.13-2018.1.20职员销售明细表.xls',
+# dfs = details2db('2018.1.21-2018.1.31职员销售明细表.xls.xls', '2018.1.21-2018.1.31职员销售明细表.xls',
 #                  ['职员名称', '商品全名'], 'xiaoshoumingxi')
 # print(dfs.columns)
 # dfgs = dfs.groupby(['日期', '职员名称'], as_index=False)['数量', '金额'].sum()
@@ -243,10 +243,49 @@ dfp = details2db('商品进货明细表（2012.11.30-2018.1.19）.xls.xls',
 # writer = pd.ExcelWriter('data\\进货分析.xlsx')
 # dfp.to_excel(writer, sheet_name='商品进货记录', freeze_panes={1, 2})
 #
-# dfg = dfp.groupby(['产品名称', '单价']).apply(lambda t: t[t.日期 == t.日期.min()][['产品名称', '日期', '单价']])
+dfg = dfp.groupby(['产品名称', '单价'], as_index=False) \
+    .apply(lambda t: t[t.日期 == t.日期.min()][['产品名称', '日期', '单价']]).sort_values(['产品名称', '日期'])
 # # print(dfg.shape[0])
 # # print(dfg.tail(10))
 # dfg.to_excel(writer, sheet_name='进货价格变动记录', freeze_panes={1, 2})
+dfgqc = dfg.drop_duplicates()
+
+cnx = lite.connect('data\\quandan.db')
+
+dfs = pd.read_sql_query('select * from xiaoshoumingxi where 日期 >\'2018-01-15\'', cnx, index_col=None,
+                        parse_dates=['日期'])
+dfs['成本单价'] = 0
+dfs['成本金额'] = 0
+dfs['毛利'] = 0
+descdb(dfs)
+
+
+def chengbenjia(pro, riqi, jiagebiao):
+    propricedf = jiagebiao[jiagebiao.产品名称 == pro][['日期', '单价']]
+    # print(propricedf)
+    prinum = propricedf.shape[0]
+    if prinum > 1:
+        # print('%s在价格全单中有记录' % pro)
+        for i in range(prinum, 1, -1):
+            # print(list(propricedf.iloc[:i]['日期']))
+            if riqi >= max(list(propricedf.iloc[:i]['日期'])):
+                # print(propricedf.iloc[i-1]['单价'])
+                return propricedf.iloc[i - 1]['单价']
+    elif prinum == 1:
+        return propricedf.iloc[0]['单价']
+    else:
+        print('%s在价格全单中无记录' % pro)
+        return 0
+
+
+chengbenjia('关公坊125ml', pd.to_datetime('2015-06-01'), dfgqc)
+
+dfctest = dfs
+
+# for i in range(len(dfs)):
+#     dfs.loc[i, '成本单价'] = chengbenjia(dfs.iloc[i]['商品全名'], dfs.iloc[i]['日期'], dfgqc)
+
+# descdb(dfs)
 #
 # dfgg = dfp.groupby(['产品名称'], as_index=False).apply(lambda t: t[t.日期 == t.日期.max()])\
 #     .sort_values(['日期'], ascending=False)
