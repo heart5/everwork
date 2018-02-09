@@ -13,7 +13,7 @@ mpl.rcParams['axes.unicode_minus'] = False
 def descdb(df):
     print(len(df))
     # print(df.head(5))
-    print(df.tail(5))
+    print(df.tail(10))
     print(df.dtypes)
     if type(df) == pd.DataFrame:
         print(df.columns)

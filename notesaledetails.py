@@ -123,7 +123,7 @@ def kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cn
                              noteleixingdf.loc[leixingset]['title'], token, neirong=htable)
 
 
-def pinpaifenxi(token, note_store, cnx, daysbefore=90, brandnum=26, fenbu='fenbu'):
+def pinpaifenxi(token, note_store, cnx, daysbefore=90, brandnum=30, fenbu='fenbu'):
     qrypinpai = "select max(日期) as 最近日期, sum(金额) as 销售金额, product.品牌名称 as 品牌 from xiaoshoumingxi,product " \
                 "where (product.商品全名 = xiaoshoumingxi.商品全名) group by 品牌 order by 最近日期"
     dff = pd.read_sql_query(qrypinpai, cnx, parse_dates=['最近日期'])
