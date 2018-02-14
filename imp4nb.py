@@ -11,14 +11,12 @@ mpl.rcParams['axes.unicode_minus'] = False
 # 显示DataFrame或Series的轮廓信息
 # df，DataFrame或Series
 def descdb(df):
-    print(len(df))
+    print(df.shape[0])
     # print(df.head(5))
     print(df.tail(10))
     print(df.dtypes)
     if type(df) == pd.DataFrame:
         print(df.columns)
-        print(df.info())
-        print(df.shape)
     print(df.describe())
 
 

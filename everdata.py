@@ -3,6 +3,63 @@
 from imp4nb import *
 
 
+def chengbenjiaupdatedf(dfsall, cnxx):
+    """
+    :param dfsall: 按照日期排序的销售明细记录
+    :param cnxx: 数据库连接，为了查询生成产品价格变动记录
+    :return:
+    """
+
+    # 读取进货记录（排除退货记录）
+    dfpros = pd.read_sql_query('select 产品名称, strftime(\'%Y%m\',日期) as 年月, 金额 as 进货金额, 数量 as 进货数量, '
+                               '单价 as 进货单价 from jinghuomingxi where 金额 >=0 order by 年月, 产品名称', cnxx)
+    dfpros = DataFrame(dfpros)
+    descdb(dfpros[dfpros.进货金额 == 0].to_pandas())
+
+    # 按照月份汇总，生成成本单价并按照月份分组汇总，生成价格调整记录
+    dfpro = dfpros.groupby(['产品名称', '年月']).agg(进货金额=dfpros.进货金额.sum(), 进货数量=dfpros.进货数量.sum())
+    dfpro = dfpro[dfpro, (dfpro.进货金额 / dfpro.进货数量).round(2).rename('单价')]
+    descdb(dfpro.to_pandas())
+    dfpro = dfpro.groupby(['产品名称', '单价']).agg(年月=dfpro.年月.min(), 进货金额=dfpro.进货金额.sum()).sort(['产品名称', '年月'])
+    descdb(dfpro.to_pandas())
+    log.info('共有%d条产品价格记录，共有%d条产品价格记录（含调价）'
+             % (dfpro.groupby('产品名称').agg(dfpro.单价.count()).to_pandas().shape[0], dfpro.to_pandas().shape[0]))
+
+    log.info('共有%d条销售明细记录' % dfsall.shape[0])
+    dfsall['年月'] = dfsall['日期'].apply(lambda x: datetime.datetime.strftime(x, '%Y%m'))
+    dfprosall = dfsall.groupby('商品全名', as_index=False)['金额'].sum()
+    dfprosall.rename(columns={'商品全名': '产品名称', '金额': '销售金额'}, inplace=True)
+
+    # 连接进货产品目录和销售产品目录，查看各自的空记录
+    dfproall = pd.merge(dfpro.groupby(['产品名称']).agg(进货金额=dfpro.进货金额.sum()).to_pandas(), dfprosall, how='outer')
+    descdb(dfproall)
+    log.info('以下进货产品在本期无销售记录：%s' % list(dfproall[dfproall.销售金额.isnull().values == True]['产品名称']))
+
+    dfsall['成本单价'] = 0
+    dfpro = dfpro.to_pandas()
+    for idx in dfpro.index:
+        dfsall.loc[dfsall[(dfsall.商品全名 == dfpro.loc[idx]['产品名称']) & (dfsall.年月 >= dfpro.loc[idx]['年月'])].index,
+                   ['成本单价']] = dfpro.loc[idx]['单价']
+
+    dfsall['成本金额'] = dfsall['成本单价'] * dfsall['数量']
+    dfsall['毛利'] = dfsall['金额'] - dfsall['成本金额']
+    descdb(dfsall)
+    del dfsall['年月']  # 删除过程数据
+    descdb(dfsall)
+
+    return dfsall
+
+
+def chengbenjiaupdateall(cnx):
+    dfsall = pd.read_sql_query('select * from xiaoshoumingxi order by 日期, 单据编号', cnx, parse_dates=['日期'])
+    del dfsall['index']
+    dfsall = chengbenjiaupdatedf(dfsall, cnx)
+    dfsall.to_sql(name='xiaoshoumingxi', con=cnx, if_exists='replace', chunksize=10000)
+    log.info('要更新%d记录中的成本价和毛利内容' % len(dfsall))
+    dfsall['年月'] = dfsall['日期'].apply(lambda x: datetime.datetime.strftime(x, '%Y%m'))
+    print(dfsall.groupby('年月', as_index=False)[['数量', '成本金额', '金额', '毛利']].sum())
+
+
 def details2db(filename, sheetname, xiangmu, tablename):
     """
 
@@ -66,6 +123,9 @@ def details2db(filename, sheetname, xiangmu, tablename):
         else:
             print('请仔细检查！%s' % datestr4data)
             print('如果确保无误，请放行下面两行代码')
+            if (xiangmu[0] == '职员名称'):
+                dfout = chengbenjiaupdatedf(dfout, cnx)
+                log.info('要更新%d记录中的成本价和毛利内容' % dfout.shape[0])
             # dfout.to_sql(name=tablename, con=cnx, if_exists='append', chunksize=10000)
             # log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' % (filename, len(dfout)))
     else:
@@ -224,7 +284,7 @@ def jiaoyankehuchanpin():
     cnx.close()
 
 
-# dfs = details2db('2018.1.21-2018.1.31职员销售明细表.xls.xls', '2018.1.21-2018.1.31职员销售明细表.xls',
+# dfs = details2db('2018.2.1-2018.2.11职员销售明细表.xls.xls', '2018.2.1-2018.2.11职员销售明细表.xls',
 #                  ['职员名称', '商品全名'], 'xiaoshoumingxi')
 # print(dfs.columns)
 # dfgs = dfs.groupby(['日期', '职员名称'], as_index=False)['数量', '金额'].sum()
@@ -235,83 +295,22 @@ def jiaoyankehuchanpin():
 # print(dfg.shape[0])
 # print(dfg.tail(30))
 
-# dfp = details2db('商品进货明细表（2012.11.30-2018.1.19）.xls.xls',
-#                  '尚品进货明细表（2012.11.30-2018.1.19）.x',
+# dfp = details2db('商品进货明细表（2018.2.1-2018.2.11）.xls.xls',
+#                  '商品进货明细表（2018.2.1-2018.2.11）.xls',
 #                  ['产品名称', '经办人'],
 #                  'jinghuomingxi')
-# #
-# # writer = pd.ExcelWriter('data\\进货分析.xlsx')
-# # dfp.to_excel(writer, sheet_name='商品进货记录', freeze_panes={1, 2})
-# #
+# writer = pd.ExcelWriter('data\\进货分析.xlsx')
+# dfp.to_excel(writer, sheet_name='商品进货记录', freeze_panes={1, 2})
 # dfg = dfp.groupby(['产品名称', '单价'], as_index=False) \
 #     .apply(lambda t: t[t.日期 == t.日期.min()][['产品名称', '日期', '单价']]).sort_values(['产品名称', '日期'])
-# # # print(dfg.shape[0])
-# # # print(dfg.tail(10))
-# # dfg.to_excel(writer, sheet_name='进货价格变动记录', freeze_panes={1, 2})
-# dfgqc = dfg.drop_duplicates()
+# print(dfg.shape[0])
+# print(dfg.tail(10))
+# dfg.to_excel(writer, sheet_name='进货价格变动记录', freeze_panes={1, 2})
+# writer.close()
 
 cnx = lite.connect('data\\quandan.db')
 
-
-def chengbenjia(pro, riqi, jiagebiao):
-    propricedf = jiagebiao[jiagebiao.产品名称 == pro][['日期', '单价']]
-    # print(propricedf)
-    prinum = propricedf.shape[0]
-    if prinum > 1:
-        # print('%s在价格全单中有记录' % pro)
-        for i in range(prinum, 1, -1):
-            # print(list(propricedf.iloc[:i]['日期']))
-            if riqi >= max(list(propricedf.iloc[:i]['日期'])):
-                # print(propricedf.iloc[i-1]['单价'])
-                return propricedf.iloc[i - 1]['单价']
-    elif prinum == 1:
-        return propricedf.iloc[0]['单价']
-    else:
-        print('%s在价格全单中无记录' % pro)
-        return 0
-
-
-def chengbenjiaupdatedf(dfsall, cnxx):
-    """
-    :param dfsall: 按照日期排序的销售明细记录
-    :param cnxx: 数据库连接，为了查询生成产品价格变动记录
-    :return:
-    """
-    dfpro = pd.read_sql_query('select 产品名称, min(日期) as 日期, sum(金额) as 进货金额, sum(数量) as 进货数量, 单价 from jinghuomingxi '
-                              'group by 产品名称, 单价 order by 产品名称, 日期', cnxx, parse_dates=['日期'])
-    dfpro['单价'] = dfpro['进货金额'] / dfpro['进货数量']
-    dfpro.dropna(subset=['单价'], inplace=True)  # 去掉单价为空的行，一般情况下是促销品或宣传品
-    log.info('共有%d条产品价格记录，共有%d条产品价格记录（含调价）'
-             % (dfpro.groupby('产品名称', as_index=False)['单价'].count().shape[0], dfpro.shape[0]))
-    # descdb(dfpro)
-    log.info('共有%d条销售明细记录' % dfsall.shape[0])
-    dfprosall = dfsall.groupby('商品全名', as_index=False)['金额'].sum()
-    dfprosall.rename(columns={'商品全名': '产品名称', '金额': '销售金额'}, inplace=True)
-    dfproall = pd.merge(dfpro.groupby('产品名称', as_index=False)['进货金额'].sum(), dfprosall, how='outer')
-    descdb(dfproall)
-    log.info('以下进货产品在本期无销售记录：%s' % list(dfproall[dfproall.销售金额.isnull().values == True]['产品名称']))
-
-    dfsall['成本单价'] = 0
-    for idx in dfpro.index:
-        dfsall.loc[dfsall[(dfsall.商品全名 == dfpro.loc[idx]['产品名称']) & (dfsall.日期 >= dfpro.loc[idx]['日期'])].index,
-                   ['成本单价']] = dfpro.loc[idx]['单价']
-
-    dfsall['成本金额'] = dfsall['成本单价'] * dfsall['数量']
-    dfsall['毛利'] = dfsall['金额'] - dfsall['成本金额']
-    dfsall['毛利'] = np.where((dfsall.金额.isnull().values == True), dfsall.成本金额 * -1, dfsall.毛利)
-    # dfsall['毛利'] = np.where((dfsall.数量 < 0), dfsall.成本金额, dfsall.毛利)
-
-    return dfsall
-
-
-# chengbenjia('关公坊125ml', pd.to_datetime('2015-06-01'), dfgqc)
-
-# dfsall = pd.read_sql_query('select * from xiaoshoumingxi where 日期 >= \'2017-11-01\' order by 日期',
-#                            cnx, parse_dates=['日期'])
-dfsall = pd.read_sql_query('select * from xiaoshoumingxi order by 日期', cnx, parse_dates=['日期'])
-dfsall = chengbenjiaupdatedf(dfsall, cnx)
-dfsall['年月'] = dfsall['日期'].apply(lambda x: datetime.datetime.strftime(x, '%Y%m'))
-print(dfsall.groupby('年月', as_index=False)[['数量', '成本金额', '金额', '毛利']].sum())
+# desclitedb(cnx)
 
 # for i in range(len(dfs)):
 #     dfs.loc[i, '成本单价'] = chengbenjia(dfs.iloc[i]['商品全名'], dfs.iloc[i]['日期'], dfgqc)
@@ -324,7 +323,8 @@ print(dfsall.groupby('年月', as_index=False)[['数量', '成本金额', '金�
 #
 # writer.save()
 # writer.close()
-
 # customerweihu2systable()
 
-# jiaoyankehuchanpin()
+jiaoyankehuchanpin()
+
+cnx.close()
