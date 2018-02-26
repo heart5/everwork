@@ -21,6 +21,7 @@ from bs4 import BeautifulSoup
 from os import listdir
 from os.path import isfile, join
 from odps.df import DataFrame
+from threading import Timer
 
 
 def dirbuildfirst():

@@ -33,7 +33,13 @@ note_store = get_notestore(token)
 
 # findnotefromnotebook(note_store, token, 'c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b', '图表')  # 从笔记本中查找标题中包含指定字符串的笔记
 
-weatherstat(token, note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
+def weatherstattimer():
+    jiagemiao = 60 * 60 * 2
+    weatherstat(token, note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
+    log.info('天气信息成功更新入天气信息统计笔记，将于%d秒后再次自动更新' % jiagemiao)
+    # print("Hello World")
+    t = Timer(jiagemiao, weatherstattimer)
+    t.start()
 
 # dfjinchugoogle = jilugoogle('data\\google')
 # descdb(dfjinchugoogle)
@@ -86,15 +92,17 @@ for aa in nbfbdf.index:
         log.debug('目录《' + cpath + '》被创建')
 
 cnx = lite.connect('data\\quandan.db')
-dataokay(cnx)
+# dataokay(cnx)
 
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
 
-pinpaifenxi(token, note_store, cnx, daysbefore=360, brandnum=50)
+# pinpaifenxi(token, note_store, cnx, daysbefore=360, brandnum=50)
 
 # desclitedb(cnx)
 # swissknife(cnx)
 cnx.close()
+
+weatherstattimer()
 
 writeini()
 log.debug('程序结束！')

@@ -24,6 +24,7 @@ def weatherstat(token, note_store, sourceguid, destguid=None):
     :rtype: Null
     """
     soup = BeautifulSoup(note_store.getNoteContent(sourceguid), "html.parser")
+    evernoteapijiayi()
     # tags = soup.find('en-note')
     # print tags
     # print soup.get_text()
