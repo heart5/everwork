@@ -7,7 +7,7 @@ from imp4nb import *
 import evernote.edam.userstore.constants as UserStoreConstants
 import evernote.edam.type.ttypes as Types
 from evernote.api.client import EvernoteClient
-from noteweather import weatherstat #调用同目录下其他文件（py）中的函数
+from noteweather import weatherstat, weatherstattimer  # 调用同目录下其他文件（py）中的函数
 from notewarehouse import *
 from notedispatch import *
 from notesaledetails import *
@@ -32,14 +32,6 @@ note_store = get_notestore(token)
 # 49eff8eb-5bce-43b9-a95a-c1ee7eab71fa 有友全渠道销售图表
 
 # findnotefromnotebook(note_store, token, 'c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b', '图表')  # 从笔记本中查找标题中包含指定字符串的笔记
-
-def weatherstattimer():
-    jiagemiao = 60 * 60 * 2
-    weatherstat(token, note_store, '277dff5e-7042-47c0-9d7b-aae270f903b8', '296f57a3-c660-4dd5-885a-56492deb2cee')
-    log.info('天气信息成功更新入天气信息统计笔记，将于%d秒后再次自动更新' % jiagemiao)
-    # print("Hello World")
-    t = Timer(jiagemiao, weatherstattimer)
-    t.start()
 
 # dfjinchugoogle = jilugoogle('data\\google')
 # descdb(dfjinchugoogle)
@@ -102,7 +94,7 @@ cnx = lite.connect('data\\quandan.db')
 # swissknife(cnx)
 cnx.close()
 
-weatherstattimer()
+weatherstattimer(token, note_store, 60 * 60 * 3)
 
 writeini()
 log.debug('程序结束！')

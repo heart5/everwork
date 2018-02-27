@@ -232,3 +232,19 @@ def weatherstat(token, note_store, sourceguid, destguid=None):
 
     imglist2note(note_store, imglist, destguid, '武汉天气图', token)
 
+
+def weatherstattimer(token, note_store, jiangemiao):
+    jiagemiao = jiangemiao
+    noteguid_weather = '277dff5e-7042-47c0-9d7b-aae270f903b8'
+    usnold = int(cfp.get('noteupdatenum', noteguid_weather))
+    print(usnold, end='\t')
+    usn = note_store.getNote(token, noteguid_weather, True, True, True, True).updateSequenceNum
+    evernoteapijiayi()
+    print(usn)
+    if usn > usnold:
+        weatherstat(token, note_store, noteguid_weather, '296f57a3-c660-4dd5-885a-56492deb2cee')
+        log.info('天气信息成功更新入天气信息统计笔记，将于%d秒后再次自动检查并更新' % jiagemiao)
+        cfp.set('noteupdatenum', noteguid_weather, '%d' % usn)
+
+    t = Timer(jiagemiao, weatherstattimer, (token, note_store, jiangemiao))
+    t.start()
