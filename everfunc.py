@@ -161,7 +161,10 @@ dirbuildfirst()
 log = mylog()
 cfp = ConfigParser()
 inifilepath = 'data\\everwork.ini'
+inidatanotefilepath = 'data\\everdatanote.ini'
 cfp.read(inifilepath, encoding='utf-8')
+cfpdata = ConfigParser()
+cfpdata.read(inidatanotefilepath, encoding='utf-8')
 ENtimes = int(cfp.get('evernote', 'apicount'))
 ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
 apitime = getapitimesfromlog()
@@ -897,7 +900,7 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', lei
     # return imgsavepath
 
 
-def imglist2note(notestore, imglist, noteguid, notetitle, token, sty='replace', neirong=''):
+def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     """
     更新note内容为图片列表
     :param notestore:
@@ -979,10 +982,51 @@ def imglist2note(notestore, imglist, noteguid, notetitle, token, sty='replace', 
     except Etypes.EDAMSystemException as ee:
         if ee.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
             log.critical("API达到调用极限，需要 %d 秒后重来" % ee.rateLimitDuration)
-            exit(1)
+            # exit(1)
         else:
-            log.critical('更新笔记时出现系统错误：' + str(ee))
+            log.critical('读取guid为%s的笔记时出现系统错误' % noteguid)
+            print(ee)
+            exit(2)
+    except Etypes.EDAMUserException as ee:
+        if ee.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
+            log.critical("API达到调用极限，需要 %d 秒后重来" % ee)
+            # exit(1)
+        else:
+            log.critical('读取guid为%s的笔记时出现系统错误' % noteguid)
+            print(ee)
             exit(2)
     except TimeoutError as te:
-        log.critical('超时错误。可能断网了')
+        log.critical('读取guid为%s的笔记时出现超时错误。evernote服务器无应答，也可能是断网了。' % noteguid)
         print(te)
+
+
+def isnoteupdate(token, note_store, noteguid):
+    if cfp.has_option('noteupdatenum', noteguid):
+        usnold = cfp.getint('noteupdatenum', noteguid)
+    else:
+        usnold = 0
+    usn = 0
+    try:
+        note = note_store.getNote(token, noteguid, True, True, True, True)
+        evernoteapijiayi()
+        log.info('成功读取笔记《%s》，guid：%s。' % (note.title, note.guid))
+        usn = note.updateSequenceNum
+    except Etypes.EDAMSystemException as ee:
+        if ee.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
+            log.critical("API达到调用极限，需要 %d 秒后重来" % ee.rateLimitDuration)
+            # exit(1)
+        else:
+            log.critical('读取guid为%s的笔记时出现系统错误：%s ' % (noteguid, str(ee)))
+            exit(2)
+    except TimeoutError as te:
+        log.critical('读取guid为%s的笔记时出现超时错误。evernote服务器无应答，也可能是断网了。%s' % (noteguid, str(te)))
+    except Exception as e:
+        print(e)
+
+    # print('%d\t%d\t%s\t%s\t%s' % (usn, usnold, __name__, __file__, __package__))
+    if usn > usnold:
+        cfp.set('noteupdatenum', noteguid, '%d' % usn)
+        cfp.write(open(inifilepath, 'w', encoding='utf-8'))
+        return usn
+    else:
+        return False

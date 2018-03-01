@@ -136,14 +136,18 @@ def pinpaifenxi(token, note_store, cnx, daysbefore=90, brandnum=30, fenbu='fenbu
     print(brandlist)
     for br in brandlist:
         log.info('第%d个品牌：%s，共有%d个品牌' % (brandlist.index(br) + 1, br, len(brandlist)))
-        updatesection(cfp, 'guid%snb' % fenbu, br + 'kehuguid%s' % fenbu, inifilepath, token, note_store, br + '客户开发图表')
-        updatesection(cfp, 'guid%snb' % fenbu, br + 'saleguid%s' % fenbu, inifilepath, token, note_store, br + '销售业绩图表')
-        updatesection(cfp, 'guidleixingnb', br + 'kehuguidleixing', inifilepath, token, note_store, br + '客户开发图表')
-        updatesection(cfp, 'guidleixingnb', br + 'saleguidleixing', inifilepath, token, note_store, br + '销售业绩图表')
+        updatesection(cfpdata, 'guid%snb' % fenbu, br + 'kehuguid%s' % fenbu, inidatanotefilepath, token, note_store,
+                      br + '客户开发图表')
+        updatesection(cfpdata, 'guid%snb' % fenbu, br + 'saleguid%s' % fenbu, inidatanotefilepath, token, note_store,
+                      br + '销售业绩图表')
+        updatesection(cfpdata, 'guidleixingnb', br + 'kehuguidleixing', inidatanotefilepath, token, note_store,
+                      br + '客户开发图表')
+        updatesection(cfpdata, 'guidleixingnb', br + 'saleguidleixing', inidatanotefilepath, token, note_store,
+                      br + '销售业绩图表')
 
         # notelxxsdf = ['']
-        notelxxsdf = readinisection2df(cfp, br + 'saleguidleixing', br + '销售图表')
-        notefbxsdf = readinisection2df(cfp, br + 'saleguid%s' % fenbu, br + '销售图表')
+        notelxxsdf = readinisection2df(cfpdata, br + 'saleguidleixing', br + '销售图表')
+        notefbxsdf = readinisection2df(cfpdata, br + 'saleguid%s' % fenbu, br + '销售图表')
         # print(notefbxsdf)
 
         qrystr = "select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码," + \
@@ -156,8 +160,8 @@ def pinpaifenxi(token, note_store, cnx, daysbefore=90, brandnum=30, fenbu='fenbu
         # fenximonthduibi(token, note_store, cnx, notefbxsdf, notelxxsdf, '金额', pinpai=br, cum=True)
 
         # notelxkhdf = ['']
-        notelxkhdf = readinisection2df(cfp, br + 'kehuguidleixing', br + '客户图表')
-        notefbkhdf = readinisection2df(cfp, br + 'kehuguid%s' % fenbu, br + '客户图表')
+        notelxkhdf = readinisection2df(cfpdata, br + 'kehuguidleixing', br + '客户图表')
+        notefbkhdf = readinisection2df(cfpdata, br + 'kehuguid%s' % fenbu, br + '客户图表')
         # print(notefbkhdf)
         qrystr = "select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码," + \
                  'count(*) as %s, substr(customer.往来单位编号,1,2) as 区域 ,' \
