@@ -18,11 +18,12 @@ from bs4 import BeautifulSoup
 from matplotlib.ticker import MultipleLocator, FuncFormatter
 
 
-def weatherstat(token, note_store, sourceguid, destguid=None):
+def weatherstat(token, sourceguid, destguid=None):
     """
 
     :rtype: Null
     """
+    note_store = get_notestore(token)
     soup = BeautifulSoup(note_store.getNoteContent(sourceguid), "html.parser")
     evernoteapijiayi()
     # tags = soup.find('en-note')
@@ -54,6 +55,7 @@ def weatherstat(token, note_store, sourceguid, destguid=None):
 
     data_list = []
     for ii in split_item:
+        stritem = list()
         for jj in re.findall(itempattern, ii):
             stritem = [pd.Timestamp(jj[0]),
                        int(jj[1]), int(jj[2]), int(jj[3]), jj[4],
@@ -230,16 +232,25 @@ def weatherstat(token, note_store, sourceguid, destguid=None):
     imglist.append(img_sunonoff_path)
     plt.close()
 
-    imglist2note(note_store, imglist, destguid, '武汉天气图', token)
+    imglist2note(note_store, imglist, destguid, '武汉天气图')
 
 
-def weatherstattimer(token, note_store, jiangemiao):
-    jiagemiao = jiangemiao
+def weatherstattimer(token, jiangemiao):
     noteguid_weather = '277dff5e-7042-47c0-9d7b-aae270f903b8'
-    usn = isnoteupdate(token, note_store, noteguid_weather)
-    if usn:
-        weatherstat(token, note_store, noteguid_weather, '296f57a3-c660-4dd5-885a-56492deb2cee')
-        log.info('天气信息成功更新入天气信息统计笔记，将于%d秒后再次自动检查并更新' % jiagemiao)
+    note_store = None
+    try:
+        note_store = get_notestore(token)
+        usn = isnoteupdate(token, note_store, noteguid_weather)
+        if usn:
+            weatherstat(token, noteguid_weather, '296f57a3-c660-4dd5-885a-56492deb2cee')
+            log.info('天气信息成功更新入天气信息统计笔记，将于%d秒后再次自动检查并更新' % jiangemiao)
+    except Exception as e:
+        log.critical('读取天气信息笔记并更新天气统计信息笔记时出现未名错误。%s' % (str(e)))
+    finally:
+        log.debug('清除notestore：%s' % note_store)
+        del note_store
 
-    t = Timer(jiagemiao, weatherstattimer, (token, note_store, jiangemiao))
-    t.start()
+    global timer_weather
+    timer_weather = Timer(jiangemiao, weatherstattimer, (token, jiangemiao))
+    # print(timer_weather)
+    timer_weather.start()

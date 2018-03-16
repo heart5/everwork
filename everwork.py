@@ -12,26 +12,28 @@ from notewarehouse import *
 from notedispatch import *
 from notesaledetails import *
 from notejinchujilu import *
+from log2note import *
+
 
 log.debug('程序启动……')
 
 token = cfp.get('evernote','token')
-log.debug('配置文件读取成功')
 
-note_store = get_notestore(token)
+# note_store = get_notestore(token)
 
-# #列出账户中的全部笔记本
+# 列出账户中的全部笔记本
 # notebooks = note_store.listNotebooks()
-# # p_notebookattributeundertoken(notebooks[-1])
-#
+# p_notebookattributeundertoken(notebooks[-1])
+
 # for x in notebooks:
 #     p_notebookattributeundertoken(x)
+# 4524187f-c131-4d7d-b6cc-a1af20474a7f notification
 
 # 39ed537d-73fa-4ad8-b4fd-bc6f746fb302 真元日配送图
 # 1c0830d9-e42f-4ce7-bf36-ead868a55eca 订单配货统计图
 # 49eff8eb-5bce-43b9-a95a-c1ee7eab71fa 有友全渠道销售图表
 
-# findnotefromnotebook(note_store, token, 'c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b', '鲁山')  # 从笔记本中查找标题中包含指定字符串的笔记
+# findnotefromnotebook(note_store, token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', 'ever')  # 从笔记本中查找标题中包含指定字符串的笔记
 
 
 # todo 一体化目录构建
@@ -43,8 +45,8 @@ for aa in nbfbdf.index:
         os.mkdir(cpath)
         log.debug('目录《' + cpath + '》被创建')
 
-cnx = lite.connect('data\\quandan.db')
-dataokay(cnx)
+# cnx = lite.connect('data\\quandan.db')
+# dataokay(cnx)
 
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
 
@@ -52,13 +54,13 @@ dataokay(cnx)
 
 # desclitedb(cnx)
 # swissknife(cnx)
-cnx.close()
+# cnx.close()
 
 # isnoteupdate(token, note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
 
-weatherstattimer(token, note_store, 60 * 60 * 3 + 60)
-
-jinchustattimer(token, note_store, 60 * 60)
+log2notetimer(token, 60 * 37)
+weatherstattimer(token, 60 * 60 * 4 + 60 * 25)
+jinchustattimer(token, 60 * 60)
 
 writeini()
 log.debug('程序结束！')

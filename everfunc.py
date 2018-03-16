@@ -80,7 +80,7 @@ def mylog():
     loghandler = lgh.RotatingFileHandler('log\\everwork.log', encoding='utf-8',  # 此处指定log文件的编码方式，否则可能乱码
                                          maxBytes=2560 * 1024, backupCount=25)
     formats = lg.Formatter('%(asctime)s\t%(name)s\t%(filename)s - [%(funcName)s]'
-                           '\t%(threadName)s - %(thread)d - %(process)d'
+                           '\t%(threadName)s - %(thread)d , %(processName)s - %(process)d'
                            '\t%(levelname)s: %(message)s',
                            datefmt='%Y-%m-%d %H:%M:%S')
     loghandler.setFormatter(formats)
@@ -91,9 +91,11 @@ def mylog():
     # 定义一个StreamHandler，将INFO级别或更高的日志信息打印到标准错误，并将其添加到当前的日志处理对象#
     console = lg.StreamHandler()
     console.setLevel(lg.DEBUG)
-    formatter = lg.Formatter('%(asctime)s\t%(name)-12s: %(levelname)-8s %(message)s')
+    formatter = lg.Formatter('%(asctime)s\t%(threadName)s - %(thread)d , %(processName)s - %(process)d: '
+                             '%(levelname)-8s %(message)s')
     console.setFormatter(formatter)
     lg.getLogger('').addHandler(console)
+    # logew.addHandler(console)
     #################################################################################################
 
     return logew
@@ -265,7 +267,7 @@ def yingdacal(x, cnx):
         return x + pd.DateOffset(days=1)
 
 
-@use_logging()
+# @use_logging()
 def get_notestore(token='your developer token'):
     # Real applications authenticate with Evernote using OAuth, but for the
     # purpose of exploring the API, you can get a developer token that allows
@@ -304,6 +306,7 @@ def get_notestore(token='your developer token'):
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
     errorstr = '连接Evernote服务器出现错误！'
+    note_store = None
     try:
         userstore = client.get_user_store()
         version_ok = userstore.checkVersion(
@@ -314,27 +317,33 @@ def get_notestore(token='your developer token'):
         if not version_ok:
             log.critical('Evernote API版本过时，请更新之！程序终止并退出！！！')
             exit(1)
-        print("Is my Evernote API version up to date? ", str(version_ok))
+        # print("Is my Evernote API version up to date? ", str(version_ok))
         note_store = client.get_note_store()
         evernoteapijiayi()
-        log.debug('成功连接Evernote服务器！')
-        return note_store
+        log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
     except socket.gaierror as sge:
         log.critical('%s可能是网络连接问题。%s' % (errorstr, str(sge)))
         exit(1)
     except Etypes.EDAMUserException as usere:
-        log.critical('%s可能口令有误。%s' % (errorstr, str(usere)))
+        log.critical('%s出现EDAM用户相关错误，可能是口令有误。%s' % (errorstr, str(usere)))
         exit(1)
     except Etypes.EDAMSystemException as systeme:
         if systeme.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
-            log.critical('%sAPI使用超限，需要%d秒后重来。%s' % (errorstr, systeme.rateLimitDuration, str(systeme)))
+            log.critical('%s出现EDAM系统错误，API使用超限，需要%d秒后重来。%s' % (errorstr, systeme.rateLimitDuration, str(systeme)))
         else:
-            log.critical('%s出现系统错误。%s' % (errorstr, str(systeme)))
+            log.critical('%s出现EDAM系统错误。%s' % (errorstr, str(systeme)))
         exit(1)
+    except WindowsError as we:
+        # print(we)
+        if we.winerror == 10060:
+            log.critical('%s出现系统错误（WindowsError）。evernote服务器装死啊！%s' % (errorstr, str(we)))
+        else:
+            log.critical('%s出现系统错误（WindowsError）。%s' % (errorstr, str(we)))
     except Exception as ee:
         print(ee)
-        log.critical('%s出现系统错误。%s' % (errorstr, str(ee)))
-        exit(2)
+        log.critical('%s出现未名系统错误。%s' % (errorstr, str(ee)))
+    finally:
+        return note_store
 
 
 def findnotefromnotebook(note_store, token, notebookguid, titlefind, notecount=10000):
@@ -373,7 +382,7 @@ def findnotefromnotebook(note_store, token, notebookguid, titlefind, notecount=1
     return False
 
 
-@use_logging()
+# @use_logging()
 def p_notebookattributeundertoken(notebook):
     """
     测试笔记本（notebook）数据结构每个属性的返回值,开发口令（token）的方式调用返回如下
@@ -979,25 +988,9 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
         updated_note = notestore.updateNote(note)
         evernoteapijiayi()
         log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
-    except Etypes.EDAMSystemException as ee:
-        if ee.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
-            log.critical("API达到调用极限，需要 %d 秒后重来" % ee.rateLimitDuration)
-            # exit(1)
-        else:
-            log.critical('读取guid为%s的笔记时出现系统错误' % noteguid)
-            print(ee)
-            exit(2)
-    except Etypes.EDAMUserException as ee:
-        if ee.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
-            log.critical("API达到调用极限，需要 %d 秒后重来" % ee)
-            # exit(1)
-        else:
-            log.critical('读取guid为%s的笔记时出现系统错误' % noteguid)
-            print(ee)
-            exit(2)
-    except TimeoutError as te:
-        log.critical('读取guid为%s的笔记时出现超时错误。evernote服务器无应答，也可能是断网了。' % noteguid)
-        print(te)
+    except Exception as e:
+        log.critical('更新guid为%s的笔记时出现错误。%s' % (noteguid, str(e)))
+        raise
 
 
 def isnoteupdate(token, note_store, noteguid):
@@ -1008,22 +1001,13 @@ def isnoteupdate(token, note_store, noteguid):
     usn = 0
     try:
         note = note_store.getNote(token, noteguid, True, True, True, True)
+        usn = note.updateSequenceNum
         evernoteapijiayi()
         log.info('成功读取笔记《%s》，guid：%s。' % (note.title, note.guid))
-        usn = note.updateSequenceNum
-    except Etypes.EDAMSystemException as ee:
-        if ee.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
-            log.critical("API达到调用极限，需要 %d 秒后重来" % ee.rateLimitDuration)
-            # exit(1)
-        else:
-            log.critical('读取guid为%s的笔记时出现系统错误：%s ' % (noteguid, str(ee)))
-            exit(2)
-    except TimeoutError as te:
-        log.critical('读取guid为%s的笔记时出现超时错误。evernote服务器无应答，也可能是断网了。%s' % (noteguid, str(te)))
     except Exception as e:
-        print(e)
+        log.critical('读取guid为%s的笔记查看更新记录时出现错误。%s' % (noteguid, str(e)))
+        raise
 
-    # print('%d\t%d\t%s\t%s\t%s' % (usn, usnold, __name__, __file__, __package__))
     if usn > usnold:
         cfp.set('noteupdatenum', noteguid, '%d' % usn)
         cfp.write(open(inifilepath, 'w', encoding='utf-8'))

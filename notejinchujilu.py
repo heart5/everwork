@@ -178,8 +178,7 @@ def jinchustat(token, note_store, jinchujiluall, noteinfos):
     imglist2note(note_store, imglist, destguid, notetitle, hout)
 
 
-def jinchustattimer(token, note_store, jiangemiao):
-    jiagemiao = jiangemiao
+def jinchustattimer(token, jiangemiao):
     dfjinchugoogle = jilugoogle('data\\google')
     noteinfolist = [
         ['f119e38e-3876-4937-80f1-e6a6b2e5d3d0', 'wenchanglu', 'work', '7f4bec82-626b-4022-b3c2-0d9b3d71198d',
@@ -199,22 +198,32 @@ def jinchustattimer(token, note_store, jiangemiao):
         ['38f4b1a9-7d6e-4091-928e-c82d7d3717c5', 'qiwei', 'work', '294b584f-f34a-49f0-b4d3-08085a37bfd5',
          '进出统计图表（创食人）'],
     ]
-    for noteinfo in noteinfolist:
-        if isnoteupdate(token, note_store, noteinfo[0]):  # or True:
-            dfjinchunote = jilunote(note_store, noteinfo)
-            # descdb(dfjinchunote)
-            # print(dfjinchunote.groupby('address', as_index=False).count())
+    note_store = None
+    try:
+        note_store = get_notestore(token)
+        for noteinfo in noteinfolist:
+            if isnoteupdate(token, note_store, noteinfo[0]):  # or True:
+                dfjinchunote = jilunote(note_store, noteinfo)
+                # descdb(dfjinchunote)
+                # print(dfjinchunote.groupby('address', as_index=False).count())
 
-            dfjinchu = dfjinchunote.append(dfjinchugoogle).sort_index()
-            # descdb(dfjinchu)
+                dfjinchu = dfjinchunote.append(dfjinchugoogle).sort_index()
+                # descdb(dfjinchu)
 
-            dfjinchu['time'] = dfjinchu.index
-            dfjinchu = dfjinchu.drop_duplicates()
-            del dfjinchu['time']
-            # descdb(dfjinchu)
-            # print('&&&&&&&&&&&&')
-            jinchustat(token, note_store, dfjinchu, noteinfo[1:])
-            log.info('%s成功更新入图表统计笔记，将于%d秒后再次自动检查并更新' % (str(noteinfo), jiagemiao))
+                dfjinchu['time'] = dfjinchu.index
+                dfjinchu = dfjinchu.drop_duplicates()
+                del dfjinchu['time']
+                # descdb(dfjinchu)
+                # print('&&&&&&&&&&&&')
+                jinchustat(token, note_store, dfjinchu, noteinfo[1:])
+                log.info('%s成功更新入图表统计笔记，将于%d秒后再次自动检查并更新' % (str(noteinfo), jiangemiao))
+    except Exception as e:
+        log.critical('读取系列进出笔记并更新统计信息时出现未名错误。%s' % (str(e)))
+    finally:
+        log.debug('清除notestore：%s' % note_store)
+        del note_store
 
-    t = Timer(jiagemiao, jinchustattimer, (token, note_store, jiangemiao))
-    t.start()
+    global timer_jinchu
+    timer_jinchu = Timer(jiangemiao, jinchustattimer, (token, jiangemiao))
+    # print(timer_jinchu)
+    timer_jinchu.start()
