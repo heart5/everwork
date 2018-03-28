@@ -105,4 +105,4 @@ def pickstat(token, note_store, cnx, destguid=None, notetitle='', cum=False):
 
     xlswriter.save()
 
-    imglist2note(note_store, imgpathlist, destguid, notetitle, token)
+    imglist2note(note_store, imgpathlist, destguid, notetitle)

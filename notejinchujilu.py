@@ -41,6 +41,7 @@ from matplotlib.ticker import MultipleLocator, FuncFormatter
 def jilugoogle(filepath):
     filelist = [ff for ff in listdir(filepath) if isfile(join(filepath, ff))]
     # print(filelist)
+    dfout = None
     for i in range(len(filelist)):
         df = pd.read_excel('%s\\%s' % (filepath, filelist[i]), sheetname='工作表1',
                            header=None, index_col=0, parse_dates=True)
@@ -61,12 +62,12 @@ def jilugoogle(filepath):
     return dfout
 
 
-def jilunote(note_store, noteinfos):
+def jilunote(token, noteinfos):
     """
     读取ifttt自动通过gmail转发至evernote生成的地段进出记录，统计作图展示
     :rtype: Null
     """
-    soup = BeautifulSoup(note_store.getNoteContent(noteinfos[0]), "html.parser")
+    soup = BeautifulSoup(get_notestore(token).getNoteContent(noteinfos[0]), "html.parser")
     # print(soup)
     evernoteapijiayi()
     # tags = soup.find('p')
@@ -86,7 +87,7 @@ def jilunote(note_store, noteinfos):
     pattern = u'(%s\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)\s*：.*?\s*(e(?:xit|nter)ed)' % yuefennames
     # print(pattern)
     slicesoup = re.split(pattern, soup.get_text())
-    print(slicesoup)
+    # print(slicesoup)
     # 提取时间和进出信息
     split_item = []
     for i in range(1, len(slicesoup), 3):
@@ -95,7 +96,7 @@ def jilunote(note_store, noteinfos):
         zhizi.append(slicesoup[i + 1])
         split_item.append(zhizi)
 
-    print(split_item)
+    # print(split_item)
     dfjc = pd.DataFrame(split_item, columns=['atime', 'eort'])
     dfjc = dfjc.drop_duplicates(['atime', 'eort'])  # 去重
     dfjc['atime'] = dfjc['atime'].apply(
@@ -110,7 +111,7 @@ def jilunote(note_store, noteinfos):
     return dfout
 
 
-def jinchustat(token, note_store, jinchujiluall, noteinfos):
+def jinchustat(token, jinchujiluall, noteinfos):
     """
     读取ifttt自动通过gmail转发至evernote生成的地段进出记录，统计作图展示
     :rtype: Null
@@ -175,7 +176,7 @@ def jinchustat(token, note_store, jinchujiluall, noteinfos):
     # print(imglist)
     plt.close()
 
-    imglist2note(note_store, imglist, destguid, notetitle, hout)
+    imglist2note(get_notestore(token), imglist, destguid, notetitle, hout)
 
 
 def jinchustattimer(token, jiangemiao):
@@ -185,10 +186,10 @@ def jinchustattimer(token, jiangemiao):
          '进出统计图表（文昌路金地格林）'],
         ['d8fa0226-88ac-4b6c-b8fd-63a9038a6abf', 'huadianxiaolu', 'home', '08a01c35-d16d-4b22-b7f7-61e3993fd2cb',
          '家进出统计图表（岳家嘴）'],
-        ['1ea50564-dee7-4e82-87b5-39703671e623', 'dingziqiao', 'life', '6eef085c-0e84-4753-bf3e-b45473a12274',
-         '进出统计图表（丁字桥）'],
-        ['9ac941cc-c04b-4d4b-879f-2bfb044382d4', 'lushan', 'home', '987c1d5e-d8ad-41aa-9269-d2b840616410',
-         '家进出统计图表（鲁山）'],
+        # ['1ea50564-dee7-4e82-87b5-39703671e623', 'dingziqiao', 'life', '6eef085c-0e84-4753-bf3e-b45473a12274',
+        #  '进出统计图表（丁字桥）'],
+        # ['9ac941cc-c04b-4d4b-879f-2bfb044382d4', 'lushan', 'home', '987c1d5e-d8ad-41aa-9269-d2b840616410',
+        #  '家进出统计图表（鲁山）'],
         ['84e9ee0b-30c3-4404-84e2-7b4614980b4b', 'hanyangban', 'work', 'a7e84055-f075-44ab-8205-5a42f3f05284',
          '进出记录统计图表（汉阳办）'],
         ['6fb1e016-01ab-439d-929e-994dc980ddbe', 'hankouban', 'work', '2c5e3728-be69-4e52-a8ff-07860e8593b7',
@@ -196,14 +197,15 @@ def jinchustattimer(token, jiangemiao):
         ['24aad619-2356-499e-9fa7-f685af3a81b1', 'maotanhuamushichang', 'work', '2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e',
          '公司进出记录统计图表'],
         ['38f4b1a9-7d6e-4091-928e-c82d7d3717c5', 'qiwei', 'work', '294b584f-f34a-49f0-b4d3-08085a37bfd5',
-         '进出统计图表（创食人）'],
+         '进出统计图表（创食人）']
     ]
-    note_store = None
     try:
-        note_store = get_notestore(token)
         for noteinfo in noteinfolist:
-            if isnoteupdate(token, note_store, noteinfo[0]):  # or True:
-                dfjinchunote = jilunote(note_store, noteinfo)
+            ntupdatenum = isnoteupdate(token, noteinfo[0])
+            if ntupdatenum:  # or True:
+                print(ntupdatenum, end='\t')
+                print(noteinfo[4])
+                dfjinchunote = jilunote(token, noteinfo)
                 # descdb(dfjinchunote)
                 # print(dfjinchunote.groupby('address', as_index=False).count())
 
@@ -215,13 +217,10 @@ def jinchustattimer(token, jiangemiao):
                 del dfjinchu['time']
                 # descdb(dfjinchu)
                 # print('&&&&&&&&&&&&')
-                jinchustat(token, note_store, dfjinchu, noteinfo[1:])
+                jinchustat(token, dfjinchu, noteinfo[1:])
                 log.info('%s成功更新入图表统计笔记，将于%d秒后再次自动检查并更新' % (str(noteinfo), jiangemiao))
     except Exception as e:
         log.critical('读取系列进出笔记并更新统计信息时出现未名错误。%s' % (str(e)))
-    finally:
-        log.debug('清除notestore：%s' % note_store)
-        del note_store
 
     global timer_jinchu
     timer_jinchu = Timer(jiangemiao, jinchustattimer, (token, jiangemiao))

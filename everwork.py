@@ -38,12 +38,12 @@ token = cfp.get('evernote','token')
 
 # todo 一体化目录构建
 
-nbfbdf = readinisection2df(cfpdata, 'guidfenbunb', '销售业绩图表')
-for aa in nbfbdf.index:
-    cpath = 'img\\'+aa
-    if not os.path.exists(cpath):
-        os.mkdir(cpath)
-        log.debug('目录《' + cpath + '》被创建')
+# nbfbdf = readinisection2df(cfpdata, 'guidfenbunb', '销售业绩图表')
+# for aa in nbfbdf.index:
+#     cpath = 'img\\'+aa
+#     if not os.path.exists(cpath):
+#         os.mkdir(cpath)
+#         log.debug('目录《' + cpath + '》被创建')
 
 # cnx = lite.connect('data\\quandan.db')
 # dataokay(cnx)
@@ -58,8 +58,8 @@ for aa in nbfbdf.index:
 
 # isnoteupdate(token, note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
 
-log2notetimer(token, 60 * 37)
-weatherstattimer(token, 60 * 60 * 4 + 60 * 25)
+log2notetimer(token, 60 * 45)
+weatherstattimer(token, 60 * 60 * 3 + 60 * 25)
 jinchustattimer(token, 60 * 60)
 
 writeini()

@@ -322,21 +322,23 @@ def get_notestore(token='your developer token'):
         evernoteapijiayi()
         log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
     except socket.gaierror as sge:
-        log.critical('%s可能是网络连接问题。%s' % (errorstr, str(sge)))
-        exit(1)
+        if sge.errno == 11001:
+            log.critical('%s网络连接问题，无法寻址。%s' % (errorstr, str(sge)))
+        else:
+            log.critical('%s可能是网络连接问题。%s' % (errorstr, str(sge)))
     except Etypes.EDAMUserException as usere:
         log.critical('%s出现EDAM用户相关错误，可能是口令有误。%s' % (errorstr, str(usere)))
-        exit(1)
+        exit(5)
     except Etypes.EDAMSystemException as systeme:
         if systeme.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
             log.critical('%s出现EDAM系统错误，API使用超限，需要%d秒后重来。%s' % (errorstr, systeme.rateLimitDuration, str(systeme)))
         else:
             log.critical('%s出现EDAM系统错误。%s' % (errorstr, str(systeme)))
-        exit(1)
     except WindowsError as we:
-        # print(we)
         if we.winerror == 10060:
             log.critical('%s出现系统错误（WindowsError）。evernote服务器装死啊！%s' % (errorstr, str(we)))
+        elif we.winerror == 10054:
+            log.critical('%s出现系统错误（WindowsError）。evernote服务器端主动关闭链接啦！%s' % (errorstr, str(we)))
         else:
             log.critical('%s出现系统错误（WindowsError）。%s' % (errorstr, str(we)))
     except Exception as ee:
@@ -951,7 +953,6 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
         data.bodyHash = imghash
         data.body = image
         resource = Ttypes.Resource()
-        # resource.name = '真元商贸'
         resource.mime = 'image/png'
         resource.data = data
         note.resources.append(resource)
@@ -984,29 +985,29 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     # Finally, send the new note to Evernote using the updateNote method
     # The new Note object that is returned will contain server-generated
     # attributes such as the new note's unique GUID.
+
     try:
         updated_note = notestore.updateNote(note)
         evernoteapijiayi()
         log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
     except Exception as e:
         log.critical('更新guid为%s的笔记时出现错误。%s' % (noteguid, str(e)))
-        raise
 
 
-def isnoteupdate(token, note_store, noteguid):
+def isnoteupdate(token, noteguid):
+
     if cfp.has_option('noteupdatenum', noteguid):
         usnold = cfp.getint('noteupdatenum', noteguid)
     else:
         usnold = 0
     usn = 0
     try:
-        note = note_store.getNote(token, noteguid, True, True, True, True)
+        note = get_notestore(token).getNote(token, noteguid, False, False, False, False)
         usn = note.updateSequenceNum
         evernoteapijiayi()
         log.info('成功读取笔记《%s》，guid：%s。' % (note.title, note.guid))
     except Exception as e:
-        log.critical('读取guid为%s的笔记查看更新记录时出现错误。%s' % (noteguid, str(e)))
-        raise
+        log.critical('读取guid为%s的笔记查看更新序列号时出现错误。%s' % (noteguid, str(e)))
 
     if usn > usnold:
         cfp.set('noteupdatenum', noteguid, '%d' % usn)

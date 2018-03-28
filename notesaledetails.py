@@ -102,7 +102,7 @@ def kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cn
                 htable = dfin[dfin.index > (dfin.index.max() + pd.Timedelta(days=-365))].sort_index(
                     ascending=False).to_html().replace('class="dataframe"', '')
                 imglist2note(note_store, imglist, notefenbudf.loc[fenbuset]['guid'], notefenbudf.loc[fenbuset]['title'],
-                             token, neirong=htable)
+                             neirong=htable)
         else:
             log.debug(str(df['日期'].max()) + '\t：\t' + leixingset)
             dfs = df[df.类型.isin(leixing).values == True]
@@ -120,7 +120,7 @@ def kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cn
                 htable = dfin[dfin.index > (dfin.index.max() + pd.Timedelta(days=-365))].sort_index(
                     ascending=False).to_html().replace('class="dataframe"', '')
                 imglist2note(note_store, imglist, noteleixingdf.loc[leixingset]['guid'],
-                             noteleixingdf.loc[leixingset]['title'], token, neirong=htable)
+                             noteleixingdf.loc[leixingset]['title'], neirong=htable)
 
 
 def pinpaifenxi(token, note_store, cnx, daysbefore=90, brandnum=30, fenbu='fenbu'):
