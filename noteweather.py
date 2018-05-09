@@ -13,18 +13,29 @@ e5d81ffa-89e7-49ff-bd4c-a5a71ae14320 武汉雨天记录
 
 
 from imp4nb import *
-from bs4 import BeautifulSoup
-
 from matplotlib.ticker import MultipleLocator, FuncFormatter
 
 
-def weatherstat(token, sourceguid, destguid=None):
-    """
+def write2weathertxt(weathertxtfilename, inputitemlist):
+    # print(inputitemlist)
+    fileObject = open(weathertxtfilename, 'w', encoding='utf-8')
+    for item in inputitemlist:
+        # print(item)
+        fileObject.write(str(item) + '\n')
+    fileObject.close()
 
-    :rtype: Null
-    """
+
+def readfromweathertxt(weathertxtfilename):
+    with open(weathertxtfilename, 'r', encoding='utf-8') as f:
+        items = [line.strip() for line in f]  # strip()，去除行首行尾的空格
+
+    return items
+
+
+def getweatherfromevernote(token):
+    noteguid_weather = '277dff5e-7042-47c0-9d7b-aae270f903b8'
     note_store = get_notestore(token)
-    soup = BeautifulSoup(note_store.getNoteContent(sourceguid), "html.parser")
+    soup = BeautifulSoup(note_store.getNoteContent(noteguid_weather), "html.parser")
     evernoteapijiayi()
     # tags = soup.find('en-note')
     # print tags
@@ -37,6 +48,26 @@ def weatherstat(token, sourceguid, destguid=None):
     for i in range(1, len(slice), 2):
         split_item.append(slice[i] + " " + slice[i + 1])
 
+    return split_item
+
+
+def getweatherfromgmail():
+    host = cfp.get('gmail', 'host')
+    username = cfp.get('gmail', 'username')
+    password = cfp.get('gmail', 'password')
+    mailitems = getMail(host, username, password, dirtarget='Ifttt/Weather', unseen=True, topic='武汉每日天气 @行政管理 +')
+    split_items = []
+    for header, body in mailitems:
+        for text, textstr in body:
+            split_items.append(textstr)
+    print('从Gmail邮箱获取%d条天气信息记录' % len(split_items))
+    # write2weathertxt("data\\ifttt\\weather.txt",split_item)
+
+    return split_items
+
+
+def weatherstat(token, items, destguid=None):
+    split_item = items
     # print len(split_item)
     # print split_item[-1]
     # print split_item
@@ -58,12 +89,12 @@ def weatherstat(token, sourceguid, destguid=None):
         stritem = list()
         for jj in re.findall(itempattern, ii):
             stritem = [pd.Timestamp(jj[0]),
-                       int(jj[1]), int(jj[2]), int(jj[3]), jj[4],
+                       jj[1], jj[2], jj[3], jj[4],
                        # pd.Timestamp(jj[5]).strftime("%I%M"),
                        int(pd.Timestamp(jj[5]).strftime("%H")) * 60 + int(pd.Timestamp(jj[5]).strftime("%M")),
                        # pd.Timestamp(jj[6]),
                        int(pd.Timestamp(jj[6]).strftime("%H")) * 60 + int(pd.Timestamp(jj[6]).strftime("%M")),
-                       int(jj[7])]
+                       jj[7]]
             datei = stritem[0]
             dates = "%04d-%02d-%02d" %(datei.year, datei.month, datei.day)
             # print(str(datei)+'\t'+dates)
@@ -71,21 +102,37 @@ def weatherstat(token, sourceguid, destguid=None):
         # print stritem
         data_list.append(stritem)
 
-    print (len(data_list))
+    print(len(data_list), end='\t')
+    print(data_list[0], end='\t')
     print (data_list[-1])
 
 
     df = pd.DataFrame(data_list,
                       columns=['date', 'gaowen', 'diwen', 'fengsu', 'fengxiang', 'sunon', 'sunoff', 'shidu'])
+    # print(len(df))
+    df.drop_duplicates(inplace=True)  # 去重，去除可能重复的天气数据记录，原因可能是邮件重复发送等
+    # print(len(df))
+    # print(df.head(30))
     df.index = df['date']
     df.sort_index(inplace=True)
+    df.dropna(how='all', inplace=True)  # 去掉空行，索引日期，后面索引值相同的行会被置空，需要去除
+    # print(len(df))
+    # df['gaowen'] = df['gaowen'].apply(lambda x: np.nan if str(x).isspace() else int(x))   #处理空字符串为空值的另外一骚
+    df['gaowen'] = df['gaowen'].apply(lambda x: int(x) if x else None)  # 数字串转换成整数，如果空字符串则为空值
+    df['diwen'] = df['diwen'].apply(lambda x: int(x) if x else None)
+    df['fengsu'] = df['fengsu'].apply(lambda x: int(x) if x else None)
+    df['shidu'] = df['shidu'].apply(lambda x: int(x) if x else None)
+    # df['gaowen'] = df['gaowen'].astype(int)
+    # df['diwen'] = df['diwen'].astype(int)
+    # df['fengsu'] = df['fengsu'].astype(int)
+    # df['shidu'] = df['shidu'].astype(int)
+    df.fillna(method='ffill', inplace=True)  # 向下填充处理可能出现的空值，bfill是向上填充
+    df['wendu'] = (df['gaowen'] + df['diwen']) /2
     df['richang'] = df['sunoff'] - df['sunon']
     df['richang'] = df['richang'].astype(int)
-    df['wendu'] = (df['gaowen'] + df['diwen'])/2
     df['wendu'] = df['wendu'].astype(int)
-    df['fengsu'] = df['fengsu'].astype(int)
 
-    # print(df.head())
+    # print(df.tail(30))
 
     df_recent_year = df.iloc[-364:]
     # print(df[df.gaowen == df.iloc[-364:]['gaowen'].max()])
@@ -111,11 +158,16 @@ def weatherstat(token, sourceguid, destguid=None):
             arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2",color='Purple'))
 
     dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
-    ax1.annotate(dates,xy=(kedu['date'],0),xycoords='data',
-            xytext=(-10, -20), textcoords='offset points',fontsize=8,
-            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
-    #去年今日
-    kedu = df.iloc[-364]
+    ax1.annotate(dates, xy=(kedu['date'],0), xycoords='data',
+                 xytext=(-10, -20), textcoords='offset points', fontsize=8,
+                 arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
+    # 去年今日，如果数据不足一年，取今日
+    if len(df) >= 365:
+        locqnjr = -364
+    else:
+        locqnjr = -1
+    kedu = df.iloc[locqnjr]
+    # kedu = df.iloc[-364]
     # print(kedu)
     ax1.plot([kedu['date'],kedu['date']],[0,kedu['wendu']],'c--')
     ax1.scatter([kedu['date'],],[kedu['wendu']],50,color='Wheat')
@@ -236,13 +288,31 @@ def weatherstat(token, sourceguid, destguid=None):
     imglist2note(get_notestore(token), imglist, destguid, '武汉天气图')
 
 
+def isweatherupdate(weathertxtfilename):
+    items = getweatherfromgmail()
+    if len(items) == 0:
+        return False
+    else:
+        itemfromtxt = readfromweathertxt(weathertxtfilename)
+        for itemg in itemfromtxt:
+            items.append(str(itemg))
+        write2weathertxt(weathertxtfilename, items)
+
+    return items
+
+
+
 def weatherstattimer(token, jiangemiao):
-    noteguid_weather = '277dff5e-7042-47c0-9d7b-aae270f903b8'
+    weathertxtfilename = "data\\ifttt\\weather.txt"
     try:
-        usn = isnoteupdate(token, noteguid_weather)
+        usn = isweatherupdate(weathertxtfilename)
         if usn:
-            weatherstat(token, noteguid_weather, '296f57a3-c660-4dd5-885a-56492deb2cee')
+            weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')
             log.info('天气信息成功更新入天气信息统计笔记，将于%d秒后再次自动检查并更新' % jiangemiao)
+    except IndexError as ixe:
+        log.critical('读取天气信息并更新天气统计信息笔记时出现索引错误。%s' % (str(ixe)))
+    except TypeError as te:
+        log.critical('读取天气信息并更新天气统计信息笔记时出现类型错误。%s' % (str(te)))
     except Exception as e:
         log.critical('读取天气信息笔记并更新天气统计信息笔记时出现未名错误。%s' % (str(e)))
 
@@ -250,3 +320,11 @@ def weatherstattimer(token, jiangemiao):
     timer_weather = Timer(jiangemiao, weatherstattimer, (token, jiangemiao))
     # print(timer_weather)
     timer_weather.start()
+
+
+if __name__ == '__main__':
+    token = cfp.get('evernote', 'token')
+    weathertxtfilename = "data\\ifttt\\weather.txt"
+    usn = isweatherupdate(weathertxtfilename)
+    weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')
+    # print(getweatherfromgmail())

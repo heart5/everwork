@@ -4,9 +4,6 @@
 """
 
 from imp4nb import *
-import evernote.edam.userstore.constants as UserStoreConstants
-import evernote.edam.type.ttypes as Types
-from evernote.api.client import EvernoteClient
 from noteweather import *  # 调用同目录下其他文件（py）中的函数
 from notewarehouse import *
 from notedispatch import *
@@ -14,28 +11,7 @@ from notesaledetails import *
 from notejinchujilu import *
 from log2note import *
 
-
-log.debug('程序启动……')
-
-token = cfp.get('evernote','token')
-
-# note_store = get_notestore(token)
-
-# 列出账户中的全部笔记本
-# notebooks = note_store.listNotebooks()
-# p_notebookattributeundertoken(notebooks[-1])
-
-# for x in notebooks:
-#     p_notebookattributeundertoken(x)
-# 4524187f-c131-4d7d-b6cc-a1af20474a7f notification
-
-# 39ed537d-73fa-4ad8-b4fd-bc6f746fb302 真元日配送图
-# 1c0830d9-e42f-4ce7-bf36-ead868a55eca 订单配货统计图
-# 49eff8eb-5bce-43b9-a95a-c1ee7eab71fa 有友全渠道销售图表
-
-# findnotefromnotebook(note_store, token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', 'ever')  # 从笔记本中查找标题中包含指定字符串的笔记
-
-
+# log.debug('程序启动……')
 # todo 一体化目录构建
 
 # nbfbdf = readinisection2df(cfpdata, 'guidfenbunb', '销售业绩图表')
@@ -58,10 +34,14 @@ token = cfp.get('evernote','token')
 
 # isnoteupdate(token, note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
 
+
+token = cfp.get('evernote', 'token')
 log2notetimer(token, 60 * 45)
 weatherstattimer(token, 60 * 60 * 3 + 60 * 25)
 jinchustattimer(token, 60 * 60)
 
 writeini()
-log.debug('程序结束！')
+
+# findnotebookfromevernote(token)
+# log.debug('程序结束！')
 # print(vars())

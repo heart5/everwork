@@ -121,11 +121,12 @@ def details2db(filename, sheetname, xiangmu, tablename):
             log.warning('时间交叉了，请检查数据！%s' % datestr4data)
             # exit(2)
         else:
-            print('请仔细检查！%s' % datestr4data)
-            print('如果确保无误，请放行下面两行代码')
+            print(dfout.tail())
             if (xiangmu[0] == '职员名称'):
                 dfout = chengbenjiaupdatedf(dfout, cnx)
                 log.info('要更新%d记录中的成本价和毛利内容' % dfout.shape[0])
+            print('请仔细检查！%s' % datestr4data)
+            print('如果确保无误，请放行下面两行代码')
             # dfout.to_sql(name=tablename, con=cnx, if_exists='append', chunksize=10000)
             # log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' % (filename, len(dfout)))
     else:
@@ -164,20 +165,17 @@ def customerweihu2systable():
 
     # 转换日期格式，从形如2017年8月/10日转换成标准日期
     # 传入参数为Series
-    def riqi2std(dsin):
-        ds = dsin
+
+    def riqistr2std(instr):
+        riqiokay = ''
         itempattern = re.compile('\s*(?P<year>\d{4})\s*年(?P<month>\d+)月/?(?P<day>\d+)日')
-        for i in list(ds.index):
-            # print(str(i)+'\t'+dsin[i],end='\t\t')
-            riqiokay = None  # 置空
-            for j in re.findall(itempattern, ds[i]):  # 形如('2017','8','10')
-                # print(j)
-                riqiokay = pd.to_datetime(str(j[0]) + '-' + str(j[1]) + '-' + str(j[2]))
-            ds[i] = riqiokay
+        for j in re.findall(itempattern, instr):  # 形如('2017','8','10')
+            # print(j)
+            riqiokay = pd.to_datetime(str(j[0]) + '-' + str(j[1]) + '-' + str(j[2]))
 
-        return ds
+        return riqiokay
 
-    dfout['日期'] = riqi2std(dfout['日期'])
+    dfout.loc[:, '日期'] = dfout['日期'].apply(lambda x: riqistr2std(x))
     dfout.loc[:, '索引'] = dfout.index
     dfout.to_excel(writer, sheet_name='档案整理', freeze_panes={1, 2})
     dfoutsort = dfout.sort_values(by=['日期', '索引'], ascending=True)
@@ -284,47 +282,48 @@ def jiaoyankehuchanpin():
     cnx.close()
 
 
-# dfs = details2db('2018.2.1-2018.2.11职员销售明细表.xls.xls', '2018.2.1-2018.2.11职员销售明细表.xls',
-#                  ['职员名称', '商品全名'], 'xiaoshoumingxi')
-# print(dfs.columns)
-# dfgs = dfs.groupby(['日期', '职员名称'], as_index=False)['数量', '金额'].sum()
-# # dfgs['日期', '职员名称'] = dfgs.index
-# descdb(dfgs)
-# dfg = dfgs.groupby(['职员名称'], as_index=False).apply(lambda t: t[t.金额 == t.金额.max()])\
-#     .sort_values(['金额'], ascending=False)
-# print(dfg.shape[0])
-# print(dfg.tail(30))
+if __name__ == '__main__':
+    dfs = details2db('2018.2.12-2018.3.21职员销售明细表.xls.xls', '2018.2.12-2018.3.21职员销售明细表.xls',
+                     ['职员名称', '商品全名'], 'xiaoshoumingxi')
+    print(dfs.columns)
+    dfgs = dfs.groupby(['日期', '职员名称'], as_index=False)['数量', '金额'].count()
+    # dfgs['日期', '职员名称'] = dfgs.index
+    descdb(dfgs)
+    dfg = dfgs.groupby(['职员名称'], as_index=False).apply(lambda t: t[t.金额 == t.金额.max()]) \
+        .sort_values(['金额'], ascending=False)
+    print(dfg.shape[0])
+    print(dfg.tail(30))
 
-# dfp = details2db('商品进货明细表（2018.2.1-2018.2.11）.xls.xls',
-#                  '商品进货明细表（2018.2.1-2018.2.11）.xls',
-#                  ['产品名称', '经办人'],
-#                  'jinghuomingxi')
-# writer = pd.ExcelWriter('data\\进货分析.xlsx')
-# dfp.to_excel(writer, sheet_name='商品进货记录', freeze_panes={1, 2})
-# dfg = dfp.groupby(['产品名称', '单价'], as_index=False) \
-#     .apply(lambda t: t[t.日期 == t.日期.min()][['产品名称', '日期', '单价']]).sort_values(['产品名称', '日期'])
-# print(dfg.shape[0])
-# print(dfg.tail(10))
-# dfg.to_excel(writer, sheet_name='进货价格变动记录', freeze_panes={1, 2})
-# writer.close()
+    # dfp = details2db('商品进货明细表（2018.4.11-2018.4.23）.xls.xls.xls',
+    #                  '商品进货明细表（2018.4.11-2018.4.23）.xl',
+    #                  ['产品名称', '经办人'],
+    #                  'jinghuomingxi')
+    # writer = pd.ExcelWriter('data\\进货分析.xlsx')
+    # dfp.to_excel(writer, sheet_name='商品进货记录', freeze_panes={1, 2})
+    # dfg = dfp.groupby(['产品名称', '单价'], as_index=False) \
+    #     .apply(lambda t: t[t.日期 == t.日期.min()][['产品名称', '日期', '单价']]).sort_values(['产品名称', '日期'])
+    # print(dfg.shape[0])
+    # print(dfg.tail(10))
+    # dfg.to_excel(writer, sheet_name='进货价格变动记录', freeze_panes={1, 2})
+    # writer.close()
 
-cnx = lite.connect('data\\quandan.db')
+    cnx = lite.connect('data\\quandan.db')
 
-# desclitedb(cnx)
+    # desclitedb(cnx)
 
-# for i in range(len(dfs)):
-#     dfs.loc[i, '成本单价'] = chengbenjia(dfs.iloc[i]['商品全名'], dfs.iloc[i]['日期'], dfgqc)
+    # for i in range(len(dfs)):
+    #     dfs.loc[i, '成本单价'] = chengbenjia(dfs.iloc[i]['商品全名'], dfs.iloc[i]['日期'], dfgqc)
 
-# descdb(dfs)
-#
-# dfgg = dfp.groupby(['产品名称'], as_index=False).apply(lambda t: t[t.日期 == t.日期.max()])\
-#     .sort_values(['日期'], ascending=False)
-# dfgg.to_excel(writer, sheet_name='进货价格最新', freeze_panes={1, 2})
-#
-# writer.save()
-# writer.close()
-# customerweihu2systable()
+    # descdb(dfs)
+    #
+    # dfgg = dfp.groupby(['产品名称'], as_index=False).apply(lambda t: t[t.日期 == t.日期.max()])\
+    #     .sort_values(['日期'], ascending=False)
+    # dfgg.to_excel(writer, sheet_name='进货价格最新', freeze_panes={1, 2})
+    #
+    # writer.save()
+    # writer.close()
+    # customerweihu2systable()
 
-jiaoyankehuchanpin()
+    # jiaoyankehuchanpin()
 
-cnx.close()
+    cnx.close()
