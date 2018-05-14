@@ -146,7 +146,7 @@ def jilugmail(dir, mingmu, fenleistr='', topic='', bodyonly=True):
 
     items = readfromtxt(txtfilename)
 
-    resultstr = ''.join(items)
+    resultstr = '\r\n'.join(items)
     # print(resultstr)
 
     return resultstr
@@ -166,6 +166,110 @@ def jilunote(token, noteinfos):
     # print(tags)
 
     return itemstr
+
+
+def notification2df(itemstr):
+    pattern = re.compile(r'(\w+ \d+, \d{4} at \d{2}:\d{2}[A|P]M)\|\|\|(.*?)\|\|\|(.*?)\|\|\|(.*?)', re.U | re.M)
+    slices = re.split(pattern, itemstr)
+    slices = slices[1:]
+    # print(len(slices))
+    # for i in range(10):
+    #     print(slices[i].strip())
+
+    split_items = list()
+    for i in range(int(len(slices) / 5)):
+        item = list()
+        item.append(datetime.datetime.strptime(slices[i * 5].strip(), '%B %d, %Y at %I:%M%p'))
+        item.append(slices[i * 5 + 1].strip())
+        item.append(slices[i * 5 + 2].strip())
+        item.append(slices[i * 5 + 4].strip())
+        # print(slices[i*5].strip()+'\t'+slices[i*5+1].strip()+'\t'+slices[i*5+2].strip()+'\t'+slices[i*5+4].strip())
+        split_items.append(item)
+
+    dfnoti = pd.DataFrame(split_items, columns=('time', 'shuxing', 'topic', 'content'))
+    dfnoti.drop_duplicates(inplace=True)
+    dfnoti.sort_values(['time'], ascending=False, inplace=True)
+    dfout = dfnoti[dfnoti.shuxing == '微信']
+    # b3a3e458-f05b-424d-8ec1-604a3e916724
+
+    try:
+        token = cfp.get('evernote', 'token')
+        notestore = get_notestore(token)
+        imglist2note(notestore, [], 'b3a3e458-f05b-424d-8ec1-604a3e916724', '系统提醒记录',
+                     tablehtml2evernote(dfout, '系统提醒记录'))
+    except Exception as e:
+        log.critical('更新系统提醒笔记时出现错误。%s' % str(e))
+    return dfout
+
+
+def wifitodf(itemstr, noteinfolist):
+    pattern = re.compile(
+        '(?:Device )((?:dis){0,1}connected) (?:to|from) ([\w|-]+)， (\w+ \d+, \d{4} at \d{2}:\d{2}[A|P]M)')
+    slices = re.split(pattern, itemstr)
+    items_split = []
+    for i in range(int(len(slices) / 4)):
+        zhizi = list()
+        zhizi.append(datetime.datetime.strptime(slices[i * 4 + 3], '%B %d, %Y at %I:%M%p'))
+        if slices[i * 4 + 1].startswith('dis'):
+            zhizi.append(False)
+        else:
+            zhizi.append(True)
+        zhizi.append(slices[i * 4 + 2].lower())
+        items_split.append(zhizi)
+    dfwifiall = pd.DataFrame(items_split, columns=('atime', 'entered', 'name'))
+    dfwifiall.drop_duplicates(inplace=True)
+    dfwifiall.sort_values(['atime'], ascending=False, inplace=True)
+    dfwifiall.index = dfwifiall['atime']
+
+    dfwifilist = list()
+    for item in items_split:
+        for [_, address, shuxing, *arg, wifilist] in noteinfolist:
+            if item[2] in wifilist:
+                item.append(shuxing)
+                address1 = address
+                if item[0] > pd.to_datetime('2017-01-09'):
+                    if address.startswith('wenchanglu'):
+                        address1 = 'maotanhuamushichang'
+                else:
+                    if address.startswith('maotanhuamushichang'):
+                        address1 = 'wenchanglu'
+                item.append(address1)
+                dfwifilist.append(item)
+                break
+
+    dfwifi = pd.DataFrame(dfwifilist, columns=('atime', 'entered', 'name', 'shuxing', 'address'))
+    dfwifi.drop_duplicates(inplace=True)
+    # descdb(dfwifi)
+    dfwifi.sort_values(['atime'], ascending=False, inplace=True)
+    dfwifi.index = dfwifi['atime']
+    del dfwifiall['atime']
+
+    dfout = dfwifi[['entered', 'shuxing', 'address']]
+    # descdb(dfout)
+
+    try:
+        token = cfp.get('evernote', 'token')
+        notestore = get_notestore(token)
+        dfnotename = dfwifi[['entered', 'shuxing', 'address']]
+        dfnotename.reset_index(inplace=True)
+        dfnotenameg = pd.DataFrame(dfnotename.groupby(['address']).max()['atime'])
+        dfnotenameg['count'] = dfnotename.groupby(['address']).count()['atime']
+        dfnotenameg.sort_values(['atime'], ascending=False, inplace=True)
+        wifitongjinametablestr = tablehtml2evernote(dfnotenameg, 'WIFI（特定）统计')
+
+        wifijilutablestr = tablehtml2evernote(dfnotename.head(50), 'WIFI（特定）连接记录')
+
+        dfwifiall.reset_index(inplace=True)
+        dfnoteallg = pd.DataFrame(dfwifiall.groupby(['name']).max()['atime'])
+        dfnoteallg['count'] = dfwifiall.groupby(['name']).count()['atime']
+        dfnoteallg.sort_values(['atime'], ascending=False, inplace=True)
+        wifitongjialltablestr = tablehtml2evernote(dfnoteallg, 'WIFI（全部）统计')
+        imglist2note(notestore, [], '971f14c0-dea9-4f13-9a16-ee6e236e25be', 'WIFI连接统计表',
+                     wifitongjinametablestr + wifijilutablestr + wifitongjialltablestr)
+    except Exception as e:
+        log.critical('更新WIFI连接统计笔记时出现错误。%s' % str(e))
+
+    return dfout
 
 
 def itemstodf(itemstr, noteinfos):
@@ -279,39 +383,44 @@ def jinchustat(token, jinchujiluall, noteinfos):
 
 
 def jinchustattimer(token, jiangemiao):
-    dfjilu = jilugmail('Ifttt/Wifi', 'wifi', 'all')
-    print(dfjilu[:200])
-    dfjilu = jilugmail('Ifttt/Notification', 'notification', 'all')
-    print(dfjilu[:200])
+    noteinfolist = [
+        ['', 'chongqing', 'life', 'ce021c0e-d96b-42c7-aa2c-36c0b11b7d53', '进出统计图表（重庆）', '重庆进出记录', ['wxpaihotels']],
+        ['', 'chengdu', 'life', 'f651c574-89ce-45b6-ab1e-e1844110d444', '进出统计图表（成都）', '成都进出记录', ['echarm', 'jyy']],
+        ['', 'yangfu\'restraunaut', 'life', '06bb4996-d0d8-4266-87d5-f3283d71f58e', '进出统计图表（东西湖）', '东西湖进出记录', []],
+        ['', 'fanyuan', 'life', 'db59af11-fb1c-4864-a7da-0989452e170f', '进出统计图表（范渊）', '范渊进出记录', ['tp-link_c6cf']],
+        ['', 'liyang', 'life', '76a9d82c-5a22-4cb6-9acf-13426a2be3b7', '进出统计图表（立阳）', '立阳进出记录', ['hubeiliyang']],
+        ['f119e38e-3876-4937-80f1-e6a6b2e5d3d0', 'wenchanglu', 'work', '7f4bec82-626b-4022-b3c2-0d9b3d71198d',
+         '进出统计图表（文昌路金地格林）', '文昌路', ['zysm3100', 'zysm2100', 'zysm4100', 'zysm5100', 'zysm_friends', 'zyck']],
+        ['d8fa0226-88ac-4b6c-b8fd-63a9038a6abf', 'huadianxiaolu', 'home', '08a01c35-d16d-4b22-b7f7-61e3993fd2cb',
+         '家进出统计图表（岳家嘴）', '白晔峰家附近区域进出记录', ['60bf0', '60bf0_5g', '60bf0_plus']],
+        ['1ea50564-dee7-4e82-87b5-39703671e623', 'dingziqiao', 'life', '6eef085c-0e84-4753-bf3e-b45473a12274',
+         '进出统计图表（丁字桥）', '丁字桥', ['wx-sgkf', '大浪淘沙']],
+        ['', 'daye', 'home', 'ba1d98ff-be3b-400a-bb59-ce78efca45fc', '家进出统计图表（大冶）', '白晔峰家大冶进出记录'],
+        ['9ac941cc-c04b-4d4b-879f-2bfb044382d4', 'lushan', 'home', '987c1d5e-d8ad-41aa-9269-d2b840616410',
+         '家进出统计图表（鲁山）', '鲁山', ['haier-soho_0dd903']],
+        ['84e9ee0b-30c3-4404-84e2-7b4614980b4b', 'hanyangban', 'work', 'a7e84055-f075-44ab-8205-5a42f3f05284',
+         '进出记录统计图表（汉阳办）', '汉阳办', ['zysmhybsq2016']],
+        ['6fb1e016-01ab-439d-929e-994dc980ddbe', 'hankouban', 'work', '2c5e3728-be69-4e52-a8ff-07860e8593b7',
+         '进出记录统计图表（汉口办）', '汉口办', ['zysmhk2018']],
+        ['24aad619-2356-499e-9fa7-f685af3a81b1', 'maotanhuamushichang', 'work', '2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e',
+         '公司进出记录统计图表', '花木市场', ['zysm3100', 'zysm2100', 'zysm4100', 'zysm5100', 'zysm_friends', 'zyck']],
+        ['38f4b1a9-7d6e-4091-928e-c82d7d3717c5', 'qiwei', 'work', '294b584f-f34a-49f0-b4d3-08085a37bfd5',
+         '进出统计图表（创食人）', '创食人', ['qw2', 'qw1', 'zcb']]
+    ]
+
+    dfjilunotifi = jilugmail('Ifttt/Notification', 'notification', 'all')
+    dfnoti = notification2df(dfjilunotifi)
+    print(dfnoti.head(5))
     dfjilu = jilugmail('Ifttt/CallSmsLog', 'callsmslog', 'all', bodyonly=False)
     print(dfjilu[:200])
 
-    noteinfolist = [
-        ['', 'yangfu\'restraunaut', 'life', '06bb4996-d0d8-4266-87d5-f3283d71f58e', '进出统计图表（东西湖）', '东西湖进出记录'],
-        ['', 'fanyuan', 'life', 'db59af11-fb1c-4864-a7da-0989452e170f', '进出统计图表（范渊）', '范渊进出记录'],
-        ['', 'liyang', 'life', '76a9d82c-5a22-4cb6-9acf-13426a2be3b7', '进出统计图表（立阳）', '立阳进出记录'],
-        ['f119e38e-3876-4937-80f1-e6a6b2e5d3d0', 'wenchanglu', 'work', '7f4bec82-626b-4022-b3c2-0d9b3d71198d',
-         '进出统计图表（文昌路金地格林）', '文昌路'],
-        ['d8fa0226-88ac-4b6c-b8fd-63a9038a6abf', 'huadianxiaolu', 'home', '08a01c35-d16d-4b22-b7f7-61e3993fd2cb',
-         '家进出统计图表（岳家嘴）', '白晔峰家附近区域进出记录'],
-        ['1ea50564-dee7-4e82-87b5-39703671e623', 'dingziqiao', 'life', '6eef085c-0e84-4753-bf3e-b45473a12274',
-         '进出统计图表（丁字桥）', '丁字桥'],
-        ['', 'daye', 'home', 'ba1d98ff-be3b-400a-bb59-ce78efca45fc', '家进出统计图表（大冶）', '白晔峰家大冶进出记录'],
-        ['9ac941cc-c04b-4d4b-879f-2bfb044382d4', 'lushan', 'home', '987c1d5e-d8ad-41aa-9269-d2b840616410',
-         '家进出统计图表（鲁山）', '鲁山'],
-        ['84e9ee0b-30c3-4404-84e2-7b4614980b4b', 'hanyangban', 'work', 'a7e84055-f075-44ab-8205-5a42f3f05284',
-         '进出记录统计图表（汉阳办）', '汉阳办'],
-        ['6fb1e016-01ab-439d-929e-994dc980ddbe', 'hankouban', 'work', '2c5e3728-be69-4e52-a8ff-07860e8593b7',
-         '进出记录统计图表（汉口办）', '汉口办'],
-        ['24aad619-2356-499e-9fa7-f685af3a81b1', 'maotanhuamushichang', 'work', '2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e',
-         '公司进出记录统计图表', '花木市场'],
-        ['38f4b1a9-7d6e-4091-928e-c82d7d3717c5', 'qiwei', 'work', '294b584f-f34a-49f0-b4d3-08085a37bfd5',
-         '进出统计图表（创食人）', '创食人']
-    ]
-    dfjinchugooglefile = jilugooglefile('data\\google')
-    dfjinchugoogle = pd.DataFrame()
+    itemswifi = jilugmail('Ifttt/Wifi', 'wifi', 'all')
+    dfjinchuwifi = wifitodf(itemswifi, noteinfolist)
+    dfjinchu = pd.DataFrame(jilugooglefile('data\\google'))
+    dfjinchu = dfjinchu.append(dfjinchuwifi)
+
     try:
-        dfjinchugoogle = dfjinchugooglefile.append(jilugoogledrive())
+        dfjinchu = dfjinchu.append(jilugoogledrive())
     except Exception as e:
         log.critical('读取Goolge Drive中表格中数据记录时出现未名错误。%s' % (str(e)))
 
@@ -319,23 +428,24 @@ def jinchustattimer(token, jiangemiao):
         for noteinfo in noteinfolist:
             if len(noteinfo[0]) > 0:  # 有数据源笔记的guid就处理该笔记
                 dfjinchunote = itemstodf(jilunote(token, noteinfo), noteinfo)  # 从evernote相应笔记中获取记录
-                # print(dfjinchunote.shape[0])
             else:
                 dfjinchunote = pd.DataFrame()
+            dfjinchuloop = dfjinchu.append(dfjinchunote)
 
             dfjinchugmail = itemstodf(
                 jilugmail('Ifttt/Location', 'jinchu', noteinfo[2] + '_' + noteinfo[1], noteinfo[5]), noteinfo)
-            # print(dfjinchugmail.shape[0])
-            dfjinchu = dfjinchugoogle.append(dfjinchunote).append(dfjinchugmail)
-            # print(dfjinchu.groupby(['address']).count())
-            dfjinchu = dfjinchu[dfjinchu.address == noteinfo[1]]  # 缩减记录集合，只处理当前循环项目相关记录
-            if dfjinchu.shape[0] == 0:
+            dfjinchuloop = dfjinchuloop.append(dfjinchugmail)
+            dfjinchuloop = dfjinchuloop[dfjinchuloop.address == noteinfo[1]]  # 缩减记录集合，只处理当前循环项目相关记录
+            if dfjinchuloop.shape[0] == 0:
                 continue
-            dfjinchu['time'] = dfjinchu.index
-            dfjinchu.drop_duplicates(inplace=True)  # 默认根据全部列值进行判断，duplicated方法亦然，所以强增time列配合
-            del dfjinchu['time']
-            dfjinchu.sort_index(ascending=False, inplace=True)
-            dfjinchucount = dfjinchu.shape[0]  # shape[0]获得行数，shape[1]则是列数
+            # descdb(dfjinchuloop)
+            dfjinchuitem = dfjinchuloop[['entered', 'shuxing', 'address']]
+            dfjinchuitem['time'] = dfjinchuitem.index
+            dfjinchuitem.drop_duplicates(inplace=True)  # 默认根据全部列值进行判断，duplicated方法亦然，所以强增time列配合
+            del dfjinchuitem['time']
+            dfjinchuitem.sort_index(ascending=False, inplace=True)
+            # descdb(dfjinchuitem)
+            dfjinchucount = dfjinchuitem.shape[0]  # shape[0]获得行数，shape[1]则是列数
             print(dfjinchucount, end='\t')
             if cfp.has_option('jinchu', noteinfo[1]):
                 ntupdatenum = dfjinchucount > cfp.getint('jinchu', noteinfo[1])  # 新数据集记录数和存档比较
@@ -343,10 +453,10 @@ def jinchustattimer(token, jiangemiao):
                 ntupdatenum = True
             print(ntupdatenum, end='\t')
             print(noteinfo[4], end='\t')
-            print(dfjinchu.index[0])
+            print(dfjinchuitem.index[0])
             if ntupdatenum:  # or True:
                 # print(dfjinchu.head(5))
-                jinchustat(token, dfjinchu, noteinfo[1:])
+                jinchustat(token, dfjinchuitem, noteinfo[1:])
                 cfp.set('jinchu', noteinfo[1], '%d' % dfjinchucount)
                 cfp.write(open(inifilepath, 'w', encoding='utf-8'))
                 log.info('%s成功更新入图表统计笔记，将于%d秒后再次自动检查并更新' % (str(noteinfo), jiangemiao))
@@ -361,7 +471,30 @@ def jinchustattimer(token, jiangemiao):
 
 if __name__ == '__main__':
     token = cfp.get('evernote', 'token')
+
+    noteinfolist = [
+        ['d8fa0226-88ac-4b6c-b8fd-63a9038a6abf', 'huadianxiaolu', 'home', '08a01c35-d16d-4b22-b7f7-61e3993fd2cb',
+         '家进出统计图表（岳家嘴）', '白晔峰家附近区域进出记录', ['60bf0', '60bf0_5g', '60bf0_plus']],
+        ['1ea50564-dee7-4e82-87b5-39703671e623', 'dingziqiao', 'life', '6eef085c-0e84-4753-bf3e-b45473a12274',
+         '进出统计图表（丁字桥）', '丁字桥', ['wx-sgkf', '大浪淘沙']],
+        ['24aad619-2356-499e-9fa7-f685af3a81b1', 'maotanhuamushichang', 'work', '2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e',
+         '公司进出记录统计图表', '花木市场', ['zysm3100', 'zysm2100', 'zysm4100', 'zysm5100', 'zysm_friends', 'zyck']],
+        ['38f4b1a9-7d6e-4091-928e-c82d7d3717c5', 'qiwei', 'work', '294b584f-f34a-49f0-b4d3-08085a37bfd5',
+         '进出统计图表（创食人）', '创食人', ['qw2', 'zcb']]
+    ]
+
     # findnotefromnotebook(token, 'c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b', '统计')
     # jinchustattimer(token, 60*32)
-    dfjilu = jilugmail('Ifttt/SmsLog', 'smslog', 'all', bodyonly=False)
-    print(dfjilu[:200])
+    # dfjilu = jilugmail('Ifttt/SmsLog', 'smslog', 'all', bodyonly=False)
+    # print(dfjilu[:200])
+
+    itemswifi = jilugmail('Ifttt/Wifi', 'wifi', 'all')
+    dfout = wifitodf(itemswifi, noteinfolist)
+    descdb(dfout)
+
+    # dfjilunotifi = jilugmail('Ifttt/Notification', 'notification', 'all')
+    # print(dfjilunotifi[:200])
+    # dfnoti = notification2df(dfjilunotifi)
+    # descdb(dfnoti)
+
+    # jinchustattimer(token,60*8)

@@ -344,7 +344,7 @@ def get_notestore(token='your developer token'):
             log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器端主动关闭链接啦！%s' % (errorstr, str(we)))
         else:
             log.critical('%s出现Windows系统错误（WindowsError）。%s' % (errorstr, str(we)))
-        # exit(5)
+        raise we
     except Exception as ee:
         print(ee)
         log.critical('%s出现未名系统错误。%s' % (errorstr, str(ee)))
@@ -1013,6 +1013,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
             log.critical('更新guid为%s的笔记时出现“EDAM用户异常”！%s' % (noteguid, str(eue)))
     except Exception as e:
         log.critical('更新guid为%s的笔记时出现未名错误！%s' % (noteguid, str(e)))
+        raise e
 
 
 def isnoteupdate(token, noteguid):
@@ -1051,7 +1052,7 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
 
         """ 解析邮件首部 """
         # 发件人
-        mailfrom = email.utils.parseaddr(message.get('from'))[1]
+        # mailfrom = email.utils.parseaddr(message.get('from'))[1]
         # print('From:', mailfrom)
 
         # 时间
@@ -1072,11 +1073,11 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
 
         localdate = datemail.astimezone(datetime.timezone(datetime.timedelta(hours=8)))
         # print('Date:', localdate)
-        # headermsg.append(localdate)
-        if mailfrom.startswith('baiyefeng@gmail.com'):
-            headermsg.append(str(localdate) + '\t发出\t')
-        else:
-            headermsg.append(str(localdate) + '\t收到\t')
+        headermsg.append(localdate)
+        # if mailfrom.startswith('baiyefeng@gmail.com'):
+        #     headermsg.append(str(localdate) + '\t发出\t')
+        # else:
+        #     headermsg.append(str(localdate) + '\t收到\t')
 
         # 主题
         subject = message.get('subject')
@@ -1169,7 +1170,7 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
             log.critical("第%d次（最多尝试三次）连接邮件服务器时失败。%s" % (i + 1, e))
             if i == 2:
                 log.critical('邮件服务器连接失败，只好无功而返。')
-                return
+                raise e
             time.sleep(20)
             # serv = imaplib.IMAP4(host, port)
 
@@ -1321,7 +1322,7 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
         t = threading.Thread(target=getnummail, args=(inputnumlist, mailitems,))
         threadlist.append(t)
 
-    log.info('共计有%d个线程准备运行。' % len(threadlist))
+    log.info('处理邮箱目录%s，共计有%d个线程准备运行。' % (dirtarget, len(threadlist)))
     threadnum = 8
     threadzushu = int(len(threadlist) / threadnum)
     for i in range(threadzushu + 1):

@@ -30,7 +30,7 @@ def log2notetimer(token, jiangemiao):
     global cfp, inifilepath
     everlogc = int(cfp.get('evernote', 'everlogc'))
     if len(loglines) <= everlogc:
-        print('无新记录，不更新everworklog笔记')
+        print('%s\t无新记录，不更新everworklog笔记' % str(datetime.datetime.now()))
     else:
         print('有新的记录，执行更新')
         loglinestr = ''.join(loglines[::-1])
@@ -51,3 +51,8 @@ def log2notetimer(token, jiangemiao):
     global timer_log2note
     timer_log2note = Timer(jiangemiao, log2notetimer, (token, jiangemiao))
     timer_log2note.start()
+
+
+if __name__ == '__main__':
+    token = cfp.get('evernote', 'token')
+    log2notetimer(token, 60 * 32)
