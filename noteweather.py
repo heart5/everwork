@@ -56,6 +56,8 @@ def getweatherfromgmail():
     username = cfp.get('gmail', 'username')
     password = cfp.get('gmail', 'password')
     mailitems = getMail(host, username, password, dirtarget='Ifttt/Weather', unseen=True, topic='武汉每日天气 @行政管理 +')
+    if mailitems == False:
+        return False
     split_items = []
     for header, body in mailitems:
         for text, textstr in body:
@@ -290,7 +292,7 @@ def weatherstat(token, items, destguid=None):
 
 def isweatherupdate(weathertxtfilename):
     items = getweatherfromgmail()
-    if len(items) == 0:
+    if items == False:
         return False
     else:
         itemfromtxt = readfromweathertxt(weathertxtfilename)
@@ -324,7 +326,8 @@ def weatherstattimer(token, jiangemiao):
 
 if __name__ == '__main__':
     token = cfp.get('evernote', 'token')
-    weathertxtfilename = "data\\ifttt\\weather.txt"
-    usn = isweatherupdate(weathertxtfilename)
-    weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')
-    # print(getweatherfromgmail())
+    weatherstattimer(token, 60 * 44)
+    # weathertxtfilename = "data\\ifttt\\weather.txt"
+    # usn = isweatherupdate(weathertxtfilename)
+    # weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')
+    # # print(getweatherfromgmail())

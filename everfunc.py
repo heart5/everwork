@@ -163,12 +163,20 @@ def evernoteapiclearatzero():
 
 dirbuildfirst()
 log = mylog()
+
 cfp = ConfigParser()
 inifilepath = 'data\\everwork.ini'
-inidatanotefilepath = 'data\\everdatanote.ini'
 cfp.read(inifilepath, encoding='utf-8')
 cfpdata = ConfigParser()
+inidatanotefilepath = 'data\\everdatanote.ini'
 cfpdata.read(inidatanotefilepath, encoding='utf-8')
+cfplife = ConfigParser()
+inilifepath = 'data\\everlife.ini'
+cfplife.read(inilifepath, encoding='utf-8')
+cfpzysm = ConfigParser()
+inizysmpath = 'data\\everzysm.ini'
+cfpzysm.read(inizysmpath, encoding='utf-8')
+
 ENtimes = int(cfp.get('evernote', 'apicount'))
 ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
 apitime = getapitimesfromlog()
@@ -1011,6 +1019,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
             log.critical('更新guid为%s的笔记时出现“EDAM用户异常-》语法”！%s' % (noteguid, str(eue.parameter)))
         else:
             log.critical('更新guid为%s的笔记时出现“EDAM用户异常”！%s' % (noteguid, str(eue)))
+        raise eue
     except Exception as e:
         log.critical('更新guid为%s的笔记时出现未名错误！%s' % (noteguid, str(e)))
         raise e
@@ -1040,9 +1049,10 @@ def isnoteupdate(token, noteguid):
 
 
 def tablehtml2evernote(dataframe, tabeltitle):
-    return dataframe.to_html(justify='right', index_names=True). \
-        replace('class="dataframe">', 'align="center">'). \
-        replace('<table', '\n<h3 align="center">%s</h3>\n<table' % tabeltitle)
+    outstr = dataframe.to_html(justify='right', index_names=True).replace('class="dataframe">', 'align="center">'). \
+        replace('<table', '\n<h3 align="center">%s</h3>\n<table' % tabeltitle).replace('<th></th>', '<th>&nbsp;</th>')
+    # print(outstr)
+    return outstr
 
 
 def getMail(host, username, password, port=993, debug=False, mailnum=100000, dirtarget='Inbox', unseen=False,
@@ -1151,7 +1161,7 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
                     bodystr = partdecode.decode(msgencoding)  # 解码出文本内容
                     # print(bodystr)
                     bodystr = BeautifulSoup(bodystr, "html.parser"). \
-                        get_text().replace('\r', '').replace('\n', '')  # 文本化后去掉回车、换行符等
+                        get_text().replace('\r', '').replace('\n', '').replace('\t', '')  # 文本化后去掉回车、换行符等
                     # print(bodystr)
                     partitem.append('text')
                     partitem.append(bodystr)
@@ -1229,6 +1239,11 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
         print(mailstatus)
 
     numlist = data[0].decode('ascii').split()[::-1]
+
+    if len(numlist) == 0:  # 无新邮件则返回False
+        log.info('邮箱目录《%s》中没有主题为“%s”的新邮件' % (dirtarget, topic))
+        return False
+
     if len(numlist) > mailnum:
         numlist = numlist[:mailnum]
     mailitems = []
@@ -1340,6 +1355,68 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
     log.info('总计的%d个线程全部执行完毕！' % len(threadlist))
 
     return mailitems
+
+
+def jilugmail(dir, mingmu, fenleistr='', topic='', bodyonly=True):
+    """
+    从指定邮件目录读取包含关键字的新邮件并更新至txt文件
+    :param dir: 待处理的邮件目录
+    :param mingmu: 名目，txt文件命名使用
+    :param fenleistr: 分类，txt文件命名使用
+    :param topic: 搜索邮件的关键字，默认置空
+    :param bodyonly: 只要邮件body，默认为真
+    :return: 带换行的规范字符串列表
+    """
+
+    def readfromtxt(fn):
+        if not os.path.exists(fn):
+            newfile = open(fn, 'w', encoding='utf-8')
+            newfile.close()
+        with open(fn, 'r', encoding='utf-8') as f:
+            items = [line.strip() for line in f if len(line.strip()) > 0]
+            # for line in f:
+            #     print(line)
+        log.info("《%s-%s》现有%d条记录。" % (mingmu, fenleistr, len(items)))
+        return items
+
+    host = cfp.get('gmail', 'host')
+    username = cfp.get('gmail', 'username')
+    password = cfp.get('gmail', 'password')
+    mailitems = []
+    try:
+        mailitems = getMail(host, username, password, debug=False, dirtarget=dir, unseen=True, topic=topic)
+    except socket.error as se:
+        log.critical("构建socket连接时出错。%s" % str(se))
+    except Exception as e:
+        log.critical('处理邮件时出现严重错误。%s' % str(e))
+
+    if mailitems == False:  # 无新邮件则返回False
+        log.info('%s-%s没有新的邮件记录' % (mingmu, fenleistr))
+        return False
+
+    itemslst = []
+    for header, body in mailitems:
+        for text, textstr in body:
+            if text.startswith('text'):  # 只取用纯文本部分
+                if bodyonly:  # 只要邮件body文本，否则增加邮件标题部分内容
+                    itemslst.append(textstr)
+                elif header[1].startswith('SMS with') or header[1].endswith('的短信记录') or header[1].endswith(
+                        '的通话记录'):  # 对特别记录增补时间戳
+                    itemslst.append(header[1] + '\t' + str(header[0]) + '，' + textstr)
+                else:
+                    itemslst.append(header[1] + '\t' + textstr)
+
+    txtfilename = 'data\\ifttt\\' + '%s_gmail_%s.txt' % (mingmu, fenleistr)
+    if len(itemslst) > 0:  # or True:
+        items = itemslst + readfromtxt(txtfilename)
+        fb = open(txtfilename, 'w', encoding='utf-8')
+        for item in items:
+            fb.write(item + '\n')
+        fb.close()
+    else:
+        items = readfromtxt(txtfilename)
+    log.info("《%s-%s》共有%d条记录。" % (mingmu, fenleistr, len(items)))
+    return items
 
 
 import imaplib

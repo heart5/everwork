@@ -10,21 +10,10 @@ from imp4nb import *
 def log2notetimer(token, jiangemiao):
     pathlog = 'log'
     files = os.listdir(pathlog)
-    filesname = []
-    for i in reversed(range(len(files))):
-        filesname.append(pathlog + '\\everwork.log.' + str(i))
-    filesname[len(files) - 1] = pathlog + '\\everwork.log'
-    # print(filesname)
     loglines = []
-    for i in range(len(filesname)):
-        with open(filesname[i], 'r', encoding='utf-8') as f:
-            while True:
-                line = f.readline()
-                if len(line) == 0:
-                    break
-                if line.find('CRITICAL') >= 0:
-                    loglines.append(line)
-        f.close()
+    for fname in files[::-1]:
+        with open(pathlog + '\\' + fname, 'r', encoding='utf-8') as f:
+            loglines = loglines + [line.strip() for line in f if line.find('CRITICAL') >= 0]
 
     print(len(loglines), end='\t')
     global cfp, inifilepath
@@ -33,9 +22,11 @@ def log2notetimer(token, jiangemiao):
         print('%s\t无新记录，不更新everworklog笔记' % str(datetime.datetime.now()))
     else:
         print('有新的记录，执行更新')
-        loglinestr = ''.join(loglines[::-1])
+        loglinestr = '\n'.join(loglines[::-1])
         loglinestr = loglinestr.replace('<', '《')
         loglinestr = loglinestr.replace('>', '》')
+        loglinestr = loglinestr.replace('&', '并符')
+        loglinestr = loglinestr.replace('=', '等于')
         loglinestr = '<pre>' + loglinestr + '</pre>'
         # print(loglinestr)
 

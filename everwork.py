@@ -10,6 +10,7 @@ from notedispatch import *
 from notesaledetails import *
 from notejinchujilu import *
 from log2note import *
+from peoplelog2note import *
 
 # log.debug('程序启动……')
 # todo 一体化目录构建
@@ -39,6 +40,7 @@ token = cfp.get('evernote', 'token')
 log2notetimer(token, 60 * 45)
 weatherstattimer(token, 60 * 60 * 3 + 60 * 25)
 jinchustattimer(token, 60 * 60)
+peoplestattimer(token, 60 * 25)
 
 writeini()
 

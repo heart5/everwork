@@ -38,18 +38,6 @@ from matplotlib.ticker import MultipleLocator, FuncFormatter
 import pygsheets
 
 
-def readfromtxt(fn):
-    if not os.path.exists(fn):
-        newfile = open(fn, 'w', encoding='utf-8')
-        newfile.close()
-    with open(fn, 'r', encoding='utf-8') as f:
-        items = [line.strip().replace('\r', '').replace('\n', '') for line in f]
-    # print(items)
-    f.close()
-
-    return items
-
-
 def jilugooglefile(filepath):
     filelist = [ff for ff in listdir(filepath) if isfile(join(filepath, ff))]
     print(filelist)
@@ -107,51 +95,6 @@ def jilugoogledrive():
     return dfout
 
 
-def jilugmail(dir, mingmu, fenleistr='', topic='', bodyonly=True):
-    host = cfp.get('gmail', 'host')
-    username = cfp.get('gmail', 'username')
-    password = cfp.get('gmail', 'password')
-    mailitems = []
-    try:
-        # mailitems = getMail(host, username, password, dirtarget='Ifttt/Location', unseen=False, topic=noteinfos[5])
-        mailitems = getMail(host, username, password, debug=False, dirtarget=dir, unseen=True, topic=topic)
-    except socket.error as se:
-        log.critical("构建socket连接时出错。%s" % str(se))
-    except Exception as e:
-        log.critical('处理邮件时出现严重错误。%s' % str(e))
-
-    itemslst = []
-    for header, body in mailitems:
-        for text, textstr in body:
-            if text.startswith('text'):  # 只取用纯文本部分
-                if bodyonly:  # 只要邮件body文本，否则增加邮件标题部分内容
-                    itemslst.append(textstr)
-                elif header[1].startswith('SMS with') or header[1].endswith('的短信记录') or header[1].endswith(
-                        '的通话记录'):  # 对特别记录增补时间戳
-                    itemslst.append(header[1] + '\t' + str(header[0]) + '，' + textstr)
-                else:
-                    itemslst.append(header[1] + '\t' + textstr)  #
-    # print('从Gmail邮箱获取%d条进出记录信息记录' %len(itemslst))
-    # print(itemslst)
-
-    # txtfilename = 'data\\ifttt\\'+'%s_gmail_'+noteinfos[2]+'_'+noteinfos[1]+'.txt' %mingmu
-    txtfilename = 'data\\ifttt\\' + '%s_gmail_%s.txt' % (mingmu, fenleistr)
-    if len(itemslst) > 0:
-        items = itemslst + readfromtxt(txtfilename)
-        # items = itemslst
-        fb = open(txtfilename, 'w', encoding='utf-8')
-        for item in items:
-            fb.write(str(item) + '\n')
-        fb.close()
-
-    items = readfromtxt(txtfilename)
-
-    resultstr = '\r\n'.join(items)
-    # print(resultstr)
-
-    return resultstr
-
-
 def jilunote(token, noteinfos):
     """
     读取ifttt自动通过gmail转发至evernote生成的地段进出记录，统计作图展示
@@ -168,44 +111,11 @@ def jilunote(token, noteinfos):
     return itemstr
 
 
-def notification2df(itemstr):
-    pattern = re.compile(r'(\w+ \d+, \d{4} at \d{2}:\d{2}[A|P]M)\|\|\|(.*?)\|\|\|(.*?)\|\|\|(.*?)', re.U | re.M)
-    slices = re.split(pattern, itemstr)
-    slices = slices[1:]
-    # print(len(slices))
-    # for i in range(10):
-    #     print(slices[i].strip())
-
-    split_items = list()
-    for i in range(int(len(slices) / 5)):
-        item = list()
-        item.append(datetime.datetime.strptime(slices[i * 5].strip(), '%B %d, %Y at %I:%M%p'))
-        item.append(slices[i * 5 + 1].strip())
-        item.append(slices[i * 5 + 2].strip())
-        item.append(slices[i * 5 + 4].strip())
-        # print(slices[i*5].strip()+'\t'+slices[i*5+1].strip()+'\t'+slices[i*5+2].strip()+'\t'+slices[i*5+4].strip())
-        split_items.append(item)
-
-    dfnoti = pd.DataFrame(split_items, columns=('time', 'shuxing', 'topic', 'content'))
-    dfnoti.drop_duplicates(inplace=True)
-    dfnoti.sort_values(['time'], ascending=False, inplace=True)
-    dfout = dfnoti[dfnoti.shuxing == '微信']
-    # b3a3e458-f05b-424d-8ec1-604a3e916724
-
-    try:
-        token = cfp.get('evernote', 'token')
-        notestore = get_notestore(token)
-        imglist2note(notestore, [], 'b3a3e458-f05b-424d-8ec1-604a3e916724', '系统提醒记录',
-                     tablehtml2evernote(dfout, '系统提醒记录'))
-    except Exception as e:
-        log.critical('更新系统提醒笔记时出现错误。%s' % str(e))
-    return dfout
-
-
 def wifitodf(itemstr, noteinfolist):
+    itemstrjoin = '\n'.join(itemstr)
     pattern = re.compile(
         '(?:Device )((?:dis){0,1}connected) (?:to|from) ([\w|-]+)， (\w+ \d+, \d{4} at \d{2}:\d{2}[A|P]M)')
-    slices = re.split(pattern, itemstr)
+    slices = re.split(pattern, itemstrjoin)
     items_split = []
     for i in range(int(len(slices) / 4)):
         zhizi = list()
@@ -251,21 +161,32 @@ def wifitodf(itemstr, noteinfolist):
         token = cfp.get('evernote', 'token')
         notestore = get_notestore(token)
         dfnotename = dfwifi[['entered', 'shuxing', 'address']]
-        dfnotename.reset_index(inplace=True)
-        dfnotenameg = pd.DataFrame(dfnotename.groupby(['address']).max()['atime'])
-        dfnotenameg['count'] = dfnotename.groupby(['address']).count()['atime']
-        dfnotenameg.sort_values(['atime'], ascending=False, inplace=True)
-        wifitongjinametablestr = tablehtml2evernote(dfnotenameg, 'WIFI（特定）统计')
+        dfwificount = dfwifi.shape[0]  # shape[0]获得行数，shape[1]则是列数
+        print(dfwificount, end='\t')
+        if cfp.has_option('wifi', 'itemnumber'):
+            ntupdatenum = dfwificount > cfp.getint('wifi', 'itemnumber')  # 新数据集记录数和存档比较
+        else:
+            ntupdatenum = True
+        print(ntupdatenum, end='\t')
+        print('WIFI连接记录', end='\t')
+        print(dfwifi.index[0])
+        if ntupdatenum:  # or True:
+            dfnotename.reset_index(inplace=True)
+            dfnotenameg = pd.DataFrame(dfnotename.groupby(['address']).max()['atime'])
+            dfnotenameg['count'] = dfnotename.groupby(['address']).count()['atime']
+            dfnotenameg.sort_values(['atime'], ascending=False, inplace=True)
+            wifitongjinametablestr = tablehtml2evernote(dfnotenameg, 'WIFI（特定）统计')
+            wifijilutablestr = tablehtml2evernote(dfnotename.head(50), 'WIFI（特定）连接记录')
+            dfwifiall.reset_index(inplace=True)
+            dfnoteallg = pd.DataFrame(dfwifiall.groupby(['name']).max()['atime'])
+            dfnoteallg['count'] = dfwifiall.groupby(['name']).count()['atime']
+            dfnoteallg.sort_values(['atime'], ascending=False, inplace=True)
+            wifitongjialltablestr = tablehtml2evernote(dfnoteallg, 'WIFI（全部）统计')
+            imglist2note(notestore, [], '971f14c0-dea9-4f13-9a16-ee6e236e25be', 'WIFI连接统计表',
+                         wifitongjinametablestr + wifijilutablestr + wifitongjialltablestr)
 
-        wifijilutablestr = tablehtml2evernote(dfnotename.head(50), 'WIFI（特定）连接记录')
-
-        dfwifiall.reset_index(inplace=True)
-        dfnoteallg = pd.DataFrame(dfwifiall.groupby(['name']).max()['atime'])
-        dfnoteallg['count'] = dfwifiall.groupby(['name']).count()['atime']
-        dfnoteallg.sort_values(['atime'], ascending=False, inplace=True)
-        wifitongjialltablestr = tablehtml2evernote(dfnoteallg, 'WIFI（全部）统计')
-        imglist2note(notestore, [], '971f14c0-dea9-4f13-9a16-ee6e236e25be', 'WIFI连接统计表',
-                     wifitongjinametablestr + wifijilutablestr + wifitongjialltablestr)
+            cfp.set('wifi', 'itemnumber', '%d' % dfwificount)
+            cfp.write(open(inifilepath, 'w', encoding='utf-8'))
     except Exception as e:
         log.critical('更新WIFI连接统计笔记时出现错误。%s' % str(e))
 
@@ -273,7 +194,7 @@ def wifitodf(itemstr, noteinfolist):
 
 
 def itemstodf(itemstr, noteinfos):
-
+    itemstrjoin = '\n'.join(itemstr)
     # 生成英文的月份列表，组装正则模式，以便准确识别
     yuefenlist = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'September', 'October',
                   'December', 'November']
@@ -286,7 +207,7 @@ def itemstodf(itemstr, noteinfos):
     # pattern = u'(%s\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)\s：\s(e(?:xit|nter)ed)' % yuefennames
     pattern = u'(%s\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)\s*：.*?\s*(e(?:xit|nter)ed)' % yuefennames
     # print(pattern)
-    slicesoup = re.split(pattern, itemstr)
+    slicesoup = re.split(pattern, itemstrjoin)
     # print('印象笔记或Gmail邮件中提取“%s”内容后取模' %noteinfos[5])
     # print(slicesoup)
     # 提取时间和进出信息
@@ -408,16 +329,11 @@ def jinchustattimer(token, jiangemiao):
          '进出统计图表（创食人）', '创食人', ['qw2', 'qw1', 'zcb']]
     ]
 
-    dfjilunotifi = jilugmail('Ifttt/Notification', 'notification', 'all')
-    dfnoti = notification2df(dfjilunotifi)
-    print(dfnoti.head(5))
-    dfjilu = jilugmail('Ifttt/CallSmsLog', 'callsmslog', 'all', bodyonly=False)
-    print(dfjilu[:200])
-
-    itemswifi = jilugmail('Ifttt/Wifi', 'wifi', 'all')
-    dfjinchuwifi = wifitodf(itemswifi, noteinfolist)
     dfjinchu = pd.DataFrame(jilugooglefile('data\\google'))
-    dfjinchu = dfjinchu.append(dfjinchuwifi)
+    itemswifi = jilugmail('Ifttt/Wifi', 'wifi', 'all')
+    if itemswifi:
+        dfjinchuwifi = wifitodf(itemswifi, noteinfolist)
+        dfjinchu = dfjinchu.append(dfjinchuwifi)
 
     try:
         dfjinchu = dfjinchu.append(jilugoogledrive())
@@ -432,9 +348,12 @@ def jinchustattimer(token, jiangemiao):
                 dfjinchunote = pd.DataFrame()
             dfjinchuloop = dfjinchu.append(dfjinchunote)
 
-            dfjinchugmail = itemstodf(
-                jilugmail('Ifttt/Location', 'jinchu', noteinfo[2] + '_' + noteinfo[1], noteinfo[5]), noteinfo)
-            dfjinchuloop = dfjinchuloop.append(dfjinchugmail)
+            itemsgmail = jilugmail('Ifttt/Location', 'jinchu', noteinfo[2] + '_' + noteinfo[1], noteinfo[5])
+            if itemsgmail:
+                dfjinchugmail = itemstodf(itemsgmail, noteinfo)
+                dfjinchuloop = dfjinchuloop.append(dfjinchugmail)
+            else:
+                continue
             dfjinchuloop = dfjinchuloop[dfjinchuloop.address == noteinfo[1]]  # 缩减记录集合，只处理当前循环项目相关记录
             if dfjinchuloop.shape[0] == 0:
                 continue
@@ -471,6 +390,7 @@ def jinchustattimer(token, jiangemiao):
 
 if __name__ == '__main__':
     token = cfp.get('evernote', 'token')
+    # findnotefromnotebook(token, 'c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b', '统计')
 
     noteinfolist = [
         ['d8fa0226-88ac-4b6c-b8fd-63a9038a6abf', 'huadianxiaolu', 'home', '08a01c35-d16d-4b22-b7f7-61e3993fd2cb',
@@ -483,14 +403,14 @@ if __name__ == '__main__':
          '进出统计图表（创食人）', '创食人', ['qw2', 'zcb']]
     ]
 
-    # findnotefromnotebook(token, 'c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b', '统计')
-    # jinchustattimer(token, 60*32)
+    jinchustattimer(token, 60 * 32)
+
     # dfjilu = jilugmail('Ifttt/SmsLog', 'smslog', 'all', bodyonly=False)
     # print(dfjilu[:200])
 
-    itemswifi = jilugmail('Ifttt/Wifi', 'wifi', 'all')
-    dfout = wifitodf(itemswifi, noteinfolist)
-    descdb(dfout)
+    # itemswifi = jilugmail('Ifttt/Wifi', 'wifi', 'all')
+    # dfout = wifitodf(itemswifi, noteinfolist)
+    # descdb(dfout)
 
     # dfjilunotifi = jilugmail('Ifttt/Notification', 'notification', 'all')
     # print(dfjilunotifi[:200])
