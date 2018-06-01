@@ -183,7 +183,11 @@ def planfenxi(token, jiangemiao):
             neirong = tablehtml2evernote(df2show, '业务工作日志提交情况汇总（最近%d工作日）' % dayscount)
             neirong = html.unescape(neirong)
             # print(neirong)
-            imglist2note(note_store, [], '53115c1b-3623-4a0b-aecc-88f85543c549', '业务工作日志提交情况汇总', neirong)
+            guid = cfpzysm.get('业务计划总结guid', '汇总')
+            note = note_store.getNote(guid, True, True, False, False)
+            huizongnoteupdatedtime = timestamp2str(int(note.updated / 1000))
+            imglist2note(note_store, [], '53115c1b-3623-4a0b-aecc-88f85543c549',
+                         '业务工作日志提交情况汇总（自动更新时间：%s）' % huizongnoteupdatedtime, neirong)
         else:
             log.info('本次查阅业务人员日志无更新。')
         cnxp.close()
@@ -270,14 +274,14 @@ def chayanshuju():
     col_names.append('timed')
     dfupdated = dfupdated.reindex(columns=col_names)
     dfupdated.loc[:, ['timed']] = dfupdated.apply(lambda x: hege(x.nianyueri, x.updatedtime), axis=1)
-    print(dfupdated[dfupdated.name == '陈益'])
+    print(dfupdated[dfupdated.name == '陈威'])
 
     cnxp.close()
 
 if __name__ == '__main__':
     token = cfp.get('evernote', 'token')
     # gezhongzaxiang(token)
-    planfenxi(token, 60 * 60 * 3)
-    # chayanshuju()
+    # planfenxi(token, 60 * 60 * 3)
+    chayanshuju()
     # chulioldversion(token)
     pass
