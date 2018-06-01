@@ -16,22 +16,6 @@ from imp4nb import *
 from matplotlib.ticker import MultipleLocator, FuncFormatter
 
 
-def write2weathertxt(weathertxtfilename, inputitemlist):
-    # print(inputitemlist)
-    fileObject = open(weathertxtfilename, 'w', encoding='utf-8')
-    for item in inputitemlist:
-        # print(item)
-        fileObject.write(str(item) + '\n')
-    fileObject.close()
-
-
-def readfromweathertxt(weathertxtfilename):
-    with open(weathertxtfilename, 'r', encoding='utf-8') as f:
-        items = [line.strip() for line in f]  # strip()，去除行首行尾的空格
-
-    return items
-
-
 def getweatherfromevernote(token):
     noteguid_weather = '277dff5e-7042-47c0-9d7b-aae270f903b8'
     note_store = get_notestore(token)
@@ -291,16 +275,36 @@ def weatherstat(token, items, destguid=None):
 
 
 def isweatherupdate(weathertxtfilename):
+    def readfromweathertxt(weathertxtfilename):
+        with open(weathertxtfilename, 'r', encoding='utf-8') as f:
+            items = [line.strip() for line in f]  # strip()，去除行首行尾的空格
+        return items
+
+    def write2weathertxt(weathertxtfilename, inputitemlist):
+        # print(inputitemlist)
+        fileObject = open(weathertxtfilename, 'w', encoding='utf-8')
+        for item in inputitemlist:
+            # print(item)
+            fileObject.write(str(item) + '\n')
+        fileObject.close()
+
     items = getweatherfromgmail()
-    if items == False:
-        return False
-    else:
+    if items:
         itemfromtxt = readfromweathertxt(weathertxtfilename)
         for itemg in itemfromtxt:
             items.append(str(itemg))
         write2weathertxt(weathertxtfilename, items)
-
-    return items
+    items = readfromweathertxt(weathertxtfilename)
+    if cfplife.has_option('天气', '统计天数'):
+        updatable = len(items) > cfplife.getint('天气', '统计天数')
+    else:
+        updatable = True
+    if updatable:
+        cfplife.set('天气', '统计天数', '%d' % len(items))
+        cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
+        return items
+    else:
+        return False
 
 
 
