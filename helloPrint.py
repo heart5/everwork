@@ -6,8 +6,7 @@
 
 """
 
-import numpy as np, time, re, os
-import matplotlib.pyplot as plt, pandas as pd
+from imp4nb import *
 
 
 def ttestprint():
@@ -84,4 +83,6 @@ def currentprocess():
 
 if __name__ == '__main__':
     # ttesttimesplit()
-    currentprocess()
+    # currentprocess()
+    token = cfp.get('evernote', 'token')
+    findnotefromnotebook(token, 'c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b', '进出')

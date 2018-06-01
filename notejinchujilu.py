@@ -100,13 +100,13 @@ def jilunote(token, noteinfos):
     读取ifttt自动通过gmail转发至evernote生成的地段进出记录，统计作图展示
     :rtype: Null
     """
+    # itemstr = BeautifulSoup(get_notestore(token).getNoteContent(noteinfos[0]), "html.parser"). \
+    #     get_text().replace('\r', '').replace('\n', '')  # 文本化后去掉回车、换行符等
     itemstr = BeautifulSoup(get_notestore(token).getNoteContent(noteinfos[0]), "html.parser"). \
-        get_text().replace('\r', '').replace('\n', '')  # 文本化后去掉回车、换行符等
+        get_text().split('\r\n')  # 文本化后去掉回车、换行符等，通过split转换为list
     # print('笔记："%s" 中提取内容' %noteinfos[5])
     # print(itemstr)
     evernoteapijiayi()
-    # tags = soup.find('p')
-    # print(tags)
 
     return itemstr
 
@@ -340,20 +340,20 @@ def jinchustattimer(token, jiangemiao):
     except Exception as e:
         log.critical('读取Goolge Drive中表格中数据记录时出现未名错误。%s' % (str(e)))
 
+    # print(dfjinchu.shape[0])
     try:
         for noteinfo in noteinfolist:
             if len(noteinfo[0]) > 0:  # 有数据源笔记的guid就处理该笔记
                 dfjinchunote = itemstodf(jilunote(token, noteinfo), noteinfo)  # 从evernote相应笔记中获取记录
             else:
                 dfjinchunote = pd.DataFrame()
+            # print(dfjinchunote)
             dfjinchuloop = dfjinchu.append(dfjinchunote)
 
             itemsgmail = jilugmail('Ifttt/Location', 'jinchu', noteinfo[2] + '_' + noteinfo[1], noteinfo[5])
-            if itemsgmail:
-                dfjinchugmail = itemstodf(itemsgmail, noteinfo)
-                dfjinchuloop = dfjinchuloop.append(dfjinchugmail)
-            else:
-                continue
+            dfjinchugmail = itemstodf(itemsgmail, noteinfo)
+            dfjinchuloop = dfjinchuloop.append(dfjinchugmail)
+            # descdb(dfjinchuloop)
             dfjinchuloop = dfjinchuloop[dfjinchuloop.address == noteinfo[1]]  # 缩减记录集合，只处理当前循环项目相关记录
             if dfjinchuloop.shape[0] == 0:
                 continue
@@ -363,7 +363,6 @@ def jinchustattimer(token, jiangemiao):
             dfjinchuitem.drop_duplicates(inplace=True)  # 默认根据全部列值进行判断，duplicated方法亦然，所以强增time列配合
             del dfjinchuitem['time']
             dfjinchuitem.sort_index(ascending=False, inplace=True)
-            # descdb(dfjinchuitem)
             dfjinchucount = dfjinchuitem.shape[0]  # shape[0]获得行数，shape[1]则是列数
             print(dfjinchucount, end='\t')
             if cfp.has_option('jinchu', noteinfo[1]):
@@ -373,6 +372,7 @@ def jinchustattimer(token, jiangemiao):
             print(ntupdatenum, end='\t')
             print(noteinfo[4], end='\t')
             print(dfjinchuitem.index[0])
+            # descdb(dfjinchuitem)
             if ntupdatenum:  # or True:
                 # print(dfjinchu.head(5))
                 jinchustat(token, dfjinchuitem, noteinfo[1:])
