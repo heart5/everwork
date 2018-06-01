@@ -6,7 +6,7 @@ everwork的各种函数
 """
 
 import time, datetime, calendar as cal, hashlib, binascii, re, os, socket, random, email, imaplib, subprocess, locale, \
-    threading, \
+    threading, html, \
     logging as lg, logging.handlers as lgh, pandas as pd, sqlite3 as lite, matplotlib.pyplot as plt, \
     evernote.edam.type.ttypes as Ttypes, evernote.edam.error.ttypes as Etypes, \
     evernote.edam.userstore.constants as UserStoreConstants, \
@@ -389,13 +389,17 @@ def findnotefromnotebook(token, notebookguid, titlefind, notecount=10000):
     # p_noteattributeundertoken(note)
     # print ourNoteList.notes[5] #打印NoteMetadata
 
+    items = []
     for note in ournotelist.notes:
         if note.title.find(titlefind) >= 0:
-            print(note.guid, note.title)
+            item = []
+            item.append(note.guid)
+            item.append(note.title)
+            # print(note.guid, note.title)
             # p_noteattributeundertoken(note)
-            # return note
+            items.append(item)
 
-    return False
+    return items
 
 
 # @use_logging()
@@ -1049,7 +1053,9 @@ def isnoteupdate(token, noteguid):
 
 
 def tablehtml2evernote(dataframe, tabeltitle):
-    outstr = dataframe.to_html(justify='right', index_names=True).replace('class="dataframe">', 'align="center">'). \
+    pd.set_option('max_colwidth', 200)
+    df = pd.DataFrame(dataframe)
+    outstr = df.to_html(justify='center', index_names=True).replace('class="dataframe">', 'align="center">'). \
         replace('<table', '\n<h3 align="center">%s</h3>\n<table' % tabeltitle).replace('<th></th>', '<th>&nbsp;</th>')
     # print(outstr)
     return outstr
@@ -1390,21 +1396,21 @@ def jilugmail(dir, mingmu, fenleistr='', topic='', bodyonly=True):
     except Exception as e:
         log.critical('处理邮件时出现严重错误。%s' % str(e))
 
+    itemslst = []
     if mailitems == False:  # 无新邮件则返回False
         log.info('%s-%s没有新的邮件记录' % (mingmu, fenleistr))
-        return False
-
-    itemslst = []
-    for header, body in mailitems:
-        for text, textstr in body:
-            if text.startswith('text'):  # 只取用纯文本部分
-                if bodyonly:  # 只要邮件body文本，否则增加邮件标题部分内容
-                    itemslst.append(textstr)
-                elif header[1].startswith('SMS with') or header[1].endswith('的短信记录') or header[1].endswith(
-                        '的通话记录'):  # 对特别记录增补时间戳
-                    itemslst.append(header[1] + '\t' + str(header[0]) + '，' + textstr)
-                else:
-                    itemslst.append(header[1] + '\t' + textstr)
+        # return False
+    else:
+        for header, body in mailitems:
+            for text, textstr in body:
+                if text.startswith('text'):  # 只取用纯文本部分
+                    if bodyonly:  # 只要邮件body文本，否则增加邮件标题部分内容
+                        itemslst.append(textstr)
+                    elif header[1].startswith('SMS with') or header[1].endswith('的短信记录') or header[1].endswith(
+                            '的通话记录'):  # 对特别记录增补时间戳
+                        itemslst.append(header[1] + '\t' + str(header[0]) + '，' + textstr)
+                    else:
+                        itemslst.append(header[1] + '\t' + textstr)
 
     txtfilename = 'data\\ifttt\\' + '%s_gmail_%s.txt' % (mingmu, fenleistr)
     if len(itemslst) > 0:  # or True:
