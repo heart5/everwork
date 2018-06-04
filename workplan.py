@@ -33,8 +33,7 @@ def gezhongzaxiang(token):
     # print(times)
 
 
-def chuliwenben(wenben):
-    # wenben = "2018年5月26日，周六一，计划拜访25区、26区，38家，订单20单二，重点工作1，产品推广1元小帅虎   15家         1元渔米之乡10家2，重点客户湖北特产、阿里之门赛达国际、2018年5月25日，周五一，计划拜访，25区，40家，订单20单，回款5千实际拜访，25区，28家，订单15单1，跟进新点，天猫小店天顺园，今天在城市广场4期碰头，已经确认了，可以开货，后面他们采购通过我们的供货清单报单2，新点一家，可多保利香槟国际2店，保利香槟国际1店介绍的3，三商佳兴园转让，5月9日，欠款单，今天跟老板娘打了电话，这两天她在那边过去结账4，最舒服的店，福乐平价     最不舒服的店，芙蓉兴盛丰华路二，重点工作1，产品推广1元小帅虎  15家        1元渔米之乡10家实际，8家                                 8家今天线路，主要是补上周没拜访的线路，整体质量不是很高2，重点客户阿里之门赛达国际、天顺园、未拜访完，明天补三，其他乐惠结欠款1，乐惠明天去，今天还没拜访到他家2.今天为了拜访天猫小店天顺园，耽搁时间，后面下雨就没拜访完，明天补3，自我评分，努力70分，结果55分"
+def chulinote_workplan(wenben):
     pattern = re.compile('(\d{4}\s*[年\\\.-]{1}\d{1,2}\s*[月\\\.-]{1}\d{1,2}\s*[日|号]?)(?:(?:[,， 。])?(?:周.))?', re.U)
     splititems = re.split(pattern, wenben)
     # print(len(splititems))
@@ -62,17 +61,12 @@ def chuliwenben(wenben):
     return items
 
 
-def planfenxi(token, jiangemiao):
+def updatedb_workplan(note_store, persons):
+    cnxp = lite.connect('data\\workplan.db')
+    tablename_plan = 'personplan'
+    tablename_updated = 'planupdated'
     try:
-        note_store = get_notestore(token)
-        persons = BeautifulSoup(note_store.getNoteContent('992afcfb-3afb-437b-9eb1-7164d5207564'),
-                                'html.parser').get_text().strip().split()
-        # print(persons)
-        cnxp = lite.connect('data\\workplan.db')
-        tablename_plan = 'personplan'
-        tablename_updated = 'planupdated'
         liuxin = 5
-        updatablelist = []
         for person in persons:
             # print(person)
             # if person != '梅富忠':
@@ -84,7 +78,7 @@ def planfenxi(token, jiangemiao):
             # print(timestamp2str(int(note.updated/1000)))
             # print(note.updateSequenceNum)
             soup = BeautifulSoup(note.content, "html.parser").get_text().strip()
-            planitems = chuliwenben(soup)
+            planitems = chulinote_workplan(soup)
             # print(planitems[:3])
             if (len(planitems) == 0):
                 log.info('%s业务日志中无有效日记录，跳过。' % (person))
@@ -92,7 +86,6 @@ def planfenxi(token, jiangemiao):
             sqlstr = 'select max(date) from %s where name=\'%s\'' % (tablename_plan, person)
             dftmp = pd.read_sql(sqlstr, cnxp)
             datemaxdb = pd.to_datetime(dftmp.iloc[0, 0])
-            log.info('%s的日志内容表中最新日期为%s' % (person, str(datemaxdb)))
             if datemaxdb == None:
                 datemaxdb = planitems[-1][0] + datetime.timedelta(days=-1)
             planitemsxinxiancount = 0
@@ -118,14 +111,13 @@ def planfenxi(token, jiangemiao):
                 if dfrizhichuli.shape[0] > liuxin:
                     dfrizhiappend = dfrizhichuli[:dfrizhichuli.shape[0] - liuxin]  # 取头部
                     dfrizhiappend.to_sql(tablename_plan, cnxp, if_exists='append')
-                    log.info('%s的业务日志有%d条追加到日志内容表中。' % (person, dfrizhiappend.shape[0]))
+                    log.info('%s的业务日志有%d条追加到日志内容表中，最新日期为：%s' % (person, dfrizhiappend.shape[0], str(datemaxdb)))
 
             # print(planitems[0])
             if cfpzysm.has_option('业务计划总结updatenum', person):
                 updatable = note.updateSequenceNum > cfpzysm.getint('业务计划总结updatenum', person)
             else:
                 updatable = True
-            updatablelist.append(updatable)
             if updatable:
                 log.info('业务主管%s的日志有更新。' % person)
                 item = []
@@ -145,18 +137,43 @@ def planfenxi(token, jiangemiao):
                 cfpzysm.set('业务计划总结updatenum', person, '%d' % note.updateSequenceNum)
                 cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
 
+    except Exception as e:
+        log.critical('读取工作日志笔记更新入日志内容表和日志更新表时发生错误。%s' % str(e))
+    finally:
+        cnxp.close()
+
+
+def planfenxi(token, jiangemiao):
+    cnxp = lite.connect('data\\workplan.db')
+    tablename_updated = 'planupdated'
+    try:
+        note_store = get_notestore(token)
+        persons = BeautifulSoup(note_store.getNoteContent('992afcfb-3afb-437b-9eb1-7164d5207564'),
+                                'html.parser').get_text().strip().split()
+        evernoteapijiayi()
+        updatedb_workplan(note_store, persons)
+
+        sqlstr = 'select distinct * from %s order by updatedtime desc' % tablename_updated
+        dfsource = pd.read_sql(sqlstr, cnxp)
+        updatablelist = []
+        for person in persons:
+            planitemscount = dfsource.loc[dfsource.name == person].shape[0]
+            if cfpzysm.has_option('业务计划总结itemscount', person):
+                updatable = planitemscount > cfpzysm.getint('业务计划总结itemscount', person)
+            else:
+                updatable = True
+            updatablelist.append(updatable)
+        print(updatablelist)
+
         updatableall = False
         for i in range(len(updatablelist)):
             updatableall |= updatablelist[i]
             if updatableall:
                 break
         if updatableall:  # or True:
-            sqlstr = 'select distinct * from %s order by updatedtime desc' % tablename_updated
-            dftmp = pd.read_sql(sqlstr, cnxp,
-                                columns=['name', 'nianyueri', 'date', 'content', 'contentlength', 'updatedtime'])
-            dftmp.columns = ['index', 'name', 'nianyueri', 'date', 'content', 'contentlength', 'updatedtime']
             dayscount = cfpzysm.getint('业务计划总结dayscount', 'count')
-            dflast = dftmp[pd.to_datetime(dftmp.date) > (datetime.datetime.now() + pd.DateOffset(days=-1 * dayscount))]
+            dflast = dfsource[
+                pd.to_datetime(dfsource.date) > (datetime.datetime.now() + pd.DateOffset(days=(-1 * dayscount)))]
             df = dflast[['name', 'nianyueri', 'contentlength', 'updatedtime']]
             df2show = df.drop_duplicates(['name', 'nianyueri'], keep='last')
             df2show.columns = ['业务人员', '计划日期', '内容字数', '更新时间']
@@ -184,16 +201,26 @@ def planfenxi(token, jiangemiao):
             neirong = html.unescape(neirong)
             # print(neirong)
             guid = cfpzysm.get('业务计划总结guid', '汇总')
-            note = note_store.getNote(guid, True, True, False, False)
-            huizongnoteupdatedtime = timestamp2str(int(note.updated / 1000))
-            imglist2note(note_store, [], '53115c1b-3623-4a0b-aecc-88f85543c549',
-                         '业务工作日志提交情况汇总（自动更新时间：%s）' % huizongnoteupdatedtime, neirong)
-        else:
-            log.info('本次查阅业务人员日志无更新。')
-        cnxp.close()
+            huizongnoteupdatedtime = datetime.datetime.now().strftime('%F %T')
+            imglist2note(note_store, [], guid,
+                         '业务工作日志提交情况汇总（%s）' % huizongnoteupdatedtime, neirong)
 
+        for person in persons:
+            dfperson = dfsource.loc[dfsource.name == person]
+            planitemscount = dfperson.shape[0]
+            if cfpzysm.has_option('业务计划总结itemscount', person):
+                updatable = planitemscount > cfpzysm.getint('业务计划总结itemscount', person)
+            else:
+                updatable = True
+            if updatable:
+                log.info(
+                    '%s的业务日志条目数增加至%d，日志更新表中最新日期为：%s。' % (person, planitemscount, str(dfperson.iloc[0]['nianyueri'])))
+                cfpzysm.set('业务计划总结itemscount', person, '%d' % planitemscount)
+                cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
     except Exception as e:
         log.critical('更新业务日志汇总笔记时出现错误。%s' % (str(e)))
+    finally:
+        cnxp.close()
 
     global timer_plan2note
     timer_plan2note = Timer(jiangemiao, planfenxi, (token, jiangemiao))
@@ -231,7 +258,7 @@ def chulioldversion(token):
                 log.critical('%s业务日志读取版本%d中时出现错误，终止操作进入下一轮。%s' % (person, ver.updateSequenceNum, str(e)))
                 break
             soup = BeautifulSoup(notever.content, "html.parser").get_text().strip()
-            planitems = chuliwenben(soup)
+            planitems = chulinote_workplan(soup)
             if (len(planitems) == 0):
                 log.info('%s业务日志版本%d中无有效日志记录，跳过此版本。' % (person, ver.updateSequenceNum))
                 continue
@@ -256,32 +283,36 @@ def chulioldversion(token):
 def chayanshuju():
     cnxp = lite.connect('data\\workplan.db')
     tablename_updated = 'planupdated'
-    sqlstr = 'select distinct * from %s order by updatedtime desc' % tablename_updated
-    dftmp = pd.read_sql(sqlstr, cnxp, columns=['name', 'nianyueri', 'date', 'content', 'contentlength', 'updatedtime'])
-    dftmp.columns = ['index', 'name', 'nianyueri', 'date', 'content', 'contentlength', 'updatedtime']
-    dflasttwenty = dftmp[pd.to_datetime(dftmp.date) > datetime.datetime.now() + pd.DateOffset(days=-20)]
-    df = dflasttwenty[['name', 'nianyueri', 'contentlength', 'updatedtime']]
-    # dfupdated = df.drop_duplicates(['name', 'nianyueri'],keep='last')
-    dfupdated = df
 
-    def hege(a, b):
-        if pd.to_datetime(a) > pd.to_datetime(b):
-            return '准时'
-        else:
-            return '<font color=\'red\'>延迟</font>'
+    person = '梅富忠'
+    sqlstr = 'select * from %s order by updatedtime desc' % (tablename_updated)
+    dftmp = pd.read_sql(sqlstr, cnxp)
+    print(dftmp.shape[0])
 
-    col_names = dfupdated.columns.tolist()
-    col_names.append('timed')
-    dfupdated = dfupdated.reindex(columns=col_names)
-    dfupdated.loc[:, ['timed']] = dfupdated.apply(lambda x: hege(x.nianyueri, x.updatedtime), axis=1)
-    print(dfupdated[dfupdated.name == '陈威'])
+    sqlstr = 'select distinct * from %s order by updatedtime desc' % (tablename_updated)
+    dftmp = pd.read_sql(sqlstr, cnxp)
+    print(dftmp.shape[0])
+    dftmp.to_sql(tablename_updated, cnxp, if_exists='replace')
+
+    sqlstr = 'select * from %s order by updatedtime desc' % (tablename_updated)
+    dftmp = pd.read_sql(sqlstr, cnxp)
+    print(dftmp.shape[0])
+
+    dfupdated = dftmp.groupby(['name', 'nianyueri'], as_index=False)['updatedtime'].max().sort_values('updatedtime',
+                                                                                                      ascending=False)
+    descdb(dfupdated)
 
     cnxp.close()
+
+    huizongnoteupdatedtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print(huizongnoteupdatedtime)
+    huizongnoteupdatedtime = datetime.datetime.now().strftime('%F %T')
+    print(huizongnoteupdatedtime)
 
 if __name__ == '__main__':
     token = cfp.get('evernote', 'token')
     # gezhongzaxiang(token)
-    # planfenxi(token, 60 * 60 * 3)
-    chayanshuju()
+    planfenxi(token, 60 * 5)
+    # chayanshuju()
     # chulioldversion(token)
     pass

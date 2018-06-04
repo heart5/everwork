@@ -316,7 +316,6 @@ def get_notestore(token='your developer token'):
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
     errorstr = '连接Evernote服务器出现错误！'
-    note_store = None
     try:
         userstore = client.get_user_store()
         version_ok = userstore.checkVersion(
@@ -331,6 +330,7 @@ def get_notestore(token='your developer token'):
         note_store = client.get_note_store()
         evernoteapijiayi()
         # log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
+        return note_store
     except socket.gaierror as sge:
         if sge.errno == 11001:
             log.critical('%s网络连接问题，无法寻址。%s' % (errorstr, str(sge)))
@@ -357,8 +357,6 @@ def get_notestore(token='your developer token'):
         print(ee)
         log.critical('%s出现未名系统错误。%s' % (errorstr, str(ee)))
         # exit(5)
-    finally:
-        return note_store
 
 
 def findnotefromnotebook(token, notebookguid, titlefind, notecount=10000):
