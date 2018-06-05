@@ -76,10 +76,6 @@ def chulixls_order(token):
         pass
 
 
-
-    pass
-
-
 if __name__ == '__main__':
     token = cfp.get('evernote', 'token')
     chulixls_order(token)

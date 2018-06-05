@@ -304,30 +304,14 @@ def jinchustat(token, jinchujiluall, noteinfos):
 
 
 def jinchustattimer(token, jiangemiao):
-    noteinfolist = [
-        ['', 'chongqing', 'life', 'ce021c0e-d96b-42c7-aa2c-36c0b11b7d53', '进出统计图表（重庆）', '重庆进出记录', ['wxpaihotels']],
-        ['', 'chengdu', 'life', 'f651c574-89ce-45b6-ab1e-e1844110d444', '进出统计图表（成都）', '成都进出记录', ['echarm', 'jyy']],
-        ['', 'yangfu\'restraunaut', 'life', '06bb4996-d0d8-4266-87d5-f3283d71f58e', '进出统计图表（东西湖）', '东西湖进出记录', []],
-        ['', 'fanyuan', 'life', 'db59af11-fb1c-4864-a7da-0989452e170f', '进出统计图表（范渊）', '范渊进出记录', ['tp-link_c6cf']],
-        ['', 'liyang', 'life', '76a9d82c-5a22-4cb6-9acf-13426a2be3b7', '进出统计图表（立阳）', '立阳进出记录', ['hubeiliyang']],
-        ['f119e38e-3876-4937-80f1-e6a6b2e5d3d0', 'wenchanglu', 'work', '7f4bec82-626b-4022-b3c2-0d9b3d71198d',
-         '进出统计图表（文昌路金地格林）', '文昌路', ['zysm3100', 'zysm2100', 'zysm4100', 'zysm5100', 'zysm_friends', 'zyck']],
-        ['d8fa0226-88ac-4b6c-b8fd-63a9038a6abf', 'huadianxiaolu', 'home', '08a01c35-d16d-4b22-b7f7-61e3993fd2cb',
-         '家进出统计图表（岳家嘴）', '白晔峰家附近区域进出记录', ['60bf0', '60bf0_5g', '60bf0_plus']],
-        ['1ea50564-dee7-4e82-87b5-39703671e623', 'dingziqiao', 'life', '6eef085c-0e84-4753-bf3e-b45473a12274',
-         '进出统计图表（丁字桥）', '丁字桥', ['wx-sgkf', '大浪淘沙']],
-        ['', 'daye', 'home', 'ba1d98ff-be3b-400a-bb59-ce78efca45fc', '家进出统计图表（大冶）', '白晔峰家大冶进出记录'],
-        ['9ac941cc-c04b-4d4b-879f-2bfb044382d4', 'lushan', 'home', '987c1d5e-d8ad-41aa-9269-d2b840616410',
-         '家进出统计图表（鲁山）', '鲁山', ['haier-soho_0dd903']],
-        ['84e9ee0b-30c3-4404-84e2-7b4614980b4b', 'hanyangban', 'work', 'a7e84055-f075-44ab-8205-5a42f3f05284',
-         '进出记录统计图表（汉阳办）', '汉阳办', ['zysmhybsq2016']],
-        ['6fb1e016-01ab-439d-929e-994dc980ddbe', 'hankouban', 'work', '2c5e3728-be69-4e52-a8ff-07860e8593b7',
-         '进出记录统计图表（汉口办）', '汉口办', ['zysmhk2018']],
-        ['24aad619-2356-499e-9fa7-f685af3a81b1', 'maotanhuamushichang', 'work', '2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e',
-         '公司进出记录统计图表', '花木市场', ['zysm3100', 'zysm2100', 'zysm4100', 'zysm5100', 'zysm_friends', 'zyck']],
-        ['38f4b1a9-7d6e-4091-928e-c82d7d3717c5', 'qiwei', 'work', '294b584f-f34a-49f0-b4d3-08085a37bfd5',
-         '进出统计图表（创食人）', '创食人', ['qw2', 'qw1', 'zcb']]
-    ]
+    items = cfplife.items('impinfolist')
+    noteinfolist = []
+    for address, infoslicelist in items:
+        infoslist = [*args, wifilist] = infoslicelist.split('\n')
+        infoslist.insert(1, address)
+        infoslist.insert(-1, infoslist[-1].split(','))
+        noteinfolist.append(infoslist[:-1])
+    # print(noteinfolist)
 
     dfjinchu = pd.DataFrame(jilugooglefile('data\\google'))
     itemswifi = jilugmail('Ifttt/Wifi', 'wifi', 'all')
