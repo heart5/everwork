@@ -95,14 +95,14 @@ def jilugoogledrive():
     return dfout
 
 
-def jilunote(token, noteinfos):
+def jilunote(noteinfos):
     """
     读取ifttt自动通过gmail转发至evernote生成的地段进出记录，统计作图展示
     :rtype: Null
     """
-    # itemstr = BeautifulSoup(get_notestore(token).getNoteContent(noteinfos[0]), "html.parser"). \
+    # itemstr = BeautifulSoup(get_notestore().getNoteContent(noteinfos[0]), "html.parser"). \
     #     get_text().replace('\r', '').replace('\n', '')  # 文本化后去掉回车、换行符等
-    itemstr = BeautifulSoup(get_notestore(token).getNoteContent(noteinfos[0]), "html.parser"). \
+    itemstr = BeautifulSoup(get_notestore().getNoteContent(noteinfos[0]), "html.parser"). \
         get_text().split('\r\n')  # 文本化后去掉回车、换行符等，通过split转换为list
     # print('笔记："%s" 中提取内容' %noteinfos[5])
     # print(itemstr)
@@ -114,7 +114,7 @@ def jilunote(token, noteinfos):
 def wifitodf(itemstr, noteinfolist):
     itemstrjoin = '\n'.join(itemstr)
     pattern = re.compile(
-        '(?:Device )((?:dis){0,1}connected) (?:to|from) ([\w|-]+)， (\w+ \d+, \d{4} at \d{2}:\d{2}[A|P]M)')
+        '(?:Device )((?:dis)?connected) (?:to|from) ([\w|-]+)， (\w+ \d+, \d{4} at \d{2}:\d{2}[A|P]M)')
     slices = re.split(pattern, itemstrjoin)
     items_split = []
     for i in range(int(len(slices) / 4)):
@@ -159,7 +159,7 @@ def wifitodf(itemstr, noteinfolist):
 
     try:
         token = cfp.get('evernote', 'token')
-        notestore = get_notestore(token)
+        notestore = get_notestore()
         dfnotename = dfwifi[['entered', 'shuxing', 'address']]
         dfwificount = dfwifi.shape[0]  # shape[0]获得行数，shape[1]则是列数
         print(dfwificount, end='\t')
@@ -187,8 +187,8 @@ def wifitodf(itemstr, noteinfolist):
 
             cfp.set('wifi', 'itemnumber', '%d' % dfwificount)
             cfp.write(open(inifilepath, 'w', encoding='utf-8'))
-    except Exception as e:
-        log.critical('更新WIFI连接统计笔记时出现错误。%s' % str(e))
+    except Exception as eee:
+        log.critical('更新WIFI连接统计笔记时出现错误。%s' % str(eee))
 
     return dfout
 
@@ -201,7 +201,8 @@ def itemstodf(itemstr, noteinfos):
     yuefennames = str(yuefenlist[0])
     for a in range(1, len(yuefenlist)):
         yuefennames += '|' + str(yuefenlist[a])
-    yuefennames = '(?:' + yuefennames + ')'  # (?:January|February|March|April|May|June|July|September|October|December|November)
+    yuefennames = '(?:' + yuefennames + ')'
+    # (?:January|February|March|April|May|June|July|September|October|December|November)
     # print(yuefennames)
     # pattern = u'(\w*\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)\s：\s(e(?:xit|nter)ed)'
     # pattern = u'(%s\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)\s：\s(e(?:xit|nter)ed)' % yuefennames
@@ -234,7 +235,7 @@ def itemstodf(itemstr, noteinfos):
     return dfout
 
 
-def jinchustat(token, jinchujiluall, noteinfos):
+def jinchustat(jinchujiluall, noteinfos):
     """
     读取ifttt自动通过gmail转发至evernote生成的地段进出记录，统计作图展示
     :rtype: Null
@@ -250,7 +251,7 @@ def jinchustat(token, jinchujiluall, noteinfos):
     dfjc['nianyue'] = dfjc['atime'].apply(lambda x: datetime.datetime.strftime(x, '%Y%m'))
     dfjc['小时'] = dfjc['atime'].apply(lambda x: datetime.datetime.strftime(x, '%H'))
     # print(dfjc.tail(10))
-    dfff = dfjc[dfjc.entered == False].groupby(['nianyue', '小时'])['entered'].count()  #以离开为进出标准
+    dfff = dfjc[dfjc.entered is False].groupby(['nianyue', '小时'])['entered'].count()  # 以离开为进出标准
     dffu = dfff.unstack(fill_value=0)
     # print(dffu)
 
@@ -300,23 +301,23 @@ def jinchustat(token, jinchujiluall, noteinfos):
     # print(imglist)
     plt.close()
 
-    imglist2note(get_notestore(token), imglist, destguid, notetitle, hout)
+    imglist2note(get_notestore(), imglist, destguid, notetitle, hout)
 
 
-def jinchustattimer(token, jiangemiao):
+def jinchustattimer(jiangemiao):
     items = cfplife.items('impinfolist')
-    noteinfolist = []
+    noteinfolistinside = []
     for address, infoslicelist in items:
         infoslist = [*args, wifilist] = infoslicelist.split('\n')
         infoslist.insert(1, address)
         infoslist.insert(-1, infoslist[-1].split(','))
-        noteinfolist.append(infoslist[:-1])
+        noteinfolistinside.append(infoslist[:-1])
     # print(noteinfolist)
 
     dfjinchu = pd.DataFrame(jilugooglefile('data\\google'))
     itemswifi = jilugmail('Ifttt/Wifi', 'wifi', 'all')
     if itemswifi:
-        dfjinchuwifi = wifitodf(itemswifi, noteinfolist)
+        dfjinchuwifi = wifitodf(itemswifi, noteinfolistinside)
         dfjinchu = dfjinchu.append(dfjinchuwifi)
 
     try:
@@ -326,9 +327,9 @@ def jinchustattimer(token, jiangemiao):
 
     # print(dfjinchu.shape[0])
     try:
-        for noteinfo in noteinfolist:
+        for noteinfo in noteinfolistinside:
             if len(noteinfo[0]) > 0:  # 有数据源笔记的guid就处理该笔记
-                dfjinchunote = itemstodf(jilunote(token, noteinfo), noteinfo)  # 从evernote相应笔记中获取记录
+                dfjinchunote = itemstodf(jilunote(noteinfo), noteinfo)  # 从evernote相应笔记中获取记录
             else:
                 dfjinchunote = pd.DataFrame()
             # print(dfjinchunote)
@@ -359,7 +360,7 @@ def jinchustattimer(token, jiangemiao):
             # descdb(dfjinchuitem)
             if ntupdatenum:  # or True:
                 # print(dfjinchu.head(5))
-                jinchustat(token, dfjinchuitem, noteinfo[1:])
+                jinchustat(dfjinchuitem, noteinfo[1:])
                 cfp.set('jinchu', noteinfo[1], '%d' % dfjinchucount)
                 cfp.write(open(inifilepath, 'w', encoding='utf-8'))
                 log.info('%s成功更新入图表统计笔记，将于%d秒后再次自动检查并更新' % (str(noteinfo), jiangemiao))
@@ -367,7 +368,7 @@ def jinchustattimer(token, jiangemiao):
         log.critical('读取系列进出笔记并更新统计信息时出现未名错误。%s' % (str(e)))
 
     global timer_jinchu
-    timer_jinchu = Timer(jiangemiao, jinchustattimer, (token, jiangemiao))
+    timer_jinchu = Timer(jiangemiao, jinchustattimer, [jiangemiao])
     # print(timer_jinchu)
     timer_jinchu.start()
 
@@ -387,7 +388,7 @@ if __name__ == '__main__':
          '进出统计图表（创食人）', '创食人', ['qw2', 'zcb']]
     ]
 
-    jinchustattimer(token, 60 * 32)
+    jinchustattimer(60 * 32)
 
     # dfjilu = jilugmail('Ifttt/SmsLog', 'smslog', 'all', bodyonly=False)
     # print(dfjilu[:200])

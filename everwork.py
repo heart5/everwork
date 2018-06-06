@@ -12,6 +12,7 @@ from notejinchujilu import *
 from log2note import *
 from peoplelog2note import *
 from workplan import *
+from salesorder import workfilefromgmail2datacenter
 
 # log.debug('程序启动……')
 # todo 一体化目录构建
@@ -36,13 +37,12 @@ from workplan import *
 
 # isnoteupdate(token, note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
 
-
-token = cfp.get('evernote', 'token')
-log2notetimer(token, 60 * 45)
-weatherstattimer(token, 60 * 60 * 3 + 60 * 25)
-jinchustattimer(token, 60 * 60)
-peoplestattimer(token, 60 * 25)
-planfenxi(token, 60 * 65 * 2)
+workfilefromgmail2datacenter(60*60*2)
+log2notetimer(60 * 45)
+weatherstattimer(60 * 60 * 3 + 60 * 25)
+jinchustattimer(60 * 60)
+peoplestattimer(60 * 25)
+planfenxi(60 * 65 * 2)
 
 writeini()
 

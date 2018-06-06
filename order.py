@@ -18,7 +18,11 @@ from imp4nb import *
 import xlrd
 
 
-def chulixls_order(token):
+def chulidata_order():
+    pass
+
+
+def chulixls_order(notestore):
     pathlog = 'data\\work\\销售订单'
     files = os.listdir(pathlog)
     print(files)
@@ -35,7 +39,7 @@ def chulixls_order(token):
     print(sheet_name)
     sheet1 = book.sheet_by_name(sheet_name)  # 通过sheet名字来获取，当然如果知道sheet名字就可以直接指定
     nrows = sheet1.nrows  # 获取行总数
-    ncols = sheet1.ncols
+    # ncols = sheet1.ncols
     biglist = []
     for i in range(nrows):
         rowlist = []
@@ -59,7 +63,6 @@ def chulixls_order(token):
     persons = list(dfordergengming.groupby('业务人员').count().index)
     print(persons)
     notestr = '每日销售订单核对'
-    note_store = get_notestore(token)
     for person in persons:
         dfperson = dfordergengming[dfordergengming.业务人员 == person]
         dfpersonsum = dfperson.groupby('业务人员').sum()['订单金额']
@@ -72,13 +75,13 @@ def chulixls_order(token):
         print(personguid)
         neirong = tablehtml2evernote(dfperson, notestr)
         # print(neirong)
-        imglist2note(note_store, [], personguid, '%s——%s（%s）' % (notestr, person, orderdatestr), neirong)
+        imglist2note(notestore, [], personguid, '%s——%s（%s）' % (notestr, person, orderdatestr), neirong)
         pass
 
 
 if __name__ == '__main__':
     token = cfp.get('evernote', 'token')
-    chulixls_order(token)
+    chulixls_order(get_notestore())
     # guids = findnotefromnotebook(token, '2c8e97b5-421f-461c-8e35-0f0b1a33e91c', '销售订单')
     # print(guids)
     pass

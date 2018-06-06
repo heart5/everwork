@@ -25,7 +25,7 @@ e34ae4da-4ddd-4b13-bb1c-307d39f03cc8 业务推广计划和总结—刘权
 from imp4nb import *
 
 
-def gezhongzaxiang(token):
+def gezhongzaxiang():
     # findnotebookfromevernote(token)
     findnotefromnotebook(token, '2c8e97b5-421f-461c-8e35-0f0b1a33e91c', '汇总')
     # findnotefromnotebook(token, '3d927c7e-98a6-4761-b0c6-7fba1348244f', '在职')
@@ -34,7 +34,7 @@ def gezhongzaxiang(token):
 
 
 def chulinote_workplan(wenben):
-    pattern = re.compile('(\d{4}\s*[年\\\.-]{1}\d{1,2}\s*[月\\\.-]{1}\d{1,2}\s*[日|号]?)(?:(?:[,， 。])?(?:周.))?', re.U)
+    pattern = re.compile('(\d{4}\s*[年\\\.-]\d{1,2}\s*[月\\\.-]\d{1,2}\s*[日|号]?)(?:(?:[,， 。])?(?:周.))?', re.U)
     splititems = re.split(pattern, wenben)
     # print(len(splititems))
     splititems = splititems[1:]
@@ -43,7 +43,7 @@ def chulinote_workplan(wenben):
     items = []
     for i in range(int(len(splititems) / 2)):
         item = []
-        patternriqi = re.compile('(\d+)\s*[年\\\.-]{1}(\d+)\s*[月\\\.-]{1}(\d+)\s*[日|号]?', re.U)
+        patternriqi = re.compile('(\d+)\s*[年\\\.-](\d+)\s*[月\\\.-](\d+)\s*[日|号]?', re.U)
         splitriqi = re.split(patternriqi, splititems[i * 2])
         # print(splitriqi)
         try:
@@ -80,13 +80,13 @@ def updatedb_workplan(note_store, persons):
             soup = BeautifulSoup(note.content, "html.parser").get_text().strip()
             planitems = chulinote_workplan(soup)
             # print(planitems[:3])
-            if (len(planitems) == 0):
-                log.info('%s业务日志中无有效日记录，跳过。' % (person))
+            if len(planitems) == 0:
+                log.info('%s业务日志中无有效日记录，跳过。' % person)
                 continue
             sqlstr = 'select max(date) from %s where name=\'%s\'' % (tablename_plan, person)
             dftmp = pd.read_sql(sqlstr, cnxp)
             datemaxdb = pd.to_datetime(dftmp.iloc[0, 0])
-            if datemaxdb == None:
+            if datemaxdb is None:
                 datemaxdb = planitems[-1][0] + datetime.timedelta(days=-1)
             planitemsxinxiancount = 0
             for i in range(len(planitems)):
@@ -120,7 +120,7 @@ def updatedb_workplan(note_store, persons):
                 updatable = True
             if updatable:
                 log.info('业务主管%s的日志有更新。' % person)
-                item = []
+                item = list()
                 item.append(person)
                 datestr = datetime.date.strftime(planitems[0][0], '%Y-%m-%d')
                 item.append(datestr)
@@ -128,7 +128,7 @@ def updatedb_workplan(note_store, persons):
                 item.append(planitems[0][1])
                 item.append(len(planitems[0][1]))
                 item.append(timestamp2str(int(note.updated / 1000)))
-                itemss = []
+                itemss = list()
                 itemss.append(item)
                 dfupdate = pd.DataFrame(itemss, columns=['name', 'nianyueri', 'date', 'content', 'contentlength',
                                                          'updatedtime'])
@@ -137,17 +137,17 @@ def updatedb_workplan(note_store, persons):
                 cfpzysm.set('业务计划总结updatenum', person, '%d' % note.updateSequenceNum)
                 cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
 
-    except Exception as e:
-        log.critical('读取工作日志笔记更新入日志内容表和日志更新表时发生错误。%s' % str(e))
+    except Exception as eee:
+        log.critical('读取工作日志笔记更新入日志内容表和日志更新表时发生错误。%s' % str(eee))
     finally:
         cnxp.close()
 
 
-def planfenxi(token, jiangemiao):
+def planfenxi(jiangemiao):
     cnxp = lite.connect('data\\workplan.db')
     tablename_updated = 'planupdated'
     try:
-        note_store = get_notestore(token)
+        note_store = get_notestore()
         persons = BeautifulSoup(note_store.getNoteContent('992afcfb-3afb-437b-9eb1-7164d5207564'),
                                 'html.parser').get_text().strip().split()
         evernoteapijiayi()
@@ -184,7 +184,7 @@ def planfenxi(token, jiangemiao):
                 else:
                     return '延迟'
 
-            col_names = df2show.columns.tolist()
+            col_names = list(df2show.columns)
             col_names.append('计划提交')
             df2show = df2show.reindex(columns=col_names)
             df2show.loc[:, ['计划提交']] = df2show.apply(lambda x: hege(x.计划日期, x.更新时间), axis=1)
@@ -217,18 +217,18 @@ def planfenxi(token, jiangemiao):
                     '%s的业务日志条目数增加至%d，日志更新表中最新日期为：%s。' % (person, planitemscount, str(dfperson.iloc[0]['nianyueri'])))
                 cfpzysm.set('业务计划总结itemscount', person, '%d' % planitemscount)
                 cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
-    except Exception as e:
-        log.critical('更新业务日志汇总笔记时出现错误。%s' % (str(e)))
+    except Exception as eee:
+        log.critical('更新业务日志汇总笔记时出现错误。%s' % (str(eee)))
     finally:
         cnxp.close()
 
     global timer_plan2note
-    timer_plan2note = Timer(jiangemiao, planfenxi, (token, jiangemiao))
+    timer_plan2note = Timer(jiangemiao, planfenxi, [jiangemiao])
     timer_plan2note.start()
 
 
-def chulioldversion(token):
-    note_store = get_notestore(token)
+def chulioldversion():
+    note_store = get_notestore()
     notes = findnotefromnotebook(token, '2c8e97b5-421f-461c-8e35-0f0b1a33e91c', '业务推广')
     for ii in range(len(notes)):
         note = notes[ii]
@@ -244,25 +244,26 @@ def chulioldversion(token):
         verlist = note_store.listNoteVersions(token, guid)
         evernoteapijiayi()
         print(len(verlist))
-        print(verlist[
-                  0])  # NoteVersionId(updateSequenceNum=472609, updated=1527677247000, saved=1527682577000, title='业务推广日工作总结和计划——徐志伟')
+        print(verlist[0])
+        # NoteVersionId(updateSequenceNum=472609, updated=1527677247000, saved=1527682577000,
+        # title='业务推广日工作总结和计划——徐志伟')
         items = []
-        note_store = get_notestore(token)
+        note_store = get_notestore()
         for ver in verlist:
             try:
                 # if ver.updateSequenceNum >= 151454:   #开关，断点续传
                 #     continue
                 notever = note_store.getNoteVersion(token, guid, ver.updateSequenceNum, True, True, True)
                 evernoteapijiayi()
-            except Exception as e:
-                log.critical('%s业务日志读取版本%d中时出现错误，终止操作进入下一轮。%s' % (person, ver.updateSequenceNum, str(e)))
+            except Exception as eeee:
+                log.critical('%s业务日志读取版本%d中时出现错误，终止操作进入下一轮。%s' % (person, ver.updateSequenceNum, str(eeee)))
                 break
             soup = BeautifulSoup(notever.content, "html.parser").get_text().strip()
             planitems = chulinote_workplan(soup)
-            if (len(planitems) == 0):
+            if len(planitems) == 0:
                 log.info('%s业务日志版本%d中无有效日志记录，跳过此版本。' % (person, ver.updateSequenceNum))
                 continue
-            item = []
+            item = list()
             item.append(person)
             datestr = datetime.date.strftime(planitems[0][0], '%Y-%m-%d')
             item.append(datestr)
@@ -284,17 +285,17 @@ def chayanshuju():
     cnxp = lite.connect('data\\workplan.db')
     tablename_updated = 'planupdated'
 
-    person = '梅富忠'
-    sqlstr = 'select * from %s order by updatedtime desc' % (tablename_updated)
+    # person = '梅富忠'
+    sqlstr = 'select * from %s order by updatedtime desc' % tablename_updated
     dftmp = pd.read_sql(sqlstr, cnxp)
     print(dftmp.shape[0])
 
-    sqlstr = 'select distinct * from %s order by updatedtime desc' % (tablename_updated)
+    sqlstr = 'select distinct * from %s order by updatedtime desc' % tablename_updated
     dftmp = pd.read_sql(sqlstr, cnxp)
     print(dftmp.shape[0])
     dftmp.to_sql(tablename_updated, cnxp, if_exists='replace')
 
-    sqlstr = 'select * from %s order by updatedtime desc' % (tablename_updated)
+    sqlstr = 'select * from %s order by updatedtime desc' % tablename_updated
     dftmp = pd.read_sql(sqlstr, cnxp)
     print(dftmp.shape[0])
 
@@ -312,8 +313,8 @@ def chayanshuju():
 
 if __name__ == '__main__':
     token = cfp.get('evernote', 'token')
-    # gezhongzaxiang(token)
-    planfenxi(token, 60 * 5)
+    # gezhongzaxiang()
+    planfenxi(60 * 5)
     # chayanshuju()
-    # chulioldversion(token)
+    # chulioldversion()
     pass

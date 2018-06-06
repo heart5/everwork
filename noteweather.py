@@ -16,9 +16,9 @@ from imp4nb import *
 from matplotlib.ticker import MultipleLocator, FuncFormatter
 
 
-def getweatherfromevernote(token):
+def getweatherfromevernote():
     noteguid_weather = '277dff5e-7042-47c0-9d7b-aae270f903b8'
-    note_store = get_notestore(token)
+    note_store = get_notestore()
     soup = BeautifulSoup(note_store.getNoteContent(noteguid_weather), "html.parser")
     evernoteapijiayi()
     # tags = soup.find('en-note')
@@ -39,8 +39,8 @@ def getweatherfromgmail():
     host = cfp.get('gmail', 'host')
     username = cfp.get('gmail', 'username')
     password = cfp.get('gmail', 'password')
-    mailitems = getMail(host, username, password, dirtarget='Ifttt/Weather', unseen=True, topic='武汉每日天气 @行政管理 +')
-    if mailitems == False:
+    mailitems = getmail(host, username, password, dirtarget='Ifttt/Weather', unseen=True, topic='武汉每日天气 @行政管理 +')
+    if mailitems is False:
         return False
     split_items = []
     for header, body in mailitems:
@@ -91,7 +91,6 @@ def weatherstat(token, items, destguid=None):
     print(len(data_list), end='\t')
     print(data_list[0], end='\t')
     print (data_list[-1])
-
 
     df = pd.DataFrame(data_list,
                       columns=['date', 'gaowen', 'diwen', 'fengsu', 'fengxiang', 'sunon', 'sunoff', 'shidu'])
@@ -271,7 +270,7 @@ def weatherstat(token, items, destguid=None):
     imglist.append(img_sunonoff_path)
     plt.close()
 
-    imglist2note(get_notestore(token), imglist, destguid, '武汉天气图')
+    imglist2note(get_notestore(), imglist, destguid, '武汉天气图')
 
 
 def isweatherupdate(weathertxtfilename):
@@ -282,11 +281,11 @@ def isweatherupdate(weathertxtfilename):
 
     def write2weathertxt(weathertxtfilename, inputitemlist):
         # print(inputitemlist)
-        fileObject = open(weathertxtfilename, 'w', encoding='utf-8')
+        fileobject = open(weathertxtfilename, 'w', encoding='utf-8')
         for item in inputitemlist:
             # print(item)
-            fileObject.write(str(item) + '\n')
-        fileObject.close()
+            fileobject.write(str(item) + '\n')
+        fileobject.close()
 
     items = getweatherfromgmail()
     if items:
@@ -307,8 +306,7 @@ def isweatherupdate(weathertxtfilename):
         return False
 
 
-
-def weatherstattimer(token, jiangemiao):
+def weatherstattimer(jiangemiao):
     weathertxtfilename = "data\\ifttt\\weather.txt"
     try:
         usn = isweatherupdate(weathertxtfilename)
@@ -323,14 +321,14 @@ def weatherstattimer(token, jiangemiao):
         log.critical('读取天气信息笔记并更新天气统计信息笔记时出现未名错误。%s' % (str(e)))
 
     global timer_weather
-    timer_weather = Timer(jiangemiao, weatherstattimer, (token, jiangemiao))
+    timer_weather = Timer(jiangemiao, weatherstattimer, [jiangemiao])
     # print(timer_weather)
     timer_weather.start()
 
 
 if __name__ == '__main__':
     token = cfp.get('evernote', 'token')
-    weatherstattimer(token, 60 * 44)
+    weatherstattimer(60 * 44)
     # weathertxtfilename = "data\\ifttt\\weather.txt"
     # usn = isweatherupdate(weathertxtfilename)
     # weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')

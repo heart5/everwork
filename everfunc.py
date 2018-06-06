@@ -6,7 +6,7 @@ everwork的各种函数
 """
 
 import time, datetime, calendar as cal, hashlib, binascii, re, os, socket, random, email, imaplib, subprocess, locale, \
-    threading, html, \
+    threading, html, struct, \
     logging as lg, logging.handlers as lgh, pandas as pd, sqlite3 as lite, matplotlib.pyplot as plt, \
     evernote.edam.type.ttypes as Ttypes, evernote.edam.error.ttypes as Etypes, \
     evernote.edam.userstore.constants as UserStoreConstants, \
@@ -23,7 +23,6 @@ from os.path import isfile, join
 #from odps.df import DataFrame
 from threading import Timer
 from multiprocessing import Process, Pool, Queue
-
 
 
 def dirbuildfirst():
@@ -227,9 +226,7 @@ def use_logging(level='debug'):
             if level == 'debug':
                 log.debug("%s 启动运行" % func.__name__)
             return func(*args)
-
         return wrapper
-
     return decorator
 
 
@@ -278,7 +275,7 @@ def yingdacal(x, cnx):
 
 
 # @use_logging()
-def get_notestore(token='your developer token'):
+def get_notestore():
     # Real applications authenticate with Evernote using OAuth, but for the
     # purpose of exploring the API, you can get a developer token that allows
     # you to access your own Evernote account. To get a developer token, visit
@@ -294,10 +291,11 @@ def get_notestore(token='your developer token'):
     # refer to https://dev.evernote.com/doc/articles/testing.php
     # and https://dev.evernote.com/doc/articles/bootstrap.php
 
-    auth_token = token
+    # auth_token = token
+    auth_token = cfp.get('evernote', 'token')   # 直接提取，唯一使用
 
     if auth_token == "your developer token":
-        print("Please fill in your developer token\nTo get a developer token, visit " \
+        print("Please fill in your developer token\nTo get a developer token, visit "
               "https://sandbox.evernote.com/api/DeveloperToken.action")
         log.critical('请填入从evernote官方网站申请的有效token！程序终止并退出！！！')
         exit(1)
@@ -345,18 +343,18 @@ def get_notestore(token='your developer token'):
             log.critical('%s出现EDAM系统错误，API使用超限，需要%d秒后重来。%s' % (errorstr, systeme.rateLimitDuration, str(systeme)))
         else:
             log.critical('%s出现EDAM系统错误。%s' % (errorstr, str(systeme)))
-    except WindowsError as we:
-        if we.winerror == 10060:
-            log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器装死啊！%s' % (errorstr, str(we)))
-        elif we.winerror == 10054:
-            log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器端主动关闭链接啦！%s' % (errorstr, str(we)))
-        else:
-            log.critical('%s出现Windows系统错误（WindowsError）。%s' % (errorstr, str(we)))
-        raise we
-    except Exception as ee:
-        print(ee)
-        log.critical('%s出现未名系统错误。%s' % (errorstr, str(ee)))
-        # exit(5)
+    # except WindowsError as we:
+    #     if we.winerror == 10060:
+    #         log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器装死啊！%s' % (errorstr, str(we)))
+    #     elif we.winerror == 10054:
+    #         log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器端主动关闭链接啦！%s' % (errorstr, str(we)))
+    #     else:
+    #         log.critical('%s出现Windows系统错误（WindowsError）。%s' % (errorstr, str(we)))
+    #     raise we
+    # except Exception as ee:
+    #     print(ee)
+    #     log.critical('%s出现未名系统错误。%s' % (errorstr, str(ee)))
+    #     # exit(5)
 
 
 def findnotefromnotebook(token, notebookguid, titlefind, notecount=10000):
@@ -369,7 +367,7 @@ def findnotefromnotebook(token, notebookguid, titlefind, notecount=10000):
     :param notecount:
     :return:
     """
-    note_store = get_notestore(token)
+    note_store = get_notestore()
     notefilter = NoteStore.NoteFilter()
     notefilter.notebookGuid = notebookguid
     notemetaspec = NoteStore.NotesMetadataResultSpec(includeTitle=True, includeContentLength=True, includeCreated=True,
@@ -390,7 +388,7 @@ def findnotefromnotebook(token, notebookguid, titlefind, notecount=10000):
     items = []
     for note in ournotelist.notes:
         if note.title.find(titlefind) >= 0:
-            item = []
+            item = list()
             item.append(note.guid)
             item.append(note.title)
             # print(note.guid, note.title)
@@ -409,8 +407,8 @@ def p_notebookattributeundertoken(notebook):
     """
     print('名称：' + notebook.name, end='\t')  # phone
     print('guid：' + notebook.guid, end='\t')  # f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
-    print('更新序列号：' + str(notebook.updateSequenceNum), end='\t')  ##8285
-    print('默认笔记本：' + str(notebook.defaultNotebook), end='\t')  ##False
+    print('更新序列号：' + str(notebook.updateSequenceNum), end='\t')  # 8285
+    print('默认笔记本：' + str(notebook.defaultNotebook), end='\t')  # False
     print('创建时间：' + timestamp2str(int(notebook.serviceCreated / 1000)), end='\t')  # 2010-09-15 11:37:43
     print('更新时间：' + timestamp2str(int(notebook.serviceUpdated / 1000)), end='\t')  # 2016-08-29 19:38:24
     # print '发布中\t', notebook.publishing  #这种权限的调用返回None
@@ -420,7 +418,13 @@ def p_notebookattributeundertoken(notebook):
     # print '共享笔记本\t', notebook.sharedNotebooks  #这种权限的调用返回None
     # print '商务笔记本\t', notebook.businessNotebook  #这种权限的调用返回None
     # print '联系人\t', notebook.contact  #这种权限的调用返回None
-    # print '限定\t', notebook.restrictions  #NotebookRestrictions(noSetDefaultNotebook=None, noPublishToBusinessLibrary=True, noCreateTags=None, noUpdateNotes=None, expungeWhichSharedNotebookRestrictions=None, noExpungeTags=None, noSetNotebookStack=None, noCreateSharedNotebooks=None, noExpungeNotebook=None, noUpdateTags=None, noPublishToPublic=None, noUpdateNotebook=None, updateWhichSharedNotebookRestrictions=None, noSetParentTag=None, noCreateNotes=None, noEmailNotes=True, noReadNotes=None, noExpungeNotes=None, noShareNotes=None, noSendMessageToRecipients=None)
+    # print '限定\t', notebook.restrictions  #NotebookRestrictions(noSetDefaultNotebook=None,
+    # noPublishToBusinessLibrary=True, noCreateTags=None, noUpdateNotes=None,
+    # expungeWhichSharedNotebookRestrictions=None,
+    # noExpungeTags=None, noSetNotebookStack=None, noCreateSharedNotebooks=None, noExpungeNotebook=None,
+    # noUpdateTags=None, noPublishToPublic=None, noUpdateNotebook=None, updateWhichSharedNotebookRestrictions=None,
+    # noSetParentTag=None, noCreateNotes=None, noEmailNotes=True, noReadNotes=None, noExpungeNotes=None,
+    # noShareNotes=None, noSendMessageToRecipients=None)
     # print '接受人设定\t', notebook.recipientSettings  #这种权限的调用没有返回这个值，报错
 
 
@@ -434,7 +438,7 @@ def p_noteattributeundertoken(note):
     print('标题\t%s' % note.title)  #
     print('内容长度\t%d' % note.contentLength)  # 762
     print('内容\t' + note.content)  # 这种权限的调用没有返回这个值，报错；NoteStore.getNoteContent()也无法解析
-    print('内容哈希值\t%s' % note.contentHash)  ##8285
+    print('内容哈希值\t%s' % note.contentHash)  # 8285
     print('创建时间\t%s' % timestamp2str(int(note.created / 1000)))  # 2017-09-04 22:39:51
     print('更新时间\t%s' % timestamp2str(int(note.updated / 1000)))  # 2017-09-07 06:38:47
     print('删除时间\t%s' % note.deleted)  # 这种权限的调用返回None
@@ -443,11 +447,17 @@ def p_noteattributeundertoken(note):
     print('所在笔记本的guid\t%s' % note.notebookGuid)  # 2c8e97b5-421f-461c-8e35-0f0b1a33e91c
     print('标签的guid表\t%s' % note.tagGuids)  # 这种权限的调用返回None
     print('资源表\t%s' % note.resources)  # 这种权限的调用返回None
-    print(
-        '属性\t%s' % note.attributes)  # NoteAttributes(lastEditorId=139947593, placeName=None, sourceURL=None, classifications=None, creatorId=139947593, author=None, reminderTime=None, altitude=0.0, reminderOrder=None, shareDate=None, reminderDoneTime=None, longitude=114.293, lastEditedBy='\xe5\x91\xa8\xe8\x8e\x89 <305664756@qq.com>', source='mobile.android', applicationData=None, sourceApplication=None, latitude=30.4722, contentClass=None, subjectDate=None)
+    print('属性\t%s' % note.attributes)
+    # NoteAttributes(lastEditorId=139947593, placeName=None, sourceURL=None, classifications=None,
+    # creatorId=139947593, author=None, reminderTime=None, altitude=0.0, reminderOrder=None, shareDate=None,
+    # reminderDoneTime=None, longitude=114.293, lastEditedBy='\xe5\x91\xa8\xe8\x8e\x89 <305664756@qq.com>',
+    # source='mobile.android', applicationData=None, sourceApplication=None, latitude=30.4722, contentClass=None,
+    # subjectDate=None)
     print('标签名称表\t%s' % note.tagNames)  # 这种权限的调用返回None
-    # print ('共享的笔记表\t%s' % note.sharedNotes)  #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'sharedNotes'
-    # print ('限定\t%s' % note.restrictions)  #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'restrictions'
+    # print ('共享的笔记表\t%s' % note.sharedNotes)
+    # 这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'sharedNotes'
+    # print ('限定\t%s' % note.restrictions)
+    # 这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'restrictions'
     # print ('范围\t%s' % note.limits) #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'limits'
 
 
@@ -469,8 +479,13 @@ def p_userattributeundertoken(user):
     print('活跃状态\t' + str(user.active))  # 返回True
     print('分享id\t' + str(user.shardId))  # 返回s37
     # print '用户属性\t', str(user.attributes)  #这种权限的调用返回None
-    print('账户\t' + str(
-        user.accounting))  # 返回Accounting(businessRole=None, currency=None, uploadLimitNextMonth=10737418240L, premiumOrderNumber=None, lastRequestedCharge=None, nextPaymentDue=None, unitDiscount=None, premiumCommerceService=None, nextChargeDate=None, premiumServiceStart=None, premiumSubscriptionNumber=None, lastFailedCharge=None, updated=None, businessId=None, uploadLimitEnd=1504854000000L, uploadLimit=10737418240L, lastSuccessfulCharge=None, premiumServiceStatus=2, unitPrice=None, premiumServiceSKU=None, premiumLockUntil=None, businessName=None, lastFailedChargeReason=None)
+    print('账户\t' + str(user.accounting))
+    # 返回Accounting(businessRole=None, currency=None, uploadLimitNextMonth=10737418240L, premiumOrderNumber=None,
+    # lastRequestedCharge=None, nextPaymentDue=None, unitDiscount=None, premiumCommerceService=None,
+    # nextChargeDate=None, premiumServiceStart=None, premiumSubscriptionNumber=None, lastFailedCharge=None,
+    # updated=None, businessId=None, uploadLimitEnd=1504854000000L, uploadLimit=10737418240L,
+    # lastSuccessfulCharge=None, premiumServiceStatus=2, unitPrice=None, premiumServiceSKU=None,
+    # premiumLockUntil=None, businessName=None, lastFailedChargeReason=None)
     print('活跃状态\t' + str(user.active))  # 返回True
     # print '商用用户信息\t', str(user.businessUserInfo)  #这种权限的调用返回None
     # print '头像url\t', str(user.photoUrl)  #这种权限的调用没有返回这个值，报错
@@ -478,14 +493,15 @@ def p_userattributeundertoken(user):
     # print '账户限制\t', str(user.accountLimits)  #这种权限的调用没有返回这个值，报错
 
 
-def findnotebookfromevernote(token):
+def findnotebookfromevernote():
     # 列出账户中的全部笔记本
-    note_store = get_notestore(token)
+    note_store = get_notestore()
     notebooks = note_store.listNotebooks()
     # p_notebookattributeundertoken(notebooks[-1])
 
     for x in notebooks:
         p_notebookattributeundertoken(x)
+
 
 def makenote(token, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
     """
@@ -578,7 +594,7 @@ def gengxinfou(filename, conn, tablename='fileread'):
                         "'文件大小' INTEGER," \
                         "'登录时间' TIMESTAMP); " % tablename
         conn.execute(create_tb_cmd)
-    except Exception:
+    except Exception as eee:
         log.critical("创建数据表%s失败！" % tablename)
         return False
 
@@ -769,7 +785,7 @@ def biaozhukedu(dfc, weibiao):
                          arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
 
 
-def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=[], quyu='', leixing='', pinpai='', nianshu=3,
+def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu='', leixing='', pinpai='', nianshu=3,
                     imgpath='img\\'):
     """
     月度（全年，自然年度）累积对比图，自最早日期起，默认3年
@@ -866,7 +882,8 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=[], quyu='', le
     plt.close()
 
 
-def chuturizhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', leixing='', pinpai='', imgpath='img\\'):
+def chuturizhexian(df, riqienddate, xiangmu, cum=False,
+                   imglist=list(), quyu='', leixing='', pinpai='', imgpath='img\\'):
     """
     日数据（月份）累积对比图，当月、环比、同期比
     riqienddate形如2017-12-08，代表数据结束点的日期
@@ -892,7 +909,7 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False, imglist=[], quyu='', lei
     if ds.index.min() <= datesb.max():  # 存在有效数据则生成按全月每天索引的DataFrame，否则置空
         ds1 = ds.reindex(datesb, fill_value=0)  # 重新索引，补全所有日期，空值用0填充
         ds1.index = (range(1, len(datesb) + 1))  # 索引天日化
-        ds1.columns = (f'{riqibeforemonthfirst.year:04d}{riqibeforemonthfirst.month:02d}') + ds1.columns  # 列命名，形如201709
+        ds1.columns = f'{riqibeforemonthfirst.year:04d}{riqibeforemonthfirst.month:02d}' + ds1.columns  # 列命名，形如201709
     else:
         ds1 = pd.DataFrame()
 
@@ -943,8 +960,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     :param imglist:
     :param noteguid:
     :param notetitle:
-    :param token:
-    :param sty:
+    :param neirong:object
     :return:
     """
     note = Ttypes.Note()
@@ -1016,15 +1032,20 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
         evernoteapijiayi()
         log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
     except Etypes.EDAMUserException as eue:
-        # EDAMUserException(errorCode=11, parameter='The element type "br" must be terminated by the matching end-tag "《/br》".')
+        # EDAMUserException(errorCode=11,
+        # parameter='The element type "br" must be terminated by the matching end-tag "《/br》".')
         if eue.errorCode == 11:
             log.critical('更新guid为%s的笔记时出现“EDAM用户异常-》语法”！%s' % (noteguid, str(eue.parameter)))
         else:
             log.critical('更新guid为%s的笔记时出现“EDAM用户异常”！%s' % (noteguid, str(eue)))
         raise eue
-    except Exception as e:
-        log.critical('更新guid为%s的笔记时出现未名错误！%s' % (noteguid, str(e)))
-        raise e
+    except struct.error as se:
+        log.critical('更新guid为%s的笔记时出现“数据结构解析错误”！%s' % (noteguid, str(se)))
+        print(nbody)
+        raise se
+    except Exception as eee:
+        log.critical('更新guid为%s的笔记时出现未名错误！%s' % (noteguid, str(eee)))
+        raise eee
 
 
 def isnoteupdate(token, noteguid):
@@ -1035,7 +1056,7 @@ def isnoteupdate(token, noteguid):
         usnold = 0
     usn = 0
     try:
-        note = get_notestore(token).getNote(token, noteguid, False, False, False, False)
+        note = get_notestore().getNote(token, noteguid, False, False, False, False)
         usn = note.updateSequenceNum
         evernoteapijiayi()
         log.info('成功读取笔记《%s》，guid：%s。' % (note.title, note.guid))
@@ -1059,9 +1080,9 @@ def tablehtml2evernote(dataframe, tabeltitle):
     return outstr
 
 
-def getMail(host, username, password, port=993, debug=False, mailnum=100000, dirtarget='Inbox', unseen=False,
+def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum=100000, dirtarget='Inbox', unseen=False,
             topicloc='subject', topic='', datadir='data\\work\\'):
-    def parseHeader(message):
+    def parseheader(message):
         headermsg = []
 
         """ 解析邮件首部 """
@@ -1071,7 +1092,7 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
 
         # 时间
         datestr = message.get('date')
-        if datestr == None:
+        if datestr is None:
             log.error('从邮件头部提取时间失败，只好从邮件内容中寻找时间信息。')
             pattern = re.compile(r'(?:X-smssync-backup-time: )(?P<date>\d{1,2} \w{3} \d{4} \d{2}:\d{2}:\d{2})', re.I)
             items = re.split(pattern, str(message))
@@ -1116,7 +1137,7 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
 
         return headermsg
 
-    def parseBody(message, msgencoding):
+    def parsebody(message, msgencoding):
         bodymsg = []
         """ 解析邮件/信体 """
         # 循环信件中的每一个mime的数据块
@@ -1128,11 +1149,11 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
                 # print('charset: ', charset)
                 contenttype = part.get_content_type()
                 # print('content-type', contenttype)
-                name = part.get_param("name")  # 如果是附件，这里就会取出附件的文件名
-                if name:
+                namepart = part.get_param("name")  # 如果是附件，这里就会取出附件的文件名
+                if namepart:
                     # 有附件
                     # 下面的三行代码只是为了解码象=?gbk?Q?=CF=E0=C6=AC.rar?=这样的文件名
-                    fh = email.header.Header(name)  # =?gb18030?B?tbyz9sr9vt0ueGxz?=
+                    fh = email.header.Header(namepart)  # =?gb18030?B?tbyz9sr9vt0ueGxz?=
                     # print(fh)
                     fdh = email.header.decode_header(fh)  # [(b'=?gb18030?B?tbyz9sr9vt0ueGxz?=', 'us-ascii')]
                     # print(fdh)
@@ -1144,15 +1165,18 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
 
                     pointat = fname.rfind('.')
                     timenowstr = datetime.datetime.now().strftime('__%Y%m%d%H%M%S_%f')
-                    attachfile = datadir + fname[:pointat] + timenowstr + fname[pointat:]
+                    datadiri = datadir
+                    if fname.startswith('销售订单'):
+                        datadiri.append('销售订单\\')
+                    attachfile = datadiri + fname[:pointat] + timenowstr + fname[pointat:]
                     try:
-                        f = open(attachfile, 'wb')  # 注意一定要用wb来打开文件，因为附件一般都是二进制文件
-                    except Exception as e:
-                        print(e)
-                        attachfile = datadir + '未名文件' + timenowstr
-                        f = open(attachfile, 'wb')
-                    f.write(attach_data)
-                    f.close()
+                        fattach = open(attachfile, 'wb')  # 注意一定要用wb来打开文件，因为附件一般都是二进制文件
+                    except Exception as eeee:
+                        print(eeee)
+                        attachfile = datadiri + '未名文件' + timenowstr
+                        fattach = open(attachfile, 'wb')
+                    fattach.write(attach_data)
+                    fattach.close()
                     partitem.append('attach')
                     partitem.append(attachfile)
                 else:
@@ -1176,19 +1200,21 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
 
         return bodymsg
 
-    for i in range(3):
+    trytimes = 3
+    serv = None
+    for i in range(trytimes):
         try:
-            serv = imaplib.IMAP4_SSL(host, port)
+            serv = imaplib.IMAP4_SSL(hostmail, port)
             break
-        except Exception as e:
-            log.critical("第%d次（最多尝试三次）连接邮件服务器时失败。%s" % (i + 1, e))
-            if i == 2:
+        except Exception as eee:
+            log.critical("第%d次（最多尝试%d次）连接邮件服务器时失败。%s" % (i + 1, trytimes, e))
+            if i == (trytimes - 1):
                 log.critical('邮件服务器连接失败，只好无功而返。')
-                raise e
+                raise eee
             time.sleep(20)
-            # serv = imaplib.IMAP4(host, port)
+            # serv = imaplib.IMAP4(hostmail, port)
 
-    serv.login(username, password)
+    serv.login(usernamemail, passwordmail)
     # if debug:
     #     serv.debug = 4
     if debug:
@@ -1209,8 +1235,8 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
     # print(serv.status('Ifttt/Notification','(UIDVALIDITY)'))
     # print(serv.status('Ifttt/SmsLog','(UIDNEXT)'))
     # print(serv.select('"&TgCCLH9RU8s-"'))
-    mailstatus = []
-    type, data = serv.select(dirtarget)
+    mailstatus = list()
+    typess, data = serv.select(dirtarget)
     mailstatus.append(int(data[0].decode('ascii')))
     if len(topic) > 0:
         # 搜索邮件内容
@@ -1250,36 +1276,35 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
 
     if len(numlist) > mailnum:
         numlist = numlist[:mailnum]
-    mailitems = []
 
-    def getnummail(numlist, mailitems):
-        countstart = len(mailitems)
-        counttarget = len(numlist)
+    def getnummail(numlistinside, mailitemsinside):
+        countstart = len(mailitemsinside)
+        counttarget = len(numlistinside)
         log.info('已有%d封邮件，准备处理%d封邮件……' % (countstart, counttarget))
 
         try:
-            servinner = imaplib.IMAP4_SSL(host, port)
+            servinner = imaplib.IMAP4_SSL(hostmail, port)
         except Exception as e:
             print("无法用IMAP4_SSL连接邮件服务器，只好用IMAP4连接。%s" % e)
-            servinner = imaplib.IMAP4(host, port)
+            servinner = imaplib.IMAP4(hostmail, port)
         try:
-            servinner.login(username, password)
+            servinner.login(usernamemail, passwordmail)
             type, data = servinner.select(dirtarget)
         except imaplib.IMAP4.error as iie:
             log.critical("登录邮件服务器时出现imaplib.IMAP4.error错误。%s" % (str(iie)))
-            log.info('此列表中的邮件未能被正常处理：%s' % str(numlist))
+            log.info('此列表中的邮件未能被正常处理：%s' % str(numlistinside))
             timesleep = 25
             time.sleep(timesleep)
             log.info('暂停%d秒后返回' % timesleep)
-            return numlist
+            return numlistinside
         count = 0
         totalcount = 0
-        for num in numlist:
+        for num in numlistinside:
             # print(num)
             if (totalcount - count) >= 20:
-                log.critical('无法正确处理的邮件超过%d封，此邮件编码列表跳过正常处理流程。%s' % (totalcount - count, numlist))
-                log.info('实际处理邮件%d封，该邮件编码列表总数量为%d。' % (count, len(numlist)))
-                return numlist
+                log.critical('无法正确处理的邮件超过%d封，此邮件编码列表跳过正常处理流程。%s' % (totalcount - count, numlistinside))
+                log.info('实际处理邮件%d封，该邮件编码列表总数量为%d。' % (count, len(numlistinside)))
+                return numlistinside
 
             totalcount += 1
             mailitem = []
@@ -1301,10 +1326,10 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
                     mailencodings = 'UTF-8'
                 # print(mailencodings)
                 # print(message)
-                mailitem.append(parseHeader(message))
-                mailitem.append(parseBody(message, mailencodings))
+                mailitem.append(parseheader(message))
+                mailitem.append(parsebody(message, mailencodings))
                 # print(mailitem)
-                mailitems.append(mailitem)
+                mailitemsinside.append(mailitem)
                 count = count + 1
             except ConnectionAbortedError as cae:
                 log.critical("获取邮件[%s,%d/%d]时出现ConnectionAbortedError错误。%s" % (num, count, totalcount, str(cae)))
@@ -1329,16 +1354,17 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
                 log.critical("处理邮件[%s,%d/%d]时出现未名错误。%s" % (num, count, totalcount, str(e)))
         servinner.close()
         servinner.logout()
-        # print(mailitems)
-        log.info('实际处理邮件%d封，该邮件编码列表总数量为%d。' % (count, len(numlist)))
+        # print(mailitemsinside)
+        log.info('实际处理邮件%d封，该邮件编码列表总数量为%d。' % (count, len(numlistinside)))
 
-    kelidu = 300
+    mailitemsresult = list()
+    kelidu = 200
     fenjie = int((len(numlist)) / kelidu)
     threadlist = []
     for i in range(fenjie + 1):
         inputnumlist = numlist[(i * kelidu):(i + 1) * kelidu]
         # print(inputnumlist)
-        t = threading.Thread(target=getnummail, args=(inputnumlist, mailitems,))
+        t = threading.Thread(target=getnummail, args=(inputnumlist, mailitemsresult,))
         threadlist.append(t)
 
     log.info('处理邮箱目录%s，共计有%d个线程准备运行。' % (dirtarget, len(threadlist)))
@@ -1358,13 +1384,13 @@ def getMail(host, username, password, port=993, debug=False, mailnum=100000, dir
         log.info('累积有[%d/%d]个线程执行完毕。' % (i * threadnum + len(threadxiaozu), len(threadlist)))
     log.info('总计的%d个线程全部执行完毕！' % len(threadlist))
 
-    return mailitems
+    return mailitemsresult
 
 
-def jilugmail(dir, mingmu, fenleistr='', topic='', bodyonly=True):
+def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
     """
     从指定邮件目录读取包含关键字的新邮件并更新至txt文件
-    :param dir: 待处理的邮件目录
+    :param direc: 待处理的邮件目录
     :param mingmu: 名目，txt文件命名使用
     :param fenleistr: 分类，txt文件命名使用
     :param topic: 搜索邮件的关键字，默认置空
@@ -1386,29 +1412,30 @@ def jilugmail(dir, mingmu, fenleistr='', topic='', bodyonly=True):
     host = cfp.get('gmail', 'host')
     username = cfp.get('gmail', 'username')
     password = cfp.get('gmail', 'password')
-    mailitems = []
+    mailitemsjilu = []
     try:
-        mailitems = getMail(host, username, password, debug=False, dirtarget=dir, unseen=True, topic=topic)
+        mailitemsjilu = getmail(host, username, password, debug=False, dirtarget=direc, unseen=True, topic=topic)
     except socket.error as se:
         log.critical("构建socket连接时出错。%s" % str(se))
     except Exception as e:
         log.critical('处理邮件时出现严重错误。%s' % str(e))
 
     itemslst = []
-    if mailitems == False:  # 无新邮件则返回False
+    if mailitemsjilu is False:  # 无新邮件则返回False
         log.info('%s-%s没有新的邮件记录' % (mingmu, fenleistr))
         # return False
     else:
-        for header, body in mailitems:
-            for text, textstr in body:
-                if text.startswith('text'):  # 只取用纯文本部分
+        for headerjilu, bodyjilu in mailitemsjilu:
+            for textjilu, textstrjilu in bodyjilu:
+                if textjilu.startswith('text'):  # 只取用纯文本部分
                     if bodyonly:  # 只要邮件body文本，否则增加邮件标题部分内容
-                        itemslst.append(textstr)
-                    elif header[1].startswith('SMS with') or header[1].endswith('的短信记录') or header[1].endswith(
+                        itemslst.append(textstrjilu)
+                    elif headerjilu[1].startswith('SMS with') or headerjilu[1].endswith('的短信记录') \
+                            or headerjilu[1].endswith(
                             '的通话记录'):  # 对特别记录增补时间戳
-                        itemslst.append(header[1] + '\t' + str(header[0]) + '，' + textstr)
+                        itemslst.append(headerjilu[1] + '\t' + str(headerjilu[0]) + '，' + textstrjilu)
                     else:
-                        itemslst.append(header[1] + '\t' + textstr)
+                        itemslst.append(headerjilu[1] + '\t' + textstrjilu)
 
     txtfilename = 'data\\ifttt\\' + '%s_gmail_%s.txt' % (mingmu, fenleistr)
     if len(itemslst) > 0:  # or True:
@@ -1423,15 +1450,11 @@ def jilugmail(dir, mingmu, fenleistr='', topic='', bodyonly=True):
     return items
 
 
-import imaplib
-import email
-from email.parser import Parser
-
 if __name__ == '__main__':
     host = cfp.get('gmail', 'host')
     username = cfp.get('gmail', 'username')
     password = cfp.get('gmail', 'password')
-    mailitems = getMail(host, username, password, dirtarget='Ifttt/Location', debug=True, topic='进出记录')
+    mailitems = getmail(host, username, password, dirtarget='Ifttt/Location', debug=True, topic='进出记录')
     print(len(mailitems))
     for header, body in mailitems:
         for text, textstr in body:

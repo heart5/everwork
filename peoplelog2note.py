@@ -21,7 +21,8 @@ def notification2df(items):
     dfnoti.drop_duplicates(inplace=True)
     log.info('系统提醒记录去重后有%d条。' % dfnoti.shape[0])
     dfnoti.index = dfnoti['atime'].apply(
-        lambda x: pd.to_datetime(datetime.datetime.strptime(x.strip(), '%B %d, %Y at %I:%M%p')))
+        lambda x: pd.to_datetime(datetime.datetime.strptime(x.strip(), '%B %d, %Y at %I:%M%p'))
+        if len(x.split('at')) > 1 else pd.to_datetime(datetime.datetime.strptime(x.strip(), '%B %d, %Y')))
     # dfnoti.index = dfnoti['atime']
     del dfnoti['atime']
     dfnoti.sort_index(ascending=False, inplace=True)
@@ -31,7 +32,7 @@ def notification2df(items):
 
     try:
         token = cfp.get('evernote', 'token')
-        notestore = get_notestore(token)
+        notestore = get_notestore()
         xiangmu = ['微信', '支付宝', 'QQ', '日历']
         for xm in xiangmu:
             biaoti = '系统提醒（%s）记录' % xm
@@ -47,15 +48,15 @@ def notification2df(items):
                 cfplife.set('lifenotecount', xm, '%d' % dfxm.shape[0])
                 cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
 
-    except Exception as e:
-        log.critical('更新系统提醒笔记时出现错误。%s' % str(e))
+    except Exception as ee:
+        log.critical('更新系统提醒笔记时出现错误。%s' % str(ee))
     return dfout
 
 
 def callsms2df(itemstr):
     # 读取老记录
-    with open('data\\ifttt\\smslog_gmail_all.txt', 'r', encoding='utf-8') as f:
-        items = [line.strip() for line in f if len(line.strip()) > 0]
+    with open('data\\ifttt\\smslog_gmail_all.txt', 'r', encoding='utf-8') as fsms:
+        items = [line.strip() for line in fsms if len(line.strip()) > 0]
     itemstr = itemstr + items
     log.info('电话短信记录有%d条。' % len(itemstr))
     itemstrjoin = '\n'.join(itemstr)
@@ -80,7 +81,7 @@ def callsms2df(itemstr):
         item = list()
         # print(slices[i*5:i*5+5])
         itemtimestr = slices[i * 5 + 1]
-        if itemtimestr == None:
+        if itemtimestr is None:
             itemtimestr = slices[i * 5 + 2].strip()
             itemtime = datetime.datetime.strptime(itemtimestr, '%Y-%m-%d %H:%M:%S+08:00')
             # itemtime = pd.to_datetime(itemtimestr)
@@ -152,7 +153,7 @@ def callsms2df(itemstr):
                     itemshuxing = '电话'
                     itemnumber = splititem[2]
                     itemcontent = splititem[1]
-                    if splititem[4] != None:
+                    if splititem[4] is not None:
                         itemreceived = False
                 else:
                     pass
@@ -172,7 +173,7 @@ def callsms2df(itemstr):
                 # print(splititem)
 
         item.append(itemtime)
-        if itemname == None:
+        if itemname is None:
             itemname = itemnumber
         item.append(itemname)
         item.append(itemnumber)
@@ -194,7 +195,7 @@ def callsms2df(itemstr):
 
     try:
         token = cfp.get('evernote', 'token')
-        notestore = get_notestore(token)
+        notestore = get_notestore()
         if cfplife.has_option('allsets', 'callsms'):
             ready2update = dfout.shape[0] > cfplife.getint('allsets', 'callsms')
         else:
@@ -205,12 +206,12 @@ def callsms2df(itemstr):
                          tablehtml2evernote(dfout[:1000], xiangmu))
             cfplife.set('allsets', 'callsms', '%d' % dfout.shape[0])
             cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
-    except Exception as e:
-        log.critical('更新人脉记录笔记时出现错误。%s' % str(e))
+    except Exception as eee:
+        log.critical('更新人脉记录笔记时出现错误。%s' % str(eee))
     return dfout
 
 
-def peoplestattimer(token, jiangemiao):
+def peoplestattimer(jiangemiao):
     dfpeople = pd.DataFrame()
 
     strjilunotifi = jilugmail('Ifttt/Notification', 'notification', 'all')
@@ -223,13 +224,12 @@ def peoplestattimer(token, jiangemiao):
         dfcs = callsms2df(strjilucallsms)
 
     global timer_jinchu
-    timer_jinchu = Timer(jiangemiao, peoplestattimer, (token, jiangemiao))
+    timer_jinchu = Timer(jiangemiao, peoplestattimer, [jiangemiao])
     timer_jinchu.start()
 
 
 if __name__ == '__main__':
-    token = cfp.get('evernote', 'token')
-    peoplestattimer(token, 60 * 25)
+    peoplestattimer(60 * 25)
 
     # rn = '\r\n'
     # print(len(rn))
