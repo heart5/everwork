@@ -6,7 +6,7 @@ everwork的各种函数
 """
 
 import time, datetime, calendar as cal, hashlib, binascii, re, os, socket, random, email, imaplib, subprocess, locale, \
-    threading, html, struct, \
+    threading, html, struct, ssl, \
     logging as lg, logging.handlers as lgh, pandas as pd, sqlite3 as lite, matplotlib.pyplot as plt, \
     evernote.edam.type.ttypes as Ttypes, evernote.edam.error.ttypes as Etypes, \
     evernote.edam.userstore.constants as UserStoreConstants, \
@@ -1041,7 +1041,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
         raise eue
     except struct.error as se:
         log.critical('更新guid为%s的笔记时出现“数据结构解析错误”！%s' % (noteguid, str(se)))
-        print(nbody)
+        print(nbody[300])
         raise se
     except Exception as eee:
         log.critical('更新guid为%s的笔记时出现未名错误！%s' % (noteguid, str(eee)))
@@ -1167,7 +1167,8 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
                     timenowstr = datetime.datetime.now().strftime('__%Y%m%d%H%M%S_%f')
                     datadiri = datadir
                     if fname.startswith('销售订单'):
-                        datadiri.append('销售订单\\')
+                        print(fname)
+                        datadiri = datadiri + '销售订单\\'
                     attachfile = datadiri + fname[:pointat] + timenowstr + fname[pointat:]
                     try:
                         fattach = open(attachfile, 'wb')  # 注意一定要用wb来打开文件，因为附件一般都是二进制文件
@@ -1205,16 +1206,15 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
     for i in range(trytimes):
         try:
             serv = imaplib.IMAP4_SSL(hostmail, port)
+            serv.login(usernamemail, passwordmail)
             break
         except Exception as eee:
-            log.critical("第%d次（最多尝试%d次）连接邮件服务器时失败。%s" % (i + 1, trytimes, e))
+            log.critical("第%d次（最多尝试%d次）连接登录邮件服务器时失败。%s" % (i + 1, trytimes, e))
             if i == (trytimes - 1):
                 log.critical('邮件服务器连接失败，只好无功而返。')
                 raise eee
             time.sleep(20)
-            # serv = imaplib.IMAP4(hostmail, port)
 
-    serv.login(usernamemail, passwordmail)
     # if debug:
     #     serv.debug = 4
     if debug:
@@ -1282,21 +1282,32 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
         counttarget = len(numlistinside)
         log.info('已有%d封邮件，准备处理%d封邮件……' % (countstart, counttarget))
 
-        try:
-            servinner = imaplib.IMAP4_SSL(hostmail, port)
-        except Exception as e:
-            print("无法用IMAP4_SSL连接邮件服务器，只好用IMAP4连接。%s" % e)
-            servinner = imaplib.IMAP4(hostmail, port)
-        try:
-            servinner.login(usernamemail, passwordmail)
-            type, data = servinner.select(dirtarget)
-        except imaplib.IMAP4.error as iie:
-            log.critical("登录邮件服务器时出现imaplib.IMAP4.error错误。%s" % (str(iie)))
-            log.info('此列表中的邮件未能被正常处理：%s' % str(numlistinside))
-            timesleep = 25
-            time.sleep(timesleep)
-            log.info('暂停%d秒后返回' % timesleep)
-            return numlistinside
+        servinner = None
+        for iii in range(trytimes):
+            try:
+                servinner = imaplib.IMAP4_SSL(hostmail, port)
+                servinner.login(usernamemail, passwordmail)
+                type, data = servinner.select(dirtarget)
+                break
+            except ssl.SSLEOFError as ssleof:
+                log.critical("第%d次（最多尝试%d次）连接登录邮件服务器时失败。%s" % (i + 1, trytimes, ssleof))
+                if iii == (trytimes - 1):
+                    log.critical('邮件服务器连接失败，只好无功而返。')
+                    log.info('此列表中的邮件未能被正常处理：%s' % str(numlistinside))
+                    raise eee
+                timesleep = 25
+                time.sleep(timesleep)
+                log.info('暂停%d秒后返回' % timesleep)
+            except Exception as eeee:
+                log.critical("第%d次（最多尝试%d次）连接登录邮件服务器时失败。%s" % (i + 1, trytimes, eeee))
+                if iii == (trytimes - 1):
+                    log.critical('邮件服务器连接失败，只好无功而返。')
+                    log.info('此列表中的邮件未能被正常处理：%s' % str(numlistinside))
+                    raise eee
+                timesleep = 25
+                time.sleep(timesleep)
+                log.info('暂停%d秒后返回' % timesleep)
+
         count = 0
         totalcount = 0
         for num in numlistinside:
@@ -1350,8 +1361,8 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
             except TypeError as te:
                 log.critical("处理邮件[%s,%d/%d]时出现TypeError错误。%s" % (num, count, totalcount, str(te)))
                 print(message)
-            except Exception as e:
-                log.critical("处理邮件[%s,%d/%d]时出现未名错误。%s" % (num, count, totalcount, str(e)))
+            except Exception as eeefetch:
+                log.critical("处理邮件[%s,%d/%d]时出现未名错误。%s" % (num, count, totalcount, str(eeefetch)))
         servinner.close()
         servinner.logout()
         # print(mailitemsinside)
@@ -1402,28 +1413,27 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
         if not os.path.exists(fn):
             newfile = open(fn, 'w', encoding='utf-8')
             newfile.close()
-        with open(fn, 'r', encoding='utf-8') as f:
-            items = [line.strip() for line in f if len(line.strip()) > 0]
+        with open(fn, 'r', encoding='utf-8') as fff:
+            itemsr = [line.strip() for line in fff if len(line.strip()) > 0]
             # for line in f:
             #     print(line)
-        log.info("《%s-%s》现有%d条记录。" % (mingmu, fenleistr, len(items)))
-        return items
+        log.info("《%s-%s》现有%d条记录。" % (mingmu, fenleistr, len(itemsr)))
+        return itemsr
 
-    host = cfp.get('gmail', 'host')
-    username = cfp.get('gmail', 'username')
-    password = cfp.get('gmail', 'password')
+    hostg = cfp.get('gmail', 'host')
+    usernameg = cfp.get('gmail', 'username')
+    passwordg = cfp.get('gmail', 'password')
     mailitemsjilu = []
     try:
-        mailitemsjilu = getmail(host, username, password, debug=False, dirtarget=direc, unseen=True, topic=topic)
+        mailitemsjilu = getmail(hostg, usernameg, passwordg, debug=False, dirtarget=direc, unseen=True, topic=topic)
     except socket.error as se:
         log.critical("构建socket连接时出错。%s" % str(se))
     except Exception as e:
         log.critical('处理邮件时出现严重错误。%s' % str(e))
 
     itemslst = []
-    if mailitemsjilu is False:  # 无新邮件则返回False
+    if mailitemsjilu is False:
         log.info('%s-%s没有新的邮件记录' % (mingmu, fenleistr))
-        # return False
     else:
         for headerjilu, bodyjilu in mailitemsjilu:
             for textjilu, textstrjilu in bodyjilu:

@@ -194,7 +194,6 @@ def callsms2df(itemstr):
     # b3a3e458-f05b-424d-8ec1-604a3e916724
 
     try:
-        token = cfp.get('evernote', 'token')
         notestore = get_notestore()
         if cfplife.has_option('allsets', 'callsms'):
             ready2update = dfout.shape[0] > cfplife.getint('allsets', 'callsms')

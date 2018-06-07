@@ -111,7 +111,7 @@ def jilunote(noteinfos):
     return itemstr
 
 
-def wifitodf(itemstr, noteinfolist):
+def wifitodf(itemstr, noteinfolistw):
     itemstrjoin = '\n'.join(itemstr)
     pattern = re.compile(
         '(?:Device )((?:dis)?connected) (?:to|from) ([\w|-]+)， (\w+ \d+, \d{4} at \d{2}:\d{2}[A|P]M)')
@@ -133,7 +133,7 @@ def wifitodf(itemstr, noteinfolist):
 
     dfwifilist = list()
     for item in items_split:
-        for [_, address, shuxing, *arg, wifilist] in noteinfolist:
+        for [_, address, shuxing, *arg, wifilist] in noteinfolistw:
             if item[2] in wifilist:
                 item.append(shuxing)
                 address1 = address
@@ -158,7 +158,6 @@ def wifitodf(itemstr, noteinfolist):
     # descdb(dfout)
 
     try:
-        token = cfp.get('evernote', 'token')
         notestore = get_notestore()
         dfnotename = dfwifi[['entered', 'shuxing', 'address']]
         dfwificount = dfwifi.shape[0]  # shape[0]获得行数，shape[1]则是列数
@@ -322,8 +321,8 @@ def jinchustattimer(jiangemiao):
 
     try:
         dfjinchu = dfjinchu.append(jilugoogledrive())
-    except Exception as e:
-        log.critical('读取Goolge Drive中表格中数据记录时出现未名错误。%s' % (str(e)))
+    except Exception as eeee:
+        log.critical('读取Goolge Drive中表格中数据记录时出现未名错误。%s' % (str(eeee)))
 
     # print(dfjinchu.shape[0])
     try:
@@ -364,8 +363,8 @@ def jinchustattimer(jiangemiao):
                 cfp.set('jinchu', noteinfo[1], '%d' % dfjinchucount)
                 cfp.write(open(inifilepath, 'w', encoding='utf-8'))
                 log.info('%s成功更新入图表统计笔记，将于%d秒后再次自动检查并更新' % (str(noteinfo), jiangemiao))
-    except Exception as e:
-        log.critical('读取系列进出笔记并更新统计信息时出现未名错误。%s' % (str(e)))
+    except Exception as eee:
+        log.critical('读取系列进出笔记并更新统计信息时出现未名错误。%s' % str(eee))
 
     global timer_jinchu
     timer_jinchu = Timer(jiangemiao, jinchustattimer, [jiangemiao])
