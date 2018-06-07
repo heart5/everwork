@@ -9,6 +9,12 @@
 
 5830a2f2-7a76-4f1a-a167-1bd18818a141 业务推广日工作总结和计划——周莉
 
+e4e9d529-1996-4701-8e5a-2b2add0abe9e    每日销售订单核对——陈益（2018-06-06 00:00:00）
+d8720b96-a067-441f-8b46-654fdbe04e84    每日销售订单核对——耿华忠（2018-06-06 00:00:00）
+03d0b2da-9e9d-45cc-a8a7-85e72be900e5    每日销售订单核对——梅富忠（2018-06-06 00:00:00）
+161c093c-4603-4802-8c41-cf346eb002bc    每日销售订单核对——徐志伟（2018-06-06 00:00:00）
+bba10885-fb93-4fce-bb3f-03d7dd43d189    每日销售订单核对——周莉
+
 
 名称：人事管理    guid：3d927c7e-98a6-4761-b0c6-7fba1348244f    更新序列号：47266    默认笔记本：False
 创建时间：2015-07-14 13:50:09    更新时间：2015-07-14 13:50:09    笔记本组：origin
@@ -40,6 +46,7 @@ def chulixls_order(orderfile):
     print(orderdate)
     dforder = pd.DataFrame(biglist[1:-2], columns=biglist[0])
     # dforder['日期'] = dforder['单据编号'].apply(lambda x: pd.to_datetime(x[3:13]))
+    dforder['日期'] = pd.to_datetime(dforder['日期'])
     dforder['订单编号'] = dforder['单据编号'].apply(lambda x: x.split('-')[-1])
     dforder['金额'] = dforder['金额'].apply(lambda x: int(x[:-3]))
     dforder = dforder.loc[:, ['单据编号', '日期', '订单编号', '往来单位', '经办人', '金额', '部门全名']]
@@ -56,40 +63,39 @@ def chulidataindir_order(pathorder):
     sqlstr = "select count(*)  from sqlite_master where type='table' and name = '%s'" % tablename_order
     tablexists = pd.read_sql_query(sqlstr, cnxp).iloc[0, 0] > 0
     if tablexists:
-        dfresult = pd.read_sql('select * from \'%s\'' % tablename_order, cnxp)
+        dfresult = pd.read_sql('select * from \'%s\'' % tablename_order, cnxp, parse_dates=['日期'])
         log.info('订单数据表%s已存在， 从中读取%d条数据记录。' % (tablename_order, dfresult.shape[0]))
     else:
-        log.info('订单数据表%s不存在，将创建至。' % tablename_order)
+        log.info('订单数据表%s不存在，将创建之。' % tablename_order)
         dfresult = pd.DataFrame()
 
     files = os.listdir(pathorder)
     for fname in files[::-1]:
-        if fname.startswith('销售订单') > 0:
+        if (fname.startswith('销售订单') > 0) and ((fname.endswith('xls')) or (fname.endswith('xlsx'))):
             yichulifilelist = list()
-            # if cfpzysm.has_option('销售订单', '已处理文件清单'):
-            #     yichulifilelist = cfpzysm.get('销售订单', '已处理文件清单').split()
+            if cfpzysm.has_option('销售订单', '已处理文件清单'):
+                yichulifilelist = cfpzysm.get('销售订单', '已处理文件清单').split()
             if fname in yichulifilelist:
                 continue
             print(fname, end='\t')
             dffname = chulixls_order(pathorder+'\\'+fname)
-            if dfresult.shape[0] == 0:
-                dfresult = dffname
-            else:
-                dfresult.append(dffname, ignore_index=True)
-            print(dffname.shape[0])
+            dfresult = dfresult.append(dffname)
+            print(dffname.shape[0], end='\t')
+            print(dfresult.shape[0])
             yichulifilelist.append(fname)
             cfpzysm.set('销售订单', '已处理文件清单', '%s' % '\n'.join(yichulifilelist))
             cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
 
     # dfresult.drop_duplicates(['单据编号', '日期', '订单编号', '客户名称', '业务人员', '订单金额', '部门'], inplace=True)
-    descdb(dfresult)
+    # descdb(dfresult)
     dfttt = dfresult.drop_duplicates()
-    dfttt.to_sql(tablename_order, cnxp, if_exists='replace')
     if cfpzysm.has_option('销售订单', '记录数'):
         jilucont = cfpzysm.getint('销售订单', '记录数')
     else:
         jilucont = 0
     if dfttt.shape[0] > jilucont:
+        dfttt.to_sql(tablename_order, cnxp, index=None, if_exists='replace')
+        cnxp.close()
         cfpzysm.set('销售订单', '记录数', '%d' % dfttt.shape[0])
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
         log.info('增加有效销售订单数据%d条。' % (dfttt.shape[0] - jilucont))
@@ -102,16 +108,21 @@ def showorderstat():
     # dforder = chulixls_order(xlsfile)
     pathor = 'data\\work\\销售订单'
     dforder = chulidataindir_order(pathor)
-    dforder = dforder.loc[:, ['日期', '订单编号', '往来单位', '经办人', '金额', '部门全名']]
-    zuixinriqi = dforder.groupby('日期').max().index[0]
-    orderdatestr = zuixinriqi
+    dforder = dforder.loc[:, ['日期', '订单编号', '部门', '业务人员', '客户名称', '订单金额']]
+    dforder.sort_values(by=['日期', '订单编号', '业务人员'], ascending=False, inplace=True)
+    zuixinriqi = dforder.groupby(['日期'])['日期'].size().index.max()
+    orderdatestr = zuixinriqi.strftime('%F')
     print(orderdatestr, end='\t')
     dforderzuixinriqi = dforder[dforder.日期 == zuixinriqi]
-    persons = list(dforder.groupby('业务人员').count().index)
+    # descdb(dforderzuixinriqi)
+    persons = list(dforderzuixinriqi.groupby('业务人员')['业务人员'].count().index)
     print(persons)
-    notestore = get_notestore()
     notestr = '每日销售订单核对'
     for person in persons:
+        if cfpzysm.has_option(notestr + 'guid', person + '最新订单日期'):
+            ordertoday = cfpzysm.get(notestr + 'guid', person + '最新订单日期')
+            if zuixinriqi <= pd.to_datetime(ordertoday):
+                continue
         dfperson = dforderzuixinriqi[dforderzuixinriqi.业务人员 == person]
         dfpersonsum = dfperson.groupby('业务人员').sum()['订单金额']
         dfperson.loc[dfpersonsum[0]] = None
@@ -119,20 +130,38 @@ def showorderstat():
         dfperson.loc[dfpersonsum[0], '订单编号'] = dfperson.shape[0]-1
         print(person, end='\t')
         print(dfpersonsum[0], end='\t')
-        personguid = cfpzysm.get('%sguid' % notestr, person)
+        personguid = cfpzysm.get(notestr + 'guid', person)
         print(personguid)
         neirong = tablehtml2evernote(dfperson, notestr)
         # print(neirong)
-        imglist2note(notestore, [], personguid, '%s——%s（%s）' % (notestr, person, orderdatestr), neirong)
-        pass
+        try:
+            notestore = get_notestore()
+            imglist2note(notestore, [], personguid, '%s——%s（%s）' % (notestr, person, orderdatestr), neirong)
+            cfpzysm.set(notestr + 'guid', person + '最新订单日期', '%s' % orderdatestr)
+            cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+        except Exception as eeee:
+            log.critical('更新笔记%s——%s（%s）时出现严重错误。%s' % (notestr, person, orderdatestr, str(eeee)))
 
+
+def showorderstat2note(jiangemiao):
+    try:
+        showorderstat()
+    except Exception as ee:
+        log.critical('处理订单核对统计笔记时出现错误。%s' % str(ee))
+
+    global timer_showorderstat
+    timer_showorderstat = Timer(jiangemiao, showorderstat2note, [jiangemiao])
+    timer_showorderstat.start()
 
 if __name__ == '__main__':
     # chulidataindir_order()
-    showorderstat()
+    # showorderstat()
+    showorderstat2note(60 * 10)
     # chulixls_order(get_notestore())
+    # token = cfp.get('evernote', 'token')
     # guids = findnotefromnotebook(token, '2c8e97b5-421f-461c-8e35-0f0b1a33e91c', '销售订单')
-    # print(guids)
+    # for item in guids:
+    #     print("%s = %s" %(item[1], item[0]))
 
     pass
 

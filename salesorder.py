@@ -17,6 +17,7 @@ def fetchworkfile_from_gmail(topic):
     usernameg = cfp.get('gmail', 'username')
     passwordg = cfp.get('gmail', 'password')
     mailitemsg = getmail(hostg, usernameg, passwordg, dirtarget='Work', unseen=True, topic=topic)
+    # mailitemsg = getmail(hostg, usernameg, passwordg, dirtarget='Work', topic=topic)
     if mailitemsg is False:
         log.info('gmail信箱工作目录中暂无新邮件。')
         return
@@ -41,6 +42,5 @@ def workfilefromgmail2datacenter(jiangemiao):
 
 
 if __name__ == '__main__':
-    token = cfp.get('evernote', 'token')
-    fetchworkfile_from_gmail('工资资料')
-    workfilefromgmail2datacenter(60*60*2)
+    fetchworkfile_from_gmail('销售订单')
+    # workfilefromgmail2datacenter(60*60*2)

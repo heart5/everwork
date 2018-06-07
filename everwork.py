@@ -13,6 +13,7 @@ from log2note import *
 from peoplelog2note import *
 from workplan import *
 from salesorder import workfilefromgmail2datacenter
+from order import showorderstat2note
 
 # log.debug('程序启动……')
 # todo 一体化目录构建
@@ -38,6 +39,7 @@ from salesorder import workfilefromgmail2datacenter
 # isnoteupdate(token, note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
 
 workfilefromgmail2datacenter(60*60*2)
+showorderstat2note(60 * 60 * 1 + 60 * 8)
 log2notetimer(60 * 45)
 weatherstattimer(60 * 60 * 3 + 60 * 25)
 jinchustattimer(60 * 60)

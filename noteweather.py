@@ -273,20 +273,30 @@ def weatherstat(token, items, destguid=None):
     imglist2note(get_notestore(), imglist, destguid, '武汉天气图')
 
 
+def readfromweathertxt(weathertxtfilename):
+    with open(weathertxtfilename, 'r', encoding='utf-8') as f:
+        items = [line.strip() for line in f]  # strip()，去除行首行尾的空格
+    return items
+
+
+def write2weathertxt(weathertxtfilename, inputitemlist):
+    # print(inputitemlist)
+    fileobject = open(weathertxtfilename, 'w', encoding='utf-8')
+    for item in inputitemlist:
+        # print(item)
+        fileobject.write(str(item) + '\n')
+    fileobject.close()
+
+
 def isweatherupdate(weathertxtfilename):
-    def readfromweathertxt(weathertxtfilename):
-        with open(weathertxtfilename, 'r', encoding='utf-8') as f:
-            items = [line.strip() for line in f]  # strip()，去除行首行尾的空格
-        return items
-
-    def write2weathertxt(weathertxtfilename, inputitemlist):
-        # print(inputitemlist)
-        fileobject = open(weathertxtfilename, 'w', encoding='utf-8')
-        for item in inputitemlist:
-            # print(item)
-            fileobject.write(str(item) + '\n')
-        fileobject.close()
-
+    # print(weathertoday, end='\t')
+    # print(datetime.datetime.now().strftime('%F'))
+    weathertoday = time.strftime('%F',
+                                 time.strptime(readfromweathertxt(weathertxtfilename)[0].split(' ：')[0],
+                                               '%B %d, %Y at %I:%M%p'))
+    if datetime.datetime.now().strftime('%F') == weathertoday:
+        print('今天的天气信息已取回，跳过本轮询')
+        return False
     items = getweatherfromgmail()
     if items:
         itemfromtxt = readfromweathertxt(weathertxtfilename)
@@ -308,11 +318,20 @@ def isweatherupdate(weathertxtfilename):
 
 def weatherstattimer(jiangemiao):
     weathertxtfilename = "data\\ifttt\\weather.txt"
+    if cfplife.has_option('天气', '最新日期'):
+        if datetime.datetime.now().strftime('%F') == cfplife.get('天气', '最新日期'):
+            print('今天的天气信息笔记已更新，本次轮询跳过')
+            return
     try:
         usn = isweatherupdate(weathertxtfilename)
         if usn:
             weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')
             log.info('天气信息成功更新入天气信息统计笔记，将于%d秒后再次自动检查并更新' % jiangemiao)
+            weathertoday = time.strftime('%F',
+                                         time.strptime(readfromweathertxt(weathertxtfilename)[0].split(' ：')[0],
+                                                       '%B %d, %Y at %I:%M%p'))
+            cfplife.set('天气', '最新日期', '%s' % weathertoday)
+            cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
     except IndexError as ixe:
         log.critical('读取天气信息并更新天气统计信息笔记时出现索引错误。%s' % (str(ixe)))
     except TypeError as te:
@@ -328,7 +347,7 @@ def weatherstattimer(jiangemiao):
 
 if __name__ == '__main__':
     token = cfp.get('evernote', 'token')
-    weatherstattimer(60 * 44)
+    weatherstattimer(60 * 3)
     # weathertxtfilename = "data\\ifttt\\weather.txt"
     # usn = isweatherupdate(weathertxtfilename)
     # weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')
