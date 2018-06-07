@@ -66,19 +66,23 @@ def chulidataindir_order(pathorder):
     for fname in files[::-1]:
         if fname.startswith('销售订单') > 0:
             yichulifilelist = list()
-            if cfpzysm.has_option('销售订单', '已处理文件清单'):
-                yichulifilelist = cfpzysm.get('销售订单', '已处理文件清单').split()
+            # if cfpzysm.has_option('销售订单', '已处理文件清单'):
+            #     yichulifilelist = cfpzysm.get('销售订单', '已处理文件清单').split()
             if fname in yichulifilelist:
                 continue
             print(fname, end='\t')
             dffname = chulixls_order(pathorder+'\\'+fname)
-            dfresult.append(dffname)
+            if dfresult.shape[0] == 0:
+                dfresult = dffname
+            else:
+                dfresult.append(dffname, ignore_index=True)
             print(dffname.shape[0])
             yichulifilelist.append(fname)
             cfpzysm.set('销售订单', '已处理文件清单', '%s' % '\n'.join(yichulifilelist))
             cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
 
     # dfresult.drop_duplicates(['单据编号', '日期', '订单编号', '客户名称', '业务人员', '订单金额', '部门'], inplace=True)
+    descdb(dfresult)
     dfttt = dfresult.drop_duplicates()
     dfttt.to_sql(tablename_order, cnxp, if_exists='replace')
     if cfpzysm.has_option('销售订单', '记录数'):
@@ -100,7 +104,7 @@ def showorderstat():
     dforder = chulidataindir_order(pathor)
     dforder = dforder.loc[:, ['日期', '订单编号', '往来单位', '经办人', '金额', '部门全名']]
     zuixinriqi = dforder.groupby('日期').max().index[0]
-    orderdatestr = zuixinriqi.strftime('%F')
+    orderdatestr = zuixinriqi
     print(orderdatestr, end='\t')
     dforderzuixinriqi = dforder[dforder.日期 == zuixinriqi]
     persons = list(dforder.groupby('业务人员').count().index)
