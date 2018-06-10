@@ -250,7 +250,7 @@ def jinchustat(jinchujiluall, noteinfos):
     dfjc['nianyue'] = dfjc['atime'].apply(lambda x: datetime.datetime.strftime(x, '%Y%m'))
     dfjc['小时'] = dfjc['atime'].apply(lambda x: datetime.datetime.strftime(x, '%H'))
     # print(dfjc.tail(10))
-    dfff = dfjc[dfjc.entered is False].groupby(['nianyue', '小时'])['entered'].count()  # 以离开为进出标准
+    dfff = dfjc[dfjc.entered == False].groupby(['nianyue', '小时'])['entered'].count()  # 以离开为进出标准
     dffu = dfff.unstack(fill_value=0)
     # print(dffu)
 
@@ -365,6 +365,7 @@ def jinchustattimer(jiangemiao):
                 log.info('%s成功更新入图表统计笔记，将于%d秒后再次自动检查并更新' % (str(noteinfo), jiangemiao))
     except Exception as eee:
         log.critical('读取系列进出笔记并更新统计信息时出现未名错误。%s' % str(eee))
+        # raise eee
 
     global timer_jinchu
     timer_jinchu = Timer(jiangemiao, jinchustattimer, [jiangemiao])

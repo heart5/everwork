@@ -101,6 +101,8 @@ def dfappend():
     print(df)
     pass
 
+
+def showtables():
     cnxp = lite.connect('data\\workplan.db')
     tablename_order = 'salesorder'
     sqlstr = "select count(*)  from sqlite_master where type='table' and name = '%s'" % tablename_order
@@ -115,5 +117,13 @@ if __name__ == '__main__':
     # ttesttimesplit()
     # currentprocess()
     # findnotefromnotebook(token, 'c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b', '进出')
-    dfappend()
+    # dfappend()
+    tody = datetime.datetime.now().strftime('%F')
+    print(tody)
+    todyini = cfplife.get('天气', '最新日期')
+    print(todyini)
+    testok = pd.to_datetime(tody) > pd.to_datetime('2016-09-19')
+    print(testok)
+    teststrok = tody > '2016-09-19'
+    print(teststrok)
     pass

@@ -136,6 +136,8 @@ def updatedb_workplan(note_store, persons):
                 log.info('%s的业务日志有%d条追加到日志更新表中，日期为%s。' % (person, dfupdate.shape[0], datestr))
                 cfpzysm.set('业务计划总结updatenum', person, '%d' % note.updateSequenceNum)
                 cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+        else:
+            log.info('下列人员的日志笔记正常处置完毕：%s' % persons)
 
     except Exception as eee:
         log.critical('读取工作日志笔记更新入日志内容表和日志更新表时发生错误。%s' % str(eee))

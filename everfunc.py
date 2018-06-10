@@ -343,18 +343,18 @@ def get_notestore():
             log.critical('%s出现EDAM系统错误，API使用超限，需要%d秒后重来。%s' % (errorstr, systeme.rateLimitDuration, str(systeme)))
         else:
             log.critical('%s出现EDAM系统错误。%s' % (errorstr, str(systeme)))
-    # except WindowsError as we:
-    #     if we.winerror == 10060:
-    #         log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器装死啊！%s' % (errorstr, str(we)))
-    #     elif we.winerror == 10054:
-    #         log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器端主动关闭链接啦！%s' % (errorstr, str(we)))
-    #     else:
-    #         log.critical('%s出现Windows系统错误（WindowsError）。%s' % (errorstr, str(we)))
-    #     raise we
-    # except Exception as ee:
-    #     print(ee)
-    #     log.critical('%s出现未名系统错误。%s' % (errorstr, str(ee)))
-    #     # exit(5)
+    except WindowsError as we:
+        if we.winerror == 10060:
+            log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器装死啊！%s' % (errorstr, str(we)))
+        elif we.winerror == 10054:
+            log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器端主动关闭链接啦！%s' % (errorstr, str(we)))
+        else:
+            log.critical('%s出现Windows系统错误（WindowsError）。%s' % (errorstr, str(we)))
+        raise we
+    except Exception as ee:
+        print(ee)
+        log.critical('%s出现未名系统错误。%s' % (errorstr, str(ee)))
+        # exit(5)
 
 
 def findnotefromnotebook(token, notebookguid, titlefind, notecount=10000):
@@ -1209,7 +1209,7 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
             serv.login(usernamemail, passwordmail)
             break
         except Exception as eee:
-            log.critical("第%d次（最多尝试%d次）连接登录邮件服务器时失败。%s" % (i + 1, trytimes, e))
+            log.critical("第%d次（最多尝试%d次）连接登录邮件服务器获取目标邮件编号列表时失败。%s" % (i + 1, trytimes, eee))
             if i == (trytimes - 1):
                 log.critical('邮件服务器连接失败，只好无功而返。')
                 raise eee
@@ -1271,7 +1271,9 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
     numlist = data[0].decode('ascii').split()[::-1]
 
     if len(numlist) == 0:  # 无新邮件则返回False
-        log.info('邮箱目录《%s》中没有主题为“%s”的新邮件' % (dirtarget, topic))
+        newstr = '新' if unseen else ''
+        topicstr = '主题为“%s”的' % topic if len(topic) > 0 else ''
+        log.info('邮箱目录《%s》中没有%s%s邮件' % (dirtarget, topicstr, newstr))
         return False
 
     if len(numlist) > mailnum:
@@ -1290,11 +1292,11 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
                 type, data = servinner.select(dirtarget)
                 break
             except ssl.SSLEOFError as ssleof:
-                log.critical("第%d次（最多尝试%d次）连接登录邮件服务器时失败。%s" % (i + 1, trytimes, ssleof))
+                log.critical("第%d次（最多尝试%d次）连接登录邮件服务器获取邮件内容时失败。%s" % (i + 1, trytimes, ssleof))
                 if iii == (trytimes - 1):
                     log.critical('邮件服务器连接失败，只好无功而返。')
                     log.info('此列表中的邮件未能被正常处理：%s' % str(numlistinside))
-                    raise eee
+                    raise ssleof
                 timesleep = 25
                 time.sleep(timesleep)
                 log.info('暂停%d秒后返回' % timesleep)
@@ -1303,7 +1305,7 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
                 if iii == (trytimes - 1):
                     log.critical('邮件服务器连接失败，只好无功而返。')
                     log.info('此列表中的邮件未能被正常处理：%s' % str(numlistinside))
-                    raise eee
+                    raise eeee
                 timesleep = 25
                 time.sleep(timesleep)
                 log.info('暂停%d秒后返回' % timesleep)

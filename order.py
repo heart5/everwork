@@ -116,9 +116,31 @@ def showorderstat():
     dforderzuixinriqi = dforder[dforder.日期 == zuixinriqi]
     # descdb(dforderzuixinriqi)
     persons = list(dforderzuixinriqi.groupby('业务人员')['业务人员'].count().index)
-    print(persons)
+    # print(persons)
     notestr = '每日销售订单核对'
+    if cfpzysm.has_section(notestr) is False:
+        cfpzysm.add_section(notestr)
     for person in persons:
+        if cfpzysm.has_option(notestr + 'guid', person) is False:
+            try:
+                notestore = get_notestore()
+                plannote = Ttypes.Note()
+                plannote.title = notestr + person
+                nBody = '<?xml version="1.0" encoding="UTF-8"?>'
+                nBody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
+                nBody += '<en-note>%s</en-note>' % plannote.title
+                plannote.content = nBody
+                global workplannotebookguid
+                plannote.notebookGuid = workplannotebookguid
+                token = cfp.get('evernote', 'token')
+                note = notestore.createNote(token, plannote)
+                evernoteapijiayi()
+                cfpzysm.set(notestr + 'guid', person, '%s' % note.guid)
+                cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+                log.info('成功创建%s的%s笔记' % (person, notestr))
+            except Exception as ee:
+                log.critical('创建%s的%s笔记时出现错误。' % (person, notestr))
+                continue
         if cfpzysm.has_option(notestr + 'guid', person + '最新订单日期'):
             ordertoday = cfpzysm.get(notestr + 'guid', person + '最新订单日期')
             if zuixinriqi <= pd.to_datetime(ordertoday):
@@ -141,9 +163,13 @@ def showorderstat():
             cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
         except Exception as eeee:
             log.critical('更新笔记%s——%s（%s）时出现严重错误。%s' % (notestr, person, orderdatestr, str(eeee)))
+    else:
+        log.info('下列人员的销售订单正常处置完毕：%s' % persons)
 
 
 def showorderstat2note(jiangemiao):
+    global workplannotebookguid
+    workplannotebookguid = '2c8e97b5-421f-461c-8e35-0f0b1a33e91c'
     try:
         showorderstat()
     except Exception as ee:

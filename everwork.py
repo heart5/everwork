@@ -41,7 +41,7 @@ from order import showorderstat2note
 workfilefromgmail2datacenter(60*60*2)
 showorderstat2note(60 * 60 * 1 + 60 * 8)
 log2notetimer(60 * 45)
-weatherstattimer(60 * 60 * 3 + 60 * 25)
+weatherstattimer(60 * 60 * 1 + 60 * 5)
 jinchustattimer(60 * 60)
 peoplestattimer(60 * 25)
 planfenxi(60 * 65 * 2)

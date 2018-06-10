@@ -288,6 +288,28 @@ def write2weathertxt(weathertxtfilename, inputitemlist):
     fileobject.close()
 
 
+def fetchweatherinfo_from_gmail(weathertxtfilename):
+    if cfplife.has_option('天气', '存储数据最新日期'):
+        weathertxtlastestday = cfplife.get('天气', '存储数据最新日期')
+    else:
+        weathertxtlastestday = '2016-09-19'
+        cfplife.set('天气', '存储数据最新日期', '%s' % weathertxtlastestday)
+        cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
+    today = datetime.datetime.now().strftime('%F')
+    hour = int(datetime.datetime.now().strftime('%H'))
+    if (today > weathertxtlastestday) and (hour > 6):
+        items = getweatherfromgmail()
+        if items:
+            log.info('通过邮件轮询，读取天气信息%d条。' % len(items))
+            itemfromtxt = readfromweathertxt(weathertxtfilename)
+            for itemg in itemfromtxt:
+                items.append(str(itemg))
+            write2weathertxt(weathertxtfilename, items)
+            weathertxtlastestday = time.strftime('%F', time.strptime(items[0].split(' ：')[0], '%B %d, %Y at %I:%M%p'))
+            cfplife.set('天气', '存储数据最新日期', '%s' % weathertxtlastestday)
+            cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
+
+
 def isweatherupdate(weathertxtfilename):
     # print(weathertoday, end='\t')
     # print(datetime.datetime.now().strftime('%F'))
@@ -295,22 +317,23 @@ def isweatherupdate(weathertxtfilename):
                                  time.strptime(readfromweathertxt(weathertxtfilename)[0].split(' ：')[0],
                                                '%B %d, %Y at %I:%M%p'))
     if datetime.datetime.now().strftime('%F') == weathertoday:
-        print('今天的天气信息已取回，跳过本轮询')
-        return False
-    items = getweatherfromgmail()
-    if items:
-        itemfromtxt = readfromweathertxt(weathertxtfilename)
-        for itemg in itemfromtxt:
-            items.append(str(itemg))
-        write2weathertxt(weathertxtfilename, items)
-    items = readfromweathertxt(weathertxtfilename)
-    if cfplife.has_option('天气', '统计天数'):
-        updatable = len(items) > cfplife.getint('天气', '统计天数')
+        log.info('今天的天气信息已取回，跳过邮件轮询。')
     else:
-        updatable = True
-    if updatable:
-        cfplife.set('天气', '统计天数', '%d' % len(items))
-        cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
+        items = getweatherfromgmail()
+        if items:
+            log.info('通过邮件轮询，读取天气信息%d条。' % len(items))
+            itemfromtxt = readfromweathertxt(weathertxtfilename)
+            for itemg in itemfromtxt:
+                items.append(str(itemg))
+            write2weathertxt(weathertxtfilename, items)
+
+    items = readfromweathertxt(weathertxtfilename)
+    print(len(items))
+    if cfplife.has_option('天气', '统计天数'):
+        dycountini = cfplife.getint('天气', '统计天数')
+    else:
+        dycountini = 0
+    if len(items) > dycountini:
         return items
     else:
         return False
@@ -318,26 +341,35 @@ def isweatherupdate(weathertxtfilename):
 
 def weatherstattimer(jiangemiao):
     weathertxtfilename = "data\\ifttt\\weather.txt"
-    if cfplife.has_option('天气', '最新日期'):
-        if datetime.datetime.now().strftime('%F') == cfplife.get('天气', '最新日期'):
-            print('今天的天气信息笔记已更新，本次轮询跳过')
-            return
-    try:
-        usn = isweatherupdate(weathertxtfilename)
-        if usn:
-            weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')
+    fetchweatherinfo_from_gmail(weathertxtfilename)
+
+    if cfplife.has_option('天气', '笔记最新日期'):
+        weathernotelastestday = cfplife.get('天气', '笔记最新日期')
+    else:
+        weathernotelastestday = '2016-09-19'
+        cfplife.set('天气', '笔记最新日期', '%s' % weathernotelastestday)
+        cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
+    today = datetime.datetime.now().strftime('%F')
+    weathertxtlastestday = cfplife.get('天气', '存储数据最新日期')
+    if today == weathernotelastestday:
+        print('今天的天气信息统计笔记已刷新，本次轮询跳过')
+    elif today == weathertxtlastestday:
+        try:
+            items = readfromweathertxt(weathertxtfilename)
+            token = cfp.get('evernote', 'token')
+            weatherstat(token, items, '296f57a3-c660-4dd5-885a-56492deb2cee')
             log.info('天气信息成功更新入天气信息统计笔记，将于%d秒后再次自动检查并更新' % jiangemiao)
-            weathertoday = time.strftime('%F',
-                                         time.strptime(readfromweathertxt(weathertxtfilename)[0].split(' ：')[0],
-                                                       '%B %d, %Y at %I:%M%p'))
-            cfplife.set('天气', '最新日期', '%s' % weathertoday)
+            cfplife.set('天气', '统计天数', '%d' % len(items))
+            cfplife.set('天气', '笔记最新日期', '%s' % today)
             cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
-    except IndexError as ixe:
-        log.critical('读取天气信息并更新天气统计信息笔记时出现索引错误。%s' % (str(ixe)))
-    except TypeError as te:
-        log.critical('读取天气信息并更新天气统计信息笔记时出现类型错误。%s' % (str(te)))
-    except Exception as e:
-        log.critical('读取天气信息笔记并更新天气统计信息笔记时出现未名错误。%s' % (str(e)))
+        except IndexError as ixe:
+            log.critical('读取天气信息并更新天气统计信息笔记时出现索引错误。%s' % (str(ixe)))
+        except TypeError as te:
+            log.critical('读取天气信息并更新天气统计信息笔记时出现类型错误。%s' % (str(te)))
+        except Exception as e:
+            log.critical('读取天气信息笔记并更新天气统计信息笔记时出现未名错误。%s' % (str(e)))
+    else:
+        log.info('时间的花儿静悄悄！')
 
     global timer_weather
     timer_weather = Timer(jiangemiao, weatherstattimer, [jiangemiao])
@@ -346,7 +378,6 @@ def weatherstattimer(jiangemiao):
 
 
 if __name__ == '__main__':
-    token = cfp.get('evernote', 'token')
     weatherstattimer(60 * 3)
     # weathertxtfilename = "data\\ifttt\\weather.txt"
     # usn = isweatherupdate(weathertxtfilename)

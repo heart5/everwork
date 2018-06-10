@@ -17,11 +17,10 @@ def log2notetimer(jiangemiao):
 
     print(len(loglines), end='\t')
     # global cfp, inifilepath
-    everlogc = int(cfp.get('evernote', 'everlogc'))
+    everlogc = cfp.getint('evernote', 'everlogc')
     if len(loglines) <= everlogc:
-        print('%s\t无新记录，不更新everworklog笔记' % str(datetime.datetime.now()))
+        log.info('暂无新记录，不更新everworklog笔记。')
     else:
-        print('有新的记录，执行更新')
         loglinestr = '\n'.join(loglines[::-1])
         loglinestr = loglinestr.replace('<', '《')
         loglinestr = loglinestr.replace('>', '》')
@@ -29,15 +28,15 @@ def log2notetimer(jiangemiao):
         loglinestr = loglinestr.replace('=', '等于')
         loglinestr = '<pre>' + loglinestr + '</pre>'
         # print(loglinestr)
-
         noteguid_lognote = '4a940ff2-74a8-4584-be46-aa6d68a4fa53'
         try:
-            imglist2note(get_notestore(), [], noteguid_lognote, 'everworklog', loglinestr)
+            nstore = get_notestore()
+            imglist2note(nstore, [], noteguid_lognote, 'everwork日志严重错误信息', loglinestr)
             cfp.set('evernote', 'everlogc', '%d' % len(loglines))
             cfp.write(open(inifilepath, 'w', encoding='utf-8'))
-            log.info('log信息成功更新入笔记，将于%d秒后再次自动检查并更新' % jiangemiao)
+            log.info('新的log错误信息成功更新入笔记，将于%d秒后再次自动检查并更新' % jiangemiao)
         except Exception as eeee:
-            log.critical('处理log信息到笔记时出现未名错误。%s' % (str(eeee)))
+            log.critical('处理新log错误信息到笔记时出现未名错误。%s' % (str(eeee)))
 
     global timer_log2note
     timer_log2note = Timer(jiangemiao, log2notetimer, [jiangemiao])
