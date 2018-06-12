@@ -313,48 +313,75 @@ def get_notestore():
 
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
-    errorstr = '连接Evernote服务器出现错误！'
-    try:
-        userstore = client.get_user_store()
-        version_ok = userstore.checkVersion(
-            "Evernote EDAMTest (Python)",
-            UserStoreConstants.EDAM_VERSION_MAJOR,
-            UserStoreConstants.EDAM_VERSION_MINOR
-        )
-        if not version_ok:
-            log.critical('Evernote API版本过时，请更新之！程序终止并退出！！！')
-            exit(1)
-        # print("Is my Evernote API version up to date? ", str(version_ok))
-        note_store = client.get_note_store()
-        evernoteapijiayi()
-        # log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
-        return note_store
-    except socket.gaierror as sge:
-        if sge.errno == 11001:
-            log.critical('%s网络连接问题，无法寻址。%s' % (errorstr, str(sge)))
-        else:
-            log.critical('%s可能是网络连接问题。%s' % (errorstr, str(sge)))
-        # exit(5)
-    except Etypes.EDAMUserException as usere:
-        log.critical('%s出现EDAM用户相关错误，可能是口令有误。%s' % (errorstr, str(usere)))
-        # exit(5)
-    except Etypes.EDAMSystemException as systeme:
-        if systeme.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
-            log.critical('%s出现EDAM系统错误，API使用超限，需要%d秒后重来。%s' % (errorstr, systeme.rateLimitDuration, str(systeme)))
-        else:
-            log.critical('%s出现EDAM系统错误。%s' % (errorstr, str(systeme)))
-    except WindowsError as we:
-        if we.winerror == 10060:
-            log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器装死啊！%s' % (errorstr, str(we)))
-        elif we.winerror == 10054:
-            log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器端主动关闭链接啦！%s' % (errorstr, str(we)))
-        else:
-            log.critical('%s出现Windows系统错误（WindowsError）。%s' % (errorstr, str(we)))
-        raise we
-    except Exception as ee:
-        print(ee)
-        log.critical('%s出现未名系统错误。%s' % (errorstr, str(ee)))
-        # exit(5)
+    trytimes = 3
+    sleeptime = 20
+    for i in range(trytimes):
+        try:
+            userstore = client.get_user_store()
+            evernoteapijiayi()
+            version_ok = userstore.checkVersion(
+                "Evernote EDAMTest (Python)",
+                UserStoreConstants.EDAM_VERSION_MAJOR,
+                UserStoreConstants.EDAM_VERSION_MINOR
+            )
+            if not version_ok:
+                log.critical('Evernote API版本过时，请更新之！程序终止并退出！！！')
+                exit(1)
+            # print("Is my Evernote API version up to date? ", str(version_ok))
+            note_store = client.get_note_store()
+            evernoteapijiayi()
+            # log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
+            return note_store
+        except Exception as eee:
+            log.critical("第%d次（最多尝试%d次）连接evernote服务器时失败，将于%d秒后重试。%s"
+                         % (i + 1, trytimes, sleeptime, eee))
+            if i == (trytimes - 1):
+                log.critical('evernote服务器连接失败，只好无功而返。')
+                raise eee
+            time.sleep(sleeptime)
+
+    # errorstr = '连接Evernote服务器出现错误！'
+    # try:
+    #     userstore = client.get_user_store()
+    #     version_ok = userstore.checkVersion(
+    #         "Evernote EDAMTest (Python)",
+    #         UserStoreConstants.EDAM_VERSION_MAJOR,
+    #         UserStoreConstants.EDAM_VERSION_MINOR
+    #     )
+    #     if not version_ok:
+    #         log.critical('Evernote API版本过时，请更新之！程序终止并退出！！！')
+    #         exit(1)
+    #     # print("Is my Evernote API version up to date? ", str(version_ok))
+    #     note_store = client.get_note_store()
+    #     evernoteapijiayi()
+    #     # log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
+    #     return note_store
+    # except socket.gaierror as sge:
+    #     if sge.errno == 11001:
+    #         log.critical('%s网络连接问题，无法寻址。%s' % (errorstr, str(sge)))
+    #     else:
+    #         log.critical('%s可能是网络连接问题。%s' % (errorstr, str(sge)))
+    #     # exit(5)
+    # except Etypes.EDAMUserException as usere:
+    #     log.critical('%s出现EDAM用户相关错误，可能是口令有误。%s' % (errorstr, str(usere)))
+    #     # exit(5)
+    # except Etypes.EDAMSystemException as systeme:
+    #     if systeme.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
+    #         log.critical('%s出现EDAM系统错误，API使用超限，需要%d秒后重来。%s' % (errorstr, systeme.rateLimitDuration, str(systeme)))
+    #     else:
+    #         log.critical('%s出现EDAM系统错误。%s' % (errorstr, str(systeme)))
+    # except WindowsError as we:
+    #     if we.winerror == 10060:
+    #         log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器装死啊！%s' % (errorstr, str(we)))
+    #     elif we.winerror == 10054:
+    #         log.critical('%s出现Windows系统错误（WindowsError）。evernote服务器端主动关闭链接啦！%s' % (errorstr, str(we)))
+    #     else:
+    #         log.critical('%s出现Windows系统错误（WindowsError）。%s' % (errorstr, str(we)))
+    #     raise we
+    # except Exception as ee:
+    #     print(ee)
+    #     log.critical('%s出现未名系统错误。%s' % (errorstr, str(ee)))
+    #     # exit(5)
 
 
 def findnotefromnotebook(token, notebookguid, titlefind, notecount=10000):

@@ -48,7 +48,7 @@ def chulixls_order(orderfile):
     # dforder['日期'] = dforder['单据编号'].apply(lambda x: pd.to_datetime(x[3:13]))
     dforder['日期'] = pd.to_datetime(dforder['日期'])
     dforder['订单编号'] = dforder['单据编号'].apply(lambda x: x.split('-')[-1])
-    dforder['金额'] = dforder['金额'].apply(lambda x: int(x[:-3]))
+    dforder['金额'] = dforder['金额'].apply(lambda x: float(x))
     dforder = dforder.loc[:, ['单据编号', '日期', '订单编号', '往来单位', '经办人', '金额', '部门全名']]
     dfordergengming = pd.DataFrame(dforder, copy=True)
     dfordergengming.columns = ['单据编号', '日期', '订单编号', '客户名称', '业务人员', '订单金额', '部门']
@@ -114,7 +114,7 @@ def showorderstat():
     orderdatestr = zuixinriqi.strftime('%F')
     print(orderdatestr, end='\t')
     dforderzuixinriqi = dforder[dforder.日期 == zuixinriqi]
-    # descdb(dforderzuixinriqi)
+    print(dforderzuixinriqi.shape[0])
     persons = list(dforderzuixinriqi.groupby('业务人员')['业务人员'].count().index)
     # print(persons)
     notestr = '每日销售订单核对'
@@ -139,7 +139,7 @@ def showorderstat():
                 cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
                 log.info('成功创建%s的%s笔记' % (person, notestr))
             except Exception as ee:
-                log.critical('创建%s的%s笔记时出现错误。' % (person, notestr))
+                log.critical('创建%s的%s笔记时出现错误。%s' % (person, notestr, str(ee)))
                 continue
         if cfpzysm.has_option(notestr + 'guid', person + '最新订单日期'):
             ordertoday = cfpzysm.get(notestr + 'guid', person + '最新订单日期')
@@ -174,6 +174,7 @@ def showorderstat2note(jiangemiao):
         showorderstat()
     except Exception as ee:
         log.critical('处理订单核对统计笔记时出现错误。%s' % str(ee))
+        raise ee
 
     global timer_showorderstat
     timer_showorderstat = Timer(jiangemiao, showorderstat2note, [jiangemiao])

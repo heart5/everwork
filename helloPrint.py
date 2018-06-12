@@ -113,11 +113,7 @@ def showtables():
     cnxp.close()
 
 
-if __name__ == '__main__':
-    # ttesttimesplit()
-    # currentprocess()
-    # findnotefromnotebook(token, 'c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b', '进出')
-    # dfappend()
+def tdaytest():
     tody = datetime.datetime.now().strftime('%F')
     print(tody)
     todyini = cfplife.get('天气', '最新日期')
@@ -126,4 +122,41 @@ if __name__ == '__main__':
     print(testok)
     teststrok = tody > '2016-09-19'
     print(teststrok)
+    today = pd.to_datetime(tody)
+    dr = pd.date_range(today, today + datetime.timedelta(days=2), freq='D')
+    print(dr)
+    print(dr.append(pd.date_range(today, today + datetime.timedelta(days=2), freq='D')))
+    pass
+
+
+def getholidayitems():
+    note_store = get_notestore()
+    hdayguid = cfpzysm.get('行政管理', '放假guid')
+    note = note_store.getNote(hdayguid, True, True, False, False)
+    evernoteapijiayi()
+    # print(timestamp2str(int(note.updated/1000)))
+    # print(note.updateSequenceNum)
+    soup = BeautifulSoup(note.content, "html.parser").get_text().strip()
+    print(soup)
+    pattern = re.compile(u'(\d{4}-\d{2}-\d{2})[,，](\w+)[,，](\d+?)', re.U)
+    splititems = re.split(pattern, soup)[1:]
+    print(splititems)
+    resultlist = list()
+    for i in range(int(len(splititems) / 4)):
+        item = list()
+        item.append(splititems[i * 4])
+        item.append(splititems[i * 4 + 2])
+        resultlist.append(item)
+    print(resultlist)
+    pd.date_range()
+
+if __name__ == '__main__':
+    # ttesttimesplit()
+    # currentprocess()
+    # getholidayitems()
+    # token = cfp.get('evernote', 'token')
+    # holidayguid = findnotefromnotebook(token, '31eee750-e240-438b-a1f5-03ce34c904b4', '放假')
+    # print(holidayguid)
+    # dfappend()
+    tdaytest()
     pass
