@@ -20,7 +20,7 @@ from pandas.tseries.offsets import *
 from bs4 import BeautifulSoup
 from os import listdir
 from os.path import isfile, join
-#from odps.df import DataFrame
+from odps.df import DataFrame
 from threading import Timer
 from multiprocessing import Process, Pool, Queue
 
@@ -1053,26 +1053,45 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     # Finally, send the new note to Evernote using the updateNote method
     # The new Note object that is returned will contain server-generated
     # attributes such as the new note's unique GUID.
+    trytimes = 3
+    sleeptime = 20
+    for i in range(trytimes):
+        try:
+            if notestore is None:
+                log.info(f'notestore失效，重新构建evernote服务器连接以便进行笔记《{note.title}》的内容更新操作。')
+                updated_note = get_notestore().updateNote(note)
+            else:
+                updated_note = notestore.updateNote(note)
+            evernoteapijiayi()
+            log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
+            break
+        except Exception as eee:
+            log.critical("第%d次（最多尝试%d次）更新笔记《%s》时失败，将于%d秒后重试。%s"
+                         % (i + 1, trytimes, note.title, sleeptime, eee))
+            if i == (trytimes - 1):
+                log.critical(f'更新笔记《{note.title}》失败，只好无功而返。')
+                raise eee
+            time.sleep(sleeptime)
 
-    try:
-        updated_note = notestore.updateNote(note)
-        evernoteapijiayi()
-        log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
-    except Etypes.EDAMUserException as eue:
-        # EDAMUserException(errorCode=11,
-        # parameter='The element type "br" must be terminated by the matching end-tag "《/br》".')
-        if eue.errorCode == 11:
-            log.critical('更新guid为%s的笔记时出现“EDAM用户异常-》语法”！%s' % (noteguid, str(eue.parameter)))
-        else:
-            log.critical('更新guid为%s的笔记时出现“EDAM用户异常”！%s' % (noteguid, str(eue)))
-        raise eue
-    except struct.error as se:
-        log.critical('更新guid为%s的笔记时出现“数据结构解析错误”！%s' % (noteguid, str(se)))
-        print(nbody[300])
-        raise se
-    except Exception as eee:
-        log.critical('更新guid为%s的笔记时出现未名错误！%s' % (noteguid, str(eee)))
-        raise eee
+    # try:
+    #     updated_note = notestore.updateNote(note)
+    #     evernoteapijiayi()
+    #     log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
+    # except Etypes.EDAMUserException as eue:
+    #     # EDAMUserException(errorCode=11,
+    #     # parameter='The element type "br" must be terminated by the matching end-tag "《/br》".')
+    #     if eue.errorCode == 11:
+    #         log.critical('更新guid为%s的笔记时出现“EDAM用户异常-》语法”！%s' % (noteguid, str(eue.parameter)))
+    #     else:
+    #         log.critical('更新guid为%s的笔记时出现“EDAM用户异常”！%s' % (noteguid, str(eue)))
+    #     raise eue
+    # except struct.error as se:
+    #     log.critical('更新guid为%s的笔记时出现“数据结构解析错误”！%s' % (noteguid, str(se)))
+    #     print(nbody[300])
+    #     raise se
+    # except Exception as eee:
+    #     log.critical('更新guid为%s的笔记时出现未名错误！%s' % (noteguid, str(eee)))
+    #     raise eee
 
 
 def isnoteupdate(token, noteguid):
@@ -1487,6 +1506,28 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
         items = readfromtxt(txtfilename)
     log.info("《%s-%s》共有%d条记录。" % (mingmu, fenleistr, len(items)))
     return items
+
+
+def isworkday(dlist):
+    cnxp = lite.connect('data\\workplan.db')
+    dfholiday = pd.read_sql('select * from holiday', cnxp, index_col='index', parse_dates=['index'])
+    dfleave = pd.read_sql('select * from leave', cnxp, index_col='index', parse_dates=['index'])
+    # print(dfholiday)
+    resultlist = list()
+    for dt in dlist:
+        dtdate = pd.to_datetime(dt)
+        if dtdate in dfholiday[dfholiday.mingmu == '上班'].index:
+            resultlist.append(True)
+            continue
+        if dtdate in dfholiday[dfholiday.mingmu != '上班'].index:
+            resultlist.append(False)
+            continue
+        if int(dtdate.strftime('%w')) == 0:
+            resultlist.append(False)
+            continue
+        resultlist.append(True)
+
+    return resultlist
 
 
 if __name__ == '__main__':

@@ -73,7 +73,11 @@ def updatedb_workplan(note_store, persons):
             #     continue
             guid = cfpzysm.get('业务计划总结guid', person)
             # print(guid)
-            note = note_store.getNote(guid, True, True, False, False)
+            if note_store is None:
+                note = get_notestore().getNote(guid, True, True, False, False)
+                log.debug(f'处理{person}日志时notestore失效，重构一个再来。')
+            else:
+                note = note_store.getNote(guid, True, True, False, False)
             evernoteapijiayi()
             # print(timestamp2str(int(note.updated/1000)))
             # print(note.updateSequenceNum)
@@ -174,8 +178,20 @@ def planfenxi(jiangemiao):
                 break
         if updatableall:  # or True:
             dayscount = cfpzysm.getint('业务计划总结dayscount', 'count')
+            dtgroup = dfsource[pd.to_datetime(dfsource.nianyueri) <= datetime.datetime.now()].groupby(
+                ['nianyueri']).count().index
+            # print(dtgroup)
+            workdaylist = isworkday(dtgroup)
+            workdaydf = pd.DataFrame(workdaylist, columns=['work'], index=dtgroup)
+            workdaydftrue = workdaydf[workdaydf.work == True]
+            workdaydftrue.sort_index(ascending=False, inplace=True)
+            if workdaydftrue.shape[0] > dayscount:
+                datelast = workdaydftrue.index[dayscount - 1]
+            else:
+                datelast = workdaydftrue.index[workdaydftrue.shape[0] - 1]
+            print(datelast)
             dflast = dfsource[
-                pd.to_datetime(dfsource.date) > (datetime.datetime.now() + pd.DateOffset(days=(-1 * dayscount)))]
+                pd.to_datetime(dfsource.nianyueri) > pd.to_datetime(datelast)]
             df = dflast[['name', 'nianyueri', 'contentlength', 'updatedtime']]
             df2show = df.drop_duplicates(['name', 'nianyueri'], keep='last')
             df2show.columns = ['业务人员', '计划日期', '内容字数', '更新时间']

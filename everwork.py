@@ -12,7 +12,7 @@ from notejinchujilu import *
 from log2note import *
 from peoplelog2note import *
 from workplan import *
-from salesorder import workfilefromgmail2datacenter
+from salesorder import workfilefromgmail2datacenter, fetchattendance_from_evernote
 from order import showorderstat2note
 
 # log.debug('程序启动……')
@@ -25,12 +25,9 @@ from order import showorderstat2note
 #         os.mkdir(cpath)
 #         log.debug('目录《' + cpath + '》被创建')
 
-# cnx = lite.connect('data\\quandan.db')
-# dataokay(cnx)
-
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
 
-# pinpaifenxi(token, note_store, cnx, daysbefore=360, brandnum=5)
+
 
 # desclitedb(cnx)
 # swissknife(cnx)
@@ -38,6 +35,7 @@ from order import showorderstat2note
 
 # isnoteupdate(token, note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
 
+fetchattendance_from_evernote(60 * 60 * 8)
 workfilefromgmail2datacenter(60*60*2)
 showorderstat2note(60 * 60 * 1 + 60 * 8)
 log2notetimer(60 * 45)

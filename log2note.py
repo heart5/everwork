@@ -18,7 +18,7 @@ def log2notetimer(jiangemiao):
     print(len(loglines), end='\t')
     # global cfp, inifilepath
     everlogc = cfp.getint('evernote', 'everlogc')
-    if len(loglines) <= everlogc:
+    if len(loglines) == everlogc:  # <=调整为==，用来应对log文件崩溃重建的情况
         log.info('暂无新记录，不更新everworklog笔记。')
     else:
         loglinestr = '\n'.join(loglines[::-1])

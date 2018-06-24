@@ -30,7 +30,12 @@ def chulixls_order(orderfile):
     print(sheet_name, end='\t')
     sheet1 = book.sheet_by_name(sheet_name)  # 通过sheet名字来获取，当然如果知道sheet名字就可以直接指定
     nrows = sheet1.nrows  # 获取行总数
-    # ncols = sheet1.ncols
+    ncols = sheet1.ncols
+    print(ncols, end='\t')
+    if ncols != 13:
+        log.info(f'{orderfile}不是合格的日销售订单格式！')
+        print()
+        return
     biglist = []
     for i in range(nrows):
         rowlist = []
@@ -79,6 +84,8 @@ def chulidataindir_order(pathorder):
                 continue
             print(fname, end='\t')
             dffname = chulixls_order(pathorder+'\\'+fname)
+            if dffname is None:
+                continue
             dfresult = dfresult.append(dffname)
             print(dffname.shape[0], end='\t')
             print(dfresult.shape[0])
@@ -174,7 +181,6 @@ def showorderstat2note(jiangemiao):
         showorderstat()
     except Exception as ee:
         log.critical('处理订单核对统计笔记时出现错误。%s' % str(ee))
-        raise ee
 
     global timer_showorderstat
     timer_showorderstat = Timer(jiangemiao, showorderstat2note, [jiangemiao])

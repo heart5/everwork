@@ -138,25 +138,39 @@ def getholidayitems():
     # print(note.updateSequenceNum)
     soup = BeautifulSoup(note.content, "html.parser").get_text().strip()
     print(soup)
-    pattern = re.compile(u'(\d{4}-\d{2}-\d{2})[,，](\w+)[,，](\d+?)', re.U)
+    # pattern = re.compile(u'(\d{4}-\d{2}-\d{2})[,，](\w+)[,，](\d{1,2}?)', re.U)
+    pattern = re.compile(u'(\d{4}-\d{2}-\d{2})', re.U)
     splititems = re.split(pattern, soup)[1:]
     print(splititems)
     resultlist = list()
-    for i in range(int(len(splititems) / 4)):
+    hlddates = None
+    for i in range(int(len(splititems) / 2)):
         item = list()
-        item.append(splititems[i * 4])
-        item.append(splititems[i * 4 + 2])
+        item.append(splititems[i * 2])
+        sitems = re.split('[,，]', splititems[i * 2 + 1])
+        # print(sitems)
+        item.append(sitems[1])
+        item.append(sitems[2])
         resultlist.append(item)
+        dday = pd.to_datetime(splititems[i * 2])
+        dr = pd.date_range(dday, dday + datetime.timedelta(days=int(sitems[2]) - 1), freq='D')
+        if hlddates is None:
+            hlddates = dr
+        else:
+            hlddates = hlddates.append(dr)
     print(resultlist)
-    pd.date_range()
+    print(hlddates)
+
+    return resultlist
 
 if __name__ == '__main__':
     # ttesttimesplit()
     # currentprocess()
     # getholidayitems()
-    # token = cfp.get('evernote', 'token')
-    # holidayguid = findnotefromnotebook(token, '31eee750-e240-438b-a1f5-03ce34c904b4', '放假')
-    # print(holidayguid)
+    token = cfp.get('evernote', 'token')
+    holidayguid = findnotefromnotebook(token, '31eee750-e240-438b-a1f5-03ce34c904b4', '假')
+    print(holidayguid)
     # dfappend()
-    tdaytest()
+    # tdaytest()
+    # hldlist = getholidayitems()
     pass

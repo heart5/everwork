@@ -262,10 +262,11 @@ def jiaoyankehuchanpin():
     dataokay(cnx)
 
     df = pd.read_sql_query(
-        'select xiaoshoumingxi.商品全名,xiaoshoumingxi.商品编号,product.* from xiaoshoumingxi left outer join product on '
+        'select xiaoshoumingxi.商品全名 as 品名,xiaoshoumingxi.商品编号,product.* from xiaoshoumingxi left outer join product on '
         'xiaoshoumingxi.商品全名 = product.商品全名 where product.商品全名 is null', cnx)
     df.describe()
-    print(df)
+    # print(df)
+    print(df.groupby(['品名']).count())
 
     df = pd.read_sql_query('select xiaoshoumingxi.单位全名,customer.* from xiaoshoumingxi left outer join customer on '
                            'xiaoshoumingxi.单位全名 = customer.往来单位 where customer.往来单位 is null', cnx)
@@ -283,19 +284,19 @@ def jiaoyankehuchanpin():
 
 
 if __name__ == '__main__':
-    dfs = details2db('2018.2.12-2018.3.21职员销售明细表.xls.xls', '2018.2.12-2018.3.21职员销售明细表.xls',
-                     ['职员名称', '商品全名'], 'xiaoshoumingxi')
-    print(dfs.columns)
-    dfgs = dfs.groupby(['日期', '职员名称'], as_index=False)['数量', '金额'].count()
-    # dfgs['日期', '职员名称'] = dfgs.index
-    descdb(dfgs)
-    dfg = dfgs.groupby(['职员名称'], as_index=False).apply(lambda t: t[t.金额 == t.金额.max()]) \
-        .sort_values(['金额'], ascending=False)
-    print(dfg.shape[0])
-    print(dfg.tail(30))
+    # dfs = details2db('职员销售明细表（2018.5.1-5.31）.xls.xls', '职员销售明细表（2018.5.1-5.31）.xls',
+    #                  ['职员名称', '商品全名'], 'xiaoshoumingxi')
+    # print(dfs.columns)
+    # dfgs = dfs.groupby(['日期', '职员名称'], as_index=False)['数量', '金额'].count()
+    # # dfgs['日期', '职员名称'] = dfgs.index
+    # descdb(dfgs)
+    # dfg = dfgs.groupby(['职员名称'], as_index=False).apply(lambda t: t[t.金额 == t.金额.max()]) \
+    #     .sort_values(['金额'], ascending=False)
+    # print(dfg.shape[0])
+    # print(dfg.tail(30))
 
-    # dfp = details2db('商品进货明细表（2018.4.11-2018.4.23）.xls.xls.xls',
-    #                  '商品进货明细表（2018.4.11-2018.4.23）.xl',
+    # dfp = details2db('商品进货明细表（2018.4.24-5.31）.xls.xls',
+    #                  '商品进货明细表（2018.4.24-5.31）.xls',
     #                  ['产品名称', '经办人'],
     #                  'jinghuomingxi')
     # writer = pd.ExcelWriter('data\\进货分析.xlsx')
@@ -324,6 +325,6 @@ if __name__ == '__main__':
     # writer.close()
     # customerweihu2systable()
 
-    # jiaoyankehuchanpin()
+    jiaoyankehuchanpin()
 
     cnx.close()

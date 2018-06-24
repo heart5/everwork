@@ -133,6 +133,7 @@ def pinpaifenxi(token, note_store, cnx, daysbefore=90, brandnum=30, fenbu='fenbu
         brandlist = brandlist[brandnum * (-1):]
     # brandlist = list(dff['品牌'])
     brandlist.append('')
+    # brandlist = brandlist[4:]
     print(brandlist)
     for br in brandlist:
         log.info('第%d个品牌：%s，共有%d个品牌' % (brandlist.index(br) + 1, br, len(brandlist)))
@@ -172,3 +173,10 @@ def pinpaifenxi(token, note_store, cnx, daysbefore=90, brandnum=30, fenbu='fenbu
         xiangmu = ['销售客户数', '退货客户数']
         fenxiyueduibi(token, note_store, qrystr, xiangmu, notefbkhdf, notelxkhdf, cnx, pinpai=br)
         # fenximonthduibi(token, note_store, '退货客户数', notefbkhdf, notelxkhdf, cnx, pinpai=br)
+
+
+if __name__ == '__main__':
+    cnx = lite.connect('data\\quandan.db')
+    dataokay(cnx)
+    token = cfp.get('evernote', 'token')
+    pinpaifenxi(token, get_notestore(), cnx, daysbefore=15, brandnum=1)
