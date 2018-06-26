@@ -93,7 +93,7 @@ def chulidataindir_order(pathorder):
             cfpzysm.set('销售订单', '已处理文件清单', '%s' % '\n'.join(yichulifilelist))
             cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
 
-    # dfresult.drop_duplicates(['单据编号', '日期', '订单编号', '客户名称', '业务人员', '订单金额', '部门'], inplace=True)
+    dfresult.drop_duplicates(['单据编号', '日期', '订单编号', '客户名称', '业务人员', '订单金额', '部门'], inplace=True)
     # descdb(dfresult)
     dfttt = dfresult.drop_duplicates()
     if cfpzysm.has_option('销售订单', '记录数'):
@@ -127,6 +127,7 @@ def showorderstat():
     notestr = '每日销售订单核对'
     if cfpzysm.has_section(notestr) is False:
         cfpzysm.add_section(notestr)
+        cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
     for person in persons:
         if cfpzysm.has_option(notestr + 'guid', person) is False:
             try:
@@ -154,9 +155,9 @@ def showorderstat():
                 continue
         dfperson = dforderzuixinriqi[dforderzuixinriqi.业务人员 == person]
         dfpersonsum = dfperson.groupby('业务人员').sum()['订单金额']
-        dfperson.loc[dfpersonsum[0]] = None
-        dfperson.loc[dfpersonsum[0], '订单金额'] = dfpersonsum[0]
-        dfperson.loc[dfpersonsum[0], '订单编号'] = dfperson.shape[0]-1
+        dfperson.loc['合计', :] = None
+        dfperson.loc['合计', '订单金额'] = dfpersonsum[0]
+        dfperson.loc['合计', '订单编号'] = dfperson.shape[0] - 1
         print(person, end='\t')
         print(dfpersonsum[0], end='\t')
         personguid = cfpzysm.get(notestr + 'guid', person)
@@ -172,6 +173,57 @@ def showorderstat():
             log.critical('更新笔记%s——%s（%s）时出现严重错误。%s' % (notestr, person, orderdatestr, str(eeee)))
     else:
         log.info('下列人员的销售订单正常处置完毕：%s' % persons)
+
+    yuechuriqi = pd.to_datetime(f"{zuixinriqi.strftime('%Y')}-{zuixinriqi.strftime('%m')}-01")
+    dfsales = dforder[dforder.日期 >= yuechuriqi]
+    notestr = '销售订单金额（月）'
+    if cfpzysm.has_section(notestr) is False:
+        cfpzysm.add_section(notestr)
+        cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+    for person in persons:
+        if cfpzysm.has_option(notestr, person) is False:
+            try:
+                notestore = get_notestore()
+                plannote = Ttypes.Note()
+                plannote.title = notestr + person
+                nBody = '<?xml version="1.0" encoding="UTF-8"?>'
+                nBody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
+                nBody += '<en-note>%s</en-note>' % plannote.title
+                plannote.content = nBody
+                plannote.notebookGuid = workplannotebookguid
+                token = cfp.get('evernote', 'token')
+                note = notestore.createNote(token, plannote)
+                evernoteapijiayi()
+                cfpzysm.set(notestr, person, '%s' % note.guid)
+                cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+                log.info('成功创建%s的%s笔记' % (person, notestr))
+            except Exception as ee:
+                log.critical('创建%s的%s笔记时出现错误。%s' % (person, notestr, str(ee)))
+                continue
+        if cfpzysm.has_option(notestr, person + '最新订单日期'):
+            ordertoday = cfpzysm.get(notestr, person + '最新订单日期')
+            if zuixinriqi <= pd.to_datetime(ordertoday):
+                continue
+        dfperson = dfsales[dfsales.业务人员 == person]
+        dfpersonsum = dfperson.groupby('日期').sum()['订单金额'].sum()
+        dfperson.loc['合计', :] = None
+        dfperson.loc['合计', '订单金额'] = dfpersonsum
+        dfperson.loc['合计', '订单编号'] = dfperson.shape[0] - 1
+        print(person, end='\t')
+        print(dfpersonsum, end='\t')
+        personguid = cfpzysm.get(notestr, person)
+        print(personguid)
+        neirong = tablehtml2evernote(dfperson, notestr)
+        # print(neirong)
+        try:
+            notestore = get_notestore()
+            imglist2note(notestore, [], personguid, '%s——%s（%s）' % (notestr, person, orderdatestr), neirong)
+            cfpzysm.set(notestr, person + '最新订单日期', '%s' % orderdatestr)
+            cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+        except Exception as eeee:
+            log.critical('更新笔记%s——%s（%s）时出现严重错误。%s' % (notestr, person, orderdatestr, str(eeee)))
+    else:
+        log.info('下列人员的销售订单金额正常处置完毕：%s' % persons)
 
 
 def showorderstat2note(jiangemiao):
