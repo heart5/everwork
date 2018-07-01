@@ -1117,10 +1117,10 @@ def isnoteupdate(token, noteguid):
         return False
 
 
-def tablehtml2evernote(dataframe, tabeltitle):
+def tablehtml2evernote(dataframe, tabeltitle, withindex=True):
     pd.set_option('max_colwidth', 200)
     df = pd.DataFrame(dataframe)
-    outstr = df.to_html(justify='center', index_names=True).replace('class="dataframe">', 'align="center">'). \
+    outstr = df.to_html(justify='center', index=withindex).replace('class="dataframe">', 'align="center">'). \
         replace('<table', '\n<h3 align="center">%s</h3>\n<table' % tabeltitle).replace('<th></th>', '<th>&nbsp;</th>')
     # print(outstr)
     return outstr
