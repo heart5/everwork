@@ -176,6 +176,8 @@ def dingdanxiaoshouyuedufenxi(dforder):
             # print(xx[i])
             if xx[i] > 0:
                 return i
+        else:
+            return 12
 
     dfpivot['首次成交月份'] = dfpivot.apply(lambda x: clsnew[shouciyuefen(x[3:16]) + 3], axis=1)
     dfpivot['首交月数'] = dfpivot.apply(lambda x: 13 - shouciyuefen(x[3:16]), axis=1)
@@ -185,13 +187,22 @@ def dingdanxiaoshouyuedufenxi(dforder):
             # print(f'{xx[i]}\t{i}')
             if xx[i] > 0:
                 return i
+        else:
+            return 12
 
     dfpivot['最近成交月份'] = dfpivot.apply(lambda x: clsnew[zuijinyuefen(x[3:16]) + 3], axis=1)
     dfpivot['尾交月数'] = dfpivot.apply(lambda x: 13 - zuijinyuefen(x[3:16]), axis=1)
     dfpivot['有效月数'] = dfpivot['首交月数'] - dfpivot['尾交月数'] + 1
     dfpivot['年总金额'] = dfpivot.apply(lambda x: sum(x[3:16]), axis=1)
     dfpivot['年总金额'] = dfpivot['年总金额'].astype(int)
-    dfpivot['有效月均'] = dfpivot['年总金额'] / dfpivot['有效月数']
+
+    def youxiaoyuejun(jine, yueshu):
+        if yueshu == 0:
+            return 0
+        else:
+            return jine / yueshu
+
+    dfpivot['有效月均'] = dfpivot.apply(lambda x: youxiaoyuejun(x.年总金额, x.有效月数), axis=1)
     dfpivot['有效月均'] = dfpivot['有效月均'].astype(int)
     dfpivot.sort_values(['区域', '有效月均'], ascending=[True, False], inplace=True)
     # descdb(dfpivot)
