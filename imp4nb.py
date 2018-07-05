@@ -1,5 +1,11 @@
 # encoding:utf-8
 
+import sys
+
+sys.path.insert(0, 'work')
+sys.path.insert(0, 'life')
+sys.path.insert(0, 'study')
+sys.path.insert(0, 'sysetc')
 from everfunc import *
 
 
