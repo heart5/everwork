@@ -69,7 +69,7 @@ def chulidataindir_order(pathorder):
     sqlstr = "select count(*)  from sqlite_master where type='table' and name = '%s'" % tablename_order
     tablexists = pd.read_sql_query(sqlstr, cnxp).iloc[0, 0] > 0
     if tablexists:
-        dfresult = pd.read_sql('select * from \'%s\'' % tablename_order, cnxp, parse_dates=['日期'], index_col=['单据编号'])
+        dfresult = pd.read_sql('select * from \'%s\'' % tablename_order, cnxp, parse_dates=['日期'])
         log.info('订单数据表%s已存在， 从中读取%d条数据记录。' % (tablename_order, dfresult.shape[0]))
     else:
         log.info('订单数据表%s不存在，将创建之。' % tablename_order)
@@ -123,7 +123,7 @@ def chulidataindir_order(pathorder):
         'select tmptable.*,C.customer.往来单位编号 as 单位编号, substr(C.customer.往来单位编号, 1,2) as 区域,  '
         'substr(C.customer.往来单位编号, 12, 1) as 类型 from tmptable, C.customer '
         'where (tmptable.客户名称 = C.customer.往来单位) order by 日期 desc',
-        cnxp, parse_dates=['日期'], index_col=['单据编号'])
+        cnxp, parse_dates=['日期'])
     # descdb(dfhanqu)
     dfout = dfhanqu.loc[:, ['日期', '订单编号', '区域', '类型', '单位编号', '客户名称', '业务人员', '订单金额', '部门']]
     # descdb(dfout)
