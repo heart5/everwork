@@ -222,7 +222,6 @@ def weatherstat(token, items, destguid=None):
     ax1.grid(True)
     ax1.set_title(u'最高气温、最低气温和均值温度图')
 
-
     ax3 = plt.subplot2grid((4, 2), (2, 0), colspan=2, rowspan=2)
     # print(type(ax3))
     ax3.plot(df_recent_year['shidu'], 'c.', lw=0.3, label=u'湿度')
