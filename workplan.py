@@ -11,6 +11,7 @@
 ddf1cbea-c6e4-4d74-9782-51017c798a99 业务推广日工作总结和计划——陈威
 252e380f-11ff-4fe5-bb0c-fc24af74d385 业务推广日工作总结和计划—陈益
 ac7088ee-c1eb-4489-b249-e22692706d15 业务推广日工作总结和计划——梅富忠
+ED569A94-28F0-4C61-B81A-D38D6CB52A92 业务推广日工作总结和计划——梅富忠 为什么guid变了？！
 443f5b18-d0d9-436a-9f9e-5c7a070b8726 业务推广日工作总结和计划——徐志伟
 b627331e-179f-4d69-a8cf-807a1d0f6862 业务推广计划和总结—王家龙
 6e68b4ee-78f8-456e-bf76-71547e83ae21 业务推广日工作总结和计划——陈威
@@ -71,7 +72,7 @@ def updatedb_workplan(note_store, persons):
             # print(person)
             # if person != '梅富忠':
             #     continue
-            guid = cfpzysm.get('业务计划总结guid', person)
+            guid = cfpzysm.get('业务计划总结guid', person).lower()
             # print(guid)
             if note_store is None:
                 note = get_notestore().getNote(guid, True, True, False, False)
@@ -114,7 +115,7 @@ def updatedb_workplan(note_store, persons):
                 # print(dfrizhichuli)
                 if dfrizhichuli.shape[0] > liuxin:
                     dfrizhiappend = dfrizhichuli[:dfrizhichuli.shape[0] - liuxin]  # 取头部
-                    dfrizhiappend.to_sql(tablename_plan, cnxp, if_exists='append')
+                    dfrizhiappend.to_sql(tablename_plan, cnxp, index=False, if_exists='append')
                     log.info('%s的业务日志有%d条追加到日志内容表中，最新日期为：%s' % (person, dfrizhiappend.shape[0], str(datemaxdb)))
 
             # print(planitems[0])
@@ -124,20 +125,30 @@ def updatedb_workplan(note_store, persons):
                 updatable = True
             if updatable:
                 log.info('业务主管%s的日志有更新。' % person)
-                item = list()
-                item.append(person)
-                datestr = datetime.date.strftime(planitems[0][0], '%Y-%m-%d')
-                item.append(datestr)
-                item.append(planitems[0][0])
-                item.append(planitems[0][1])
-                item.append(len(planitems[0][1]))
-                item.append(timestamp2str(int(note.updated / 1000)))
+                sqlstr = 'select max(date) from %s where name=\'%s\'' % (tablename_updated, person)
+                dftmp = pd.read_sql(sqlstr, cnxp)
+                datemaxdb = pd.to_datetime(dftmp.iloc[0, 0])
+                if datemaxdb is None:
+                    datemaxdb = planitems[-1][0] + datetime.timedelta(days=-1)
+                dfitems = pd.DataFrame(planitems, columns=['date', 'content'])
+                dfadd = dfitems[dfitems.date > datemaxdb]
+                print(dfadd)
                 itemss = list()
-                itemss.append(item)
+                for ix in dfadd.index:
+                    item = list()
+                    item.append(person)
+                    datestr = datetime.date.strftime(dfadd.loc[ix, 'date'], '%Y-%m-%d')
+                    item.append(datestr)
+                    item.append(dfadd.loc[ix, 'date'])
+                    item.append(dfadd.loc[ix, 'content'])
+                    item.append(len(dfadd.loc[ix, 'content']))
+                    item.append(timestamp2str(int(note.updated / 1000)))
+                    itemss.append(item)
                 dfupdate = pd.DataFrame(itemss, columns=['name', 'nianyueri', 'date', 'content', 'contentlength',
                                                          'updatedtime'])
-                dfupdate.to_sql(tablename_updated, cnxp, if_exists='append')
-                log.info('%s的业务日志有%d条追加到日志更新表中，日期为%s。' % (person, dfupdate.shape[0], datestr))
+                print(dfupdate)
+                dfupdate.to_sql(tablename_updated, cnxp, index=False, if_exists='append')
+                log.info('%s的业务日志有%d条追加到日志更新表中，日期为%s。' % (person, dfupdate.shape[0], list(dfadd['date'])))
                 cfpzysm.set('业务计划总结updatenum', person, '%d' % note.updateSequenceNum)
                 cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
         else:
@@ -160,7 +171,7 @@ def planfenxi(jiangemiao):
         updatedb_workplan(note_store, persons)
 
         sqlstr = 'select distinct * from %s order by updatedtime desc' % tablename_updated
-        dfsource = pd.read_sql(sqlstr, cnxp)
+        dfsource = pd.read_sql(sqlstr, cnxp, parse_dates=['date', 'updatedtime'])
         updatablelist = []
         for person in persons:
             planitemscount = dfsource.loc[dfsource.name == person].shape[0]
@@ -211,7 +222,7 @@ def planfenxi(jiangemiao):
                 if df2show.loc[ix]['计划提交'] == '延迟':
                     df2show.loc[ix, '业务人员'] = df2show.loc[ix, '业务人员'].join(stylelist)
                     df2show.loc[ix, '计划日期'] = df2show.loc[ix, '计划日期'].join(stylelist)
-                    df2show.loc[ix, '更新时间'] = df2show.loc[ix, '更新时间'].join(stylelist)
+                    # df2show.loc[ix, '更新时间'] = df2show.loc[ix, '更新时间'].join(stylelist)
                     df2show.loc[ix, '计划提交'] = df2show.loc[ix, '计划提交'].join(stylelist)
                     pass
             # descdb(df2show)
@@ -237,6 +248,7 @@ def planfenxi(jiangemiao):
                 cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
     except Exception as eee:
         log.critical('更新业务日志汇总笔记时出现错误。%s' % (str(eee)))
+        # raise eee
     finally:
         cnxp.close()
 
@@ -295,7 +307,7 @@ def chulioldversion():
         tablename_updated = 'planupdated'
         dfupdate = pd.DataFrame(items,
                                 columns=['name', 'nianyueri', 'date', 'content', 'contentlength', 'updatedtime'])
-        dfupdate.to_sql(tablename_updated, cnxp, if_exists='append')
+        dfupdate.to_sql(tablename_updated, cnxp, index=False, if_exists='append')
         cnxp.close()
 
 
@@ -305,16 +317,16 @@ def chayanshuju():
 
     # person = '梅富忠'
     sqlstr = 'select * from %s order by updatedtime desc' % tablename_updated
-    dftmp = pd.read_sql(sqlstr, cnxp)
+    dftmp = pd.read_sql(sqlstr, cnxp, parse_dates=['date', 'updatedtime'])
     print(dftmp.shape[0])
 
     sqlstr = 'select distinct * from %s order by updatedtime desc' % tablename_updated
-    dftmp = pd.read_sql(sqlstr, cnxp)
+    dftmp = pd.read_sql(sqlstr, cnxp, parse_dates=['date', 'updatedtime'])
     print(dftmp.shape[0])
-    dftmp.to_sql(tablename_updated, cnxp, if_exists='replace')
+    dftmp.to_sql(tablename_updated, cnxp, index=False, if_exists='replace')
 
     sqlstr = 'select * from %s order by updatedtime desc' % tablename_updated
-    dftmp = pd.read_sql(sqlstr, cnxp)
+    dftmp = pd.read_sql(sqlstr, cnxp, parse_dates=['date', 'updatedtime'])
     print(dftmp.shape[0])
 
     dfupdated = dftmp.groupby(['name', 'nianyueri'], as_index=False)['updatedtime'].max().sort_values('updatedtime',
