@@ -1,6 +1,7 @@
 """
 4524187f-c131-4d7d-b6cc-a1af20474a7f notification 笔记本
 4a940ff2-74a8-4584-be46-aa6d68a4fa53 everworklog 笔记
+log目录
 
 """
 
