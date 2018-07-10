@@ -160,7 +160,7 @@ def evernoteapiclearatzero():
         writeini()
 
 
-dirbuildfirst()
+# dirbuildfirst()
 log = mylog()
 
 cfp = ConfigParser()
@@ -1215,6 +1215,10 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
                     if fname.startswith('销售订单'):
                         # print(fname)
                         datadiri = datadiri + '销售订单\\'
+                    elif fname.startswith('订单明细'):
+                        # print(fname)
+                        datadiri = datadiri + '订单明细\\'
+
                     attachfile = datadiri + fname[:pointat] + timenowstr + fname[pointat:]
                     try:
                         fattach = open(attachfile, 'wb')  # 注意一定要用wb来打开文件，因为附件一般都是二进制文件
