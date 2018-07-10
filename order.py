@@ -102,7 +102,9 @@ def chulidataindir_order(pathorder):
     print(f'除重前有{dfresult.shape[0]}条记录，', end='\t')
     dfresult.drop_duplicates(inplace=True)
     # descdb(dfresult)
-    print(f'除重后有{dfresult.shape[0]}条记录，', end='\t')
+    dateqiyu = min(dfresult['日期'])
+    datezhiyu = max(dfresult['日期'])
+    print(f'除重后有{dfresult.shape[0]}条记录；数据起于{dateqiyu}，止于{datezhiyu}')
     dfttt = dfresult.drop_duplicates()
     if cfpzysm.has_option('销售订单', '记录数'):
         jilucont = cfpzysm.getint('销售订单', '记录数')
@@ -138,11 +140,11 @@ def dingdanxiaoshouyuedufenxi(dforder):
     dfall['年月'] = dfall['日期'].apply(lambda x: x.strftime('%Y%m'))
     # descdb(dfall)
     zuijinchengjiaori = max(dfall['日期'])
-    # print(zuijinchengjiaori)
+    print(f'数据集最新日期：{zuijinchengjiaori}')
     if cfpdata.has_option('ordersaleguidquyu', '数据最新日期'):
         daterec = pd.to_datetime(cfpdata.get('ordersaleguidquyu', '数据最新日期'))
         # print(daterec)
-        if daterec >= zuijinchengjiaori:
+        if daterec >= zuijinchengjiaori:  # and False:
             log.info(f'订单数据集无更新，返回')
             return
     zuiyuanriqi = zuijinchengjiaori + datetime.timedelta(days=-365)
@@ -242,6 +244,8 @@ def dingdanxiaoshouyuedufenxi(dforder):
 
     dfzhongduan = dfshow[dfshow.类型大类 == '终端客户']
     # descdb(dfzhongduan)
+
+    targetlist = list()
     dfzdall = dfzhongduan.loc[:, :]
     # descdb(dfzdall)
 
@@ -266,7 +270,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
                 cfpdata.set('guidquyunb', qy, nbguid)
                 cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
             except Exception as e:
-                log.critical(f'创建《{qy}订单金额年度分析》笔记时出现错误。{ee}')
+                log.critical(f'创建《{qy}》笔记本时出现错误。{ee}')
         print(nbguid, end='\t')
         if cfpdata.has_option('ordersaleguidquyu', qy + 'guid'):
             ntguid = cfpdata.get('ordersaleguidquyu', qy + 'guid')
@@ -284,9 +288,69 @@ def dingdanxiaoshouyuedufenxi(dforder):
                 cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
             except Exception as ee:
                 log.critical(f'创建《{qy}订单金额年度分析》笔记时出现错误。{ee}')
-        print(ntguid, end='\t')
+        print(ntguid)
+        target = list()
+        target.append(qy)
+        target.append(ntguid)
+        target.append(dfslicesingle)
+        targetlist.append(target)
 
+    # descdb(dfshow[dfshow.index.str.find('XF') >= 0])
+    lqzlist = [['连锁客户', '0e8ba322-4874-4627-a6de-13c69fffc88d'],
+               ['渠道客户', '4AC03027-5929-415B-9711-0A8170263189'.lower()],
+               ['直销客户', 'B0731D74-C268-417E-A8B7-7BE3EE590FAE'.lower()]
+               ]
+    for [mingmu, mmguid] in lqzlist:
+        dfls = dfshow.loc[:, :]
+        dfls = dfls[dfls.类型大类 == mingmu]
+        # dfls = dfls[str(dfls.index)[7:9] == 'XF']
+        del dfls['类型大类']
+        dfls.sort_values(['有效月均'], ascending=False, inplace=True)
+        target = list()
+        target.append(mingmu)
+        target.append(mmguid)
+        target.append(dfls)
+        targetlist.append(target)
+    lslist = [['学府超市', 'XF', 'ce26a763-81cc-421f-8430-22dab21ba43e'],
+              ['红生超市', 'HS', '1F0995DA-1DEC-4333-8EA6-8C85B54E2B71'.lower()],
+              ['五分钟', 'WF', '41518B63-FF81-4719-BFE0-0E5BBFBC295A'.lower()]
+              ]
+    for [mingcheng, bianma, guid] in lslist:
+        dfls = dfshow.loc[:, :]
+        dfls = dfls[dfls.index.str.find(bianma) >= 0]
+        del dfls['类型大类']
+        if dfls.shape[0] == 0:
+            log.info(f'连锁超市{mingcheng}没有数据记录，跳过')
+            continue
+        dfls.sort_values(['有效月均'], ascending=False, inplace=True)
+        target = list()
+        target.append(mingcheng)
+        target.append(guid)
+        target.append(dfls)
+        targetlist.append(target)
+
+    # print(targetlist)
+    for [qy, ntguid, dfslicesingle] in targetlist:
         try:
+            dfslicesingle.loc['汇总'] = dfslicesingle.apply(lambda x: x.sum())
+            dfslicesingle.loc['汇总', ['客户名称']] = '汇总'
+            dfslicesingle.loc['汇总', ['类型小类']] = ''
+            dfslicesingle.loc['汇总', ['类型小类']] = ''
+            if '区域名称' in list(dfslicesingle.columns):
+                dfslicesingle.loc['汇总', ['区域名称']] = ''
+            idxnew = list(dfslicesingle.index)
+            idxnew = [idxnew[-1]] + idxnew[:-1]
+            dfslicesingle = dfslicesingle.loc[idxnew]
+            # dfslicesingle = pd.DataFrame(dfslicesingle.iloc[-1]).append(dfslicesingle.iloc[0:-1])
+            # print(dfslicesingle.iloc[-1,:])
+            # print(dfslicesingle.iloc[0:-1,:])
+            if cfpdata.has_option('ordersaleguidquyu', qy + 'count'):
+                itemscount = cfpdata.getint('ordersaleguidquyu', qy + 'count')
+            else:
+                itemscount = 0
+            # if dfslicesingle.shape[0] == itemscount:
+            #     log.info(f'{qy}数据项目没有变化，跳过次轮更新')
+            #     continue
             dfzdclnames = list(dfslicesingle.columns)
             # print(dfzdclnames)
             dfzdclnames3 = dfzdclnames[3:16]
@@ -300,22 +364,13 @@ def dingdanxiaoshouyuedufenxi(dforder):
                          tablehtml2evernote(dfslicesingle.loc[:, dfzdclnamesnew], stattitle, withindex=False))
             cfpdata.set('ordersaleguidquyu', qy + 'count', f'{dfslicesingle.shape[0]}')
             cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
+            log.info(f'{qy}数据项目成功更新')
         except Exception as eee:
             log.critical(f'《{qy}订单金额年度分析》笔记更新时出现错误。{eee}')
         print(dfslicesingle.shape[0])
-
-    cfpdata.set('ordersaleguidquyu', '数据最新日期', f'{zuijinchengjiaori}')
-    cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
-
-    # print(dfshow[dfshow.类型 == 'L'])
-    # 销售列表 0e8ba322-4874-4627-a6de-13c69fffc88d
-    # dfls = dfshow.loc[:,:]
-    # dfls = dfls[dfls.类型 == 'L']
-    # dfls.sort_values(['年总金额'], ascending=False, inplace=True)
-    # dfls.index = dfls['客户名称']
-    # del dfls['客户名称']
-    # imglist2note(get_notestore(),[],'0e8ba322-4874-4627-a6de-13c69fffc88d', '连锁超市销售', tablehtml2evernote(dfls, '连锁超市年销售'))
-    # pass
+    else:
+        cfpdata.set('ordersaleguidquyu', '数据最新日期', f'{zuijinchengjiaori}')
+        cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
 
 
 def showorderstat():
