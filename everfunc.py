@@ -1534,6 +1534,57 @@ def isworkday(dlist):
     return resultlist
 
 
+def dftotal2top(df: pd.DataFrame):
+    # print(df.dtypes)
+    dfslicesingle = df.loc[:, :]
+    # print(dfslicesingle.dtypes)
+    numtypelist = [float, float64, int, int64]
+    # dfslicesingle.loc['汇总'] = dfslicesingle.apply(lambda x: x.sum() if dtype(x) in numtypelist else None)
+    dfslicesingle.loc['汇总'] = dfslicesingle.apply(lambda x: x.sum() if x.name.find('日期') < 0 else None)
+    # print(list(dfslicesingle.columns))
+    # print(list(dfslicesingle.loc['汇总']))
+    firstcltotal = False
+    hasjun = False
+    cls = dfslicesingle.columns
+    # print(df.dtypes)
+    for cl in cls:
+        # print(cl)
+        if cl.find('日期') >= 0:
+            continue
+        if cl.find('有效月均') >= 0:
+            hasjun = True
+        if dtype(dfslicesingle[cl]) in numtypelist:
+            # dfslicesingle.loc['汇总', cl] = dfslicesingle[cl].sum()
+            continue
+        else:
+            if firstcltotal:
+                dfslicesingle.loc['汇总', cl] = len(set(list(dfslicesingle[cl]))) - 1
+            else:
+                firstcltotal = True
+                dfslicesingle.loc['汇总', cl] = '汇总'
+    print(list(dfslicesingle.loc['汇总']))
+    if hasjun:
+        first = start = end = -1
+        for i in range(len(cls)):
+            if (cls[i].find('有效月均') >= 0) or (cls[i].find('总金额') >= 0):
+                break
+            if dtype(dfslicesingle[cls[i]]) in numtypelist:
+                if first < 0:
+                    first = i
+                if dfslicesingle.loc['汇总', cls[i]] > 0:
+                    if start < 0:
+                        start = i
+                    end = i
+        print(f'{first}\t{start}\t{end}')
+        print(list(dfslicesingle.loc['汇总'])[start:(end + 1)])
+        dfslicesingle.loc['汇总', '有效月均'] = int(sum(list(dfslicesingle.loc['汇总'])[start:(end + 1)]) / (end - start))
+        pass
+    idxnew = list(dfslicesingle.index)
+    idxnew = [idxnew[-1]] + idxnew[:-1]
+    dfout = dfslicesingle.loc[idxnew]
+    return dfout
+
+
 if __name__ == '__main__':
     host = cfp.get('gmail', 'host')
     username = cfp.get('gmail', 'username')
