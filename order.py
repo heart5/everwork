@@ -332,18 +332,6 @@ def dingdanxiaoshouyuedufenxi(dforder):
     # print(targetlist)
     for [qy, ntguid, dfslicesingle] in targetlist:
         try:
-            dfslicesingle.loc['汇总'] = dfslicesingle.apply(lambda x: x.sum())
-            dfslicesingle.loc['汇总', ['客户名称']] = '汇总'
-            dfslicesingle.loc['汇总', ['类型小类']] = ''
-            dfslicesingle.loc['汇总', ['类型小类']] = ''
-            if '区域名称' in list(dfslicesingle.columns):
-                dfslicesingle.loc['汇总', ['区域名称']] = ''
-            idxnew = list(dfslicesingle.index)
-            idxnew = [idxnew[-1]] + idxnew[:-1]
-            dfslicesingle = dfslicesingle.loc[idxnew]
-            # dfslicesingle = pd.DataFrame(dfslicesingle.iloc[-1]).append(dfslicesingle.iloc[0:-1])
-            # print(dfslicesingle.iloc[-1,:])
-            # print(dfslicesingle.iloc[0:-1,:])
             if cfpdata.has_option('ordersaleguidquyu', qy + 'count'):
                 itemscount = cfpdata.getint('ordersaleguidquyu', qy + 'count')
             else:
@@ -361,7 +349,8 @@ def dingdanxiaoshouyuedufenxi(dforder):
                         f'在线客户（前三个月有成交记录）：{dfslicesingle[dfslicesingle.尾交月数 <= 4].shape[0]}，' \
                         f'本月成交客户：{dfslicesingle[dfslicesingle.尾交月数 == 1].shape[0]}'
             imglist2note(notestore, [], ntguid, qy + '订单金额年度分析',
-                         tablehtml2evernote(dfslicesingle.loc[:, dfzdclnamesnew], stattitle, withindex=False))
+                         tablehtml2evernote(dftotal2top(dfslicesingle.loc[:, dfzdclnamesnew]), stattitle,
+                                            withindex=False))
             cfpdata.set('ordersaleguidquyu', qy + 'count', f'{dfslicesingle.shape[0]}')
             cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
             log.info(f'{qy}数据项目成功更新')
@@ -415,18 +404,17 @@ def showorderstat():
                 continue
         if cfpzysm.has_option(notestr + 'guid', person + '最新订单日期'):
             ordertoday = cfpzysm.get(notestr + 'guid', person + '最新订单日期')
-            if zuixinriqi <= pd.to_datetime(ordertoday):
+            if zuixinriqi <= pd.to_datetime(ordertoday):  # and False:
                 continue
         dfperson = dforderzuixinriqi[dforderzuixinriqi.业务人员 == person]
         dfpersonsum = dfperson.groupby('业务人员').sum()['订单金额']
-        dfperson.loc['合计', :] = None
-        dfperson.loc['合计', '订单金额'] = dfpersonsum[0]
-        dfperson.loc['合计', '订单编号'] = dfperson.shape[0] - 1
+        del dfperson['业务人员']
+        del dfperson['日期']
         print(person, end='\t')
         print(dfpersonsum[0], end='\t')
         personguid = cfpzysm.get(notestr + 'guid', person)
         print(personguid)
-        neirong = tablehtml2evernote(dfperson, notestr, withindex=False)
+        neirong = tablehtml2evernote(dftotal2top(dfperson), f'{orderdatestr}{notestr}——{person}', withindex=False)
         # print(neirong)
         try:
             notestore = get_notestore()
@@ -466,22 +454,20 @@ def showorderstat():
                 continue
         if cfpzysm.has_option(notestr, person + '最新订单日期'):
             ordertoday = cfpzysm.get(notestr, person + '最新订单日期')
-            if zuixinriqi <= pd.to_datetime(ordertoday):
+            if zuixinriqi <= pd.to_datetime(ordertoday):  # and False:
                 continue
         dfperson = dfsales[dfsales.业务人员 == person]
         dfpersonsum = dfperson.groupby('日期').sum()['订单金额'].sum()
-        dfperson.loc['合计', :] = None
-        dfperson.loc['合计', '订单金额'] = dfpersonsum
-        dfperson.loc['合计', '订单编号'] = dfperson.shape[0] - 1
+        del dfperson['业务人员']
         print(person, end='\t')
         print(dfpersonsum, end='\t')
         personguid = cfpzysm.get(notestr, person)
         print(personguid)
-        neirong = tablehtml2evernote(dfperson, notestr, withindex=False)
+        neirong = tablehtml2evernote(dftotal2top(dfperson), f'{orderdatestr[:-3]}{notestr}', withindex=False)
         # print(neirong)
         try:
             notestore = get_notestore()
-            imglist2note(notestore, [], personguid, '%s——%s（%s）' % (notestr, person, orderdatestr), neirong)
+            imglist2note(notestore, [], personguid, '%s——%s（%s）' % (notestr, person, orderdatestr[:-3]), neirong)
             cfpzysm.set(notestr, person + '最新订单日期', '%s' % orderdatestr)
             cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
         except Exception as eeee:
