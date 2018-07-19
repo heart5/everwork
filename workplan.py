@@ -48,12 +48,18 @@ def chulinote_workplan(wenben):
         splitriqi = re.split(patternriqi, splititems[i * 2])
         # print(splitriqi)
         try:
-            item.append(pd.to_datetime('%s-%s-%s' % (splitriqi[1], splitriqi[2], splitriqi[3])))
+            itemdate = pd.to_datetime('%s-%s-%s' % (splitriqi[1], splitriqi[2], splitriqi[3]))
+            qixianzuixindate = pd.to_datetime(datetime.datetime.now()) + datetime.timedelta(days=1)
+            if itemdate <= qixianzuixindate:
+                item.append(itemdate)
+            else:
+                log.critical(f'工作日志中出现日期错误，跳过此记录。{splititems[i * 2]}，超过允许的计划日期范围。')
+                continue
         except TypeError as te:
-            log.critical('工作日志中出现日期错误：%s，跳过此记录。%s' % (splititems[i * 2], str(te)))
+            log.critical(f'工作日志中出现日期错误，跳过此记录。{splititems[i * 2]}，{te}')
             continue
         except ValueError as ve:
-            log.critical('工作日志中出现日期错误：%s，跳过此记录。%s' % (splititems[i * 2], str(ve)))
+            log.critical(f'工作日志中出现日期错误，跳过此记录。{splititems[i * 2]}，{ve}')
             continue
         item.append(splititems[i * 2 + 1].replace(" ", ""))
         items.append(item)
@@ -91,6 +97,7 @@ def updatedb_workplan(note_store, persons):
             sqlstr = 'select max(date) from %s where name=\'%s\'' % (tablename_plan, person)
             dftmp = pd.read_sql(sqlstr, cnxp)
             datemaxdb = pd.to_datetime(dftmp.iloc[0, 0])
+            print(f'{person}的日志最新日期为{datemaxdb}')
             if datemaxdb is None:
                 datemaxdb = planitems[-1][0] + datetime.timedelta(days=-1)
             planitemsxinxiancount = 0
@@ -123,16 +130,21 @@ def updatedb_workplan(note_store, persons):
                 updatable = note.updateSequenceNum > cfpzysm.getint('业务计划总结updatenum', person)
             else:
                 updatable = True
-            if updatable:
+            if updatable:  # or True:
                 log.info('业务主管%s的日志有更新。' % person)
                 sqlstr = 'select max(date) from %s where name=\'%s\'' % (tablename_updated, person)
                 dftmp = pd.read_sql(sqlstr, cnxp)
                 datemaxdb = pd.to_datetime(dftmp.iloc[0, 0])
                 if datemaxdb is None:
                     datemaxdb = planitems[-1][0] + datetime.timedelta(days=-1)
+                print(f'{person}的最新日志更新日期为{datemaxdb}')
                 dfitems = pd.DataFrame(planitems, columns=['date', 'content'])
                 dfadd = dfitems[dfitems.date > datemaxdb]
-                print(dfadd)
+                if dfadd.shape[0] > 0:
+                    print(dfadd)
+                else:
+                    print(f'{person}的日志暂无更新，最新有效日期为{datemaxdb}')
+                    continue
                 itemss = list()
                 for ix in dfadd.index:
                     item = list()
@@ -170,17 +182,18 @@ def planfenxi(jiangemiao):
         evernoteapijiayi()
         updatedb_workplan(note_store, persons)
 
-        sqlstr = 'select distinct * from %s order by updatedtime desc' % tablename_updated
+        sqlstr = 'select distinct * from %s order by date desc, name, updatedtime desc' % tablename_updated
         dfsource = pd.read_sql(sqlstr, cnxp, parse_dates=['date', 'updatedtime'])
         updatablelist = []
         for person in persons:
             planitemscount = dfsource.loc[dfsource.name == person].shape[0]
+            print(f'{person}日志更新记录有{planitemscount}条')
             if cfpzysm.has_option('业务计划总结itemscount', person):
                 updatable = planitemscount > cfpzysm.getint('业务计划总结itemscount', person)
             else:
                 updatable = True
             updatablelist.append(updatable)
-        print(updatablelist)
+        print(f'{persons}，{updatablelist}')
 
         updatableall = False
         for i in range(len(updatablelist)):
@@ -267,7 +280,7 @@ def chulioldversion():
         if len(titles) >= 2:
             person = titles[-1]
             print('%s\t%s' % (person, guid))
-            # if person != '梅富忠':   #开关，某人记录未读完是专项处理
+            # if person != '黄壮':   #开关，某人记录未读完是专项处理
             #     continue
         else:
             continue
@@ -280,8 +293,10 @@ def chulioldversion():
         items = []
         note_store = get_notestore()
         for ver in verlist:
+            print(
+                f'{ver.updateSequenceNum}\t{timestamp2str(int(ver.updated / 1000))}\t{timestamp2str(int(ver.saved / 1000))}')
             try:
-                # if ver.updateSequenceNum >= 151454:   #开关，断点续传
+                # if ver.updateSequenceNum >= 349273:   #开关，断点续传
                 #     continue
                 notever = note_store.getNoteVersion(token, guid, ver.updateSequenceNum, True, True, True)
                 evernoteapijiayi()
