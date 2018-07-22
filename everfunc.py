@@ -6,7 +6,7 @@ everwork的各种函数
 """
 
 import time, datetime, calendar as cal, hashlib, binascii, re, os, socket, random, email, imaplib, subprocess, locale, \
-    threading, html, struct, ssl, \
+    threading, html, struct, ssl, itertools, \
     logging as lg, logging.handlers as lgh, pandas as pd, sqlite3 as lite, matplotlib.pyplot as plt, \
     evernote.edam.type.ttypes as Ttypes, evernote.edam.error.ttypes as Etypes, \
     evernote.edam.userstore.constants as UserStoreConstants, \
@@ -175,6 +175,9 @@ cfplife.read(inilifepath, encoding='utf-8')
 cfpzysm = ConfigParser()
 inizysmpath = 'data\\everzysm.ini'
 cfpzysm.read(inizysmpath, encoding='utf-8')
+cfpworkplan = ConfigParser()
+iniworkplanpath = 'data\\everworkplan.ini'
+cfpworkplan.read(iniworkplanpath, encoding='utf-8')
 
 ENtimes = int(cfp.get('evernote', 'apicount'))
 ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
@@ -1512,29 +1515,72 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
     return items
 
 
-def isworkday(dlist):
+def isworkday(dlist: list, person: str = '全体', fromthen=False):
+    if fromthen and (len(dlist) == 1):
+        dlist = pd.date_range(dlist[0], datetime.datetime.today(), freq='D')
     cnxp = lite.connect('data\\workplan.db')
-    dfholiday = pd.read_sql('select * from holiday', cnxp, index_col='index', parse_dates=['index'])
-    dfleave = pd.read_sql('select * from leave', cnxp, index_col='index', parse_dates=['index'])
+    dfholiday = pd.read_sql('select distinct * from holiday', cnxp, index_col='date', parse_dates=['date'])
+    del dfholiday['index']
     # print(dfholiday)
+    dfleave = pd.read_sql('select distinct date,mingmu,xingzhi,tianshu from leave', cnxp, parse_dates=['date'])
+    # print(dfleave)
     resultlist = list()
     for dt in dlist:
+        item = list()
         dtdate = pd.to_datetime(dt)
+        item.append(dtdate)
+        if person != '全体':
+            item.append(person)
+            dfperson = dfleave[dfleave.mingmu == person]
+            dfperson.index = dfperson['date']
+            if dtdate in dfperson[dfperson.xingzhi == '上班'].index:
+                item.append(True)
+                item.append('上班')
+                item.append(dfperson.loc[dtdate, ['tianshu']][0])
+                resultlist.append(item)
+                continue
+            if dtdate in dfperson[dfperson.xingzhi != '上班'].index:
+                item.append(False)
+                item.append(dfperson.loc[dtdate, ['xingzhi']][0])
+                item.append(dfperson.loc[dtdate, ['tianshu']][0])
+                resultlist.append(item)
+                continue
+            pass
+        else:
+            item.append('全体')
         if dtdate in dfholiday[dfholiday.mingmu == '上班'].index:
-            resultlist.append(True)
+            item.append(True)
+            item.append('上班')
+            item.append(dfholiday.loc[dtdate, ['tianshu']][0])
+            resultlist.append(item)
             continue
         if dtdate in dfholiday[dfholiday.mingmu != '上班'].index:
-            resultlist.append(False)
+            item.append(False)
+            item.append(dfholiday.loc[dtdate, ['mingmu']][0])
+            item.append(dfholiday.loc[dtdate, ['tianshu']][0])
+            resultlist.append(item)
             continue
         if int(dtdate.strftime('%w')) == 0:
-            resultlist.append(False)
+            item.append(False)
+            item.append('周日')
+            item.append(1)
+            resultlist.append(item)
             continue
-        resultlist.append(True)
-
-    return resultlist
+        item.append(True)
+        item.append('上班')
+        item.append(1)
+        resultlist.append(item)
+    dfout = pd.DataFrame(resultlist, columns=['date', 'name', 'work', 'xingzhi', 'tianshu'])
+    dfout.sort_values(['date'], ascending=[False], inplace=True)
+    return dfout
 
 
 def dftotal2top(df: pd.DataFrame):
+    """
+    给DataFrame增加汇总行，并将汇总行置顶
+    :param df: pd.DataFrame
+    :return: pd.DataFrame
+    """
     # print(df.dtypes)
     dfslicesingle = df.loc[:, :]
     # print(dfslicesingle.dtypes)
@@ -1586,11 +1632,13 @@ def dftotal2top(df: pd.DataFrame):
 
 
 if __name__ == '__main__':
-    host = cfp.get('gmail', 'host')
-    username = cfp.get('gmail', 'username')
-    password = cfp.get('gmail', 'password')
-    mailitems = getmail(host, username, password, dirtarget='Ifttt/Location', debug=True, topic='进出记录')
-    print(len(mailitems))
-    for header, body in mailitems:
-        for text, textstr in body:
-            print(textstr)
+    # host = cfp.get('gmail', 'host')
+    # username = cfp.get('gmail', 'username')
+    # password = cfp.get('gmail', 'password')
+    # mailitems = getmail(host, username, password, dirtarget='Ifttt/Location', debug=True, topic='进出记录')
+    # print(len(mailitems))
+    # for header, body in mailitems:
+    #     for text, textstr in body:
+    #         print(textstr)
+
+    pass
