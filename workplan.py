@@ -34,7 +34,12 @@ def gezhongzaxiang():
     # print(times)
 
 
-def chulinote_workplan(wenben):
+def chulinote_workplan(wenben: str):
+    """
+    处理输入的文本，输出整理后的以日期为单位的工作日志列表
+    :param wenben: 原始字符串文本，一般是从笔记中提取的纯文本
+    :return: 日期工作日志列表
+    """
     pattern = re.compile('(\d{4}\s*[年\\\.-]\d{1,2}\s*[月\\\.-]\d{1,2}\s*[日|号]?)(?:(?:[,， 。])?(?:周.))?', re.U)
     splititems = re.split(pattern, wenben)
     # print(len(splititems))
@@ -53,13 +58,13 @@ def chulinote_workplan(wenben):
             if itemdate <= qixianzuixindate:
                 item.append(itemdate)
             else:
-                log.critical(f'工作日志中出现日期错误，跳过此记录。{splititems[i * 2]}，超过允许的计划日期范围。')
+                log.critical(f'工作日志中出现日期超限错误，跳过此记录。{splititems[i * 2]}，超过允许的计划日期范围。')
                 continue
         except TypeError as te:
-            log.critical(f'工作日志中出现日期错误，跳过此记录。{splititems[i * 2]}，{te}')
+            log.critical(f'工作日志中出现日期类型错误，跳过此记录。{splititems[i * 2]}，{te}')
             continue
         except ValueError as ve:
-            log.critical(f'工作日志中出现日期错误，跳过此记录。{splititems[i * 2]}，{ve}')
+            log.critical(f'工作日志中出现日期限值错误，跳过此记录。{splititems[i * 2]}，{ve}')
             continue
         item.append(splititems[i * 2 + 1].replace(" ", ""))
         items.append(item)
@@ -72,13 +77,14 @@ def updatedb_workplan(note_store, persons):
     cnxp = lite.connect('data\\workplan.db')
     tablename_plan = 'personplan'
     tablename_updated = 'planupdated'
+    token = cfp.get('evernote', 'token')
     try:
         liuxin = 5
         for person in persons:
             # print(person)
             # if person != '梅富忠':
             #     continue
-            guid = cfpzysm.get('业务计划总结guid', person).lower()
+            guid = cfpworkplan.get('业务计划总结guid', person).lower()
             # print(guid)
             if note_store is None:
                 note = get_notestore().getNote(guid, True, True, False, False)
@@ -88,62 +94,78 @@ def updatedb_workplan(note_store, persons):
             evernoteapijiayi()
             # print(timestamp2str(int(note.updated/1000)))
             # print(note.updateSequenceNum)
-            soup = BeautifulSoup(note.content, "html.parser").get_text().strip()
-            planitems = chulinote_workplan(soup)
-            # print(planitems[:3])
-            if len(planitems) == 0:
-                log.info('%s业务日志中无有效日记录，跳过。' % person)
-                continue
-            sqlstr = 'select max(date) from %s where name=\'%s\'' % (tablename_plan, person)
-            dftmp = pd.read_sql(sqlstr, cnxp)
-            datemaxdb = pd.to_datetime(dftmp.iloc[0, 0])
-            print(f'{person}的日志最新日期为{datemaxdb}')
-            if datemaxdb is None:
-                datemaxdb = planitems[-1][0] + datetime.timedelta(days=-1)
-            planitemsxinxiancount = 0
-            for i in range(len(planitems)):
-                planitemsxinxiancount += 1
-                if planitems[i][0] <= datemaxdb:
-                    break
-            baddate = False
-            for i in range(1, planitemsxinxiancount):
-                baddate |= planitems[i - 1][0] < planitems[i][0]
-                if baddate:
-                    log.critical('%s的业务日志中存在日期错误：%s，位于第%d条。' % (person, str(planitems[i - 1][0]), i))
-                    break
-            if baddate:
-                continue
-            if len(planitems) > liuxin:  # 固化内容存储，预留5天可修改，随着记录更新追加到数据表中
-                dfrizhi = pd.DataFrame(planitems, columns=['date', 'content'])
-                dfrizhi['name'] = person
-                dfrizhi = dfrizhi[['name', 'date', 'content']]
-                dfrizhi.sort_values(['date'], inplace=True)  # 升序排列
-                dfrizhichuli = dfrizhi[dfrizhi.date > datemaxdb]  # 取尾部记录
-                # print(dfrizhichuli)
-                if dfrizhichuli.shape[0] > liuxin:
-                    dfrizhiappend = dfrizhichuli[:dfrizhichuli.shape[0] - liuxin]  # 取头部
-                    dfrizhiappend.to_sql(tablename_plan, cnxp, index=False, if_exists='append')
-                    log.info('%s的业务日志有%d条追加到日志内容表中，最新日期为：%s' % (person, dfrizhiappend.shape[0], str(datemaxdb)))
-
-            # print(planitems[0])
-            if cfpzysm.has_option('业务计划总结updatenum', person):
-                updatable = note.updateSequenceNum > cfpzysm.getint('业务计划总结updatenum', person)
+            if cfpworkplan.has_option('业务计划总结updatenum', person):
+                usnini = cfpworkplan.getint('业务计划总结updatenum', person)
+                updatable = note.updateSequenceNum > usnini
             else:
+                usnini = 0
                 updatable = True
-            if updatable:  # or True:
-                log.info('业务主管%s的日志有更新。' % person)
+            if updatable is False:
+                log.info(f'{person}的工作日志本轮查询中无更新，跳过。')
+                continue
+
+            verlist = note_store.listNoteVersions(token, guid)  # 历史版本，不含当前最新版本
+            evernoteapijiayi()
+            #  当前版本和历史版本组成轮训池
+            usnlist = [note.updateSequenceNum] + [x.updateSequenceNum for x in verlist if x.updateSequenceNum > usnini]
+            # print(f'{note.updateSequenceNum}\t{usnini}\t{usnlist}')
+            log.info(f'业务主管{person}的日志有更新，版本号列表为：{usnlist}')
+            for verusn in usnlist[::-1]:  # 倒过来，从最早的笔记版本开始处理
+                if verusn == note.updateSequenceNum:
+                    vernote = note
+                else:
+                    vernote = note_store.getNoteVersion(token, guid, verusn, True, True, True)
+                evernoteapijiayi()
+                soup = BeautifulSoup(vernote.content, "html.parser").get_text().strip()
+                planitems = chulinote_workplan(soup)
+                # print(planitems[:3])
+                if len(planitems) == 0:
+                    log.info('%s业务日志中无有效日志记录，跳过。' % person)
+                    continue
+                # 通过已存储项目的日期（如果没有就默认是当前项目列表最早日期的前一天）截取需要处理的项目并追加到相应数据表中
+                sqlstr = 'select max(date) from %s where name=\'%s\'' % (tablename_plan, person)
+                dftmp = pd.read_sql(sqlstr, cnxp)
+                datemaxdb = pd.to_datetime(dftmp.iloc[0, 0])
+                print(f'{person}的日志数据表中最新条目日期为{datemaxdb}')
+                if datemaxdb is None:
+                    datemaxdb = planitems[-1][0] + datetime.timedelta(days=-1)
+                planitemsxinxiancount = 0
+                for i in range(len(planitems)):
+                    planitemsxinxiancount += 1
+                    if planitems[i][0] <= datemaxdb:
+                        break
+                baddate = False
+                for i in range(1, planitemsxinxiancount):  # 逐项检查，看是否有时间倒序问题存在
+                    baddate |= planitems[i - 1][0] < planitems[i][0]
+                    if baddate:
+                        log.critical(f'{person}业务日志（版本号：{verusn}）中存在日期倒置：{planitems[i - 1][0]}，位于第{i}条。跳过。')
+                        break
+                if baddate:
+                    continue
+                if len(planitems) > liuxin:  # 固化内容存储，预留5天可修改，随着记录更新追加到数据表中
+                    dfrizhi = pd.DataFrame(planitems, columns=['date', 'content'])
+                    dfrizhi['name'] = person
+                    dfrizhi = dfrizhi[['name', 'date', 'content']]
+                    dfrizhi.sort_values(['date'], inplace=True)  # 升序排列
+                    dfrizhichuli = dfrizhi[dfrizhi.date > datemaxdb]  # 取尾部记录
+                    # print(dfrizhichuli)
+                    if dfrizhichuli.shape[0] > liuxin:
+                        dfrizhiappend = dfrizhichuli[:dfrizhichuli.shape[0] - liuxin]  # 取头部
+                        dfrizhiappend.to_sql(tablename_plan, cnxp, index=False, if_exists='append')
+                        log.info(f'{person}的业务日志有{dfrizhiappend.shape[0]}条追加到日志内容表中，最新日期为：{datemaxdb}')
+
                 sqlstr = 'select max(date) from %s where name=\'%s\'' % (tablename_updated, person)
                 dftmp = pd.read_sql(sqlstr, cnxp)
                 datemaxdb = pd.to_datetime(dftmp.iloc[0, 0])
                 if datemaxdb is None:
                     datemaxdb = planitems[-1][0] + datetime.timedelta(days=-1)
-                print(f'{person}的最新日志更新日期为{datemaxdb}')
+                print(f'{person}的日志更新数据表中最近有效日期为{datemaxdb}')
                 dfitems = pd.DataFrame(planitems, columns=['date', 'content'])
                 dfadd = dfitems[dfitems.date > datemaxdb]
                 if dfadd.shape[0] > 0:
                     print(dfadd)
                 else:
-                    print(f'{person}的日志暂无更新，最新有效日期为{datemaxdb}')
+                    log.info(f'{person}业务日志（版本号：{verusn}）暂无有效新内容，最新有效日期为{planitems[0][0]}')
                     continue
                 itemss = list()
                 for ix in dfadd.index:
@@ -154,15 +176,15 @@ def updatedb_workplan(note_store, persons):
                     item.append(dfadd.loc[ix, 'date'])
                     item.append(dfadd.loc[ix, 'content'])
                     item.append(len(dfadd.loc[ix, 'content']))
-                    item.append(timestamp2str(int(note.updated / 1000)))
+                    item.append(timestamp2str(int(vernote.updated / 1000)))
                     itemss.append(item)
                 dfupdate = pd.DataFrame(itemss, columns=['name', 'nianyueri', 'date', 'content', 'contentlength',
                                                          'updatedtime'])
                 print(dfupdate)
                 dfupdate.to_sql(tablename_updated, cnxp, index=False, if_exists='append')
-                log.info('%s的业务日志有%d条追加到日志更新表中，日期为%s。' % (person, dfupdate.shape[0], list(dfadd['date'])))
-                cfpzysm.set('业务计划总结updatenum', person, '%d' % note.updateSequenceNum)
-                cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+                log.info(f'{person}的业务日志有{dfupdate.shape[0]}条追加到日志内容表中')
+                cfpworkplan.set('业务计划总结updatenum', person, '%d' % verusn)
+                cfpworkplan.write(open(iniworkplanpath, 'w', encoding='utf-8'))
         else:
             log.info('下列人员的日志笔记正常处置完毕：%s' % persons)
 
@@ -188,8 +210,8 @@ def planfenxi(jiangemiao):
         for person in persons:
             planitemscount = dfsource.loc[dfsource.name == person].shape[0]
             print(f'{person}日志更新记录有{planitemscount}条')
-            if cfpzysm.has_option('业务计划总结itemscount', person):
-                updatable = planitemscount > cfpzysm.getint('业务计划总结itemscount', person)
+            if cfpworkplan.has_option('业务计划总结itemscount', person):
+                updatable = planitemscount > cfpworkplan.getint('业务计划总结itemscount', person)
             else:
                 updatable = True
             updatablelist.append(updatable)
@@ -201,7 +223,7 @@ def planfenxi(jiangemiao):
             if updatableall:
                 break
         if updatableall:  # or True:
-            dayscount = cfpzysm.getint('业务计划总结dayscount', 'count')
+            dayscount = cfpworkplan.getint('业务计划总结dayscount', 'count')
             dtgroup = dfsource[pd.to_datetime(dfsource.nianyueri) <= datetime.datetime.now()].groupby(
                 ['nianyueri']).count().index
             # print(dtgroup)
@@ -242,7 +264,7 @@ def planfenxi(jiangemiao):
             neirong = tablehtml2evernote(df2show, '业务工作日志提交情况汇总（最近%d工作日）' % dayscount)
             neirong = html.unescape(neirong)
             # print(neirong)
-            guid = cfpzysm.get('业务计划总结guid', '汇总')
+            guid = cfpworkplan.get('业务计划总结guid', '汇总')
             huizongnoteupdatedtime = datetime.datetime.now().strftime('%F %T')
             imglist2note(note_store, [], guid,
                          '业务工作日志提交情况汇总（%s）' % huizongnoteupdatedtime, neirong)
@@ -250,15 +272,15 @@ def planfenxi(jiangemiao):
         for person in persons:
             dfperson = dfsource.loc[dfsource.name == person]
             planitemscount = dfperson.shape[0]
-            if cfpzysm.has_option('业务计划总结itemscount', person):
-                updatable = planitemscount > cfpzysm.getint('业务计划总结itemscount', person)
+            if cfpworkplan.has_option('业务计划总结itemscount', person):
+                updatable = planitemscount > cfpworkplan.getint('业务计划总结itemscount', person)
             else:
                 updatable = True
             if updatable:
                 log.info(
                     '%s的业务日志条目数增加至%d，日志更新表中最新日期为：%s。' % (person, planitemscount, str(dfperson.iloc[0]['nianyueri'])))
-                cfpzysm.set('业务计划总结itemscount', person, '%d' % planitemscount)
-                cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+                cfpworkplan.set('业务计划总结itemscount', person, '%d' % planitemscount)
+                cfpworkplan.write(open(iniworkplanpath, 'w', encoding='utf-8'))
     except Exception as eee:
         log.critical('更新业务日志汇总笔记时出现错误。%s' % (str(eee)))
         # raise eee
