@@ -204,7 +204,7 @@ def planfenxi(jiangemiao):
         evernoteapijiayi()
         updatedb_workplan(note_store, persons)
 
-        sqlstr = 'select distinct * from %s order by date desc, name, updatedtime desc' % tablename_updated
+        sqlstr = f'select distinct * from {tablename_updated} order by date desc, name, updatedtime desc'
         dfsource = pd.read_sql(sqlstr, cnxp, parse_dates=['date', 'updatedtime'])
         updatablelist = []
         for person in persons:
@@ -224,25 +224,37 @@ def planfenxi(jiangemiao):
                 break
         if updatableall:  # or True:
             dayscount = cfpworkplan.getint('业务计划总结dayscount', 'count')
-            dtgroup = dfsource[pd.to_datetime(dfsource.nianyueri) <= datetime.datetime.now()].groupby(
-                ['nianyueri']).count().index
-            # print(dtgroup)
-            workdaylist = isworkday(dtgroup)
-            workdaydf = pd.DataFrame(workdaylist, columns=['work'], index=dtgroup)
-            workdaydftrue = workdaydf[workdaydf.work == True]
-            workdaydftrue.sort_index(ascending=False, inplace=True)
-            if workdaydftrue.shape[0] > dayscount:
-                datelast = workdaydftrue.index[dayscount - 1]
-            else:
-                datelast = workdaydftrue.index[workdaydftrue.shape[0] - 1]
-            print(datelast)
-            dflast = dfsource[
-                pd.to_datetime(dfsource.nianyueri) > pd.to_datetime(datelast)]
-            df = dflast[['name', 'nianyueri', 'contentlength', 'updatedtime']]
-            df2show = df.drop_duplicates(['name', 'nianyueri'], keep='last')
+            today = pd.to_datetime(datetime.datetime.today().strftime('%F'))
+            workdays = isworkday([today - datetime.timedelta(days=60)], '全体', fromthen=True)
+            dtqishi = workdays[workdays.work == True].groupby('date').count().sort_index(ascending=False).index[
+                dayscount - 1]
+            print(f'最近{dayscount}个工作日（公司）的起始日期：{dtqishi}')
+            # dtqishi = today - datetime.timedelta(days=dayscount)
+            dtqujian = pd.date_range(dtqishi, today, freq='D').values
+            dfqujian = pd.DataFrame()
+            for person in persons:
+                resultlist = isworkday(dtqujian, person)
+                dftmp = pd.DataFrame(resultlist, columns=['date', 'name', 'work', 'xingzhi', 'tianshu'])
+                if dfqujian.shape[0] == 0:
+                    dfqujian = dftmp
+                else:
+                    dfqujian = dfqujian.append(dftmp)
+            dfsourcequjian = dfsource[dfsource.date >= dtqishi]
+            # print(dfqujian)
+            # print(dfsourcequjian)
+            dfresult = pd.merge(dfqujian, dfsourcequjian, on=['date', 'name'], how='outer')
+            dflast = dfresult[dfresult.work == True].sort_values(['date', 'name'], ascending=[False, True])
+            df = dflast.loc[:, ['name', 'date', 'contentlength', 'updatedtime']]
+            df2show = df.drop_duplicates(['name', 'date'], keep='last')
+            print(f'去重前记录数为：{df.shape[0]}，去重后记录是：{df2show.shape[0]}')
             df2show.columns = ['业务人员', '计划日期', '内容字数', '更新时间']
 
+            # print(df2show)
+
             def hege(a, b):
+                if pd.isnull(b):
+                    # print(f'{a}\t{b}')
+                    return '未提交'
                 if pd.to_datetime(a) > pd.to_datetime(b):
                     return '准时'
                 else:
@@ -252,12 +264,16 @@ def planfenxi(jiangemiao):
             col_names.append('计划提交')
             df2show = df2show.reindex(columns=col_names)
             df2show.loc[:, ['计划提交']] = df2show.apply(lambda x: hege(x.计划日期, x.更新时间), axis=1)
+            print(df2show[pd.isnull(df2show.更新时间)])
             stylelist = ['<span style=\"color:red\">', '</span>']
+            df2show['计划日期'] = df2show['计划日期'].apply(lambda x: x.strftime('%F'))
+            df2show['更新时间'] = df2show['更新时间'].apply(lambda x: x.strftime('%m-%d %T') if pd.notnull(x) else '')
+            df2show['内容字数'] = df2show['内容字数'].apply(lambda x: int(x) if pd.notnull(x) else '')
             for ix in df2show.index:
-                if df2show.loc[ix]['计划提交'] == '延迟':
+                if (df2show.loc[ix]['计划提交'] == '延迟') or (df2show.loc[ix]['计划提交'] == '未提交'):
                     df2show.loc[ix, '业务人员'] = df2show.loc[ix, '业务人员'].join(stylelist)
                     df2show.loc[ix, '计划日期'] = df2show.loc[ix, '计划日期'].join(stylelist)
-                    # df2show.loc[ix, '更新时间'] = df2show.loc[ix, '更新时间'].join(stylelist)
+                    df2show.loc[ix, '更新时间'] = df2show.loc[ix, '更新时间'].join(stylelist)
                     df2show.loc[ix, '计划提交'] = df2show.loc[ix, '计划提交'].join(stylelist)
                     pass
             # descdb(df2show)
@@ -283,7 +299,7 @@ def planfenxi(jiangemiao):
                 cfpworkplan.write(open(iniworkplanpath, 'w', encoding='utf-8'))
     except Exception as eee:
         log.critical('更新业务日志汇总笔记时出现错误。%s' % (str(eee)))
-        # raise eee
+        raise eee
     finally:
         cnxp.close()
 
