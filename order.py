@@ -81,7 +81,7 @@ def chulidataindir_order(pathorder):
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
     files = os.listdir(pathorder)
     for fname in files[::-1]:
-        if fname.startswith('销售订单') and ((fname.endswith('xls')) or (fname.endswith('xlsx'))):
+        if fname.startswith('销售订单') and (fname.endswith('xls') or fname.endswith('xlsx')):
             yichulifilelist = list()
             if cfpzysm.has_option('销售订单', '已处理文件清单'):
                 yichulifilelist = cfpzysm.get('销售订单', '已处理文件清单').split()
@@ -143,7 +143,6 @@ def dingdanxiaoshouyuedufenxi(dforder):
     print(f'数据集最新日期：{zuijinchengjiaori}')
     if cfpdata.has_option('ordersaleguidquyu', '数据最新日期'):
         daterec = pd.to_datetime(cfpdata.get('ordersaleguidquyu', '数据最新日期'))
-        # print(daterec)
         if daterec >= zuijinchengjiaori:  # and False:
             log.info(f'订单数据集无更新，返回')
             return
@@ -156,12 +155,14 @@ def dingdanxiaoshouyuedufenxi(dforder):
     dfkehuzhengli.index = dfkehuzhengli['单位编号']
     del dfkehuzhengli['单位编号']
     # descdb(dfkehuzhengli)
+    dsquyuzuixinriqi = pd.Series(dfall[dfall.日期 == zuijinchengjiaori].groupby('区域').count().index.values)
+    # print(dsquyuzuixinriqi.values)
     dfyuetongji = dfall[dfall.日期 >= zuiyuanyuechu].groupby(by=['年月', '单位编号'], as_index=False, sort=True)['订单金额'].sum()
     dfyuetongji['订单金额'] = dfyuetongji['订单金额'].astype(int)
     # descdb(dfyuetongji)
     dfpivot = dfyuetongji.pivot(index='单位编号', values='订单金额', columns='年月')
     cls = list(dfpivot.columns)
-    print(cls)
+    # print(cls)
     # for cl in cls:
     #     dfpivot[cl] = dfpivot[cl].astype(int)
     dfpivot['单位编号'] = dfpivot.index
@@ -169,7 +170,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
     dfpivot['区域'] = dfpivot['单位编号'].apply(lambda x: dfkehuzhengli.loc[x][1])
     dfpivot['类型'] = dfpivot['单位编号'].apply(lambda x: dfkehuzhengli.loc[x][2])
     clsnew = ['客户名称', '区域', '类型'] + cls
-    print(clsnew)
+    # print(clsnew)
     dfpivot = dfpivot.loc[:, clsnew]
     dfpivot['成交月数'] = dfpivot.apply(lambda x: x[-13:].count(), axis=1)
 
@@ -250,7 +251,9 @@ def dingdanxiaoshouyuedufenxi(dforder):
     # descdb(dfzdall)
 
     notestore = get_notestore()
-    quyuset = set(list(dfzdall['区域名称']))
+    quyuset = set(dsquyuzuixinriqi.apply(lambda x: dfquyu.loc[x][0]).values)
+    print(quyuset)
+    # quyuset = set(list(dfzdall['区域名称']))
     for qy in quyuset:
         dfslice = dfzdall[dfzdall.区域名称 == qy]
         dfslicesingle = dfslice.loc[:, :]
@@ -269,8 +272,9 @@ def dingdanxiaoshouyuedufenxi(dforder):
                 nbguid = notebook.guid
                 cfpdata.set('guidquyunb', qy, nbguid)
                 cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
-            except Exception as e:
-                log.critical(f'创建《{qy}》笔记本时出现错误。{ee}')
+            except Exception as eeeee:
+                nbguid = None
+                log.critical(f'创建《{qy}》笔记本时出现错误。{eeeee}')
         print(nbguid, end='\t')
         if cfpdata.has_option('ordersaleguidquyu', qy + 'guid'):
             ntguid = cfpdata.get('ordersaleguidquyu', qy + 'guid')
@@ -287,6 +291,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
                 cfpdata.set('ordersaleguidquyu', qy + 'guid', ntguid)
                 cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
             except Exception as ee:
+                ntguid = None
                 log.critical(f'创建《{qy}订单金额年度分析》笔记时出现错误。{ee}')
         print(ntguid)
         target = list()
@@ -332,13 +337,6 @@ def dingdanxiaoshouyuedufenxi(dforder):
     # print(targetlist)
     for [qy, ntguid, dfslicesingle] in targetlist:
         try:
-            if cfpdata.has_option('ordersaleguidquyu', qy + 'count'):
-                itemscount = cfpdata.getint('ordersaleguidquyu', qy + 'count')
-            else:
-                itemscount = 0
-            # if dfslicesingle.shape[0] == itemscount:
-            #     log.info(f'{qy}数据项目没有变化，跳过次轮更新')
-            #     continue
             dfzdclnames = list(dfslicesingle.columns)
             # print(dfzdclnames)
             dfzdclnames3 = dfzdclnames[3:16]
@@ -356,7 +354,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
             log.info(f'{qy}数据项目成功更新')
         except Exception as eee:
             log.critical(f'《{qy}订单金额年度分析》笔记更新时出现错误。{eee}')
-        print(dfslicesingle.shape[0])
+        # print(dfslicesingle.shape[0])
     else:
         cfpdata.set('ordersaleguidquyu', '数据最新日期', f'{zuijinchengjiaori}')
         cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
@@ -387,10 +385,10 @@ def showorderstat():
                 notestore = get_notestore()
                 plannote = Ttypes.Note()
                 plannote.title = notestr + person
-                nBody = '<?xml version="1.0" encoding="UTF-8"?>'
-                nBody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
-                nBody += '<en-note>%s</en-note>' % plannote.title
-                plannote.content = nBody
+                nbody = '<?xml version="1.0" encoding="UTF-8"?>'
+                nbody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
+                nbody += '<en-note>%s</en-note>' % plannote.title
+                plannote.content = nbody
                 global workplannotebookguid
                 plannote.notebookGuid = workplannotebookguid
                 token = cfp.get('evernote', 'token')
@@ -427,7 +425,9 @@ def showorderstat():
         log.info('下列人员的销售订单正常处置完毕：%s' % persons)
 
     yuechuriqi = pd.to_datetime(f"{zuixinriqi.strftime('%Y')}-{zuixinriqi.strftime('%m')}-01")
-    dfsales = dforder[dforder.日期 >= yuechuriqi]
+    dfsales = pd.DataFrame(dforder[dforder.日期 >= yuechuriqi])
+    dfsales = dfsales.groupby(['区域', '类型', '客户名称', '业务人员'], as_index=False).sum()
+    dfsales.sort_values(['区域', '订单金额'], inplace=True)
     notestr = '销售订单金额（月）'
     if cfpzysm.has_section(notestr) is False:
         cfpzysm.add_section(notestr)
@@ -438,10 +438,10 @@ def showorderstat():
                 notestore = get_notestore()
                 plannote = Ttypes.Note()
                 plannote.title = notestr + person
-                nBody = '<?xml version="1.0" encoding="UTF-8"?>'
-                nBody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
-                nBody += '<en-note>%s</en-note>' % plannote.title
-                plannote.content = nBody
+                nbody = '<?xml version="1.0" encoding="UTF-8"?>'
+                nbody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
+                nbody += '<en-note>%s</en-note>' % plannote.title
+                plannote.content = nbody
                 plannote.notebookGuid = workplannotebookguid
                 token = cfp.get('evernote', 'token')
                 note = notestore.createNote(token, plannote)
@@ -457,7 +457,7 @@ def showorderstat():
             if zuixinriqi <= pd.to_datetime(ordertoday):  # and False:
                 continue
         dfperson = dfsales[dfsales.业务人员 == person]
-        dfpersonsum = dfperson.groupby('日期').sum()['订单金额'].sum()
+        dfpersonsum = dfperson['订单金额'].sum()
         del dfperson['业务人员']
         print(person, end='\t')
         print(dfpersonsum, end='\t')
@@ -473,7 +473,7 @@ def showorderstat():
         except Exception as eeee:
             log.critical('更新笔记%s——%s（%s）时出现严重错误。%s' % (notestr, person, orderdatestr, str(eeee)))
     else:
-        log.info('下列人员的销售订单金额正常处置完毕：%s' % persons)
+        log.info('下列人员的销售订单金额月度分析正常处置完毕：%s' % persons)
 
 
 def showorderstat2note(jiangemiao):
