@@ -13,15 +13,15 @@ from matplotlib.ticker import MultipleLocator, FuncFormatter
 import pygsheets
 
 
-def chuliholidayleave_note(zhuti):
+def chuliholidayleave_note(zhuti: list):
     note_store = get_notestore()
-    guid = cfpzysm.get('行政管理', f'{zhuti[0]}guid')
+    guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')
     note = note_store.getNote(guid, True, True, False, False)
     evernoteapijiayi()
     # print(timestamp2str(int(note.updated/1000)))
     # print(note.updateSequenceNum)
-    if cfpzysm.has_option('行政管理', f'{zhuti[0]}updatenum'):
-        updatenumold = cfpzysm.getint('行政管理', f'{zhuti[0]}updatenum')
+    if cfpworkplan.has_option('行政管理', f'{zhuti[0]}updatenum'):
+        updatenumold = cfpworkplan.getint('行政管理', f'{zhuti[0]}updatenum')
     else:
         updatenumold = 0
     if note.updateSequenceNum <= updatenumold:
@@ -40,37 +40,56 @@ def chuliholidayleave_note(zhuti):
         *names, daynum = re.split('[,，]', splititems[i * 2 + 1])
         # print(sitems)
         if len(names) == 2:
-            names.append('放假')
+            if names[1].find('上班') >= 0:
+                names.append('上班')
+            else:
+                names.append('放假')
         # item.append(names[1:])
         item.append(names[1])
         item.append(names[2])
         item.append(daynum)
         resultlist.append(item)
 
-    print(resultlist)
+    # print(resultlist)
 
     dfresult = None
-    for im in resultlist:
-        num = math.ceil(float(im[3]))
-        drim = pd.date_range(im[0], im[0] + datetime.timedelta(days=int(num) - 1), freq='D')
+    for [dt, mingmu, xingzhi, tian] in resultlist:
+        numfloat = float(tian)
+        numceil = math.ceil(numfloat)
+        numfloor = math.floor(numfloat)
+        drim = pd.date_range(dt, dt + datetime.timedelta(days=int(numceil) - 1), freq='D')
         if dfresult is None:
             dfresult = pd.DataFrame(index=drim)
-            dfresult['mingmu'] = im[1]
-            dfresult['xingzhi'] = im[2]
+            dfresult['mingmu'] = mingmu
+            dfresult['xingzhi'] = xingzhi
+            dfresult['tianshu'] = 1
+            # dfresult['tianshu'] = dfresult['tianshu'].astype(float)
+            if numfloat > numfloor:
+                xtian = numfloat - numfloor
+                # print(f'{numfloat}\t{numceil}\t{numfloor}\t{mingmu}\t{xingzhi}\t{tian}\t{xtian}')
+                dfresult.ix[-1, ['tianshu']] = xtian
         else:
             dftmp = pd.DataFrame(index=drim)
-            dftmp['mingmu'] = im[1]
-            dftmp['xingzhi'] = im[2]
+            dftmp['mingmu'] = mingmu
+            dftmp['xingzhi'] = xingzhi
+            dftmp['tianshu'] = 1
+            # dfresult['tianshu'] = dfresult['tianshu'].astype(float)
+            if numfloat > numfloor:
+                xtian = numfloat - numfloor
+                # print(f'{numfloat}\t{numceil}\t{numfloor}\t{mingmu}\t{xingzhi}\t{tian}\t{xtian}')
+                dftmp.ix[-1, ['tianshu']] = xtian
             dfresult = dfresult.append(dftmp)
-        pass
+
     dfresult.sort_index(ascending=False, inplace=True)
+    dfresult['date'] = dfresult.index
+    # dfresult['idx'] = range(dfresult.shape[0])
+    dfresult = dfresult.reset_index(drop=True)
     cnxp = lite.connect('data\\workplan.db')
-    dfresult.to_sql(zhuti[1], cnxp, if_exists='replace')
+    dfresult.to_sql(zhuti[1], cnxp, if_exists='replace')  # index, ['mingmu', 'xingzhi', 'tianshu', 'date']
     cnxp.close()
     log.info(f'{zhuti[0]}数据表更新了{dfresult.shape[0]}条记录。')
-    cfpzysm.set('行政管理', f'{zhuti[0]}updatenum', '%d' % note.updateSequenceNum)
-    cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
-
+    cfpworkplan.set('行政管理', f'{zhuti[0]}updatenum', '%d' % note.updateSequenceNum)
+    cfpworkplan.write(open(iniworkplanpath, 'w', encoding='utf-8'))
     return dfresult
 
 
@@ -114,6 +133,7 @@ def fetchattendance_from_evernote(jiangemiao):
                 descdb(dfresult)
     except Exception as eee:
         log.critical(f'从evernote获取放假笔记信息时出现未名错误。{eee}')
+        raise eee
 
     global timer_holiday2datacenter
     timer_holiday2datacenter = Timer(jiangemiao, fetchattendance_from_evernote, [jiangemiao])
@@ -128,3 +148,11 @@ if __name__ == '__main__':
     reslist = isworkday(dtlist)
     print(dtlist)
     print(reslist)
+    dtfrom = pd.to_datetime('2018-6-1')
+    tianshu = 25
+    drim = pd.date_range(dtfrom, dtfrom + datetime.timedelta(days=tianshu), freq='D').values
+    # print(drim)
+    resultlist = isworkday([pd.to_datetime('2018-7-16')], '梅富忠', fromthen=True).values
+    weekdaychinese = ['日', '一', '二', '三', '四', '五', '六']
+    for [dt, name, iswork, xingzhi, tianshu] in resultlist:
+        print(f'{dt}\t{weekdaychinese[int(dt.strftime("%w"))]}\t{iswork}\t{xingzhi}')
