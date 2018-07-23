@@ -1608,7 +1608,7 @@ def dftotal2top(df: pd.DataFrame):
             else:
                 firstcltotal = True
                 dfslicesingle.loc['汇总', cl] = '汇总'
-    print(list(dfslicesingle.loc['汇总']))
+    # print(list(dfslicesingle.loc['汇总']))
     if hasjun:
         first = start = end = -1
         for i in range(len(cls)):
@@ -1621,8 +1621,8 @@ def dftotal2top(df: pd.DataFrame):
                     if start < 0:
                         start = i
                     end = i
-        print(f'{first}\t{start}\t{end}')
-        print(list(dfslicesingle.loc['汇总'])[start:(end + 1)])
+        # print(f'{first}\t{start}\t{end}')
+        # print(list(dfslicesingle.loc['汇总'])[start:(end + 1)])
         dfslicesingle.loc['汇总', '有效月均'] = int(sum(list(dfslicesingle.loc['汇总'])[start:(end + 1)]) / (end - start))
         pass
     idxnew = list(dfslicesingle.index)
