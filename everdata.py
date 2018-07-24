@@ -50,11 +50,11 @@ def chengbenjiaupdatedf(dfsall, cnxx):
     return dfsall
 
 
-def chengbenjiaupdateall(cnx):
-    dfsall = pd.read_sql_query('select * from xiaoshoumingxi order by 日期, 单据编号', cnx, parse_dates=['日期'])
+def chengbenjiaupdateall(cnxc):
+    dfsall = pd.read_sql_query('select * from xiaoshoumingxi order by 日期, 单据编号', cnxc, parse_dates=['日期'])
     del dfsall['index']
-    dfsall = chengbenjiaupdatedf(dfsall, cnx)
-    dfsall.to_sql(name='xiaoshoumingxi', con=cnx, if_exists='replace', chunksize=10000)
+    dfsall = chengbenjiaupdatedf(dfsall, cnxc)
+    dfsall.to_sql(name='xiaoshoumingxi', con=cnxc, if_exists='replace', chunksize=10000)
     log.info('要更新%d记录中的成本价和毛利内容' % len(dfsall))
     dfsall['年月'] = dfsall['日期'].apply(lambda x: datetime.datetime.strftime(x, '%Y%m'))
     print(dfsall.groupby('年月', as_index=False)[['数量', '成本金额', '金额', '毛利']].sum())
@@ -107,13 +107,13 @@ def details2db(filename, sheetname, xiangmu, tablename):
     # print(dfout.head(10))
 
     # 读取大数据的起止日期，不交叉、不是前置则可能是合法数据，二次检查后放行
-    cnx = lite.connect('data\\quandan.db')
+    cnxp = lite.connect('data\\quandan.db')
 
     # dfout.to_sql(name=tablename, con=cnx, if_exists='replace', chunksize=10000)
     # log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' %(filename, len(dfout)))
 
     if (totalin[0] == '%.2f' % dfout.sum()['数量']) & (totalin[1] == '%.2f' % dfout.sum()['金额']):
-        dfall = pd.read_sql_query('select 日期, sum(金额) as 销售额 from %s group by 日期 order by 日期' % tablename, cnx,
+        dfall = pd.read_sql_query('select 日期, sum(金额) as 销售额 from %s group by 日期 order by 日期' % tablename, cnxp,
                                   parse_dates=['日期'])
         datestr4data = '【待插入S：%s，E：%s】【目标数据S：%s，E：%s】' \
                        % (dfout['日期'].min(), dfout['日期'].max(), dfall['日期'].min(), dfall['日期'].max())
@@ -123,7 +123,7 @@ def details2db(filename, sheetname, xiangmu, tablename):
         else:
             print(dfout.tail())
             if (xiangmu[0] == '职员名称'):
-                dfout = chengbenjiaupdatedf(dfout, cnx)
+                dfout = chengbenjiaupdatedf(dfout, cnxp)
                 log.info('要更新%d记录中的成本价和毛利内容' % dfout.shape[0])
             print('请仔细检查！%s' % datestr4data)
             print('如果确保无误，请放行下面两行代码')
@@ -132,7 +132,7 @@ def details2db(filename, sheetname, xiangmu, tablename):
     else:
         log.warning('对读入文件《%s》的数据整理有误！总数量和总金额对不上！' % filename)
 
-    cnx.close()
+    cnxp.close()
 
     return dfout
 
@@ -221,11 +221,12 @@ def customerweihu2systable():
     dfzh = dfoutsort.loc[lszc, ['往来单位', '往来单位编号']]
     # dfzh.info()
 
-    cnx = lite.connect('data\\quandan.db')
+    # cnx = lite.connect('data\\quandan.db')
     dfys = pd.read_excel('data\\系统表.xlsx', sheetname='客户档案')
     # dfys.info()
 
     dfzh = pd.concat([dfys, dfzh])
+    dfzh = pd.DataFrame(dfzh)
     # dfzh.info()
     dfzh.to_excel(writer, sheet_name='合并客户全集', freeze_panes={1, 2})
     dfzh.index = range(len(dfzh))
@@ -308,7 +309,7 @@ if __name__ == '__main__':
     # dfg.to_excel(writer, sheet_name='进货价格变动记录', freeze_panes={1, 2})
     # writer.close()
 
-    cnx = lite.connect('data\\quandan.db')
+    cnxx = lite.connect('data\\quandan.db')
 
     # desclitedb(cnx)
 
@@ -325,6 +326,7 @@ if __name__ == '__main__':
     # writer.close()
     # customerweihu2systable()
 
+    # dataokay(cnx)
     jiaoyankehuchanpin()
 
-    cnx.close()
+    cnxx.close()
