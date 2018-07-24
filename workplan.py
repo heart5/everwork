@@ -299,7 +299,7 @@ def planfenxi(jiangemiao):
                 cfpworkplan.write(open(iniworkplanpath, 'w', encoding='utf-8'))
     except Exception as eee:
         log.critical('更新业务日志汇总笔记时出现错误。%s' % (str(eee)))
-        raise eee
+        # raise eee
     finally:
         cnxp.close()
 
