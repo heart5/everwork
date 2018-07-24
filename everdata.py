@@ -69,7 +69,7 @@ def details2db(filename, sheetname, xiangmu, tablename):
     :param tablename:
     :return:
     """
-    df = pd.read_excel('data\\%s' % filename, sheetname='%s' % sheetname, index_col=0, parse_dates=True)
+    df = pd.read_excel(os.path.join('data', filename), sheetname='%s' % sheetname, index_col=0, parse_dates=True)
     log.info('读取%s' % filename)
     print(list(df.columns))
     #  ['日期', '单据编号', '摘要', '单据类型', '备注', '商品备注', '商品编号', '商品全名',
@@ -107,7 +107,7 @@ def details2db(filename, sheetname, xiangmu, tablename):
     # print(dfout.head(10))
 
     # 读取大数据的起止日期，不交叉、不是前置则可能是合法数据，二次检查后放行
-    cnxp = lite.connect('data\\quandan.db')
+    cnxp = lite.connect(dbpathquandan)
 
     # dfout.to_sql(name=tablename, con=cnx, if_exists='replace', chunksize=10000)
     # log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' %(filename, len(dfout)))
@@ -143,9 +143,10 @@ def customerweihu2systable():
     :return:
     """
 
-    writer = pd.ExcelWriter('data\\结果输出.xlsx')
+    writer = pd.ExcelWriter(os.path.join('data', '结果输出.xlsx'))
 
-    df = pd.read_csv('data\\kehudanganweihu.txt', sep=']', header=None, names=['日期', '内容'], na_filter=True,
+    df = pd.read_csv(os.path.join('data', 'kehudanganweihu.txt'), sep=']', header=None, names=['日期', '内容'],
+                     na_filter=True,
                      skip_blank_lines=True, skipinitialspace=True)
     # print(df)
     df.to_excel(writer, sheet_name='原始数据整理', freeze_panes={1, 2})
@@ -222,7 +223,7 @@ def customerweihu2systable():
     # dfzh.info()
 
     # cnx = lite.connect('data\\quandan.db')
-    dfys = pd.read_excel('data\\系统表.xlsx', sheetname='客户档案')
+    dfys = pd.read_excel(os.path.join('data', '系统表.xlsx'), sheetname='客户档案')
     # dfys.info()
 
     dfzh = pd.concat([dfys, dfzh])
@@ -258,7 +259,7 @@ def customerweihu2systable():
 
 
 def jiaoyankehuchanpin():
-    cnx = lite.connect('data\\quandan.db')
+    cnx = lite.connect(dbpathquandan)
 
     dataokay(cnx)
 
@@ -309,7 +310,7 @@ if __name__ == '__main__':
     # dfg.to_excel(writer, sheet_name='进货价格变动记录', freeze_panes={1, 2})
     # writer.close()
 
-    cnxx = lite.connect('data\\quandan.db')
+    cnxx = lite.connect(dbpathquandan)
 
     # desclitedb(cnx)
 

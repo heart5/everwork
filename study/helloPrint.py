@@ -103,7 +103,7 @@ def dfappend():
 
 
 def showtables():
-    cnxp = lite.connect('data\\workplan.db')
+    cnxp = lite.connect(dbpathworkplan)
     tablename_order = 'salesorder'
     sqlstr = "select count(*)  from sqlite_master where type='table' and name = '%s'" % tablename_order
     dftmp = pd.read_sql_query(sqlstr, cnxp)
@@ -131,7 +131,7 @@ def tdaytest():
 
 def getholidayitems():
     note_store = get_notestore()
-    hdayguid = cfpzysm.get('行政管理', '放假guid')
+    hdayguid = cfpworkplan.get('行政管理', '放假guid')
     note = note_store.getNote(hdayguid, True, True, False, False)
     evernoteapijiayi()
     # print(timestamp2str(int(note.updated/1000)))
@@ -168,6 +168,9 @@ if __name__ == '__main__':
     # currentprocess()
     # getholidayitems()
     token = cfp.get('evernote', 'token')
+    print(token)
+    if token:
+        pass
     holidayguid = findnotefromnotebook(token, '31eee750-e240-438b-a1f5-03ce34c904b4', '假')
     print(holidayguid)
     # dfappend()

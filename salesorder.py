@@ -84,7 +84,7 @@ def chuliholidayleave_note(zhuti: list):
     dfresult['date'] = dfresult.index
     # dfresult['idx'] = range(dfresult.shape[0])
     dfresult = dfresult.reset_index(drop=True)
-    cnxp = lite.connect('data\\workplan.db')
+    cnxp = lite.connect(dbpathworkplan)
     dfresult.to_sql(zhuti[1], cnxp, if_exists='replace')  # index, ['mingmu', 'xingzhi', 'tianshu', 'date']
     cnxp.close()
     log.info(f'{zhuti[0]}数据表更新了{dfresult.shape[0]}条记录。')

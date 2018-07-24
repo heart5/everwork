@@ -43,7 +43,7 @@ def jilugooglefile(filepath):
     print(filelist)
     dfout = None
     for i in range(len(filelist)):
-        df = pd.read_excel('%s\\%s' % (filepath, filelist[i]), sheetname='工作表1',
+        df = pd.read_excel(os.path.join(filepath, filelist[i]), sheetname='工作表1',
                            header=None, index_col=0, parse_dates=True)
         if df.shape[0] == 0:
             log.info('%s 无进出记录' % filelist[i])
@@ -65,7 +65,7 @@ def jilugooglefile(filepath):
 
 def jilugoogledrive():
     # 验证登录
-    gc = pygsheets.authorize(service_file='data\\imp\\ewjinchu.json')
+    gc = pygsheets.authorize(service_file=os.path.join('data', 'imp', 'ewjinchu.json'))
     files = gc.list_ssheets()
     dffiles = pd.DataFrame(files)
     # print(dffiles.head())
@@ -294,7 +294,7 @@ def jinchustat(jinchujiluall, noteinfos):
 
     imglist = []
     # plt.show()
-    img_jinchu_path = 'img\\jichubyfgongsi.png'
+    img_jinchu_path = os.path.join('img', 'jichubyfgongsi.png')
     plt.savefig(img_jinchu_path)
     imglist.append(img_jinchu_path)
     # print(imglist)
@@ -313,7 +313,7 @@ def jinchustattimer(jiangemiao):
         noteinfolistinside.append(infoslist[:-1])
     # print(noteinfolist)
 
-    dfjinchu = pd.DataFrame(jilugooglefile('data\\google'))
+    dfjinchu = pd.DataFrame(jilugooglefile(os.path.join('data', 'google')))
     itemswifi = jilugmail('Ifttt/Wifi', 'wifi', 'all')
     if itemswifi:
         dfjinchuwifi = wifitodf(itemswifi, noteinfolistinside)

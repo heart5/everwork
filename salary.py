@@ -37,7 +37,7 @@ def salesjiangjin(cnx):
     dfyt.reset_index(inplace=True)
     descdb(dfyt)
 
-    xlswriter = pd.ExcelWriter('data\\业绩奖金.xlsx')
+    xlswriter = pd.ExcelWriter(os.path.join('data', '业绩奖金.xlsx'))
     dfyt.to_excel(xlswriter, '业绩奖金', freeze_panes=[2, 2])
     xlswriter.close()
 
@@ -55,7 +55,7 @@ def peisonghesuan(cnx):
     df['订单净值'] = df.fillna(0)['订单金额'] - df.fillna(0)['客户拒收'] - df.fillna(0)['无货金额'] - df.fillna(0)['少配金额'] - \
                  df.fillna(0)['配错未要']
 
-    xlswriter = pd.ExcelWriter('data\\全单统计.xlsx')
+    xlswriter = pd.ExcelWriter(os.path.join('data', '全单统计.xlsx'))
     feipeihuoliebiao = ['陈列', '返利', '赠送', '作废', np.nan]
     df = df[(df.年月收款 >= '201701') & (df.配货人.isin(feipeihuoliebiao).values == False)]
 
@@ -89,7 +89,7 @@ def peisonghesuan(cnx):
     # descdb(df)
 
 
-cnx = lite.connect('data\\quandan.db')
+cnx = lite.connect(dbpathquandan)
 # dataokay(cnx)
 # desclitedb(cnx)
 # salesjiangjin(cnx)

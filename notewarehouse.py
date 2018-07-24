@@ -34,7 +34,7 @@ def pickstat(token, note_store, cnx, destguid=None, notetitle='', cum=False):
 
     except:
         pass
-    xlswriter = pd.ExcelWriter('data\\ttt.xlsx')
+    xlswriter = pd.ExcelWriter(os.path.join('data', 'ttt.xlsx'))
 
     print(df.columns)
     dd = pd.DataFrame(df.groupby(['订单日期']).size(), columns=['配单数量'])
@@ -77,13 +77,14 @@ def pickstat(token, note_store, cnx, destguid=None, notetitle='', cum=False):
     plt.bar(ddm.index,ddm['错配金额'],width=5,bottom=ddm['漏配金额'],label='错配金额')
     plt.legend()
     plt.title('错配金额（月度）统计图')
-    plt.savefig("img\\pick\\pickstat.png")
+    plt.savefig(os.path.join('img', 'pick', 'pickstat.png'))
     plt.close()
 
     imgpathlist = []
-    chuturizhexian(dd['配单数量'], ddlastdate, '配单数量', cum=cum, imglist=imgpathlist, imgpath='img\\pick\\')
-    chuturizhexian(dd['配单金额'], ddlastdate, '配单金额', cum=cum, imglist=imgpathlist, imgpath='img\\pick\\')
-    imgpathlist.append("img\\pick\\pickstat.png")
+    pathimgpick = os.path.join('img', 'pick')
+    chuturizhexian(dd['配单数量'], ddlastdate, '配单数量', cum=cum, imglist=imgpathlist, imgpath=pathimgpick)
+    chuturizhexian(dd['配单金额'], ddlastdate, '配单金额', cum=cum, imglist=imgpathlist, imgpath=pathimgpick)
+    imgpathlist.append(os.path.join(pathimgpick, "pickstat.png"))
 
     df['年月'] = df['订单日期'].apply(lambda x: "%04d-%02d" % (x.year, x.month))
 

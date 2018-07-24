@@ -6,7 +6,7 @@
 
 from imp4nb import *
 
-cnx = lite.connect('..\\data\\quandan.db')
+cnx = lite.connect(dbpathquandan)
 
 desclitedb(cnx)
 

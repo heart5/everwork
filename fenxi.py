@@ -43,7 +43,7 @@ def timetest():
     tms = []
     tms.append(time.clock())
 
-    cnx = lite.connect('data\\quandan.db')
+    cnx = lite.connect(dbpathquandan)
     tms.append(time.clock())
     # df = pd.read_sql_query("select * from xiaoshoumingxi order by 日期",cnx)
     # print(len(df))
@@ -79,7 +79,7 @@ def timetest():
 
 
 def getapitimesfromlog():
-    df = pd.read_csv('log\\everwork.log', sep='\t',  # index_col= False,
+    df = pd.read_csv(os.path.join('log', 'everwork.log'), sep='\t',  # index_col= False,
                      header=None, usecols=[0, 1, 2, 3, 4],
                      names=['asctime', 'name', 'filenamefuncName', 'threadNamethreadprocess', 'levelnamemessage'],
                      na_filter=True, parse_dates=[0],
@@ -95,7 +95,7 @@ def getapitimesfromlog():
     return result
 
 
-cnx = lite.connect('data\\quandan.db')
+cnx = lite.connect(dbpathquandan)
 # guanlianall(cnx)
 
 # zashua()

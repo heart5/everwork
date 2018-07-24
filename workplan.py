@@ -74,7 +74,7 @@ def chulinote_workplan(wenben: str):
 
 
 def updatedb_workplan(note_store, persons):
-    cnxp = lite.connect('data\\workplan.db')
+    cnxp = lite.connect(dbpathworkplan)
     tablename_plan = 'personplan'
     tablename_updated = 'planupdated'
     token = cfp.get('evernote', 'token')
@@ -195,7 +195,7 @@ def updatedb_workplan(note_store, persons):
 
 
 def planfenxi(jiangemiao):
-    cnxp = lite.connect('data\\workplan.db')
+    cnxp = lite.connect(dbpathworkplan)
     tablename_updated = 'planupdated'
     try:
         note_store = get_notestore()
@@ -356,7 +356,7 @@ def chulioldversion():
             item.append(timestamp2str(int(notever.updated / 1000)))
             items.append(item)
         print(items)
-        cnxp = lite.connect('data\\workplan.db')
+        cnxp = lite.connect(dbpathworkplan)
         tablename_updated = 'planupdated'
         dfupdate = pd.DataFrame(items,
                                 columns=['name', 'nianyueri', 'date', 'content', 'contentlength', 'updatedtime'])
@@ -365,7 +365,7 @@ def chulioldversion():
 
 
 def chayanshuju():
-    cnxp = lite.connect('data\\workplan.db')
+    cnxp = lite.connect(dbpathworkplan)
     tablename_updated = 'planupdated'
 
     # person = '梅富忠'

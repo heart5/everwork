@@ -237,7 +237,7 @@ def weatherstat(items, destguid=None):
     ax3.set_ylabel(u'（百分比%）')
     ax3.set_title(u'半月平均湿度图')
 
-    img_wenshifeng_path = "img\\weather\\wenshifeng.png"
+    img_wenshifeng_path = os.path.join("img", 'weather', 'wenshifeng.png')
     plt.savefig(img_wenshifeng_path)
 
     imglist = list()
@@ -273,7 +273,7 @@ def weatherstat(items, destguid=None):
     plt.grid(True)
 
     # plt.show()
-    img_sunonoff_path = 'img\\weather\\sunonoff.png'
+    img_sunonoff_path = os.path.join('img', 'weather', 'sunonoff.png')
     plt.savefig(img_sunonoff_path)
     imglist.append(img_sunonoff_path)
     plt.close()
@@ -348,7 +348,7 @@ def isweatherupdate(weathertxtfilename):
 
 
 def weatherstattimer(jiangemiao):
-    weathertxtfilename = "data\\ifttt\\weather.txt"
+    weathertxtfilename = os.path.join('data', 'ifttt', 'weather.txt')
     fetchweatherinfo_from_gmail(weathertxtfilename)
 
     if cfplife.has_option('天气', '笔记最新日期'):

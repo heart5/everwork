@@ -64,7 +64,7 @@ def chulixls_order(orderfile):
 
 
 def chulidataindir_order(pathorder):
-    cnxp = lite.connect('data\\workplan.db')
+    cnxp = lite.connect(dbpathworkplan)
     tablename_order = 'salesorder'
     sqlstr = "select count(*)  from sqlite_master where type='table' and name = '%s'" % tablename_order
     tablexists = pd.read_sql_query(sqlstr, cnxp).iloc[0, 0] > 0
@@ -88,7 +88,7 @@ def chulidataindir_order(pathorder):
             if fname in yichulifilelist:
                 continue
             print(fname, end='\t')
-            dffname = chulixls_order(pathorder+'\\'+fname)
+            dffname = chulixls_order(os.path.join(pathorder, fname))
             if dffname is None:
                 continue
             dfresult = dfresult.append(dffname)
@@ -120,7 +120,7 @@ def chulidataindir_order(pathorder):
     # descdb(dfdanjusuoyin)
     dfdanjusuoyin.to_sql('tmptable', cnxp, index=True, if_exists='replace')
     cursor = cnxp.cursor()
-    cursor.execute('attach database \'data\\quandan.db\' as \'C\'')
+    cursor.execute(f'attach database \'{dbpathquandan}\' as \'C\'')
     dfhanqu = pd.read_sql_query(
         'select tmptable.*,C.customer.往来单位编号 as 单位编号, substr(C.customer.往来单位编号, 1,2) as 区域,  '
         'substr(C.customer.往来单位编号, 12, 1) as 类型 from tmptable, C.customer '
@@ -221,10 +221,10 @@ def dingdanxiaoshouyuedufenxi(dforder):
     # print(dfshow[dfshow.类型 == 'I'])
     # descdb(dfshow)
 
-    cnx = lite.connect('data\\workplan.db')
+    cnx = lite.connect(dbpathworkplan)
     # dfshow.to_sql('tmptable', cnx, index=True, if_exists='replace')
     cursor = cnx.cursor()
-    cursor.execute('attach database \'data\\quandan.db\' as \'C\'')
+    cursor.execute(f'attach database \'{dbpathquandan}\' as \'C\'')
     dfquyu = pd.read_sql('select * from C.quyu', cnx, index_col='index')
     dfquyu.drop_duplicates(['区域'], keep='first', inplace=True)
     dfquyu.index = dfquyu['区域']
@@ -363,7 +363,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
 def showorderstat():
     # xlsfile = 'data\\work\\销售订单\\销售订单20180606__20180607034848_480667.xls'
     # dforder = chulixls_order(xlsfile)
-    pathor = 'data\\work\\销售订单'
+    pathor = os.path.join('data', 'work', '销售订单')
     dforder = chulidataindir_order(pathor)
     dingdanxiaoshouyuedufenxi(dforder)
     dforder = dforder.loc[:, ['日期', '订单编号', '区域', '类型', '客户名称', '业务人员', '订单金额']]

@@ -55,7 +55,7 @@ def notification2df(items):
 
 def callsms2df(itemstr):
     # 读取老记录
-    with open('data\\ifttt\\smslog_gmail_all.txt', 'r', encoding='utf-8') as fsms:
+    with open(os.path.join('data', 'ifttt', 'smslog_gmail_all.txt'), 'r', encoding='utf-8') as fsms:
         items = [line.strip() for line in fsms if len(line.strip()) > 0]
     itemstr = itemstr + items
     log.info('电话短信记录有%d条。' % len(itemstr))

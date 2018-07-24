@@ -13,7 +13,7 @@ def log2notetimer(jiangemiao):
     files = os.listdir(pathlog)
     loglines = []
     for fname in files[::-1]:
-        with open(pathlog + '\\' + fname, 'r', encoding='utf-8') as flog:
+        with open(os.path.join(pathlog, fname), 'r', encoding='utf-8') as flog:
             loglines = loglines + [line.strip() for line in flog if line.find('CRITICAL') >= 0]
 
     print(len(loglines), end='\t')

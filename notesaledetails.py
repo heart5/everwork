@@ -176,7 +176,7 @@ def pinpaifenxi(token, note_store, cnx, daysbefore=90, brandnum=30, fenbu='fenbu
 
 
 if __name__ == '__main__':
-    cnx = lite.connect('data\\quandan.db')
+    cnx = lite.connect(dbpathquandan)
     dataokay(cnx)
     token = cfp.get('evernote', 'token')
     pinpaifenxi(token, get_notestore(), cnx, daysbefore=15, brandnum=1)

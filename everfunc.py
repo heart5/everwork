@@ -32,44 +32,21 @@ def dirbuildfirst():
     :returns
         null
     """
-    if not os.path.exists('data'):
-        os.mkdir('data')
-    if not os.path.exists('data\\tmp'):
-        os.mkdir('data\\tmp')
-    if not os.path.exists('img'):
-        os.mkdir('img')
-    if not os.path.exists('img\\weather'):
-        os.mkdir('img\\weather')
-    if not os.path.exists('img\\pick'):
-        os.mkdir('img\\pick')
-    if not os.path.exists('img\\一部'):
-        os.mkdir('img\\一部')
-    if not os.path.exists('img\\二部'):
-        os.mkdir('img\\二部')
-    if not os.path.exists('img\\汉口'):
-        os.mkdir('img\\汉口')
-    if not os.path.exists('img\\汉阳'):
-        os.mkdir('img\\汉阳')
-    if not os.path.exists('img\\销售部'):
-        os.mkdir('img\\销售部')
-    if not os.path.exists('img\\终端客户'):
-        os.mkdir('img\\终端客户')
-    if not os.path.exists('img\\连锁客户'):
-        os.mkdir('img\\连锁客户')
-    if not os.path.exists('img\\渠道客户'):
-        os.mkdir('img\\渠道客户')
-    if not os.path.exists('img\\直销客户'):
-        os.mkdir('img\\直销客户')
-    if not os.path.exists('img\\公关客户'):
-        os.mkdir('img\\公关客户')
-    if not os.path.exists('img\\其他客户'):
-        os.mkdir('img\\其他客户')
-    if not os.path.exists('img\\全渠道'):
-        os.mkdir('img\\全渠道')
-    if not os.path.exists('img\\非终端'):
-        os.mkdir('img\\非终端')
-    if not os.path.exists('log'):
-        os.mkdir('log')
+    dirlst = [
+        ['data', ['tmp']],
+        ['log', []],
+        ['img', ['weather', 'pick', '一部', '二部', '汉口', '汉阳',
+                 '销售部', '终端客户', '连锁客户', '渠道客户', '直销客户',
+                 '公关客户', '其他客户', '全渠道', '非终端', '汉阳']]
+    ]
+    for dir1, dir2lst in dirlst:
+        if not os.path.exists(dir1):
+            os.mkdir(dir1)
+            # print(dir1)
+        for dr2 in dir2lst:
+            if not os.path.exists(os.path.join(dir1, dr2)):
+                os.mkdir(os.path.join(dir1, dr2))
+                # print(os.path.join(dir1,dr2))
 
 
 def mylog():
@@ -78,7 +55,7 @@ def mylog():
     :returns    返回log对象
     """
     logew = lg.getLogger('ewer')
-    loghandler = lgh.RotatingFileHandler('log\\everwork.log', encoding='utf-8',  # 此处指定log文件的编码方式，否则可能乱码
+    loghandler = lgh.RotatingFileHandler(os.path.join('log', 'everwork.log'), encoding='utf-8',  # 此处指定log文件的编码方式，否则可能乱码
                                          maxBytes=2560 * 1024, backupCount=25)
     formats = lg.Formatter('%(asctime)s\t%(name)s\t%(filename)s - [%(funcName)s]'
                            '\t%(threadName)s - %(thread)d , %(processName)s - %(process)d'
@@ -107,7 +84,7 @@ def getapitimesfromlog():
     从log中提取API调用次数
     :return:
     """
-    df = pd.read_csv('log\\everwork.log', sep='\t',  # index_col= False,
+    df = pd.read_csv(os.path.join('log', 'everwork.log'), sep='\t',  # index_col= False,
                      header=None, usecols=[0, 1, 2, 3, 4],
                      names=['asctime', 'name', 'filenamefuncName', 'threadNamethreadprocess', 'levelnamemessage'],
                      na_filter=True, parse_dates=[0],
@@ -164,20 +141,23 @@ def evernoteapiclearatzero():
 log = mylog()
 
 cfp = ConfigParser()
-inifilepath = 'data\\everwork.ini'
+inifilepath = os.path.join('data', 'everwork.ini')
 cfp.read(inifilepath, encoding='utf-8')
 cfpdata = ConfigParser()
-inidatanotefilepath = 'data\\everdatanote.ini'
+inidatanotefilepath = os.path.join('data', 'everdatanote.ini')
 cfpdata.read(inidatanotefilepath, encoding='utf-8')
 cfplife = ConfigParser()
-inilifepath = 'data\\everlife.ini'
+inilifepath = os.path.join('data', 'everlife.ini')
 cfplife.read(inilifepath, encoding='utf-8')
 cfpzysm = ConfigParser()
-inizysmpath = 'data\\everzysm.ini'
+inizysmpath = os.path.join('data', 'everzysm.ini')
 cfpzysm.read(inizysmpath, encoding='utf-8')
 cfpworkplan = ConfigParser()
-iniworkplanpath = 'data\\everworkplan.ini'
+iniworkplanpath = os.path.join('data', 'everworkplan.ini')
 cfpworkplan.read(iniworkplanpath, encoding='utf-8')
+
+dbpathworkplan = os.path.join('data', 'workplan.db')
+dbpathquandan = os.path.join('data', 'quandan.db')
 
 ENtimes = int(cfp.get('evernote', 'apicount'))
 ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
@@ -676,33 +656,34 @@ def gengxinfou(filename, conn, tablename='fileread'):
 
 
 def dataokay(cnx):
-    if gengxinfou('data\\系统表.xlsx', cnx, 'fileread'):  # or True:
-        df = pd.read_excel('data\\系统表.xlsx', sheetname='区域')
+    pathxitongbiaoxls = os.path.join('data', '系统表.xlsx')
+    if gengxinfou(pathxitongbiaoxls, cnx, 'fileread'):  # or True:
+        df = pd.read_excel(os.path.join('data', '系统表.xlsx'), sheetname='区域')
         df['区域'] = pd.DataFrame(df['区域']).apply(lambda r: '%02d' % r, axis=1)
         # print(df)
         df = df.loc[:, ['区域', '区域名称', '分部']]
         df.to_sql(name='quyu', con=cnx, if_exists='replace')
 
-        df = pd.read_excel('data\\系统表.xlsx', sheetname='小区')
+        df = pd.read_excel(pathxitongbiaoxls, sheetname='小区')
         df['小区'] = pd.DataFrame(df['小区']).apply(lambda r: '%03d' % r, axis=1)
         # print(df)
         df.to_sql(name='xiaoqu', con=cnx, if_exists='replace')
 
-        df = pd.read_excel('data\\系统表.xlsx', sheetname='终端类型')
+        df = pd.read_excel(pathxitongbiaoxls, sheetname='终端类型')
         # print(df)
         df.to_sql(name='leixing', con=cnx, if_exists='replace')
 
-        df = pd.read_excel('data\\系统表.xlsx', sheetname='产品档案', )
+        df = pd.read_excel(pathxitongbiaoxls, sheetname='产品档案', )
         # print(df)
         df.to_sql(name='product', con=cnx, if_exists='replace')
 
-        df = pd.read_excel('data\\系统表.xlsx', sheetname='客户档案')
+        df = pd.read_excel(pathxitongbiaoxls, sheetname='客户档案')
         df = df.loc[:, ['往来单位', '往来单位编号', '地址']]
         # print(df)
         df.to_sql(name='customer', con=cnx, if_exists='replace')
 
-    if gengxinfou('data\\2018年全单统计管理.xlsm', cnx, 'fileread'):  # or True:
-        df = pd.read_excel('data\\2018年全单统计管理.xlsm', sheetname='全单统计管理', na_values=[0])
+    if gengxinfou(os.path.join('data', '2018年全单统计管理.xlsm'), cnx, 'fileread'):  # or True:
+        df = pd.read_excel(os.path.join('data', '2018年全单统计管理.xlsm'), sheetname='全单统计管理', na_values=[0])
         # descdb(df)
         df = df.loc[:, ['订单日期', '单号', '配货人', '配货准确', '业务主管', '终端编码', '终端名称', '积欠', '送货金额',
                         '实收金额', '收款方式', '优惠', '退货金额', '客户拒收', '无货金额', '少配金额', '配错未要',
@@ -723,8 +704,8 @@ def dataokay(cnx):
         # df = df.apply(lambda x:str.strip(x) if type(x) == str else x)
         df.to_sql(name='quandan', con=cnx, if_exists='replace', chunksize=100000)
 
-    if gengxinfou('data\\jiaqi.txt', cnx, 'fileread'):
-        df = pd.read_csv('data\\jiaqi.txt', sep=',', header=None)
+    if gengxinfou(os.path.join('data', 'jiaqi.txt'), cnx, 'fileread'):
+        df = pd.read_csv(os.path.join('data', 'jiaqi.txt'), sep=',', header=None)
         dfjiaqi = []
         for ii in df[0]:
             slist = ii.split('，')
@@ -759,12 +740,12 @@ def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount
                     riqiendwith = dangqianyueri + MonthEnd(k * (-1))
                 # print(riqiendwith)
                 chuturizhexian(dfmoban, riqiendwith, cln, cum=cum, leixing=leixingset, imglist=imglist, quyu=fenbuset,
-                               pinpai=pinpai, imgpath='img\\' + fenbuset + '\\')
+                               pinpai=pinpai, imgpath=os.path.join('img', fenbuset))
             if len(imglist) >= imgmonthcount:
                 imglist = imglist[:imgmonthcount]
         nianshu = dfmoban.index.max().year - dfmoban.index.min().year + 1
         chutuyuezhexian(dfmoban, dangqianyueri, cln, cum=cum, leixing=leixingset, imglist=imglist, quyu=fenbuset,
-                        pinpai=pinpai, nianshu=nianshu, imgpath='img\\' + fenbuset + '\\')
+                        pinpai=pinpai, nianshu=nianshu, imgpath=os.path.join('img', fenbuset))
         imglists.append(imglist)
     imglistreturn = []
     for i in range(len(imglists)):
@@ -816,7 +797,7 @@ def biaozhukedu(dfc, weibiao):
 
 
 def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu='', leixing='', pinpai='', nianshu=3,
-                    imgpath='img\\'):
+                    imgpath=os.path.join('img')):
     """
     月度（全年，自然年度）累积对比图，自最早日期起，默认3年
     :param ds: 数据表，必须用DateTime做index
@@ -897,9 +878,9 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu=''
         if not os.path.exists(imgpath):
             os.mkdir(imgpath)
             log.info('%s不存在，将被创建' % imgpath)
-
-        plt.savefig(imgpath + '%s%s.png' % (biaoti, cumstr))
-        imglist.append(imgpath + '%s%s.png' % (biaoti, cumstr))
+        itemimgpath = os.path.join(imgpath, f'{biaoti}{cumstr}.png')
+        plt.savefig(itemimgpath)
+        imglist.append(itemimgpath)
         plt.close()
     cumstr = '月折线'
     dfy.plot(title='%s%s' % (biaoti, cumstr))
@@ -907,13 +888,14 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu=''
         plt.gca().yaxis.set_major_formatter(
             FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
     biaozhukedu(dfy, '%02d' % (riqienddate.month))
-    plt.savefig(imgpath + '%s%s.png' % (biaoti, cumstr))
-    imglist.append(imgpath + '%s%s.png' % (biaoti, cumstr))
+    itemimgpath = os.path.join(imgpath, f'{biaoti}{cumstr}.png')
+    plt.savefig(itemimgpath)
+    imglist.append(itemimgpath)
     plt.close()
 
 
 def chuturizhexian(df, riqienddate, xiangmu, cum=False,
-                   imglist=list(), quyu='', leixing='', pinpai='', imgpath='img\\'):
+                   imglist=list(), quyu='', leixing='', pinpai='', imgpath=os.path.join('img')):
     """
     日数据（月份）累积对比图，当月、环比、同期比
     riqienddate形如2017-12-08，代表数据结束点的日期
@@ -975,7 +957,7 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False,
     # plt.ylim(0) #设定纵轴从0开始
 
     biaozhukedu(dfc, riqienddate.day)
-    imgsavepath = imgpath + biaoti + '（日累积月）.png'
+    imgsavepath = os.path.join(imgpath, biaoti + '（日累积月）.png')
     plt.savefig(imgsavepath)
     imglist.append(imgsavepath)
     plt.close()
@@ -1130,7 +1112,7 @@ def tablehtml2evernote(dataframe, tabeltitle, withindex=True):
 
 
 def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum=100000, dirtarget='Inbox', unseen=False,
-            topicloc='subject', topic='', datadir='data\\work\\'):
+            topicloc='subject', topic='', datadir=os.path.join('data', 'work')):
     def parseheader(message):
         headermsg = []
 
@@ -1217,17 +1199,17 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
                     datadiri = datadir
                     if fname.startswith('销售订单'):
                         # print(fname)
-                        datadiri = datadiri + '销售订单\\'
+                        datadiri = os.path.join(datadiri, '销售订单')
                     elif fname.startswith('订单明细'):
                         # print(fname)
-                        datadiri = datadiri + '订单明细\\'
+                        datadiri = os.path.join(datadiri, '订单明细')
 
-                    attachfile = datadiri + fname[:pointat] + timenowstr + fname[pointat:]
+                    attachfile = os.path.join(datadiri, fname[:pointat] + timenowstr + fname[pointat:])
                     try:
                         fattach = open(attachfile, 'wb')  # 注意一定要用wb来打开文件，因为附件一般都是二进制文件
                     except Exception as eeee:
                         print(eeee)
-                        attachfile = datadiri + '未名文件' + timenowstr
+                        attachfile = os.path.join(datadiri, '未名文件' + timenowstr)
                         fattach = open(attachfile, 'wb')
                     fattach.write(attach_data)
                     fattach.close()
@@ -1502,7 +1484,7 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
                     else:
                         itemslst.append(headerjilu[1] + '\t' + textstrjilu)
 
-    txtfilename = 'data\\ifttt\\' + '%s_gmail_%s.txt' % (mingmu, fenleistr)
+    txtfilename = os.path.join('data', 'ifttt', '%s_gmail_%s.txt' % (mingmu, fenleistr))
     if len(itemslst) > 0:  # or True:
         items = itemslst + readfromtxt(txtfilename)
         fb = open(txtfilename, 'w', encoding='utf-8')
@@ -1518,7 +1500,7 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
 def isworkday(dlist: list, person: str = '全体', fromthen=False):
     if fromthen and (len(dlist) == 1):
         dlist = pd.date_range(dlist[0], datetime.datetime.today(), freq='D')
-    cnxp = lite.connect('data\\workplan.db')
+    cnxp = lite.connect(dbpathworkplan)
     dfholiday = pd.read_sql('select distinct * from holiday', cnxp, index_col='date', parse_dates=['date'])
     del dfholiday['index']
     # print(dfholiday)
