@@ -16,7 +16,6 @@ from salesorder import workfilefromgmail2datacenter, fetchattendance_from_everno
 from order import showorderstat2note
 
 # log.debug('程序启动……')
-# todo 一体化目录构建
 
 # nbfbdf = readinisection2df(cfpdata, 'guidfenbunb', '销售业绩图表')
 # for aa in nbfbdf.index:
@@ -36,7 +35,7 @@ from order import showorderstat2note
 # isnoteupdate(token, note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
 
 fetchattendance_from_evernote(60 * 60 * 8)
-workfilefromgmail2datacenter(60*60*2)
+workfilefromgmail2datacenter(60 * 55)
 showorderstat2note(60 * 60 * 1 + 60 * 8)
 log2notetimer(60 * 45)
 weatherstattimer(60 * 60 * 1 + 60 * 5)
