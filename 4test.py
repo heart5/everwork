@@ -9,4 +9,4 @@ from func.first import getdirmain
 if __name__ == '__main__':
     dm = getdirmain()
     print(dm)
-    get_notestore(mylog())
+    get_notestore()

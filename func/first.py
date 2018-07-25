@@ -2,7 +2,9 @@
 """
 功能描述
 """
-import os
+import os, sys
+sys.path.append(os.path.split(os.getcwd())[0])
+sys.path.append(os.getcwd())
 import func.fordirmainonly as fdmo
 
 
@@ -16,3 +18,4 @@ def getdirmain():
 
 if __name__ == '__main__':
     print(getdirmain())
+    print(sys.path)
