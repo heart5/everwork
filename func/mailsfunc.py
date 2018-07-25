@@ -5,11 +5,12 @@
 import os, re, datetime, time, email, imaplib, ssl, threading
 from bs4 import BeautifulSoup
 from func.logme import log
+from func.first import getdirmain
 
 
 def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum=100000, dirtarget='Inbox',
             unseen=False,
-            topicloc='subject', topic='', datadir=os.path.join('data', 'work')):
+            topicloc='subject', topic='', datadir=os.path.join(getdirmain(), 'data', 'work')):
     global log
 
     def parseheader(message):

@@ -30,7 +30,8 @@ def get_notestore():
 
     global log
     # auth_token = token
-    auth_token = getcfp('everwork').get('evernote', 'token')  # 直接提取，唯一使用
+    cfp, inipath = getcfp('everwork')
+    auth_token = cfp.get('evernote', 'token')  # 直接提取，唯一使用
 
     if auth_token == "your developer token":
         print("Please fill in your developer token\nTo get a developer token, visit "

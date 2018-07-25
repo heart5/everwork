@@ -45,7 +45,7 @@ def getweatherfromevernote():
 
 
 def getweatherfromgmail():
-    cfp = getcfp('everwork')
+    cfp, inipath = getcfp('everwork')
     host = cfp.get('gmail', 'host')
     username = cfp.get('gmail', 'username')
     password = cfp.get('gmail', 'password')
@@ -309,8 +309,7 @@ def write2weathertxt(weathertxtfilename, inputitemlist):
 
 def fetchweatherinfo_from_gmail(weathertxtfilename):
     global log
-    inilife = 'everlife'
-    cfplife = getcfp(inilife)
+    cfplife, inilife = getcfp('everlife')
     if cfplife.has_option('天气', '存储数据最新日期'):
         weathertxtlastestday = cfplife.get('天气', '存储数据最新日期')
     else:
@@ -334,8 +333,7 @@ def fetchweatherinfo_from_gmail(weathertxtfilename):
 
 def isweatherupdate(weathertxtfilename):
     global log
-    inilife = 'everlife'
-    cfplife = getcfp(inilife)
+    cfplife, inilife = getcfp('everlife')
     # print(weathertoday, end='\t')
     # print(datetime.datetime.now().strftime('%F'))
     weathertoday = time.strftime('%F',
@@ -366,8 +364,7 @@ def isweatherupdate(weathertxtfilename):
 
 def weatherstattimer(jiangemiao):
     global log
-    inilife = 'everlife'
-    cfplife = getcfp(inilife)
+    cfplife, inilife = getcfp('everlife')
     weathertxtfilename = os.path.join(getdirmain(), 'data', 'ifttt', 'weather.txt')
     fetchweatherinfo_from_gmail(weathertxtfilename)
 

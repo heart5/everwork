@@ -16,7 +16,7 @@ def getcfp(cfpfilename: str):
         open(inipath, 'w', encoding='utf-8')
     cfp.read(inipath, encoding='utf-8')
 
-    return cfp
+    return cfp, inipath
 
 
 if __name__ == '__main__':
