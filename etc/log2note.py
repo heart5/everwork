@@ -12,6 +12,7 @@ from func.configpr import getcfp
 from func.evernt import get_notestore, imglist2note
 from func.logme import log
 
+
 def log2notetimer(jiangemiao):
     pathlog = getdirmain() / 'log'
     files = os.listdir(str(pathlog))
@@ -51,6 +52,6 @@ def log2notetimer(jiangemiao):
 
 
 if __name__ == '__main__':
-    global log
+    # global log
     log.info(f'测试文件\t{__file__}')
     log2notetimer(60 * 32)

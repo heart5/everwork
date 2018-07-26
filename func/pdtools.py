@@ -10,7 +10,7 @@ from pandas.tseries.offsets import *
 from configparser import ConfigParser
 from matplotlib.ticker import MultipleLocator, FuncFormatter
 from func.logme import log
-from func.first import dbpathworkplan, dirmainpath, YWanAnchor
+from func.first import dbpathworkplan, dirmainpath, YWanAnchor, touchfilepath2depth
 from func.evernt import evernoteapijiayi, makenote
 
 # plot中显示中文
@@ -440,7 +440,7 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu=''
 
 
 def chuturizhexian(df, riqienddate, xiangmu, cum=False,
-                   imglist=list(), quyu='', leixing='', pinpai='', imgpath=os.path.join('img')):
+                   imglist=list(), quyu='', leixing='', pinpai='', imgpath=str(dirmainpath / 'img')):
     """
     日数据（月份）累积对比图，当月、环比、同期比
     riqienddate形如2017-12-08，代表数据结束点的日期
@@ -503,6 +503,7 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False,
 
     biaozhukedu(dfc, riqienddate.day)
     imgsavepath = os.path.join(imgpath, biaoti + '（日累积月）.png')
+    touchfilepath2depth(imgsavepath)
     plt.savefig(imgsavepath)
     imglist.append(imgsavepath)
     plt.close()
