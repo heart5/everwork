@@ -3,9 +3,13 @@
 功能描述
 """
 
-import os, logging as lg, logging.handlers as lgh
-from func.first import getdirmain
+import logging as lg
+import logging.handlers as lgh
+import os
 from pathlib import Path
+
+from func.first import dirlog, touchfilepath2depth
+
 
 def mylog():
     """
@@ -13,9 +17,8 @@ def mylog():
     :returns    返回log对象
     """
     logew = lg.getLogger('ewer')
-    logpath = Path(getdirmain()) / 'log' / 'everwork.log'
-    # print(logpath)
-    loghandler = lgh.RotatingFileHandler(logpath, encoding='utf-8',
+    touchfilepath2depth(dirlog)
+    loghandler = lgh.RotatingFileHandler(str(dirlog), encoding='utf-8',
                                          # 此处指定log文件的编码方式，否则可能乱码
                                          maxBytes=2560 * 1024, backupCount=25)
     formats = lg.Formatter('%(asctime)s\t%(name)s\t%(filename)s - [%(funcName)s]'

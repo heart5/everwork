@@ -290,7 +290,7 @@ def getapitimesfromlog():
                      skip_blank_lines=True, skipinitialspace=True)
     dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API').values == True][['asctime', 'levelnamemessage']]
     if dfapi2.shape[0] == 0:
-        log.info('log文进中还没有API的调用记录')
+        log.info('日志文件中还没有API的调用记录')
         return False
     # print(dfapi2.tail())
     dfapi2['counts'] = dfapi2['levelnamemessage'].apply(lambda x: int(re.findall('(?P<counts>\d+)', x)[0]))
@@ -383,6 +383,7 @@ evernoteapiclearatzero()
 # writeini()
 
 if __name__ == '__main__':
-    log.info('测试evernt')
+    print(f'开始测试文件\t{__file__}')
     get_notestore()
     writeini()
+    print('Done.')

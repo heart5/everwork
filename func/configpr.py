@@ -5,18 +5,17 @@
 """
 import os
 from configparser import ConfigParser
-from func.first import getdirmain
+from func.first import getdirmain, touchfilepath2depth
 from pathlib import Path
 
-def getcfp(cfpfilename: str):
-    pass
-    cfp = ConfigParser()
-    inipath = Path(getdirmain()) / 'data' / (cfpfilename + '.ini')
-    if not os.path.exists(inipath):
-        open(inipath, 'w', encoding='utf-8')
-    cfp.read(inipath, encoding='utf-8')
 
-    return cfp, inipath
+def getcfp(cfpfilename: str):
+    cfpson = ConfigParser()
+    inipathson = Path(getdirmain()) / 'data' / (cfpfilename + '.ini')
+    touchfilepath2depth(inipathson)
+    cfpson.read(inipathson, encoding='utf-8')
+
+    return cfpson, inipathson
 
 
 cfp, inifilepath = getcfp('everwork')
@@ -27,5 +26,8 @@ cfpworkplan, iniworkplanpath = getcfp('everworkplan')
 
 
 if __name__ == '__main__':
+    print(f'开始测试文件\t{__file__}')
     cp, cppath = getcfp('everwork')
     print(cp, cppath)
+    print(inizysmpath)
+    print('Done.')
