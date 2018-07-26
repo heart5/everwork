@@ -306,6 +306,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
                 note.content += '<en-note>专营休闲美食</en-note>'
                 note.notebookGuid = nbguid
                 note = notestore.createNote(note)
+                evernoteapijiayi()
                 ntguid = note.guid
                 cfpdata.set('ordersaleguidquyu', qy + 'guid', ntguid)
                 cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))

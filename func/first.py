@@ -22,6 +22,11 @@ dirmain = str(getdirmain())
 dirlog = str(getdirmain() / 'log' / 'everwork.log')
 dbpathworkplan = str(getdirmain() / 'data' / 'workplan.db')
 dbpathquandan = str(getdirmain() / 'data' / 'quandan.db')
+path2include = ['etc', 'func', 'work', 'life', 'study']
+for p2i in path2include:
+    sys.path.append(str(dirmainpath / p2i))
+for dr in sys.path:
+    print(dr)
 
 YWanAnchor = 50000  # 纵轴标识万化锚点
 

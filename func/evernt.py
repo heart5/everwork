@@ -164,7 +164,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
                 updated_note = get_notestore().updateNote(note)
             else:
                 updated_note = notestore.updateNote(note)
-            # evernoteapijiayi()
+            evernoteapijiayi()
             log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
             break
         except Exception as eee:
@@ -224,6 +224,53 @@ def findnotefromnotebook(token, notebookguid, titlefind, notecount=10000):
             items.append(item)
 
     return items
+
+
+def makenote(token, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
+    """
+    创建一个note
+    :param token:
+    :param notestore:
+    :param notetitle:
+    :param notebody:
+    :param parentnotebook:
+    :return:
+    """
+    global log
+    nbody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+    nbody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+    nbody += "<en-note>%s</en-note>" % notebody
+
+    # Create note object
+    ournote = Ttypes.Note()
+    ournote.title = notetitle
+    ournote.content = nbody
+
+    # parentNotebook is optional; if omitted, default notebook is used
+    if parentnotebook and hasattr(parentnotebook, 'guid'):
+        ournote.notebookGuid = parentnotebook.guid
+
+    # Attempt to create note in Evernote account
+    try:
+        note = notestore.createNote(token, ournote)
+        evernoteapijiayi()
+        log.info('笔记《' + notetitle + '》在笔记本《' + parentnotebook.name + '》中创建成功。')
+        return note
+    except Etypes.EDAMUserException as usere:
+        # Something was wrong with the note data
+        # See EDAMErrorCode enumeration for error code explanation
+        # http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
+        log.critical("用户错误！%s" % str(usere))
+    except Etypes.EDAMNotFoundException as notfounde:
+        # Parent Notebook GUID doesn't correspond to an actual notebook
+        print("无效的笔记本guid（识别符）！%s" % str(notfounde))
+    except Etypes.EDAMSystemException as systeme:
+        if systeme.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
+            log.critical("API达到调用极限，需要 %d 秒后重来" % systeme.rateLimitDuration)
+            exit(1)
+        else:
+            log.critical('创建笔记时出现严重错误：' + str(systeme))
+            exit(2)
 
 
 def timestamp2str(timestamp):
@@ -308,9 +355,9 @@ def evernoteapijiayi():
         sleep_seconds = (zhengdian - now).seconds + secondsaferzhengdian
         starttimeafterzhengdian = pd.to_datetime(zhengdian + datetime.timedelta(seconds=secondsaferzhengdian))
         log.info(f'Evernote API 调用已达{ENtimes:d}次，休息{sleep_seconds:d}秒，待{str(starttimeafterzhengdian)}再开干……')
+        ENtimes = 0
         writeini()
         time.sleep(sleep_seconds)
-        ENtimes = 0
 
 
 # print('我是evernt啊')
@@ -332,54 +379,6 @@ if apitime:
         ENAPIlasttime = apitime[0]
         ENtimes = apitime[1] + 1
 evernoteapiclearatzero()
-
-
-def makenote(token, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
-    """
-    创建一个note
-    :param token:
-    :param notestore:
-    :param notetitle:
-    :param notebody:
-    :param parentnotebook:
-    :return:
-    """
-    global log
-    nbody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-    nbody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
-    nbody += "<en-note>%s</en-note>" % notebody
-
-    # Create note object
-    ournote = Ttypes.Note()
-    ournote.title = notetitle
-    ournote.content = nbody
-
-    # parentNotebook is optional; if omitted, default notebook is used
-    if parentnotebook and hasattr(parentnotebook, 'guid'):
-        ournote.notebookGuid = parentnotebook.guid
-
-    # Attempt to create note in Evernote account
-    try:
-        note = notestore.createNote(token, ournote)
-        evernoteapijiayi()
-        log.info('笔记《' + notetitle + '》在笔记本《' + parentnotebook.name + '》中创建成功。')
-        return note
-    except Etypes.EDAMUserException as usere:
-        # Something was wrong with the note data
-        # See EDAMErrorCode enumeration for error code explanation
-        # http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
-        log.critical("用户错误！%s" % str(usere))
-    except Etypes.EDAMNotFoundException as notfounde:
-        # Parent Notebook GUID doesn't correspond to an actual notebook
-        print("无效的笔记本guid（识别符）！%s" % str(notfounde))
-    except Etypes.EDAMSystemException as systeme:
-        if systeme.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
-            log.critical("API达到调用极限，需要 %d 秒后重来" % systeme.rateLimitDuration)
-            exit(1)
-        else:
-            log.critical('创建笔记时出现严重错误：' + str(systeme))
-            exit(2)
-
 
 # writeini()
 

@@ -5,7 +5,8 @@ import sys
 sys.path.insert(0, 'work')
 sys.path.insert(0, 'life')
 sys.path.insert(0, 'study')
-sys.path.insert(0, 'sysetc')
+sys.path.insert(0, 'func')
+sys.path.insert(0, 'etc')
 from everfunc import *
 
 
