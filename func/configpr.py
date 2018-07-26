@@ -6,12 +6,12 @@
 import os
 from configparser import ConfigParser
 from func.first import getdirmain
-
+from pathlib import Path
 
 def getcfp(cfpfilename: str):
     pass
     cfp = ConfigParser()
-    inipath = os.path.join(getdirmain(), 'data', cfpfilename + '.ini')
+    inipath = Path(getdirmain()) / 'data' / (cfpfilename + '.ini')
     if not os.path.exists(inipath):
         open(inipath, 'w', encoding='utf-8')
     cfp.read(inipath, encoding='utf-8')
@@ -19,22 +19,13 @@ def getcfp(cfpfilename: str):
     return cfp, inipath
 
 
+cfp, inifilepath = getcfp('everwork')
+cfpdata, inidatanotefilepath = getcfp('everdatanote')
+cfplife, inilifepath = getcfp('everlife')
+cfpzysm, inizysmpath = getcfp('everzysm')
+cfpworkplan, iniworkplanpath = getcfp('everworkplan')
+
+
 if __name__ == '__main__':
-    cp = getcfp('everwork')
-    print(cp)
-    # cfp = ConfigParser()
-    # inifilepath = os.path.join('data', 'everwork.ini')
-    # cfp.read(inifilepath, encoding='utf-8')
-    # cfpdata = ConfigParser()
-    # inidatanotefilepath = os.path.join('data', 'everdatanote.ini')
-    # cfpdata.read(inidatanotefilepath, encoding='utf-8')
-    # cfplife = ConfigParser()
-    # inilifepath = os.path.join('data', 'everlife.ini')
-    # cfplife.read(inilifepath, encoding='utf-8')
-    # cfpzysm = ConfigParser()
-    # inizysmpath = os.path.join('data', 'everzysm.ini')
-    # cfpzysm.read(inizysmpath, encoding='utf-8')
-    # cfpworkplan = ConfigParser()
-    # iniworkplanpath = os.path.join('data', 'everworkplan.ini')
-    # cfpworkplan.read(iniworkplanpath, encoding='utf-8')
-    pass
+    cp, cppath = getcfp('everwork')
+    print(cp, cppath)

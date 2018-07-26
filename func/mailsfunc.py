@@ -2,10 +2,12 @@
 """
 功能描述
 """
-import os, re, datetime, time, email, imaplib, ssl, threading
+import os, re, datetime, time, email, imaplib, ssl, threading, socket
 from bs4 import BeautifulSoup
 from func.logme import log
 from func.first import getdirmain
+from func.configpr import cfp
+from func.first import dirmainpath
 
 
 def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum=100000, dirtarget='Inbox',
@@ -334,3 +336,67 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
     log.info('总计的%d个线程全部执行完毕！' % len(threadlist))
 
     return mailitemsresult
+
+
+def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
+    """
+    从指定邮件目录读取包含关键字的新邮件并更新至txt文件
+    :param direc: 待处理的邮件目录
+    :param mingmu: 名目，txt文件命名使用
+    :param fenleistr: 分类，txt文件命名使用
+    :param topic: 搜索邮件的关键字，默认置空
+    :param bodyonly: 只要邮件body，默认为真
+    :return: 带换行的规范字符串列表
+    """
+
+    def readfromtxt(fn):
+        if not os.path.exists(fn):
+            newfile = open(fn, 'w', encoding='utf-8')
+            newfile.close()
+        with open(fn, 'r', encoding='utf-8') as fff:
+            itemsr = [line.strip() for line in fff if len(line.strip()) > 0]
+            # for line in f:
+            #     print(line)
+        log.info("《%s-%s》现有%d条记录。" % (mingmu, fenleistr, len(itemsr)))
+        return itemsr
+
+    global cfp
+    hostg = cfp.get('gmail', 'host')
+    usernameg = cfp.get('gmail', 'username')
+    passwordg = cfp.get('gmail', 'password')
+    mailitemsjilu = []
+    try:
+        mailitemsjilu = getmail(hostg, usernameg, passwordg, debug=False, dirtarget=direc, unseen=True, topic=topic)
+    except socket.error as se:
+        log.critical("构建socket连接时出错。%s" % str(se))
+    except Exception as e:
+        log.critical('处理邮件时出现严重错误。%s' % str(e))
+
+    itemslst = []
+    if mailitemsjilu is False:
+        log.info('%s-%s没有新的邮件记录' % (mingmu, fenleistr))
+    else:
+        for headerjilu, bodyjilu in mailitemsjilu:
+            for textjilu, textstrjilu in bodyjilu:
+                if textjilu.startswith('text'):  # 只取用纯文本部分
+                    if bodyonly:  # 只要邮件body文本，否则增加邮件标题部分内容
+                        itemslst.append(textstrjilu)
+                    elif headerjilu[1].startswith('SMS with') or headerjilu[1].endswith('的短信记录') \
+                            or headerjilu[1].endswith(
+                        '的通话记录'):  # 对特别记录增补时间戳
+                        itemslst.append(headerjilu[1] + '\t' + str(headerjilu[0]) + '，' + textstrjilu)
+                    else:
+                        itemslst.append(headerjilu[1] + '\t' + textstrjilu)
+
+    global dirmainpath
+    txtfilename = str(dirmainpath / 'data' / 'ifttt' / f'{mingmu}_gmail_{fenleistr}.txt')
+    if len(itemslst) > 0:  # or True:
+        items = itemslst + readfromtxt(txtfilename)
+        fb = open(txtfilename, 'w', encoding='utf-8')
+        for item in items:
+            fb.write(item + '\n')
+        fb.close()
+    else:
+        items = readfromtxt(txtfilename)
+    log.info("《%s-%s》共有%d条记录。" % (mingmu, fenleistr, len(items)))
+    return items

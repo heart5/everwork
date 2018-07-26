@@ -20,8 +20,19 @@ bba10885-fb93-4fce-bb3f-03d7dd43d189    每日销售订单核对——周莉
 创建时间：2015-07-14 13:50:09    更新时间：2015-07-14 13:50:09    笔记本组：origin
 992afcfb-3afb-437b-9eb1-7164d5207564 在职业务人员名单
 """
-from imp4nb import *
+# from imp4nb import *
+import os
+import datetime
 import xlrd
+import pandas as pd
+import sqlite3 as lite
+import evernote.edam.type.ttypes as Ttypes
+from threading import Timer
+from func.configpr import cfp, cfpzysm, inizysmpath, cfpdata, inidatanotefilepath
+from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
+from func.logme import log
+from func.first import dirmain, dirmainpath, dbpathworkplan, dbpathquandan
+from func.pdtools import dftotal2top
 
 
 def chulixls_order(orderfile):
@@ -32,6 +43,7 @@ def chulixls_order(orderfile):
     nrows = sheet1.nrows  # 获取行总数
     ncols = sheet1.ncols
     print(ncols, end='\t')
+    global log
     if ncols != 13:
         log.info(f'{orderfile}不是合格的日销售订单格式！')
         print()
@@ -64,6 +76,7 @@ def chulixls_order(orderfile):
 
 
 def chulidataindir_order(pathorder):
+    global dbpathworkplan
     cnxp = lite.connect(dbpathworkplan)
     tablename_order = 'salesorder'
     sqlstr = "select count(*)  from sqlite_master where type='table' and name = '%s'" % tablename_order
@@ -76,10 +89,11 @@ def chulidataindir_order(pathorder):
         dfresult = pd.DataFrame()
 
     notestr = '销售订单'
+    global cfpzysm, inizysmpath
     if cfpzysm.has_section(notestr) is False:
         cfpzysm.add_section(notestr)
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
-    files = os.listdir(pathorder)
+    files = os.listdir(str(pathorder))
     for fname in files[::-1]:
         if fname.startswith('销售订单') and (fname.endswith('xls') or fname.endswith('xlsx')):
             yichulifilelist = list()
@@ -88,7 +102,7 @@ def chulidataindir_order(pathorder):
             if fname in yichulifilelist:
                 continue
             print(fname, end='\t')
-            dffname = chulixls_order(os.path.join(pathorder, fname))
+            dffname = chulixls_order(str(pathorder / fname))
             if dffname is None:
                 continue
             dfresult = dfresult.append(dffname)
@@ -120,6 +134,7 @@ def chulidataindir_order(pathorder):
     # descdb(dfdanjusuoyin)
     dfdanjusuoyin.to_sql('tmptable', cnxp, index=True, if_exists='replace')
     cursor = cnxp.cursor()
+    global dbpathquandan
     cursor.execute(f'attach database \'{dbpathquandan}\' as \'C\'')
     dfhanqu = pd.read_sql_query(
         'select tmptable.*,C.customer.往来单位编号 as 单位编号, substr(C.customer.往来单位编号, 1,2) as 区域,  '
@@ -141,6 +156,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
     # descdb(dfall)
     zuijinchengjiaori = max(dfall['日期'])
     print(f'数据集最新日期：{zuijinchengjiaori}')
+    global cfpdata, inidatanotefilepath
     if cfpdata.has_option('ordersaleguidquyu', '数据最新日期'):
         daterec = pd.to_datetime(cfpdata.get('ordersaleguidquyu', '数据最新日期'))
         if daterec >= zuijinchengjiaori:  # and False:
@@ -161,6 +177,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
     dfyuetongji['订单金额'] = dfyuetongji['订单金额'].astype(int)
     # descdb(dfyuetongji)
     dfpivot = dfyuetongji.pivot(index='单位编号', values='订单金额', columns='年月')
+    dfpivot = pd.DataFrame(dfpivot)
     cls = list(dfpivot.columns)
     # print(cls)
     # for cl in cls:
@@ -196,7 +213,9 @@ def dingdanxiaoshouyuedufenxi(dforder):
     dfpivot['最近成交月份'] = dfpivot.apply(lambda x: clsnew[zuijinyuefen(x[3:16]) + 3], axis=1)
     dfpivot['尾交月数'] = dfpivot.apply(lambda x: 13 - zuijinyuefen(x[3:16]), axis=1)
     dfpivot['有效月数'] = dfpivot['首交月数'] - dfpivot['尾交月数'] + 1
+    dfpivot.fillna(0, inplace=True)
     dfpivot['年总金额'] = dfpivot.apply(lambda x: sum(x[3:16]), axis=1)
+    # print(dfpivot.iloc[0, :])
     dfpivot['年总金额'] = dfpivot['年总金额'].astype(int)
 
     def youxiaoyuejun(jine, yueshu):
@@ -363,7 +382,8 @@ def dingdanxiaoshouyuedufenxi(dforder):
 def showorderstat():
     # xlsfile = 'data\\work\\销售订单\\销售订单20180606__20180607034848_480667.xls'
     # dforder = chulixls_order(xlsfile)
-    pathor = os.path.join('data', 'work', '销售订单')
+    global dirmainpath
+    pathor = dirmainpath / 'data' / 'work' / '销售订单'
     dforder = chulidataindir_order(pathor)
     dingdanxiaoshouyuedufenxi(dforder)
     dforder = dforder.loc[:, ['日期', '订单编号', '区域', '类型', '客户名称', '业务人员', '订单金额']]
@@ -376,6 +396,7 @@ def showorderstat():
     persons = list(dforderzuixinriqi.groupby('业务人员')['业务人员'].count().index)
     # print(persons)
     notestr = '每日销售订单核对'
+    global cfpzysm, inizysmpath
     if cfpzysm.has_section(notestr) is False:
         cfpzysm.add_section(notestr)
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
@@ -391,6 +412,7 @@ def showorderstat():
                 plannote.content = nbody
                 global workplannotebookguid
                 plannote.notebookGuid = workplannotebookguid
+                global cfp
                 token = cfp.get('evernote', 'token')
                 note = notestore.createNote(token, plannote)
                 evernoteapijiayi()
@@ -443,6 +465,7 @@ def showorderstat():
                 nbody += '<en-note>%s</en-note>' % plannote.title
                 plannote.content = nbody
                 plannote.notebookGuid = workplannotebookguid
+                cfp, cfppath = getcfp('everwork')
                 token = cfp.get('evernote', 'token')
                 note = notestore.createNote(token, plannote)
                 evernoteapijiayi()
@@ -483,6 +506,7 @@ def showorderstat2note(jiangemiao):
         showorderstat()
     except Exception as ee:
         log.critical('处理订单核对统计笔记时出现错误。%s' % str(ee))
+        raise ee
 
     global timer_showorderstat
     timer_showorderstat = Timer(jiangemiao, showorderstat2note, [jiangemiao])

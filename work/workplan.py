@@ -23,11 +23,20 @@ e34ae4da-4ddd-4b13-bb1c-307d39f03cc8 业务推广计划和总结—刘权
 创建时间：2015-07-14 13:50:09    更新时间：2015-07-14 13:50:09    笔记本组：origin
 992afcfb-3afb-437b-9eb1-7164d5207564 在职业务人员名单
 """
-from imp4nb import *
-
+# from imp4nb import *
+import re, datetime, html, pandas as pd, sqlite3 as lite
+from bs4 import BeautifulSoup
+from threading import Timer
+from func.first import dbpathworkplan, dbpathquandan
+from func.logme import log
+from func.evernt import findnotefromnotebook, get_notestore, evernoteapijiayi, token, timestamp2str, tablehtml2evernote, \
+    imglist2note
+from func.configpr import cfp, cfpworkplan, iniworkplanpath
+from func.pdtools import isworkday, descdb
 
 def gezhongzaxiang():
     # findnotebookfromevernote(token)
+    global token
     findnotefromnotebook(token, '2c8e97b5-421f-461c-8e35-0f0b1a33e91c', '汇总')
     # findnotefromnotebook(token, '3d927c7e-98a6-4761-b0c6-7fba1348244f', '在职')
     # times = timestamp2str(int(1527605554000 / 1000))
@@ -40,6 +49,7 @@ def chulinote_workplan(wenben: str):
     :param wenben: 原始字符串文本，一般是从笔记中提取的纯文本
     :return: 日期工作日志列表
     """
+    global log
     pattern = re.compile('(\d{4}\s*[年\\\.-]\d{1,2}\s*[月\\\.-]\d{1,2}\s*[日|号]?)(?:(?:[,， 。])?(?:周.))?', re.U)
     splititems = re.split(pattern, wenben)
     # print(len(splititems))
@@ -74,10 +84,10 @@ def chulinote_workplan(wenben: str):
 
 
 def updatedb_workplan(note_store, persons):
+    global dbpathworkplan, token, cfp, cfpworkplan
     cnxp = lite.connect(dbpathworkplan)
     tablename_plan = 'personplan'
     tablename_updated = 'planupdated'
-    token = cfp.get('evernote', 'token')
     try:
         liuxin = 5
         for person in persons:
@@ -195,6 +205,7 @@ def updatedb_workplan(note_store, persons):
 
 
 def planfenxi(jiangemiao):
+    global dbpathworkplan
     cnxp = lite.connect(dbpathworkplan)
     tablename_updated = 'planupdated'
     try:
@@ -395,7 +406,7 @@ def chayanshuju():
 
 
 if __name__ == '__main__':
-    token = cfp.get('evernote', 'token')
+    # token = cfp.get('evernote', 'token')
     # gezhongzaxiang()
     planfenxi(60 * 5)
     # chayanshuju()

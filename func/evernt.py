@@ -3,13 +3,14 @@
 印象笔记相关功能函数
 """
 
-import time, hashlib, binascii, \
+import os, re, datetime, time, hashlib, binascii, \
     evernote.edam.type.ttypes as Ttypes, evernote.edam.error.ttypes as Etypes, \
     evernote.edam.userstore.constants as UserStoreConstants, \
-    evernote.edam.notestore.NoteStore as NoteStore
+    evernote.edam.notestore.NoteStore as NoteStore, pandas as pd, numpy as np
 from evernote.api.client import EvernoteClient
-from func.configpr import getcfp
+from func.configpr import getcfp, cfp, inifilepath
 from func.logme import log
+from func.first import dirlog
 
 
 def get_notestore():
@@ -57,7 +58,7 @@ def get_notestore():
     for i in range(trytimes):
         try:
             userstore = client.get_user_store()
-            # evernoteapijiayi()
+            evernoteapijiayi()
             version_ok = userstore.checkVersion(
                 "Evernote EDAMTest (Python)",
                 UserStoreConstants.EDAM_VERSION_MAJOR,
@@ -68,8 +69,8 @@ def get_notestore():
                 exit(1)
             # print("Is my Evernote API version up to date? ", str(version_ok))
             note_store = client.get_note_store()
-            # evernoteapijiayi()
-            log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
+            evernoteapijiayi()
+            # log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
             return note_store
         except Exception as eee:
             log.critical("第%d次（最多尝试%d次）连接evernote服务器时失败，将于%d秒后重试。%s"
@@ -175,6 +176,214 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
             time.sleep(sleeptime)
 
 
+def tablehtml2evernote(dataframe, tabeltitle, withindex=True):
+    pd.set_option('max_colwidth', 200)
+    df = pd.DataFrame(dataframe)
+    outstr = df.to_html(justify='center', index=withindex).replace('class="dataframe">', 'align="center">'). \
+        replace('<table', '\n<h3 align="center">%s</h3>\n<table' % tabeltitle).replace('<th></th>', '<th>&nbsp;</th>')
+    # print(outstr)
+    return outstr
+
+
+def findnotefromnotebook(token, notebookguid, titlefind, notecount=10000):
+    """
+    列出笔记本中的笔记信息
+    :param note_store:
+    :param token:
+    :param notebookguid:
+    :param titlefind:
+    :param notecount:
+    :return:
+    """
+    note_store = get_notestore()
+    notefilter = NoteStore.NoteFilter()
+    notefilter.notebookGuid = notebookguid
+    notemetaspec = NoteStore.NotesMetadataResultSpec(includeTitle=True, includeContentLength=True, includeCreated=True,
+                                                     includeUpdated=True, includeDeleted=True,
+                                                     includeUpdateSequenceNum=True,
+                                                     includeNotebookGuid=True, includeTagGuids=True,
+                                                     includeAttributes=True,
+                                                     includeLargestResourceMime=True, includeLargestResourceSize=True)
+    ournotelist = note_store.findNotesMetadata(token, notefilter, 0, notecount, notemetaspec)
+    evernoteapijiayi()
+
+    # print ourNoteList.notes[-1].title  #测试打印指定note的标题
+    # print note_store.getNoteContent(ourNoteList.notes[-1].guid)  #测试打印指定note的内容
+    # note = note_store.getNote(auth_token, ourNoteList.notes[9].guid, True, True, True, True)  #获得Note并打印其中的值
+    # p_noteattributeundertoken(note)
+    # print ourNoteList.notes[5] #打印NoteMetadata
+
+    items = []
+    for note in ournotelist.notes:
+        if note.title.find(titlefind) >= 0:
+            item = list()
+            item.append(note.guid)
+            item.append(note.title)
+            # print(note.guid, note.title)
+            # p_noteattributeundertoken(note)
+            items.append(item)
+
+    return items
+
+
+def timestamp2str(timestamp):
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
+
+
+def getapitimesfromlog():
+    """
+    从log中提取API调用次数
+    :return:
+    """
+    global dirlog, log
+    df = pd.read_csv(dirlog, sep='\t',  # index_col= False,
+                     header=None, usecols=[0, 1, 2, 3, 4],
+                     names=['asctime', 'name', 'filenamefuncName', 'threadNamethreadprocess', 'levelnamemessage'],
+                     na_filter=True, parse_dates=[0],
+                     skip_blank_lines=True, skipinitialspace=True)
+    dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API').values == True][['asctime', 'levelnamemessage']]
+    if dfapi2.shape[0] == 0:
+        log.info('log文进中还没有API的调用记录')
+        return False
+    # print(dfapi2.tail())
+    dfapi2['counts'] = dfapi2['levelnamemessage'].apply(lambda x: int(re.findall('(?P<counts>\d+)', x)[0]))
+    # del dfapi2['levelnamemessage']
+    # print(dfapi2.tail())
+    jj = dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['counts'].iloc[-1]
+    # print(type(jj))
+    # print(jj)
+    result = [dfapi2.asctime.max(), int(jj)]
+    print(dfapi2[dfapi2.asctime == dfapi2.asctime.max()])
+    # print(result)
+    return result
+
+
+def writeini():
+    """
+    evernote API调用次数写入配置文件以备调用。又及，函数写在这里还有个原因是global全局变量无法跨文件传递。
+    :return:
+    """
+    global ENtimes, cfp, inifilepath, log
+    # print(ENtimes)
+    # print(str(datetime.datetime.now()))
+    cfp.set('evernote', 'apicount', '%d' % ENtimes)
+    cfp.set('evernote', 'apilasttime', '%s' % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    cfp.write(open(inifilepath, 'w', encoding='utf-8'))
+    log.info('Evernote API调用次数：%d，写入配置文件%s' % (ENtimes, os.path.split(inifilepath)[1]))
+
+
+def evernoteapiclearatzero():
+    """
+    evernote API的调用次数过整点清零
+    :rtype: None
+    :return:
+    """
+    global ENAPIlasttime
+    apilasttimehouzhengdian = pd.to_datetime(
+        (ENAPIlasttime + datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:00:00'))
+    now = datetime.datetime.now()
+    if now > apilasttimehouzhengdian:
+        ENAPIlasttime = now
+        # time.sleep(60)
+        ENtimes = 0
+        writeini()
+
+
+def evernoteapijiayi():
+    """
+    evernote API调用次数加一，如果达到限值则sleep后归零。又及，多次测试，限值应该是300次每个小时，整点清零重来。
+    :return:
+    """
+    global ENtimes, cfp, inifilepath, log
+    log.debug('动用了Evernote API %s 次……' % ENtimes)
+    ENtimes += 1
+    evernoteapiclearatzero()
+    if ENtimes >= 290:
+        now = datetime.datetime.now()
+        # 强制小时数加一在零点的时候会出错，采用timedelta解决问题
+        nexthour = now + datetime.timedelta(hours=1)
+        zhengdian = pd.to_datetime(
+            '%4d-%2d-%2d %2d:00:00' % (nexthour.year, nexthour.month, nexthour.day, nexthour.hour))
+        secondsaferzhengdian = np.random.randint(0, 300)
+        sleep_seconds = (zhengdian - now).seconds + secondsaferzhengdian
+        starttimeafterzhengdian = pd.to_datetime(zhengdian + datetime.timedelta(seconds=secondsaferzhengdian))
+        log.info(f'Evernote API 调用已达{ENtimes:d}次，休息{sleep_seconds:d}秒，待{str(starttimeafterzhengdian)}再开干……')
+        writeini()
+        time.sleep(sleep_seconds)
+        ENtimes = 0
+
+
+# print('我是evernt啊')
+# global cfp
+token = cfp.get('evernote', 'token')
+ENtimes = cfp.getint('evernote', 'apicount')
+ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
+apitime = getapitimesfromlog()
+# print(ENAPIlasttime, apitime)
+if apitime:
+    # 比较ini和log中API存档的时间，解决异常退出时调用次数无法准确反映的问题
+    if apitime[0] > ENAPIlasttime:
+        diff = apitime[0] - ENAPIlasttime
+    else:
+        diff = ENAPIlasttime - apitime[0]
+    # print(diff.seconds)
+    if diff.seconds > 60:
+        log.info('程序上次异常退出，调用log中的API数据[%s,%d]' % (str(apitime[0]), apitime[1]))
+        ENAPIlasttime = apitime[0]
+        ENtimes = apitime[1] + 1
+evernoteapiclearatzero()
+
+
+def makenote(token, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
+    """
+    创建一个note
+    :param token:
+    :param notestore:
+    :param notetitle:
+    :param notebody:
+    :param parentnotebook:
+    :return:
+    """
+    global log
+    nbody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+    nbody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+    nbody += "<en-note>%s</en-note>" % notebody
+
+    # Create note object
+    ournote = Ttypes.Note()
+    ournote.title = notetitle
+    ournote.content = nbody
+
+    # parentNotebook is optional; if omitted, default notebook is used
+    if parentnotebook and hasattr(parentnotebook, 'guid'):
+        ournote.notebookGuid = parentnotebook.guid
+
+    # Attempt to create note in Evernote account
+    try:
+        note = notestore.createNote(token, ournote)
+        evernoteapijiayi()
+        log.info('笔记《' + notetitle + '》在笔记本《' + parentnotebook.name + '》中创建成功。')
+        return note
+    except Etypes.EDAMUserException as usere:
+        # Something was wrong with the note data
+        # See EDAMErrorCode enumeration for error code explanation
+        # http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
+        log.critical("用户错误！%s" % str(usere))
+    except Etypes.EDAMNotFoundException as notfounde:
+        # Parent Notebook GUID doesn't correspond to an actual notebook
+        print("无效的笔记本guid（识别符）！%s" % str(notfounde))
+    except Etypes.EDAMSystemException as systeme:
+        if systeme.errorCode == Etypes.EDAMErrorCode.RATE_LIMIT_REACHED:
+            log.critical("API达到调用极限，需要 %d 秒后重来" % systeme.rateLimitDuration)
+            exit(1)
+        else:
+            log.critical('创建笔记时出现严重错误：' + str(systeme))
+            exit(2)
+
+
+# writeini()
+
 if __name__ == '__main__':
     log.info('测试evernt')
     get_notestore()
+    writeini()

@@ -32,18 +32,29 @@ a7e84055-f075-44ab-8205-5a42f3f05284 汉阳办进出记录统计图表    hanyan
 
 """
 
-from imp4nb import *
+# from imp4nb import *
+import os, re, time, datetime, pandas as pd, matplotlib.pyplot as plt
+from os import listdir
+from os.path import isfile, join
 from bs4 import BeautifulSoup
+from threading import Timer
 from matplotlib.ticker import MultipleLocator, FuncFormatter
+from pandas.tseries.offsets import *
 import pygsheets
+from func.logme import log
+from func.first import dirmainpath
+from func.evernt import get_notestore, evernoteapijiayi, tablehtml2evernote, imglist2note
+from func.configpr import cfp, inifilepath, cfplife, inilifepath
+from func.mailsfunc import jilugmail
 
 
 def jilugooglefile(filepath):
-    filelist = [ff for ff in listdir(filepath) if isfile(join(filepath, ff))]
+    filelist = [ff for ff in listdir(str(filepath)) if isfile(str(filepath / ff))]
     print(filelist)
     dfout = None
+    global log
     for i in range(len(filelist)):
-        df = pd.read_excel(os.path.join(filepath, filelist[i]), sheetname='工作表1',
+        df = pd.read_excel(str(filepath / filelist[i]), sheetname='工作表1',
                            header=None, index_col=0, parse_dates=True)
         if df.shape[0] == 0:
             log.info('%s 无进出记录' % filelist[i])
@@ -65,7 +76,8 @@ def jilugooglefile(filepath):
 
 def jilugoogledrive():
     # 验证登录
-    gc = pygsheets.authorize(service_file=os.path.join('data', 'imp', 'ewjinchu.json'))
+    global dirmainpath
+    gc = pygsheets.authorize(service_file=str(dirmainpath / 'data' / 'imp' / 'ewjinchu.json'))
     files = gc.list_ssheets()
     dffiles = pd.DataFrame(files)
     # print(dffiles.head())
@@ -81,6 +93,7 @@ def jilugoogledrive():
         # print(df.head())
     dfboottrails.columns = ['atime', 'entered', 'xingzhi', 'tu', 'tulian']
     dfboottrails = pd.concat([dfboottrails, dfboottrails['xingzhi'].str.split(r' ', expand=True)], axis=1)
+    dfboottrails = pd.DataFrame(dfboottrails)
     dfboottrails.rename(columns={0: 'shuxing', 1: 'address'}, inplace=True)
     dfboottrails.drop_duplicates(inplace=True)
     dfbout = dfboottrails.loc[:, ['atime', 'entered', 'shuxing', 'address']]
@@ -162,6 +175,7 @@ def wifitodf(itemstr, noteinfolistw):
         dfnotename = dfwifi[['entered', 'shuxing', 'address']]
         dfwificount = dfwifi.shape[0]  # shape[0]获得行数，shape[1]则是列数
         print(dfwificount, end='\t')
+        global cfp, inifilepath
         if cfp.has_option('wifi', 'itemnumber'):
             ntupdatenum = dfwificount > cfp.getint('wifi', 'itemnumber')  # 新数据集记录数和存档比较
         else:
@@ -259,7 +273,7 @@ def jinchustat(jinchujiluall, noteinfos):
         colname = '%02d' % i
         if colname not in list(dffu.columns):
             dffu[colname] = 0
-    lst = sort(list(dffu.columns))
+    lst = sorted(list(dffu.columns))
     dffu = dffu[lst]
     dfrange = pd.date_range(dfjc.index.min(), dfjc.index.max() + MonthBegin(), freq='M')
     ddrange = pd.Series(dfrange).apply(lambda x: datetime.datetime.strftime(x, "%Y%m"))
@@ -294,7 +308,8 @@ def jinchustat(jinchujiluall, noteinfos):
 
     imglist = []
     # plt.show()
-    img_jinchu_path = os.path.join('img', 'jichubyfgongsi.png')
+    global dirmainpath
+    img_jinchu_path = str(dirmainpath / 'img' / 'jichubyfgongsi.png')
     plt.savefig(img_jinchu_path)
     imglist.append(img_jinchu_path)
     # print(imglist)
@@ -304,6 +319,7 @@ def jinchustat(jinchujiluall, noteinfos):
 
 
 def jinchustattimer(jiangemiao):
+    global cfplife
     items = cfplife.items('impinfolist')
     noteinfolistinside = []
     for address, infoslicelist in items:
@@ -313,7 +329,8 @@ def jinchustattimer(jiangemiao):
         noteinfolistinside.append(infoslist[:-1])
     # print(noteinfolist)
 
-    dfjinchu = pd.DataFrame(jilugooglefile(os.path.join('data', 'google')))
+    global dirmainpath
+    dfjinchu = pd.DataFrame(jilugooglefile(dirmainpath / 'data' / 'google'))
     itemswifi = jilugmail('Ifttt/Wifi', 'wifi', 'all')
     if itemswifi:
         dfjinchuwifi = wifitodf(itemswifi, noteinfolistinside)
@@ -365,7 +382,7 @@ def jinchustattimer(jiangemiao):
                 log.info('%s成功更新入图表统计笔记，将于%d秒后再次自动检查并更新' % (str(noteinfo), jiangemiao))
     except Exception as eee:
         log.critical('读取系列进出笔记并更新统计信息时出现未名错误。%s' % str(eee))
-        # raise eee
+        raise eee
 
     global timer_jinchu
     timer_jinchu = Timer(jiangemiao, jinchustattimer, [jiangemiao])

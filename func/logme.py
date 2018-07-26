@@ -5,7 +5,7 @@
 
 import os, logging as lg, logging.handlers as lgh
 from func.first import getdirmain
-
+from pathlib import Path
 
 def mylog():
     """
@@ -13,7 +13,9 @@ def mylog():
     :returns    返回log对象
     """
     logew = lg.getLogger('ewer')
-    loghandler = lgh.RotatingFileHandler(os.path.join(getdirmain(), 'log', 'everwork.log'), encoding='utf-8',
+    logpath = Path(getdirmain()) / 'log' / 'everwork.log'
+    # print(logpath)
+    loghandler = lgh.RotatingFileHandler(logpath, encoding='utf-8',
                                          # 此处指定log文件的编码方式，否则可能乱码
                                          maxBytes=2560 * 1024, backupCount=25)
     formats = lg.Formatter('%(asctime)s\t%(name)s\t%(filename)s - [%(funcName)s]'
@@ -44,5 +46,5 @@ log = mylog()
 if __name__ == '__main__':
     print(os.__file__)
     cwd = os.getcwd()
-    # global log
+    print(cwd)
     log.info('测试func下的log，主要看路径')

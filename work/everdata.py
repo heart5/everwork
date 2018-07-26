@@ -1,7 +1,13 @@
 # encoding:utf-8
 # 整理并导入原始数据
-from imp4nb import *
+# from imp4nb import *
 
+import re, datetime, pandas as pd, sqlite3 as lite
+from odps.df import DataFrame
+from func.pdtools import descdb
+from func.logme import log
+from func.first import dirmainpath, dbpathquandan
+from func.pdtools import dataokay
 
 def chengbenjiaupdatedf(dfsall, cnxx):
     """
@@ -22,6 +28,7 @@ def chengbenjiaupdatedf(dfsall, cnxx):
     descdb(dfpro.to_pandas())
     dfpro = dfpro.groupby(['产品名称', '单价']).agg(年月=dfpro.年月.min(), 进货金额=dfpro.进货金额.sum()).sort(['产品名称', '年月'])
     descdb(dfpro.to_pandas())
+    global log
     log.info('共有%d条产品价格记录，共有%d条产品价格记录（含调价）'
              % (dfpro.groupby('产品名称').agg(dfpro.单价.count()).to_pandas().shape[0], dfpro.to_pandas().shape[0]))
 
@@ -55,6 +62,7 @@ def chengbenjiaupdateall(cnxc):
     del dfsall['index']
     dfsall = chengbenjiaupdatedf(dfsall, cnxc)
     dfsall.to_sql(name='xiaoshoumingxi', con=cnxc, if_exists='replace', chunksize=10000)
+    global log
     log.info('要更新%d记录中的成本价和毛利内容' % len(dfsall))
     dfsall['年月'] = dfsall['日期'].apply(lambda x: datetime.datetime.strftime(x, '%Y%m'))
     print(dfsall.groupby('年月', as_index=False)[['数量', '成本金额', '金额', '毛利']].sum())
@@ -69,7 +77,8 @@ def details2db(filename, sheetname, xiangmu, tablename):
     :param tablename:
     :return:
     """
-    df = pd.read_excel(os.path.join('data', filename), sheetname='%s' % sheetname, index_col=0, parse_dates=True)
+    global dirmainpath, log
+    df = pd.read_excel(str(dirmainpath / 'data' / filename), sheetname='%s' % sheetname, index_col=0, parse_dates=True)
     log.info('读取%s' % filename)
     print(list(df.columns))
     #  ['日期', '单据编号', '摘要', '单据类型', '备注', '商品备注', '商品编号', '商品全名',
@@ -107,6 +116,7 @@ def details2db(filename, sheetname, xiangmu, tablename):
     # print(dfout.head(10))
 
     # 读取大数据的起止日期，不交叉、不是前置则可能是合法数据，二次检查后放行
+    global dbpathquandan
     cnxp = lite.connect(dbpathquandan)
 
     # dfout.to_sql(name=tablename, con=cnx, if_exists='replace', chunksize=10000)
@@ -142,10 +152,10 @@ def customerweihu2systable():
     处理客户档案维护记录，规整（填充日期、取有效数据集、板块排序、拆分内容后取有效信息并填充、抽取改编码客户、抽出重复录入纪录）后输出，对改编码客户进行条码更新，手工进入《系统表》
     :return:
     """
+    global dirmainpath, log
+    writer = pd.ExcelWriter(str(dirmainpath / 'data' / '结果输出.xlsx'))
 
-    writer = pd.ExcelWriter(os.path.join('data', '结果输出.xlsx'))
-
-    df = pd.read_csv(os.path.join('data', 'kehudanganweihu.txt'), sep=']', header=None, names=['日期', '内容'],
+    df = pd.read_csv(str(dirmainpath / 'data' / 'kehudanganweihu.txt'), sep=']', header=None, names=['日期', '内容'],
                      na_filter=True,
                      skip_blank_lines=True, skipinitialspace=True)
     # print(df)
@@ -223,7 +233,7 @@ def customerweihu2systable():
     # dfzh.info()
 
     # cnx = lite.connect('data\\quandan.db')
-    dfys = pd.read_excel(os.path.join('data', '系统表.xlsx'), sheetname='客户档案')
+    dfys = pd.read_excel(str(dirmainpath / 'data' / '系统表.xlsx'), sheetname='客户档案')
     # dfys.info()
 
     dfzh = pd.concat([dfys, dfzh])
@@ -259,6 +269,7 @@ def customerweihu2systable():
 
 
 def jiaoyankehuchanpin():
+    global dbpathquandan
     cnx = lite.connect(dbpathquandan)
 
     dataokay(cnx)
@@ -327,7 +338,7 @@ if __name__ == '__main__':
     # writer.close()
     # customerweihu2systable()
 
-    # dataokay(cnx)
-    jiaoyankehuchanpin()
+    dataokay(cnxx)
+    # jiaoyankehuchanpin()
 
     cnxx.close()

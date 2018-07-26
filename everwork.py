@@ -2,19 +2,16 @@
 """
 用evernote作为工作平台，通过Python链接整理各种工作数据，呈现给各个相关岗位。.
 """
-
-from imp4nb import *
-from noteweather import *  # 调用同目录下其他文件（py）中的函数
-from notewarehouse import *
-from notedispatch import *
-from notesaledetails import *
-from notejinchujilu import *
-from log2note import *
-from peoplelog2note import *
-from workplan import *
-from salesorder import workfilefromgmail2datacenter, fetchattendance_from_evernote
-from order import showorderstat2note
-
+# import imp4nb
+from func.evernt import writeini
+from life.noteweather import weatherstattimer  # 调用同目录下其他文件（py）中的函数
+from etc.log2note import log2notetimer
+from work.order import showorderstat2note
+from work.workplan import planfenxi
+from work.dutyon import fetchattendance_from_evernote
+from life.notejinchujilu import jinchustattimer
+from life.peoplelog2note import peoplestattimer
+from work.filemail import workfilefromgmail2datacenter
 # log.debug('程序启动……')
 
 # nbfbdf = readinisection2df(cfpdata, 'guidfenbunb', '销售业绩图表')
@@ -42,8 +39,8 @@ weatherstattimer(60 * 60 * 1 + 60 * 5)
 jinchustattimer(60 * 60)
 peoplestattimer(60 * 25)
 planfenxi(60 * 65 * 2)
-
-writeini()
+#
+# writeini()
 
 # findnotebookfromevernote(token)
 # log.debug('程序结束！')

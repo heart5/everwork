@@ -3,11 +3,16 @@
 处理销售明细数据
 """
 
-
-from imp4nb import *
-
+# from imp4nb import *
+import pandas as pd, sqlite3 as lite
+from func.evernt import imglist2note, get_notestore, token
+from func.pdtools import dataokay, dfin2imglist, updatesection, readinisection2df
+from func.configpr import cfpdata, inidatanotefilepath
+from func.logme import log
+from func.first import dbpathquandan
 
 def getgroupdf(dfs, xiangmus, period='month'):
+    global log
     dfmobans = dfs.groupby('日期')[xiangmus].sum()  # 日期唯一，就是求个框架，值其实随意，这里随意取了当天的sum（对数值有效）
     dfout = pd.DataFrame()
     for xiangmu in xiangmus:
@@ -39,7 +44,7 @@ def getgroupdf(dfs, xiangmus, period='month'):
 
 
 def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnx, pinpai='', cum=False):
-
+    global log
     log.info(sqlstr)
     xmclause = xiangmu[0]
     jineclause = ' and (金额 >= 0) '
@@ -63,6 +68,7 @@ def fenxiyueduibi(token, note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf
 
 
 def kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cnx, pinpai, cum=False):
+    global log
     dfquyu = pd.read_sql('select * from quyu', cnx, index_col='index')
     dfleixing = pd.read_sql('select * from leixing', cnx, index_col='index')
     fenbulist = list(notefenbudf.index)
@@ -124,6 +130,7 @@ def kuangjiachutu(token, note_store, notefenbudf, noteleixingdf, df, xiangmu, cn
 
 
 def pinpaifenxi(token, note_store, cnx, daysbefore=90, brandnum=30, fenbu='fenbu'):
+    global log
     qrypinpai = "select max(日期) as 最近日期, sum(金额) as 销售金额, product.品牌名称 as 品牌 from xiaoshoumingxi,product " \
                 "where (product.商品全名 = xiaoshoumingxi.商品全名) group by 品牌 order by 最近日期"
     dff = pd.read_sql_query(qrypinpai, cnx, parse_dates=['最近日期'])
@@ -178,5 +185,5 @@ def pinpaifenxi(token, note_store, cnx, daysbefore=90, brandnum=30, fenbu='fenbu
 if __name__ == '__main__':
     cnx = lite.connect(dbpathquandan)
     dataokay(cnx)
-    token = cfp.get('evernote', 'token')
     pinpaifenxi(token, get_notestore(), cnx, daysbefore=15, brandnum=1)
+    print('Done.')

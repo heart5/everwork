@@ -5,20 +5,26 @@ log目录
 
 """
 
-from imp4nb import *
-
+import os
+from threading import Timer
+from func.first import getdirmain
+from func.configpr import getcfp
+from func.evernt import get_notestore, imglist2note
+from func.logme import log
 
 def log2notetimer(jiangemiao):
-    pathlog = 'log'
-    files = os.listdir(pathlog)
+    pathlog = getdirmain() / 'log'
+    files = os.listdir(str(pathlog))
     loglines = []
     for fname in files[::-1]:
-        with open(os.path.join(pathlog, fname), 'r', encoding='utf-8') as flog:
+        with open(pathlog / fname, 'r', encoding='utf-8') as flog:
             loglines = loglines + [line.strip() for line in flog if line.find('CRITICAL') >= 0]
 
-    print(len(loglines), end='\t')
+    print(f'日志共有{len(loglines)}条记录')
     # global cfp, inifilepath
+    cfp, cfppath = getcfp('everwork')
     everlogc = cfp.getint('evernote', 'everlogc')
+    global log
     if len(loglines) == everlogc:  # <=调整为==，用来应对log文件崩溃重建的情况
         log.info('暂无新记录，不更新everworklog笔记。')
     else:
@@ -34,7 +40,7 @@ def log2notetimer(jiangemiao):
             nstore = get_notestore()
             imglist2note(nstore, [], noteguid_lognote, 'everwork日志严重错误信息', loglinestr)
             cfp.set('evernote', 'everlogc', '%d' % len(loglines))
-            cfp.write(open(inifilepath, 'w', encoding='utf-8'))
+            cfp.write(open(cfppath, 'w', encoding='utf-8'))
             log.info('新的log错误信息成功更新入笔记，将于%d秒后再次自动检查并更新' % jiangemiao)
         except Exception as eeee:
             log.critical('处理新log错误信息到笔记时出现未名错误。%s' % (str(eeee)))
@@ -45,5 +51,6 @@ def log2notetimer(jiangemiao):
 
 
 if __name__ == '__main__':
-    token = cfp.get('evernote', 'token')
+    global log
+    log.info(f'测试文件\t{__file__}')
     log2notetimer(60 * 32)

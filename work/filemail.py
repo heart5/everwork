@@ -1,32 +1,34 @@
-#
 # encoding:utf-8
-#
 """
-从gmail信箱中收取各种工作文件，比如销售订单、全单等
-
+功能描述
 """
-
-from imp4nb import *
+from threading import Timer
+from func.logme import log
+from func.configpr import cfp
+from func.mailsfunc import getmail
 
 
 def fetchworkfile_from_gmail(topic):
+    global cfp, log
     hostg = cfp.get('gmail', 'host')
     usernameg = cfp.get('gmail', 'username')
     passwordg = cfp.get('gmail', 'password')
-    mailitemsg = getmail(hostg, usernameg, passwordg, dirtarget='Work', unseen=True, topic=topic)
+    dirwork = 'Work'
+    mailitemsg = getmail(hostg, usernameg, passwordg, dirtarget=dirwork, unseen=True, topic=topic)
+    # mailitemsg = getmail(hostg, usernameg, passwordg, dirtarget='Work', topic=topic)
     if mailitemsg is False:
-        log.info('gmail信箱工作目录中暂无新邮件。')
+        log.info('Gmail信箱目录《%s》中暂无新邮件。' % dirwork)
         return
 
     itemslst = list()
     for headerg, bodyg in mailitemsg:
         itemslst.append(headerg[1])
     print(itemslst)
-    log.info('从Gmail邮箱获取%d条“%s”相关的信息记录' % (len(itemslst), topic))
+    topicstring = '“%s”相关的' % topic if len(topic) > 0 else ''
+    log.info('从Gmail邮箱目录《%s》中获取%d封%s新邮件。' % (dirwork, len(itemslst), topicstring))
 
 
 def workfilefromgmail2datacenter(jiangemiao):
-
     try:
         fetchworkfile_from_gmail('')
     except Exception as eeee:
@@ -38,5 +40,7 @@ def workfilefromgmail2datacenter(jiangemiao):
 
 
 if __name__ == '__main__':
-    fetchworkfile_from_gmail('工资资料')
-    workfilefromgmail2datacenter(60*60*2)
+    global log
+    log.info(f'测试文件\t{__file__}')
+    workfilefromgmail2datacenter(60 * 21)
+    print('Done')

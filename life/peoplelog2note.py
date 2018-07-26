@@ -5,9 +5,15 @@
 处理进出记录笔记，生成图表呈现
 """
 
-from imp4nb import *
+# from imp4nb import *
+import re, datetime, pandas as pd
+from threading import Timer
 from bs4 import BeautifulSoup
-
+from func.first import dirmainpath
+from func.logme import log
+from func.evernt import get_notestore, token, imglist2note, tablehtml2evernote
+from func.configpr import cfp, cfplife, inilifepath
+from func.mailsfunc import jilugmail
 
 def notification2df(items):
     split_items = list()
@@ -16,6 +22,7 @@ def notification2df(items):
 
     dfnoti = pd.DataFrame(split_items, columns=('atime', 'shuxing', 'topic', 'content'))
     dfnoti['received'] = True
+    global log
     log.info('系统提醒记录有%d条。' % dfnoti.shape[0])
     # descdb(dfnoti)
     dfnoti.drop_duplicates(inplace=True)
@@ -31,9 +38,9 @@ def notification2df(items):
     # b3a3e458-f05b-424d-8ec1-604a3e916724
 
     try:
-        token = cfp.get('evernote', 'token')
         notestore = get_notestore()
         xiangmu = ['微信', '支付宝', 'QQ', '日历']
+        global cfplife, inilifepath
         for xm in xiangmu:
             biaoti = '系统提醒（%s）记录' % xm
             dfxm = dfnoti[dfnoti.shuxing == xm]
@@ -55,7 +62,8 @@ def notification2df(items):
 
 def callsms2df(itemstr):
     # 读取老记录
-    with open(os.path.join('data', 'ifttt', 'smslog_gmail_all.txt'), 'r', encoding='utf-8') as fsms:
+    global dirmainpath
+    with open(str(dirmainpath / 'data' / 'ifttt' / 'smslog_gmail_all.txt'), 'r', encoding='utf-8') as fsms:
         items = [line.strip() for line in fsms if len(line.strip()) > 0]
     itemstr = itemstr + items
     log.info('电话短信记录有%d条。' % len(itemstr))

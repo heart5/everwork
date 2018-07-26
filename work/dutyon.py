@@ -1,20 +1,23 @@
-#
 # encoding:utf-8
-#
 """
-处理订单数据，进行各种统计，用于每日订单核对等工作
+处理放假休假请假等
 ['c1b8297a-2c3a-4afc-9faf-e36484495529', '武汉真元放假调休记录'],
 ['040509c2-a8bf-4af9-9296-3d41321889d9', '武汉真元员工请假记录']
 """
-
-from imp4nb import *
+import re, datetime, math, pandas as pd, sqlite3 as lite
+from threading import Timer
 from bs4 import BeautifulSoup
-from matplotlib.ticker import MultipleLocator, FuncFormatter
-import pygsheets
+from func.pdtools import descdb, isworkday
+from func.evernt import get_notestore, evernoteapijiayi
+from func.configpr import cfpworkplan, iniworkplanpath
+from func.first import dbpathworkplan
+from func.logme import log
+from func.evernt import *
 
 
 def chuliholidayleave_note(zhuti: list):
     note_store = get_notestore()
+    global cfpworkplan, iniworkplanpath
     guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')
     note = note_store.getNote(guid, True, True, False, False)
     evernoteapijiayi()
@@ -84,6 +87,7 @@ def chuliholidayleave_note(zhuti: list):
     dfresult['date'] = dfresult.index
     # dfresult['idx'] = range(dfresult.shape[0])
     dfresult = dfresult.reset_index(drop=True)
+    global dbpathworkplan
     cnxp = lite.connect(dbpathworkplan)
     dfresult.to_sql(zhuti[1], cnxp, if_exists='replace')  # index, ['mingmu', 'xingzhi', 'tianshu', 'date']
     cnxp.close()
@@ -91,37 +95,6 @@ def chuliholidayleave_note(zhuti: list):
     cfpworkplan.set('行政管理', f'{zhuti[0]}updatenum', '%d' % note.updateSequenceNum)
     cfpworkplan.write(open(iniworkplanpath, 'w', encoding='utf-8'))
     return dfresult
-
-
-def fetchworkfile_from_gmail(topic):
-    hostg = cfp.get('gmail', 'host')
-    usernameg = cfp.get('gmail', 'username')
-    passwordg = cfp.get('gmail', 'password')
-    dirwork = 'Work'
-    mailitemsg = getmail(hostg, usernameg, passwordg, dirtarget=dirwork, unseen=True, topic=topic)
-    # mailitemsg = getmail(hostg, usernameg, passwordg, dirtarget='Work', topic=topic)
-    if mailitemsg is False:
-        log.info('Gmail信箱目录《%s》中暂无新邮件。' % dirwork)
-        return
-
-    itemslst = list()
-    for headerg, bodyg in mailitemsg:
-        itemslst.append(headerg[1])
-    print(itemslst)
-    topicstring = '“%s”相关的' % topic if len(topic) > 0 else ''
-    log.info('从Gmail邮箱目录《%s》中获取%d封%s新邮件。' % (dirwork, len(itemslst), topicstring))
-
-
-def workfilefromgmail2datacenter(jiangemiao):
-
-    try:
-        fetchworkfile_from_gmail('')
-    except Exception as eeee:
-        log.critical('从gmail信箱获取工作文件时出现未名错误。%s' % (str(eeee)))
-
-    global timer_filegmail2datacenter
-    timer_filegmail2datacenter = Timer(jiangemiao, workfilefromgmail2datacenter, [jiangemiao])
-    timer_filegmail2datacenter.start()
 
 
 def fetchattendance_from_evernote(jiangemiao):
@@ -133,7 +106,7 @@ def fetchattendance_from_evernote(jiangemiao):
                 descdb(dfresult)
     except Exception as eee:
         log.critical(f'从evernote获取放假笔记信息时出现未名错误。{eee}')
-        raise eee
+        # raise eee
 
     global timer_holiday2datacenter
     timer_holiday2datacenter = Timer(jiangemiao, fetchattendance_from_evernote, [jiangemiao])
@@ -141,9 +114,9 @@ def fetchattendance_from_evernote(jiangemiao):
 
 
 if __name__ == '__main__':
-    # fetchworkfile_from_gmail('销售订单')
-    # workfilefromgmail2datacenter(60*60*2)
-    # fetchattendance_from_evernote(60*30)
+    global log
+    log.info(f'测试文件\t{__file__}')
+    # fetchattendance_from_evernote(60 * 12)
     dtlist = ['2018-6-14', '2018-6-10', '2018-5-1', '2018-3-4']
     reslist = isworkday(dtlist)
     print(dtlist)
@@ -156,3 +129,4 @@ if __name__ == '__main__':
     weekdaychinese = ['日', '一', '二', '三', '四', '五', '六']
     for [dt, name, iswork, xingzhi, tianshu] in resultlist:
         print(f'{dt}\t{weekdaychinese[int(dt.strftime("%w"))]}\t{iswork}\t{xingzhi}')
+    print('Done')

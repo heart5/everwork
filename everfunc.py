@@ -23,6 +23,7 @@ from os.path import isfile, join
 from odps.df import DataFrame
 from threading import Timer
 from multiprocessing import Process, Pool, Queue
+from func.logme import log
 
 
 def dirbuildfirst():
@@ -47,36 +48,6 @@ def dirbuildfirst():
             if not os.path.exists(os.path.join(dir1, dr2)):
                 os.mkdir(os.path.join(dir1, dr2))
                 # print(os.path.join(dir1,dr2))
-
-
-def mylog():
-    """
-    日志函数，定义输出文件和格式等内容
-    :returns    返回log对象
-    """
-    logew = lg.getLogger('ewer')
-    loghandler = lgh.RotatingFileHandler(os.path.join('log', 'everwork.log'), encoding='utf-8',  # 此处指定log文件的编码方式，否则可能乱码
-                                         maxBytes=2560 * 1024, backupCount=25)
-    formats = lg.Formatter('%(asctime)s\t%(name)s\t%(filename)s - [%(funcName)s]'
-                           '\t%(threadName)s - %(thread)d , %(processName)s - %(process)d'
-                           '\t%(levelname)s: %(message)s',
-                           datefmt='%Y-%m-%d %H:%M:%S')
-    loghandler.setFormatter(formats)
-    logew.setLevel(lg.DEBUG)
-    logew.addHandler(loghandler)
-
-    #################################################################################################
-    # 定义一个StreamHandler，将INFO级别或更高的日志信息打印到标准错误，并将其添加到当前的日志处理对象#
-    console = lg.StreamHandler()
-    console.setLevel(lg.DEBUG)
-    formatter = lg.Formatter('%(asctime)s\t%(threadName)s - %(thread)d , %(processName)s - %(process)d: '
-                             '%(levelname)-8s %(message)s')
-    console.setFormatter(formatter)
-    lg.getLogger('').addHandler(console)
-    # logew.addHandler(console)
-    #################################################################################################
-
-    return logew
 
 
 def getapitimesfromlog():
@@ -138,7 +109,6 @@ def evernoteapiclearatzero():
 
 
 # dirbuildfirst()
-log = mylog()
 
 cfp = ConfigParser()
 inifilepath = os.path.join('data', 'everwork.ini')
