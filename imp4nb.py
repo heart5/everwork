@@ -7,7 +7,7 @@ sys.path.insert(0, 'life')
 sys.path.insert(0, 'study')
 sys.path.insert(0, 'func')
 sys.path.insert(0, 'etc')
-from everfunc import *
+from func.everfunc import *
 
 
 # plot中显示中文

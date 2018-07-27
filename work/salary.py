@@ -2,21 +2,29 @@
 """
 核算工资
 """
-from imp4nb import *
+# from imp4nb import *
+import numpy as np
+import pandas as pd
+import sqlite3 as lite
+
+from func.first import dbpathquandan, dirmainpath
+from func.pdtools import descdb
+from func.logme import log
 
 
-def salesjiangjin(cnx):
+def salesjiangjin(cnxs):
     feiqudaokehustr = '  and (leixing.类型 !=\'渠道客户\')'
     # feiqudaokehustr = ''
     qrystr = "select strftime('%Y%m',日期) as 年月, 职员名称 as 业务主管, substr(customer.往来单位编号,1,2) as 区域, " \
              "xiaoshoumingxi.商品全名 as 产品, product.推广等级 as 等级, 单位全名 as 客户名称, 单据编号, " \
-             '金额 as 销售金额, 成本金额 as 成本金额, substr(customer.往来单位编号,12,1) as 类型编码 from xiaoshoumingxi, customer, product, leixing ' \
+             '金额 as 销售金额, 成本金额 as 成本金额, substr(customer.往来单位编号,12,1) as 类型编码 ' \
+             'from xiaoshoumingxi, customer, product, leixing ' \
              'where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) and ' \
              ' (leixing.编码 = 类型编码)'
     qrystr += feiqudaokehustr
     qrystr += ' order by 年月, 业务主管'
     print(qrystr)
-    df = pd.read_sql_query(qrystr, cnx)
+    df = pd.read_sql_query(qrystr, cnxs)
 
     df['销售金额净'] = df['销售金额'].apply(lambda x: x * 4 if x <= 0 else x)
     # descdb(df)
@@ -37,7 +45,8 @@ def salesjiangjin(cnx):
     dfyt.reset_index(inplace=True)
     descdb(dfyt)
 
-    xlswriter = pd.ExcelWriter(os.path.join('data', '业绩奖金.xlsx'))
+    # global dirmainpath
+    xlswriter = pd.ExcelWriter(str(dirmainpath / 'data' / '业绩奖金.xlsx'))
     dfyt.to_excel(xlswriter, '业绩奖金', freeze_panes=[2, 2])
     xlswriter.close()
 
@@ -45,17 +54,19 @@ def salesjiangjin(cnx):
     print(dfy.tail(60))
 
 
-def peisonghesuan(cnx):
-    qrystr = "select 订单日期,strftime('%Y%m',订单日期) as 年月订单, strftime('%Y%m',送达日期) as 年月送达, strftime('%Y%m',收款日期) as 年月收款, " \
-             "配货人, 配货准确 as 错配, 业务主管, substr(终端编码,1,2) as 区域,  substr(终端编码,12,1) as 类型编码, leixing.类型 as 客户类型," \
+def peisonghesuan(cnxp):
+    qrystr = "select 订单日期,strftime('%Y%m',订单日期) as 年月订单, strftime('%Y%m',送达日期) as 年月送达, " \
+             "strftime('%Y%m',收款日期) as 年月收款, 配货人, 配货准确 as 错配, 业务主管, " \
+             "substr(终端编码,1,2) as 区域,  substr(终端编码,12,1) as 类型编码, leixing.类型 as 客户类型," \
              "送货金额 as 订单金额, 实收金额, 优惠, 退货金额,客户拒收,无货金额,少配金额,配错未要,送货人,收款日期" \
              " from quandan, leixing " \
              'where (leixing.编码 = 类型编码)'
-    df = pd.read_sql_query(qrystr, cnx)
-    df['订单净值'] = df.fillna(0)['订单金额'] - df.fillna(0)['客户拒收'] - df.fillna(0)['无货金额'] - df.fillna(0)['少配金额'] - \
-                 df.fillna(0)['配错未要']
+    df = pd.read_sql_query(qrystr, cnxp)
+    df['订单净值'] = df.fillna(0)['订单金额'] - df.fillna(0)['客户拒收'] - df.fillna(0)['无货金额'] \
+                 - df.fillna(0)['少配金额'] - df.fillna(0)['配错未要']
 
-    xlswriter = pd.ExcelWriter(os.path.join('data', '全单统计.xlsx'))
+    # global dirmainpath
+    xlswriter = pd.ExcelWriter(str(dirmainpath / 'data' / '全单统计.xlsx'))
     feipeihuoliebiao = ['陈列', '返利', '赠送', '作废', np.nan]
     df = df[(df.年月收款 >= '201701') & (df.配货人.isin(feipeihuoliebiao).values == False)]
 
@@ -89,11 +100,12 @@ def peisonghesuan(cnx):
     # descdb(df)
 
 
-cnx = lite.connect(dbpathquandan)
-# dataokay(cnx)
-# desclitedb(cnx)
-# salesjiangjin(cnx)
-
-peisonghesuan(cnx)
-
-cnx.close()
+if __name__ == '__main__':
+    # global log
+    log.info(f'测试文件\t{__file__}')
+    cnx = lite.connect(dbpathquandan)
+    # dataokay(cnx)
+    # desclitedb(cnx)
+    salesjiangjin(cnx)
+    peisonghesuan(cnx)
+    cnx.close()

@@ -382,7 +382,7 @@ def jinchustattimer(jiangemiao):
                 log.info('%s成功更新入图表统计笔记，将于%d秒后再次自动检查并更新' % (str(noteinfo), jiangemiao))
     except Exception as eee:
         log.critical('读取系列进出笔记并更新统计信息时出现未名错误。%s' % str(eee))
-        raise eee
+        # raise eee
 
     global timer_jinchu
     timer_jinchu = Timer(jiangemiao, jinchustattimer, [jiangemiao])
