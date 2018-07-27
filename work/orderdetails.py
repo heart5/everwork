@@ -2,25 +2,12 @@
 # encoding:utf-8
 #
 """
-销售订单处理汇总
-
-名称：业务计划总结    guid：2c8e97b5-421f-461c-8e35-0f0b1a33e91c    更新序列号：471364    默认笔记本：False
-创建时间：2016-02-16 19:56:56    更新时间：2018-02-25 00:24:57    笔记本组：None
-
-5830a2f2-7a76-4f1a-a167-1bd18818a141 业务推广日工作总结和计划——周莉
-
-e4e9d529-1996-4701-8e5a-2b2add0abe9e    每日销售订单核对——陈益（2018-06-06 00:00:00）
-d8720b96-a067-441f-8b46-654fdbe04e84    每日销售订单核对——耿华忠（2018-06-06 00:00:00）
-03d0b2da-9e9d-45cc-a8a7-85e72be900e5    每日销售订单核对——梅富忠（2018-06-06 00:00:00）
-161c093c-4603-4802-8c41-cf346eb002bc    每日销售订单核对——徐志伟（2018-06-06 00:00:00）
-bba10885-fb93-4fce-bb3f-03d7dd43d189    每日销售订单核对——周莉
-
+销售订单明细处理汇总
 
 名称：人事管理    guid：3d927c7e-98a6-4761-b0c6-7fba1348244f    更新序列号：47266    默认笔记本：False
 创建时间：2015-07-14 13:50:09    更新时间：2015-07-14 13:50:09    笔记本组：origin
 992afcfb-3afb-437b-9eb1-7164d5207564 在职业务人员名单
 """
-# from imp4nb import *
 import os
 import datetime
 import xlrd
@@ -513,15 +500,8 @@ def showorderstat2note(jiangemiao):
     timer_showorderstat = Timer(jiangemiao, showorderstat2note, [jiangemiao])
     timer_showorderstat.start()
 
+
 if __name__ == '__main__':
-    # chulidataindir_order()
-    showorderstat()
-    # showorderstat2note(60 * 10)
-    # chulixls_order(get_notestore())
-    # token = cfp.get('evernote', 'token')
-    # guids = findnotefromnotebook(token, '2c8e97b5-421f-461c-8e35-0f0b1a33e91c', '销售订单')
-    # for item in guids:
-    #     print("%s = %s" %(item[1], item[0]))
+    log.info(f'测试文件\t{__file__}')
 
-    pass
-
+    print('Done.测试完毕。')
