@@ -32,13 +32,13 @@ from work.filemail import workfilefromgmail2datacenter
 # isnoteupdate(token, note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
 
 fetchattendance_from_evernote(60 * 60 * 8)
-workfilefromgmail2datacenter(60 * 55)
-showorderstat2note(60 * 60 * 1 + 60 * 8)
-log2notetimer(60 * 45)
-weatherstattimer(60 * 60 * 1 + 60 * 5)
-jinchustattimer(60 * 60)
+# workfilefromgmail2datacenter(60 * 55)
+# showorderstat2note(60 * 60 * 1 + 60 * 8)
+# log2notetimer(60 * 45)
+# weatherstattimer(60 * 60 * 1 + 60 * 5)
+# jinchustattimer(60 * 60)
 peoplestattimer(60 * 25)
-planfenxi(60 * 65 * 2)
+# planfenxi(60 * 65 * 2)
 #
 # writeini()
 
