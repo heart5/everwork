@@ -6,8 +6,6 @@
 import logging as lg
 import logging.handlers as lgh
 import os
-from pathlib import Path
-
 from func.first import dirlog, touchfilepath2depth
 
 

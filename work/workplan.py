@@ -49,7 +49,6 @@ def chulinote_workplan(wenben: str):
     :param wenben: 原始字符串文本，一般是从笔记中提取的纯文本
     :return: 日期工作日志列表
     """
-    global log
     pattern = re.compile('(\d{4}\s*[年\\\.-]\d{1,2}\s*[月\\\.-]\d{1,2}\s*[日|号]?)(?:(?:[,， 。])?(?:周.))?', re.U)
     splititems = re.split(pattern, wenben)
     # print(len(splititems))
@@ -237,7 +236,9 @@ def planfenxi(jiangemiao):
             dayscount = cfpworkplan.getint('业务计划总结dayscount', 'count')
             today = pd.to_datetime(datetime.datetime.today().strftime('%F'))
             workdays = isworkday([today - datetime.timedelta(days=60)], '全体', fromthen=True)
-            dtqishi = workdays[workdays.work == True].groupby('date').count().sort_index(ascending=False).index[
+            # dtqishi = workdays[workdays.work == True].groupby('date').count().sort_index(ascending=False).index[
+            #     dayscount - 1]
+            dtqishi = workdays[workdays.work].groupby('date').count().sort_index(ascending=False).index[
                 dayscount - 1]
             print(f'最近{dayscount}个工作日（公司）的起始日期：{dtqishi}')
             # dtqishi = today - datetime.timedelta(days=dayscount)
@@ -406,9 +407,9 @@ def chayanshuju():
 
 
 if __name__ == '__main__':
-    # token = cfp.get('evernote', 'token')
+    log.info(f'测试文件\t{__file__}')
     # gezhongzaxiang()
     planfenxi(60 * 5)
     # chayanshuju()
     # chulioldversion()
-    pass
+    print('Done')

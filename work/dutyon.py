@@ -4,20 +4,19 @@
 ['c1b8297a-2c3a-4afc-9faf-e36484495529', '武汉真元放假调休记录'],
 ['040509c2-a8bf-4af9-9296-3d41321889d9', '武汉真元员工请假记录']
 """
-import re, datetime, math, pandas as pd, sqlite3 as lite
+import math
+import sqlite3 as lite
 from threading import Timer
 from bs4 import BeautifulSoup
-from func.pdtools import descdb, isworkday
-from func.evernt import get_notestore, evernoteapijiayi
-from func.configpr import cfpworkplan, iniworkplanpath
-from func.first import dbpathworkplan
-from func.logme import log
 from func.evernt import *
+from func.pdtools import descdb, isworkday
+from func.configpr import cfpworkplan as cfpworkplan, iniworkplanpath as iniworkplanpath
+from func.first import dbpathworkplan
 
 
 def chuliholidayleave_note(zhuti: list):
     note_store = get_notestore()
-    global cfpworkplan, iniworkplanpath
+    # global cfpworkplan, iniworkplanpath
     guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')
     note = note_store.getNote(guid, True, True, False, False)
     evernoteapijiayi()
@@ -36,7 +35,7 @@ def chuliholidayleave_note(zhuti: list):
     pattern = re.compile(u'(\d{4}-\d{2}-\d{2})', re.U)
     splititems = re.split(pattern, soup)[1:]
     # print(splititems)
-    resultlist = list()
+    resultlisthd = list()
     for i in range(int(len(splititems) / 2)):
         item = list()
         item.append(pd.to_datetime(splititems[i * 2]))
@@ -51,20 +50,20 @@ def chuliholidayleave_note(zhuti: list):
         item.append(names[1])
         item.append(names[2])
         item.append(daynum)
-        resultlist.append(item)
+        resultlisthd.append(item)
 
     # print(resultlist)
 
     dfresult = None
-    for [dt, mingmu, xingzhi, tian] in resultlist:
+    for [dtinfor, mingmu, xingzhiinfor, tian] in resultlisthd:
         numfloat = float(tian)
         numceil = math.ceil(numfloat)
         numfloor = math.floor(numfloat)
-        drim = pd.date_range(dt, dt + datetime.timedelta(days=int(numceil) - 1), freq='D')
+        driminfor = pd.date_range(dtinfor, dtinfor + datetime.timedelta(days=int(numceil) - 1), freq='D')
         if dfresult is None:
-            dfresult = pd.DataFrame(index=drim)
+            dfresult = pd.DataFrame(index=driminfor)
             dfresult['mingmu'] = mingmu
-            dfresult['xingzhi'] = xingzhi
+            dfresult['xingzhi'] = xingzhiinfor
             dfresult['tianshu'] = 1
             # dfresult['tianshu'] = dfresult['tianshu'].astype(float)
             if numfloat > numfloor:
@@ -72,9 +71,9 @@ def chuliholidayleave_note(zhuti: list):
                 # print(f'{numfloat}\t{numceil}\t{numfloor}\t{mingmu}\t{xingzhi}\t{tian}\t{xtian}')
                 dfresult.ix[-1, ['tianshu']] = xtian
         else:
-            dftmp = pd.DataFrame(index=drim)
+            dftmp = pd.DataFrame(index=driminfor)
             dftmp['mingmu'] = mingmu
-            dftmp['xingzhi'] = xingzhi
+            dftmp['xingzhi'] = xingzhiinfor
             dftmp['tianshu'] = 1
             # dfresult['tianshu'] = dfresult['tianshu'].astype(float)
             if numfloat > numfloor:
@@ -87,7 +86,6 @@ def chuliholidayleave_note(zhuti: list):
     dfresult['date'] = dfresult.index
     # dfresult['idx'] = range(dfresult.shape[0])
     dfresult = dfresult.reset_index(drop=True)
-    global dbpathworkplan
     cnxp = lite.connect(dbpathworkplan)
     dfresult.to_sql(zhuti[1], cnxp, if_exists='replace')  # index, ['mingmu', 'xingzhi', 'tianshu', 'date']
     cnxp.close()
@@ -106,7 +104,7 @@ def fetchattendance_from_evernote(jiangemiao):
                 descdb(dfresult)
     except Exception as eee:
         log.critical(f'从evernote获取放假笔记信息时出现未名错误。{eee}')
-        # raise eee
+        raise eee
 
     global timer_holiday2datacenter
     timer_holiday2datacenter = Timer(jiangemiao, fetchattendance_from_evernote, [jiangemiao])
@@ -114,7 +112,7 @@ def fetchattendance_from_evernote(jiangemiao):
 
 
 if __name__ == '__main__':
-    global log
+    # global log
     log.info(f'测试文件\t{__file__}')
     # fetchattendance_from_evernote(60 * 12)
     dtlist = ['2018-6-14', '2018-6-10', '2018-5-1', '2018-3-4']

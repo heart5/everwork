@@ -138,7 +138,7 @@ if apitime:
         log.info('程序上次异常退出，调用log中的API数据[%s,%d]' % (str(apitime[0]), apitime[1]))
         ENAPIlasttime = apitime[0]
         ENtimes = apitime[1] + 1
-YWanAnchor = 50000  # 纵轴标识万化锚点
+ywananchor = 50000  # 纵轴标识万化锚点
 
 evernoteapiclearatzero()
 
@@ -746,8 +746,8 @@ def biaozhukedu(dfc, weibiao):
                 # print(type(kedu.iloc[i]))
                 continue
             plt.scatter([idx, ], [kedu.iloc[i]], 50, color='Wheat')
-            global YWanAnchor
-            if kedu.map(lambda x: abs(x)).max() >= YWanAnchor:
+            # global ywananchor
+            if kedu.map(lambda x: abs(x)).max() >= ywananchor:
                 kedubiaozhi = "%.1f万" % (kedu.iloc[i] / 10000)
                 plt.gca().yaxis.set_major_formatter(
                     FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
@@ -836,12 +836,12 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu=''
         dslistmax.append(dfyabs[clname].max())  # 取绝对值的最大，涵盖退货的负值金额
     # print(type(dslistmax))
     # print(dslistmax)
-    global YWanAnchor
+    # global ywananchor
     if cum:
         cumstr = '月累积'
         dfjieguo = dfy.cumsum()
         dfjieguo.plot(title=biaoti + cumstr)
-        if max(map(abs, dslistmax)) > YWanAnchor:
+        if max(map(abs, dslistmax)) > ywananchor:
             plt.gca().yaxis.set_major_formatter(
                 FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
         biaozhukedu(dfjieguo, '%02d' % riqienddate.month)
@@ -854,7 +854,7 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu=''
         plt.close()
     cumstr = '月折线'
     dfy.plot(title='%s%s' % (biaoti, cumstr))
-    if max(map(abs, dslistmax)) > YWanAnchor:
+    if max(map(abs, dslistmax)) > ywananchor:
         plt.gca().yaxis.set_major_formatter(
             FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
     biaozhukedu(dfy, '%02d' % (riqienddate.month))
