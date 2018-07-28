@@ -1,0 +1,8 @@
+.idea
+/data
+/img
+/log
+#.gitignore
+.ipynb_checkpoints
+__pycache__
+itchat.pkl
