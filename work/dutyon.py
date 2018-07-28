@@ -3,10 +3,10 @@
 处理放假休假请假等
 ['c1b8297a-2c3a-4afc-9faf-e36484495529', '武汉真元放假调休记录'],
 ['040509c2-a8bf-4af9-9296-3d41321889d9', '武汉真元员工请假记录']
+['a582e11f-d6e6-4eb2-817f-196c70971f53', '武汉真元员工入职离职记录']
 """
 import math
 import sqlite3 as lite
-from threading import Timer
 from bs4 import BeautifulSoup
 from func.evernt import *
 from func.pdtools import descdb, isworkday
@@ -16,7 +16,6 @@ from func.first import dbpathworkplan
 
 def chuliholidayleave_note(zhuti: list):
     note_store = get_notestore()
-    # global cfpworkplan, iniworkplanpath
     guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')
     note = note_store.getNote(guid, True, True, False, False)
     evernoteapijiayi()
@@ -110,20 +109,90 @@ def fetchattendance_from_evernote():
     # timer_holiday2datacenter.start()
 
 
+def chuliworkmateduty_note(zhuti: list):
+    note_store = get_notestore()
+    guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')
+    try:
+        note = note_store.getNote(guid, True, True, False, False)
+        evernoteapijiayi()
+    except ConnectionResetError as cre:
+        log.critical(f'服务器发脾气，强行断线！{cre}')
+    # print(timestamp2str(int(note.updated/1000)))
+    # print(note.updateSequenceNum)
+    cnxp = lite.connect(dbpathworkplan)
+
+    if cfpworkplan.has_option('行政管理', f'{zhuti[0]}updatenum'):
+        updatenumold = cfpworkplan.getint('行政管理', f'{zhuti[0]}updatenum')
+    else:
+        updatenumold = 0
+    if (note.updateSequenceNum <= updatenumold):  # and False:
+        log.info(f'{zhuti[0]}笔记内容无更新。')
+        dfresult = pd.read_sql(f'select * from {zhuti[1]}', cnxp, parse_dates=['ruzhi', 'lizhi'])
+        cnxp.close()
+        return dfresult
+
+    souporigin = BeautifulSoup(note.content, "html.parser")
+    items = list()
+    for item in souporigin.find_all('div'):
+        pattern = re.compile(u'[,，]', re.U)
+        itemtext = item.get_text().strip()
+        ims = re.split(pattern, itemtext)
+        if len(ims) == 3:
+            im = list()
+            im.append(ims[0])
+            im.append(pd.to_datetime(ims[1]))
+            im.append(pd.to_datetime(ims[2]))
+            items.append(im)
+    print(items)
+
+    dfresult = pd.DataFrame(items, columns=['name', 'ruzhi', 'lizhi'])
+    # print(dfresult)
+    dfresult.to_sql(zhuti[1], cnxp, if_exists='replace', index=False)  # index, ['mingmu', 'xingzhi', 'tianshu', 'date']
+    cnxp.close()
+    log.info(f'{zhuti[0]}数据表更新了{dfresult.shape[0]}条记录。')
+    cfpworkplan.set('行政管理', f'{zhuti[0]}updatenum', '%d' % note.updateSequenceNum)
+    cfpworkplan.write(open(iniworkplanpath, 'w', encoding='utf-8'))
+
+    return dfresult
+
+
+def showdutyon():
+    zhutiss = ['入职', 'dutyon']
+    dfduty = chuliworkmateduty_note(zhutiss)
+    # print(dfduty)
+    zaizhi = list(dfduty[pd.isnull(dfduty.lizhi)].groupby('name').count().index)
+    print(f'{len(zaizhi)}\t{zaizhi}')
+    print(isworkday(['2018-1-1'], fromthen=True).groupby('xingzhi', as_index=False).count()[['xingzhi', 'date']])
+    dslist = list()
+    for zg in zaizhi:
+        # print(zg)
+        dszg = isworkday([pd.to_datetime('2018-1-1')], zg, fromthen=True).groupby('xingzhi').count()['date']
+        # print(dszg.name)
+        dszg = pd.Series(dszg)
+        dszg = dszg.rename(zg)
+        # print(dszg.name)
+        dslist.append(dszg)
+
+    dfall = pd.DataFrame(dslist)
+    print(dfall)
+
+
 if __name__ == '__main__':
     # global log
     log.info(f'测试文件\t{__file__}')
+
+    showdutyon()
     # fetchattendance_from_evernote(60 * 12)
-    dtlist = ['2018-6-14', '2018-6-10', '2018-5-1', '2018-3-4']
-    reslist = isworkday(dtlist)
-    print(dtlist)
-    print(reslist)
-    dtfrom = pd.to_datetime('2018-6-1')
-    tianshu = 25
-    drim = pd.date_range(dtfrom, dtfrom + datetime.timedelta(days=tianshu), freq='D').values
-    # print(drim)
-    resultlist = isworkday([pd.to_datetime('2018-7-16')], '梅富忠', fromthen=True).values
-    weekdaychinese = ['日', '一', '二', '三', '四', '五', '六']
-    for [dt, name, iswork, xingzhi, tianshu] in resultlist:
-        print(f'{dt}\t{weekdaychinese[int(dt.strftime("%w"))]}\t{iswork}\t{xingzhi}')
+    # dtlist = ['2018-6-14', '2018-6-10', '2018-5-1', '2018-3-4']
+    # reslist = isworkday(dtlist)
+    # print(dtlist)
+    # print(reslist)
+    # dtfrom = pd.to_datetime('2018-6-1')
+    # tianshu = 25
+    # drim = pd.date_range(dtfrom, dtfrom + datetime.timedelta(days=tianshu), freq='D').values
+    # # print(drim)
+    # resultlist = isworkday([pd.to_datetime('2018-7-16')], '梅富忠', fromthen=True).values
+    # weekdaychinese = ['日', '一', '二', '三', '四', '五', '六']
+    # for [dt, name, iswork, xingzhi, tianshu] in resultlist:
+    #     print(f'{dt}\t{weekdaychinese[int(dt.strftime("%w"))]}\t{iswork}\t{xingzhi}')
     print('Done')
