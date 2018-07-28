@@ -79,12 +79,20 @@ def get_notestore():
             evernoteapijiayi()
             # log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
             return note_store
-        except Exception as eee:
-            log.critical("第%d次（最多尝试%d次）连接evernote服务器时失败，将于%d秒后重试。%s"
-                         % (i + 1, trytimes, sleeptime, eee))
+        except WindowsError as eee:
+            if eee.errno == 11001:
+                log.critical(f'寻址失败，貌似网络不通。{eee}')
+            if eee.errno == 10054:
+                log.critical(f'主机发脾气，强行断线了。{eee}')
+            elif eee.errno == 8:
+                log.critical(f'和evernote服务器握手失败。{eee}')
+            else:
+                log.critical(f'连接失败。{eee}')
+            log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接evernote服务器时失败，将于{sleeptime}秒后重试。")
+            # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
             if i == (trytimes - 1):
                 log.critical('evernote服务器连接失败，只好无功而返。')
-                raise eee
+                # raise eee
             time.sleep(sleeptime)
 
 

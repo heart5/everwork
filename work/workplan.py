@@ -24,19 +24,25 @@ e34ae4da-4ddd-4b13-bb1c-307d39f03cc8 业务推广计划和总结—刘权
 992afcfb-3afb-437b-9eb1-7164d5207564 在职业务人员名单
 """
 # from imp4nb import *
-import re, datetime, html, pandas as pd, sqlite3 as lite
-from bs4 import BeautifulSoup
+import datetime
+import html
+import pandas as pd
+import re
+import sqlite3 as lite
 from threading import Timer
-from func.first import dbpathworkplan, dbpathquandan
+from bs4 import BeautifulSoup
+from func.configpr import cfpworkplan, iniworkplanpath
+from func.evernt import findnotefromnotebook, get_notestore, evernoteapijiayi, token, \
+    timestamp2str, tablehtml2evernote, imglist2note
+from func.first import dbpathworkplan
 from func.logme import log
-from func.evernt import findnotefromnotebook, get_notestore, evernoteapijiayi, token, timestamp2str, tablehtml2evernote, \
-    imglist2note
-from func.configpr import cfp, cfpworkplan, iniworkplanpath
 from func.pdtools import isworkday, descdb
+from work.dutyon import fetchattendance_from_evernote
+
 
 def gezhongzaxiang():
     # findnotebookfromevernote(token)
-    global token
+    # global token
     findnotefromnotebook(token, '2c8e97b5-421f-461c-8e35-0f0b1a33e91c', '汇总')
     # findnotefromnotebook(token, '3d927c7e-98a6-4761-b0c6-7fba1348244f', '在职')
     # times = timestamp2str(int(1527605554000 / 1000))
@@ -83,7 +89,7 @@ def chulinote_workplan(wenben: str):
 
 
 def updatedb_workplan(note_store, persons):
-    global dbpathworkplan, token, cfp, cfpworkplan
+    # global dbpathworkplan, token, cfp, cfpworkplan
     cnxp = lite.connect(dbpathworkplan)
     tablename_plan = 'personplan'
     tablename_updated = 'planupdated'
@@ -203,19 +209,33 @@ def updatedb_workplan(note_store, persons):
         cnxp.close()
 
 
-def planfenxi(jiangemiao):
-    global dbpathworkplan
+def planfenxifunc():
+    # global dbpathworkplan
     cnxp = lite.connect(dbpathworkplan)
     tablename_updated = 'planupdated'
+    errorshowstr = '更新业务日志汇总笔记时出现错误。'
+    fetchattendance_from_evernote()
     try:
         note_store = get_notestore()
+        #  从印象笔记中取得在职业务列表
         persons = BeautifulSoup(note_store.getNoteContent('992afcfb-3afb-437b-9eb1-7164d5207564'),
                                 'html.parser').get_text().strip().split()
         evernoteapijiayi()
+        #  更新相应数据表内容
         updatedb_workplan(note_store, persons)
 
-        sqlstr = f'select distinct * from {tablename_updated} order by date desc, name, updatedtime desc'
+        #  从数据表中查询日志更新记录，只针对在职业务人员
+        # 组装sql语句使用的set，形如('梅富忠','陈益','周莉')
+        personsetstr = '('
+        for pr in ['\'' + x + '\'' for x in persons]:
+            personsetstr += pr + ','
+        personsetstr = personsetstr[:-1] + ')'
+        # print(personsetstr)
+        sqlstr = f'select distinct * from {tablename_updated} where name in {personsetstr} ' \
+                 f'order by date desc, name, updatedtime desc'
         dfsource = pd.read_sql(sqlstr, cnxp, parse_dates=['date', 'updatedtime'])
+
+        #  通过ini中记录的有效日志条目（以日期为单位）数量判断是否有有效的日志更新条目
         updatablelist = []
         for person in persons:
             planitemscount = dfsource.loc[dfsource.name == person].shape[0]
@@ -232,12 +252,11 @@ def planfenxi(jiangemiao):
             updatableall |= updatablelist[i]
             if updatableall:
                 break
-        if updatableall:  # or True:
+        if updatableall or True:
             dayscount = cfpworkplan.getint('业务计划总结dayscount', 'count')
             today = pd.to_datetime(datetime.datetime.today().strftime('%F'))
             workdays = isworkday([today - datetime.timedelta(days=60)], '全体', fromthen=True)
-            # dtqishi = workdays[workdays.work == True].groupby('date').count().sort_index(ascending=False).index[
-            #     dayscount - 1]
+            # print(workdays)
             dtqishi = workdays[workdays.work].groupby('date').count().sort_index(ascending=False).index[
                 dayscount - 1]
             print(f'最近{dayscount}个工作日（公司）的起始日期：{dtqishi}')
@@ -255,47 +274,58 @@ def planfenxi(jiangemiao):
             # print(dfqujian)
             # print(dfsourcequjian)
             dfresult = pd.merge(dfqujian, dfsourcequjian, on=['date', 'name'], how='outer')
-            dflast = dfresult[dfresult.work == True].sort_values(['date', 'name'], ascending=[False, True])
-            df = dflast.loc[:, ['name', 'date', 'contentlength', 'updatedtime']]
+            # dflast = dfresult[dfresult.work == True].sort_values(['date', 'name'], ascending=[False, True])
+            dflast = dfresult.sort_values(['date', 'name'], ascending=[False, True])
+            df = dflast.loc[:, ['name', 'date', 'contentlength', 'updatedtime', 'xingzhi', 'tianshu']]
             df2show = df.drop_duplicates(['name', 'date'], keep='last')
             print(f'去重前记录数为：{df.shape[0]}，去重后记录是：{df2show.shape[0]}')
-            df2show.columns = ['业务人员', '计划日期', '内容字数', '更新时间']
+            df2show.columns = ['业务人员', '计划日期', '内容字数', '日志更新时间', '出勤', '天数']
 
             # print(df2show)
 
-            def hege(a, b):
+            def hege(a, b, c):
+                freelist = ['请假']
+                if c in freelist:
+                    return f'{c}'
                 if pd.isnull(b):
                     # print(f'{a}\t{b}')
-                    return '未提交'
+                    return '未交'
                 if pd.to_datetime(a) > pd.to_datetime(b):
                     return '准时'
                 else:
                     return '延迟'
 
             col_names = list(df2show.columns)
-            col_names.append('计划提交')
+            col_names.append('提交')
             df2show = df2show.reindex(columns=col_names)
-            df2show.loc[:, ['计划提交']] = df2show.apply(lambda x: hege(x.计划日期, x.更新时间), axis=1)
-            print(df2show[pd.isnull(df2show.更新时间)])
-            stylelist = ['<span style=\"color:red\">', '</span>']
-            df2show['计划日期'] = df2show['计划日期'].apply(lambda x: x.strftime('%F'))
-            df2show['更新时间'] = df2show['更新时间'].apply(lambda x: x.strftime('%m-%d %T') if pd.notnull(x) else '')
-            df2show['内容字数'] = df2show['内容字数'].apply(lambda x: int(x) if pd.notnull(x) else '')
+            df2show.loc[:, ['提交']] = df2show.apply(lambda x: hege(x.计划日期, x.日志更新时间, x.出勤), axis=1)
+            print(df2show[pd.isnull(df2show.日志更新时间)])
+            df2show['计划日期'] = df2show['计划日期'].apply(lambda x: x.strftime('%m-%d'))
+            df2show['日志更新时间'] = df2show['日志更新时间'].apply(lambda x: x.strftime('%m-%d %H:%M') if pd.notnull(x) else '')
+            df2show['内容字数'] = df2show['内容字数'].apply(lambda x: str(int(x)) if pd.notnull(x) else '')
+            df2show = df2show.loc[:, ['业务人员', '计划日期', '内容字数', '日志更新时间', '提交', '出勤']]
+            freeday = ['周日']
+            df2show = df2show[df2show['出勤'].map(lambda x: x not in freeday)]
+            # print(df2show)
             for ix in df2show.index:
-                if (df2show.loc[ix]['计划提交'] == '延迟') or (df2show.loc[ix]['计划提交'] == '未提交'):
-                    df2show.loc[ix, '业务人员'] = df2show.loc[ix, '业务人员'].join(stylelist)
-                    df2show.loc[ix, '计划日期'] = df2show.loc[ix, '计划日期'].join(stylelist)
-                    df2show.loc[ix, '更新时间'] = df2show.loc[ix, '更新时间'].join(stylelist)
-                    df2show.loc[ix, '计划提交'] = df2show.loc[ix, '计划提交'].join(stylelist)
-                    pass
+                yanchiweitijiao = ['延迟', '未交']
+                queqin = ['请假']
+                if df2show.loc[ix]['出勤'] in queqin:
+                    for clname in df2show.columns:
+                        df2show.loc[ix, clname] = df2show.loc[ix, clname].join(
+                            ['<span style=\"color:gray\">', '</span>'])
+                elif df2show.loc[ix]['提交'] in yanchiweitijiao:
+                    for clname in df2show.columns:
+                        df2show.loc[ix, clname] = df2show.loc[ix, clname] \
+                            .join(['<span style=\"color:red\">', '</span>'])
+            df2show = df2show.loc[:, ['业务人员', '计划日期', '内容字数', '日志更新时间', '提交']]
             # descdb(df2show)
-            neirong = tablehtml2evernote(df2show, '业务工作日志提交情况汇总（最近%d工作日）' % dayscount)
+            neirong = tablehtml2evernote(df2show, '业务工作日志提交情况汇总（最近%d工作日）' % dayscount, withindex=False)
             neirong = html.unescape(neirong)
             # print(neirong)
             guid = cfpworkplan.get('业务计划总结guid', '汇总')
             huizongnoteupdatedtime = datetime.datetime.now().strftime('%F %T')
-            imglist2note(note_store, [], guid,
-                         '业务工作日志提交情况汇总（%s）' % huizongnoteupdatedtime, neirong)
+            imglist2note(note_store, [], guid, '业务工作日志提交情况汇总（%s）' % huizongnoteupdatedtime, neirong)
 
         for person in persons:
             dfperson = dfsource.loc[dfsource.name == person]
@@ -305,15 +335,26 @@ def planfenxi(jiangemiao):
             else:
                 updatable = True
             if updatable:
-                log.info(
-                    '%s的业务日志条目数增加至%d，日志更新表中最新日期为：%s。' % (person, planitemscount, str(dfperson.iloc[0]['nianyueri'])))
+                log.info('%s的业务日志条目数增加至%d，日志更新表中最新日期为：%s。'
+                         % (person, planitemscount, str(dfperson.iloc[0]['nianyueri'])))
                 cfpworkplan.set('业务计划总结itemscount', person, '%d' % planitemscount)
                 cfpworkplan.write(open(iniworkplanpath, 'w', encoding='utf-8'))
-    except Exception as eee:
-        log.critical('更新业务日志汇总笔记时出现错误。%s' % (str(eee)))
-        # raise eee
+    except WindowsError as wine:
+        if wine.errno == 10054:
+            log.critical(f'远程主机发脾气了，强行断线。')
+        log.critical(f'{errorshowstr}Windows错误：{wine}')
+    except AttributeError as ae:
+        log.critical(f'{errorshowstr}属性错误：{ae}')
+
+    # except Exception as eee:
+    #     log.critical(f'{errorshowstr}{eee}')
+    # raise eee
     finally:
         cnxp.close()
+
+
+def planfenxi(jiangemiao):
+    planfenxifunc()
 
     global timer_plan2note
     timer_plan2note = Timer(jiangemiao, planfenxi, [jiangemiao])
@@ -344,7 +385,8 @@ def chulioldversion():
         note_store = get_notestore()
         for ver in verlist:
             print(
-                f'{ver.updateSequenceNum}\t{timestamp2str(int(ver.updated / 1000))}\t{timestamp2str(int(ver.saved / 1000))}')
+                f'{ver.updateSequenceNum}\t{timestamp2str(int(ver.updated / 1000))}'
+                f'\t{timestamp2str(int(ver.saved / 1000))}')
             try:
                 # if ver.updateSequenceNum >= 349273:   #开关，断点续传
                 #     continue
@@ -409,7 +451,7 @@ def chayanshuju():
 if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
     # gezhongzaxiang()
-    planfenxi(60 * 5)
+    planfenxifunc()
     # chayanshuju()
     # chulioldversion()
     print('Done')

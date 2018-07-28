@@ -8,7 +8,7 @@ from life.noteweather import weatherstattimer  # 调用同目录下其他文件�
 from etc.log2note import log2notetimer
 from work.order import showorderstat2note
 from work.workplan import planfenxi
-from work.dutyon import fetchattendance_from_evernote
+# from work.dutyon import fetchattendance_from_evernote
 from life.notejinchujilu import jinchustattimer
 from life.peoplelog2note import peoplestattimer
 from work.filemail import workfilefromgmail2datacenter
@@ -31,7 +31,7 @@ from work.filemail import workfilefromgmail2datacenter
 
 # isnoteupdate(token, note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
 
-fetchattendance_from_evernote(60 * 60 * 8)
+# fetchattendance_from_evernote(60 * 60 * 8)
 workfilefromgmail2datacenter(60 * 55)
 showorderstat2note(60 * 60 * 1 + 60 * 8)
 log2notetimer(60 * 45)
@@ -45,3 +45,4 @@ planfenxi(60 * 65 * 2)
 # findnotebookfromevernote(token)
 # log.debug('程序结束！')
 # print(vars())
+print('自动线程任务启动完毕！')

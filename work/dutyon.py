@@ -95,20 +95,19 @@ def chuliholidayleave_note(zhuti: list):
     return dfresult
 
 
-def fetchattendance_from_evernote(jiangemiao):
+def fetchattendance_from_evernote():
     try:
         zhutis = [['放假', 'holiday'], ['请假', 'leave']]
         for zhuti in zhutis:
             dfresult = chuliholidayleave_note(zhuti)
             if dfresult is not False:
                 descdb(dfresult)
-    except Exception as eee:
-        log.critical(f'从evernote获取放假笔记信息时出现未名错误。{eee}')
-        raise eee
+    except WindowsError as wine:
+        log.critical(f'从evernote获取放假笔记信息时出现未名错误。{wine}')
 
-    global timer_holiday2datacenter
-    timer_holiday2datacenter = Timer(jiangemiao, fetchattendance_from_evernote, [jiangemiao])
-    timer_holiday2datacenter.start()
+    # global timer_holiday2datacenter
+    # timer_holiday2datacenter = Timer(jiangemiao, fetchattendance_from_evernote, [jiangemiao])
+    # timer_holiday2datacenter.start()
 
 
 if __name__ == '__main__':
