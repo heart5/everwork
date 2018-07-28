@@ -86,8 +86,8 @@ def pickstat(note_store, cnx, destguid=None, notetitle='', cum=False):
 
     imgpathlist = []
     pathimgpick = dirmainpath / 'img' / 'pick'
-    chuturizhexian(dd['配单数量'], ddlastdate, '配单数量', cum=cum, imglist=imgpathlist, imgpath=pathimgpick)
-    chuturizhexian(dd['配单金额'], ddlastdate, '配单金额', cum=cum, imglist=imgpathlist, imgpath=pathimgpick)
+    imgpathlist += chuturizhexian(dd['配单数量'], ddlastdate, '配单数量', cum=cum, imgpath=pathimgpick)
+    imgpathlist += chuturizhexian(dd['配单金额'], ddlastdate, '配单金额', cum=cum, imgpath=pathimgpick)
     imgpathlist.append(str(pathimgpick / "pickstat.png"))
 
     df['年月'] = df['订单日期'].apply(lambda x: "%04d-%02d" % (x.year, x.month))

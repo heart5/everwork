@@ -2,16 +2,20 @@
 """
 功能描述
 """
-import os, time, datetime, numpy as np, pandas as pd, sqlite3 as lite, matplotlib.pyplot as plt, \
-    evernote.edam.type.ttypes as Ttypes
-from numpy import *
-from pylab import *
-from pandas.tseries.offsets import *
+import os
+import evernote.edam.type.ttypes as ttypes
+import pandas as pd
+import sqlite3 as lite
+import time
 from configparser import ConfigParser
-from matplotlib.ticker import MultipleLocator, FuncFormatter
-from func.logme import log
-from func.first import dbpathworkplan, dirmainpath, YWanAnchor, touchfilepath2depth
+# from matplotlib.ticker import FuncFormatter
+from pandas.tseries.offsets import *
+# from numpy import *
+from pylab import *
+
 from func.evernt import evernoteapijiayi, makenote
+from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
+from func.logme import log
 
 # plot中显示中文
 mpl.rcParams['font.sans-serif'] = ['SimHei']
@@ -89,11 +93,11 @@ def dftotal2top(df: pd.DataFrame):
 def isworkday(dlist: list, person: str = '全体', fromthen=False):
     if fromthen and (len(dlist) == 1):
         dlist = pd.date_range(dlist[0], datetime.datetime.today(), freq='D')
-    cnxp = lite.connect(dbpathworkplan)
-    dfholiday = pd.read_sql('select distinct * from holiday', cnxp, index_col='date', parse_dates=['date'])
+    cnxpi = lite.connect(dbpathworkplan)
+    dfholiday = pd.read_sql('select distinct * from holiday', cnxpi, index_col='date', parse_dates=['date'])
     del dfholiday['index']
     # print(dfholiday)
-    dfleave = pd.read_sql('select distinct date,mingmu,xingzhi,tianshu from leave', cnxp, parse_dates=['date'])
+    dfleave = pd.read_sql('select distinct date,mingmu,xingzhi,tianshu from leave', cnxpi, parse_dates=['date'])
     # print(dfleave)
     resultlist = list()
     for dt in dlist:
@@ -147,7 +151,7 @@ def isworkday(dlist: list, person: str = '全体', fromthen=False):
 
 
 def gengxinfou(filename, conn, tablename='fileread'):
-    global log
+    # global log
     try:
         create_tb_cmd = "CREATE TABLE IF NOT EXISTS %s " \
                         "('文件名' TEXT," \
@@ -159,7 +163,7 @@ def gengxinfou(filename, conn, tablename='fileread'):
         conn.execute(create_tb_cmd)
     except Exception as eee:
         log.critical("创建数据表%s失败！" % tablename)
-        return False
+        raise eee
 
     fna = os.path.abspath(filename)
     fn = os.path.basename(fna)
@@ -180,12 +184,12 @@ def gengxinfou(filename, conn, tablename='fileread'):
     fncount = (result.fetchone())[0]
     if fncount == 0:
         print("文件《" + fn + "》无记录，录入信息！\t", end='\t')
-        result = c.execute("insert into %s values(?,?,?,?,?,?)"
-                           % tablename, (fn, fna,
-                                         time.strftime('%Y-%m-%d %H:%M:%S',
-                                                       time.localtime(fstat.st_mtime)),
-                                         str(fstat.st_dev), str(fstat.st_size),
-                                         time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())))
+        c.execute("insert into %s values(?,?,?,?,?,?)"
+                  % tablename, (fn, fna,
+                                time.strftime('%Y-%m-%d %H:%M:%S',
+                                              time.localtime(fstat.st_mtime)),
+                                str(fstat.st_dev), str(fstat.st_size),
+                                time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())))
         print('添加成功。')
         log.info('文件《%s》无记录，录入信息。' % fn)
         rt = True
@@ -194,7 +198,7 @@ def gengxinfou(filename, conn, tablename='fileread'):
         sql = "select max(修改时间) as xg from %s where 文件名 = \'%s\'" % (tablename, fn)
         result = c.execute(sql)
         if time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(fstat.st_mtime)) > (result.fetchone())[0]:
-            result = c.execute("insert into %s values(?,?,?,?,?,?)" % tablename, (
+            c.execute("insert into %s values(?,?,?,?,?,?)" % tablename, (
                 fn, fna, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(fstat.st_mtime)), str(fstat.st_dev),
                 str(fstat.st_size), time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())))
             print('更新成功！')
@@ -209,7 +213,7 @@ def gengxinfou(filename, conn, tablename='fileread'):
 
 
 def dataokay(cnx):
-    global dirmainpath
+    # global dirmainpath
     pathxitongbiaoxls = str(dirmainpath / 'data' / '系统表.xlsx')
     if gengxinfou(pathxitongbiaoxls, cnx, 'fileread'):  # or True:
         df = pd.read_excel(pathxitongbiaoxls, sheetname='区域')
@@ -300,8 +304,8 @@ def biaozhukedu(dfc, weibiao):
                 # print(type(kedu.iloc[i]))
                 continue
             plt.scatter([idx, ], [kedu.iloc[i]], 50, color='Wheat')
-            global YWanAnchor
-            if kedu.map(lambda x: abs(x)).max() >= YWanAnchor:
+            # global ywananchor
+            if kedu.map(lambda x: abs(x)).max() >= ywananchor:
                 kedubiaozhi = "%.1f万" % (kedu.iloc[i] / 10000)
                 plt.gca().yaxis.set_major_formatter(
                     FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
@@ -341,15 +345,14 @@ def readinisection2df(cfpp: ConfigParser, section: object, biaoti: object):
     return df
 
 
-def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu='', leixing='', pinpai='', nianshu=3,
-                    imgpath=os.path.join('img')):
+def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, quyu='', leixing='', pinpai='', nianshu=3,
+                    imgpath=dirmainpath / 'img'):
     """
     月度（全年，自然年度）累积对比图，自最早日期起，默认3年
     :param ds: 数据表，必须用DateTime做index
     :param riqienddate: 数据记录的最近日期，可以是DateTIme的各种形式，只要pd能识别成功，形如2017-10-06
     :param xiangmu: 主题，画图时写入标题
     :param cum:
-    :param imglist: 输出图片路径list
     :param quyu: 销售区域或区域聚合（分部）
     :param leixing: 终端类型
     :param pinpai:
@@ -373,7 +376,7 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu=''
     # 分年份生成按照每天日期重新索引的数据列
     dslist = []
     for i in range(nianshushiji):
-        dfnian = pd.DataFrame()
+        # dfnian = pd.DataFrame()
         if i == 0:
             periods = int(riqienddate.strftime('%j'))
         else:
@@ -386,7 +389,7 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu=''
             dfnian = dstmp.resample('M').sum()
         else:
             dfnian = dstmp.resample('M').max()
-        dfnian.columns = ['%04d' % (nianlist[i].year)]
+        dfnian.columns = ['%04d' % nianlist[i].year]
         dfnian.index = range(len(dfnian.index))
         dslist.append(dfnian)
     # 连接年份DataFrame
@@ -399,48 +402,52 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu=''
 
     # print(dfy)
     zuobiao = pd.Series(range(1, len(dfy.index) + 1))  # 从1开始生成序列，配合月份，日期的话是自动从1开始的，不用特别处理
-    dfy.index = zuobiao.apply(lambda x: '%02d' % (x))
+    dfy.index = zuobiao.apply(lambda x: '%02d' % x)
 
     nianyue = '%04d年' % riqienddate.year
     biaoti = leixing + quyu + pinpai + nianyue + xiangmu
     dslistmax = []
-    dslistabs = [abs(x) for x in dslist]
+    # dslistabs = [abs(x) for x in dslist]
     dfyabs = dfy.apply(lambda x: abs(x))
     # print(dfyabs.max())
     for clname in dfyabs.columns:
         dslistmax.append(dfyabs[clname].max())  # 取绝对值的最大，涵盖退货的负值金额
     # print(type(dslistmax))
     # print(dslistmax)
-    global YWanAnchor
+    # global ywananchor
+    imglist = []
     if cum:
         cumstr = '月累积'
         dfjieguo = dfy.cumsum()
         dfjieguo.plot(title=biaoti + cumstr)
-        if max(map(abs, dslistmax)) > YWanAnchor:
+        if max(map(abs, dslistmax)) > ywananchor:
             plt.gca().yaxis.set_major_formatter(
                 FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
         biaozhukedu(dfjieguo, '%02d' % riqienddate.month)
-        if not os.path.exists(imgpath):
-            os.mkdir(imgpath)
-            log.info('%s不存在，将被创建' % imgpath)
-        itemimgpath = os.path.join(imgpath, f'{biaoti}{cumstr}.png')
+        imgpathstr = str(imgpath)
+        if not os.path.exists(imgpathstr):
+            os.mkdir(imgpathstr)
+            log.info('%s不存在，将被创建' % imgpathstr)
+        itemimgpath = str(imgpath / f'{biaoti}{cumstr}.png')
         plt.savefig(itemimgpath)
         imglist.append(itemimgpath)
         plt.close()
     cumstr = '月折线'
     dfy.plot(title='%s%s' % (biaoti, cumstr))
-    if max(map(abs, dslistmax)) > YWanAnchor:
+    if max(map(abs, dslistmax)) > ywananchor:
         plt.gca().yaxis.set_major_formatter(
             FuncFormatter(lambda x, pos: "%d万" % int(x / 10000)))  # 纵轴主刻度文本用y_formatter函数计算
-    biaozhukedu(dfy, '%02d' % (riqienddate.month))
-    itemimgpath = os.path.join(imgpath, f'{biaoti}{cumstr}.png')
+    biaozhukedu(dfy, '%02d' % riqienddate.month)
+    itemimgpath = str(imgpath / f'{biaoti}{cumstr}.png')
     plt.savefig(itemimgpath)
     imglist.append(itemimgpath)
     plt.close()
 
+    return imglist
+
 
 def chuturizhexian(df, riqienddate, xiangmu, cum=False,
-                   imglist=list(), quyu='', leixing='', pinpai='', imgpath=str(dirmainpath / 'img')):
+                   quyu='', leixing='', pinpai='', imgpath=dirmainpath / 'img'):
     """
     日数据（月份）累积对比图，当月、环比、同期比
     riqienddate形如2017-12-08，代表数据结束点的日期
@@ -448,7 +455,6 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False,
     :param riqienddate:
     :param xiangmu:
     :param cum:
-    :param imglist:
     :param quyu:
     :param leixing:
     :param pinpai:
@@ -502,19 +508,19 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False,
     # plt.ylim(0) #设定纵轴从0开始
 
     biaozhukedu(dfc, riqienddate.day)
-    imgsavepath = os.path.join(imgpath, biaoti + '（日累积月）.png')
+    imgsavepath = imgpath / (biaoti + '（日累积月）.png')
     touchfilepath2depth(imgsavepath)
-    plt.savefig(imgsavepath)
-    imglist.append(imgsavepath)
+    plt.savefig(str(imgsavepath))
     plt.close()
+    imglistctrz = list()
+    imglistctrz.append(str(imgsavepath))
 
-    # return imgsavepath
+    return imglistctrz
 
 
 def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount=1):
     # print(dfin.tail())
     imglists = []
-    global dirmainpath
     for cln in dfin.columns:
         imglist = []
         dfmoban = dfin[cln]
@@ -530,17 +536,20 @@ def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount
                 else:
                     riqiendwith = dangqianyueri + MonthEnd(k * (-1))
                 # print(riqiendwith)
-                chuturizhexian(dfmoban, riqiendwith, cln, cum=cum, leixing=leixingset, imglist=imglist, quyu=fenbuset,
-                               pinpai=pinpai, imgpath=str(dirmainpath / 'img' / fenbuset))
+                imglistson = chuturizhexian(dfmoban, riqiendwith, cln, cum=cum, leixing=leixingset, quyu=fenbuset,
+                                            pinpai=pinpai, imgpath=dirmainpath / 'img' / fenbuset)
+                imglist += imglistson
             if len(imglist) >= imgmonthcount:
                 imglist = imglist[:imgmonthcount]
         nianshu = dfmoban.index.max().year - dfmoban.index.min().year + 1
-        chutuyuezhexian(dfmoban, dangqianyueri, cln, cum=cum, leixing=leixingset, imglist=imglist, quyu=fenbuset,
-                        pinpai=pinpai, nianshu=nianshu, imgpath=str(dirmainpath / 'img' / fenbuset))
+        imglistson = chutuyuezhexian(dfmoban, dangqianyueri, cln, cum=cum, leixing=leixingset, quyu=fenbuset,
+                                     pinpai=pinpai, nianshu=nianshu, imgpath=dirmainpath / 'img' / fenbuset)
+        imglist += imglistson
         imglists.append(imglist)
     imglistreturn = []
     for i in range(len(imglists)):
         imglistreturn += imglists[i]
+    # print(imglistreturn)
     return imglistreturn
 
 
@@ -568,7 +577,7 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
                 continue
         except Exception as ee:
             log.info('笔记《' + str(aa) + zhuti + '》不存在，将被创建……%s' % str(ee))
-        note = Ttypes.Note()
+        note = ttypes.Note()
         note.title = nbfbdf.loc[aa]['title']
         # print(aa + '\t\t' + note.title, end='\t\t')
         parentnotebook = note_store.getNotebook(nbfbdf.loc[aa]['guid'])
@@ -580,8 +589,8 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
 
 
 if __name__ == '__main__':
-    global log
+    # global log
     log.info(f'测试文件\t{__file__}')
-    cnxp = lite.connect(str(dirmainpath / 'data' / 'quandan.db'))
+    cnxp = lite.connect(dbpathquandan)
     dataokay(cnxp)
     print('Done.')

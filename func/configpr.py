@@ -3,7 +3,6 @@
 输出相应的配置处理器
 可用的处理有：everwork, everdatanote, everlife, everzysm, everworkplan
 """
-import os
 from configparser import ConfigParser
 from func.first import getdirmain, touchfilepath2depth
 from pathlib import Path
