@@ -146,6 +146,7 @@ def chuliworkmateduty_note(zhuti: list):
     print(items)
 
     dfresult = pd.DataFrame(items, columns=['name', 'ruzhi', 'lizhi'])
+    dfresult.sort_values(['ruzhi', 'lizhi'], ascending=[False, False])
     # print(dfresult)
     dfresult.to_sql(zhuti[1], cnxp, if_exists='replace', index=False)  # index, ['mingmu', 'xingzhi', 'tianshu', 'date']
     cnxp.close()
@@ -162,11 +163,14 @@ def showdutyon():
     # print(dfduty)
     zaizhi = list(dfduty[pd.isnull(dfduty.lizhi)].groupby('name').count().index)
     print(f'{len(zaizhi)}\t{zaizhi}')
-    print(isworkday(['2018-1-1'], fromthen=True).groupby('xingzhi', as_index=False).count()[['xingzhi', 'date']])
+    print(isworkday(['2016-1-1'], fromthen=True).groupby('xingzhi', as_index=False).count()[['xingzhi', 'date']])
     dslist = list()
     for zg in zaizhi:
         # print(zg)
-        dszg = isworkday([pd.to_datetime('2018-1-1')], zg, fromthen=True).groupby('xingzhi').count()['date']
+        zgruzhi = max(dfduty[dfduty.name == zg]['ruzhi'])
+        # print(zgruzhi)
+        dtszgwork = isworkday([pd.to_datetime('2016-1-1')], zg, fromthen=True)
+        dszg = dtszgwork[dtszgwork.date >= zgruzhi].groupby('xingzhi').count()['date']
         # print(dszg.name)
         dszg = pd.Series(dszg)
         dszg = dszg.rename(zg)
@@ -174,6 +178,14 @@ def showdutyon():
         dslist.append(dszg)
 
     dfall = pd.DataFrame(dslist)
+    dfall.fillna(0, inplace=True)
+    print(dfall)
+    clsnames = list(dfall.columns)
+    clsjiaxiu = [x for x in clsnames if (x.find('班') < 0) & (x.find('假') < 0) & (x.find('旷') < 0)]
+    clsqingjia = [x for x in clsnames if x.find('假') > 0]
+    print(clsjiaxiu)
+    dfall['假休'] = sum(dfall.loc[:, clsjiaxiu])
+    dfall['请假年假'] = sum(dfall.loc[:, clsqingjia])
     print(dfall)
 
 
