@@ -10,12 +10,16 @@ sys.path.append(os.getcwd())
 import func.fordirmainonly as fdmo
 
 
+# from func.logme import log
+
+
 def touchfilepath2depth(filepath: Path):
     if not os.path.exists(os.path.split(str(filepath))[0]):
         os.makedirs(os.path.split(str(filepath))[0])
-    if not os.path.exists(str(filepath)):
-        fp = open(str(filepath), 'w', encoding='utf-8')
-        fp.close()
+        print(f'目录《{os.path.split(str(filepath))[0]}》不存在，构建之。')
+    # if not os.path.exists(str(filepath)):
+    #     fp = open(str(filepath), 'w', encoding='utf-8')
+    #     fp.close()
 
 
 def getdirmain():

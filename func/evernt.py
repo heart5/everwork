@@ -20,6 +20,35 @@ from func.first import dirlog
 from func.logme import log
 
 
+def trycounttimes(jutifunc, returnresult=False):
+    trytimes = 3
+    sleeptime = 15
+    for i in range(trytimes):
+        try:
+            if returnresult:
+                return jutifunc()
+            else:
+                jutifunc()
+            break
+        except WindowsError as eee:
+            if eee.errno == 11001:
+                log.critical(f'寻址失败，貌似网络不通。{eee}')
+            elif eee.errno == 10060:
+                log.critical(f'够不着啊，是不是在墙外？！{eee}')
+            elif eee.errno == 10054:
+                log.critical(f'主机发脾气，强行断线了。{eee}')
+            elif eee.errno == 8:
+                log.critical(f'和evernote服务器握手失败。{eee}')
+            else:
+                log.critical(f'连接失败。{eee}')
+            log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接evernote服务器时失败，将于{sleeptime}秒后重试。")
+            # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
+            if i == (trytimes - 1):
+                log.critical('evernote服务器连接失败，只好无功而返。')
+                # raise eee
+            time.sleep(sleeptime)
+
+
 def get_notestore():
     # Real applications authenticate with Evernote using OAuth, but for the
     # purpose of exploring the API, you can get a developer token that allows
@@ -60,42 +89,61 @@ def get_notestore():
 
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
-    trytimes = 3
-    sleeptime = 20
-    for i in range(trytimes):
-        try:
-            userstore = client.get_user_store()
-            evernoteapijiayi()
-            version_ok = userstore.checkVersion(
-                "Evernote EDAMTest (Python)",
-                EDAM_VERSION_MAJOR,
-                EDAM_VERSION_MINOR
-            )
-            if not version_ok:
-                log.critical('Evernote API版本过时，请更新之！程序终止并退出！！！')
-                exit(1)
-            # print("Is my Evernote API version up to date? ", str(version_ok))
-            note_store = client.get_note_store()
-            evernoteapijiayi()
-            # log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
-            return note_store
-        except WindowsError as eee:
-            if eee.errno == 11001:
-                log.critical(f'寻址失败，貌似网络不通。{eee}')
-            elif eee.errno == 10060:
-                log.critical(f'够不着啊，是不是在墙外？！{eee}')
-            elif eee.errno == 10054:
-                log.critical(f'主机发脾气，强行断线了。{eee}')
-            elif eee.errno == 8:
-                log.critical(f'和evernote服务器握手失败。{eee}')
-            else:
-                log.critical(f'连接失败。{eee}')
-            log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接evernote服务器时失败，将于{sleeptime}秒后重试。")
-            # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
-            if i == (trytimes - 1):
-                log.critical('evernote服务器连接失败，只好无功而返。')
-                # raise eee
-            time.sleep(sleeptime)
+    def getnotestore():
+        userstore = client.get_user_store()
+        evernoteapijiayi()
+        version_ok = userstore.checkVersion(
+            "Evernote EDAMTest (Python)",
+            EDAM_VERSION_MAJOR,
+            EDAM_VERSION_MINOR
+        )
+        if not version_ok:
+            log.critical('Evernote API版本过时，请更新之！程序终止并退出！！！')
+            exit(1)
+        # print("Is my Evernote API version up to date? ", str(version_ok))
+        note_store = client.get_note_store()
+        evernoteapijiayi()
+        # log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
+        return note_store
+
+    return trycounttimes(getnotestore, True)
+
+    # trytimes = 3
+    # sleeptime = 20
+    # for i in range(trytimes):
+    #     try:
+    #         userstore = client.get_user_store()
+    #         evernoteapijiayi()
+    #         version_ok = userstore.checkVersion(
+    #             "Evernote EDAMTest (Python)",
+    #             EDAM_VERSION_MAJOR,
+    #             EDAM_VERSION_MINOR
+    #         )
+    #         if not version_ok:
+    #             log.critical('Evernote API版本过时，请更新之！程序终止并退出！！！')
+    #             exit(1)
+    #         # print("Is my Evernote API version up to date? ", str(version_ok))
+    #         note_store = client.get_note_store()
+    #         evernoteapijiayi()
+    #         # log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
+    #         return note_store
+    #     except WindowsError as eee:
+    #         if eee.errno == 11001:
+    #             log.critical(f'寻址失败，貌似网络不通。{eee}')
+    #         elif eee.errno == 10060:
+    #             log.critical(f'够不着啊，是不是在墙外？！{eee}')
+    #         elif eee.errno == 10054:
+    #             log.critical(f'主机发脾气，强行断线了。{eee}')
+    #         elif eee.errno == 8:
+    #             log.critical(f'和evernote服务器握手失败。{eee}')
+    #         else:
+    #             log.critical(f'连接失败。{eee}')
+    #         log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接evernote服务器时失败，将于{sleeptime}秒后重试。")
+    #         # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
+    #         if i == (trytimes - 1):
+    #             log.critical('evernote服务器连接失败，只好无功而返。')
+    #             # raise eee
+    #         time.sleep(sleeptime)
 
 
 def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
@@ -403,6 +451,7 @@ evernoteapiclearatzero()
 
 if __name__ == '__main__':
     print(f'开始测试文件\t{__file__}')
-    get_notestore()
+    nost = get_notestore()
+    print(nost)
     writeini()
     print('Done.')

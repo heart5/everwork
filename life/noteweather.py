@@ -13,16 +13,26 @@ e5d81ffa-89e7-49ff-bd4c-a5a71ae14320 武汉雨天记录
 
 # from imp4nb import *
 # import evernote.edam.notestore.NoteStore as NoteStore
-import os, re, datetime, time, \
-    numpy as np, pandas as pd, matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter
-from bs4 import BeautifulSoup
+# import datetime
+# import matplotlib.pyplot as plt
+# import numpy as np
+# import os
+import pandas as pd
+import re
+import time
 from threading import Timer
-from func.first import dirmainpath, touchfilepath2depth
-from func.logme import log
-from func.evernt import get_notestore, imglist2note
+from bs4 import BeautifulSoup
+# from matplotlib.ticker import FuncFormatter
 from func.configpr import cfp, cfplife, inilifepath
+from func.evernt import get_notestore, imglist2note
+from func.first import dirmainpath, touchfilepath2depth
+from pylab import *
+from func.logme import log
 from func.mailsfunc import getmail
+
+# plot中显示中文
+mpl.rcParams['font.sans-serif'] = ['SimHei']
+mpl.rcParams['axes.unicode_minus'] = False
 
 
 def getweatherfromevernote():
@@ -45,7 +55,6 @@ def getweatherfromevernote():
 
 
 def getweatherfromgmail():
-    global cfp
     host = cfp.get('gmail', 'host')
     username = cfp.get('gmail', 'username')
     password = cfp.get('gmail', 'password')
@@ -248,12 +257,13 @@ def weatherstat(items, destguid=None):
     ax3.set_ylabel(u'（百分比%）')
     ax3.set_title(u'半月平均湿度图')
 
-    img_wenshifeng_path = str(dirmainpath / "img" / 'weather' / 'wenshifeng.png')
+    img_wenshifeng_path = dirmainpath / "img" / 'weather' / 'wenshifeng.png'
+    img_wenshifeng_path_str = str(img_wenshifeng_path)
     touchfilepath2depth(img_wenshifeng_path)
-    plt.savefig(img_wenshifeng_path)
+    plt.savefig(img_wenshifeng_path_str)
 
     imglist = list()
-    imglist.append(img_wenshifeng_path)
+    imglist.append(img_wenshifeng_path_str)
     plt.close()
 
     plt.figure(figsize=(16, 10))
@@ -272,6 +282,7 @@ def weatherstat(items, destguid=None):
     plt.title(u'日出日落时刻和白天时长图')
     plt.grid(True)
     ax2 = ax1.twinx()
+    print(ax2)
     plt.plot(df_recent_year['date'], df_recent_year['richang'], 'r', lw=1.5, label=u'日长')
     ax = plt.gca()
     # ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
@@ -285,10 +296,11 @@ def weatherstat(items, destguid=None):
     plt.grid(True)
 
     # plt.show()
-    img_sunonoff_path = str(dirmainpath / 'img' / 'weather' / 'sunonoff.png')
+    img_sunonoff_path = dirmainpath / 'img' / 'weather' / 'sunonoff.png'
+    img_sunonoff_path_str = str(img_sunonoff_path)
     touchfilepath2depth(img_sunonoff_path)
-    plt.savefig(img_sunonoff_path)
-    imglist.append(img_sunonoff_path)
+    plt.savefig(img_sunonoff_path_str)
+    imglist.append(img_sunonoff_path_str)
     plt.close()
 
     imglist2note(get_notestore(), imglist, destguid, '武汉天气图')
@@ -310,7 +322,6 @@ def write2weathertxt(weathertxtfilename, inputitemlist):
 
 
 def fetchweatherinfo_from_gmail(weathertxtfilename):
-    global log, cfplife, inilifepath
     if cfplife.has_option('天气', '存储数据最新日期'):
         weathertxtlastestday = cfplife.get('天气', '存储数据最新日期')
     else:
@@ -333,7 +344,6 @@ def fetchweatherinfo_from_gmail(weathertxtfilename):
 
 
 def isweatherupdate(weathertxtfilename):
-    global log, cfplife
     # print(weathertoday, end='\t')
     # print(datetime.datetime.now().strftime('%F'))
     weathertoday = time.strftime('%F',
@@ -363,7 +373,6 @@ def isweatherupdate(weathertxtfilename):
 
 
 def weatherstattimer(jiangemiao):
-    global log, cfplife, inilifepath, dirmainpath
     weathertxtfilename = str(dirmainpath / 'data' / 'ifttt' / 'weather.txt')
     fetchweatherinfo_from_gmail(weathertxtfilename)
 
@@ -377,10 +386,9 @@ def weatherstattimer(jiangemiao):
     weathertxtlastestday = cfplife.get('天气', '存储数据最新日期')
     if today == weathernotelastestday:  # and False:
         print('今天的天气信息统计笔记已刷新，本次轮询跳过')
-    elif today == weathertxtlastestday:  # or True:
+    elif today == weathertxtlastestday or True:
         try:
             items = readfromweathertxt(weathertxtfilename)
-            # token = cfp.get('evernote', 'token')
             weatherstat(items, '296f57a3-c660-4dd5-885a-56492deb2cee')
             log.info('天气信息成功更新入天气信息统计笔记，将于%d秒后再次自动检查并更新' % jiangemiao)
             cfplife.set('天气', '统计天数', '%d' % len(items))
