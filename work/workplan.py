@@ -252,7 +252,7 @@ def planfenxifunc():
             updatableall |= updatablelist[i]
             if updatableall:
                 break
-        if updatableall or True:
+        if updatableall:  # or True:
             dayscount = cfpworkplan.getint('业务计划总结dayscount', 'count')
             today = pd.to_datetime(datetime.datetime.today().strftime('%F'))
             workdays = isworkday([today - datetime.timedelta(days=60)], '全体', fromthen=True)
