@@ -6,6 +6,7 @@
 ['a582e11f-d6e6-4eb2-817f-196c70971f53', '武汉真元员工入职离职记录']
 """
 import math
+import numpy as np
 import sqlite3 as lite
 from bs4 import BeautifulSoup
 from func.evernt import *
@@ -112,6 +113,7 @@ def fetchattendance_from_evernote():
 def chuliworkmateduty_note(zhuti: list):
     note_store = get_notestore()
     guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')
+    note = None
     try:
         note = note_store.getNote(guid, True, True, False, False)
         evernoteapijiayi()
@@ -125,7 +127,7 @@ def chuliworkmateduty_note(zhuti: list):
         updatenumold = cfpworkplan.getint('行政管理', f'{zhuti[0]}updatenum')
     else:
         updatenumold = 0
-    if (note.updateSequenceNum <= updatenumold):  # and False:
+    if note.updateSequenceNum <= updatenumold:  # and False:
         log.info(f'{zhuti[0]}笔记内容无更新。')
         dfresult = pd.read_sql(f'select * from {zhuti[1]}', cnxp, parse_dates=['ruzhi', 'lizhi'])
         cnxp.close()
@@ -163,37 +165,51 @@ def showdutyon():
     # print(dfduty)
     zaizhi = list(dfduty[pd.isnull(dfduty.lizhi)].groupby('name').count().index)
     print(f'{len(zaizhi)}\t{zaizhi}')
-    print(isworkday(['2016-1-1'], fromthen=True).groupby('xingzhi', as_index=False).count()[['xingzhi', 'date']])
-    dslist = list()
+    dfquanti = isworkday(['2016-1-1'], fromthen=True)
+    dtquanti = dfquanti.groupby('xingzhi').count()['date'].rename('公司')
+    print(dtquanti)
+    dslist = [dtquanti]
     for zg in zaizhi:
         # print(zg)
-        zgruzhi = max(dfduty[dfduty.name == zg]['ruzhi'])
-        # print(zgruzhi)
-        dtszgwork = isworkday([pd.to_datetime('2016-1-1')], zg, fromthen=True)
-        dszg = dtszgwork[dtszgwork.date >= zgruzhi].groupby('xingzhi').count()['date']
+        zgruzhimax = dfduty[dfduty.name == zg]['ruzhi'].max()
+        dfgzmaxruizhi = dfduty[(dfduty.name == zg) & (dfduty.ruzhi == zgruzhimax)]
+        print(dfgzmaxruizhi)
+        zgruzhi, zglizhi = dfduty.loc[dfgzmaxruizhi.index, ['ruzhi', 'lizhi']].values[0]
+        print(zgruzhi, zglizhi)
+        dfzgwork = isworkday([pd.to_datetime('2016-1-1')], zg, fromthen=True)
+        dfzgwork = dfzgwork[dfzgwork.date >= zgruzhi]
+        if pd.notnull(zglizhi):
+            dfzgwork = dfzgwork[dfzgwork.date <= zglizhi]
+        dszg = dfzgwork.groupby('xingzhi').count()['date']
         # print(dszg.name)
         dszg = pd.Series(dszg)
         dszg = dszg.rename(zg)
         # print(dszg.name)
         dslist.append(dszg)
 
-    dfall = pd.DataFrame(dslist)
-    dfall.fillna(0, inplace=True)
-    print(dfall)
-    clsnames = list(dfall.columns)
+    dfgzduty = pd.DataFrame(dslist)
+    dfgzduty.fillna(0, inplace=True)
+    print(dfgzduty)
+
+    dfout = pd.DataFrame()
+    clsnames = list(dfgzduty.columns)
     clsjiaxiu = [x for x in clsnames if (x.find('班') < 0) & (x.find('假') < 0) & (x.find('旷') < 0)]
+    dfjiaxiusum = dfgzduty.loc[:, clsjiaxiu].apply(lambda x : sum(x), axis=1).rename('假休')
     clsqingjia = [x for x in clsnames if x.find('假') > 0]
-    print(clsjiaxiu)
-    dfall['假休'] = sum(dfall.loc[:, clsjiaxiu])
-    dfall['请假年假'] = sum(dfall.loc[:, clsqingjia])
-    print(dfall)
+    dfqingjia = dfgzduty.loc[:, clsqingjia].apply(lambda x : sum(x), axis=1).rename('请假')
+    dfkuanggong = None
+    if len([x for x in clsnames if x.find('旷') >= 0]) > 0:
+        dfkuanggong = dfgzduty['旷工']
+    dfout = pd.DataFrame([dfgzduty['上班'], dfjiaxiusum, dfqingjia, dfkuanggong]).T
+    return dfout
 
 
 if __name__ == '__main__':
     # global log
     log.info(f'测试文件\t{__file__}')
 
-    showdutyon()
+    df = showdutyon()
+    print(df)
     # fetchattendance_from_evernote(60 * 12)
     # dtlist = ['2018-6-14', '2018-6-10', '2018-5-1', '2018-3-4']
     # reslist = isworkday(dtlist)
