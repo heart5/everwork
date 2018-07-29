@@ -82,7 +82,9 @@ def get_notestore():
         except WindowsError as eee:
             if eee.errno == 11001:
                 log.critical(f'寻址失败，貌似网络不通。{eee}')
-            if eee.errno == 10054:
+            elif eee.errno == 10060:
+                log.critical(f'够不着啊，是不是在墙外？！{eee}')
+            elif eee.errno == 10054:
                 log.critical(f'主机发脾气，强行断线了。{eee}')
             elif eee.errno == 8:
                 log.critical(f'和evernote服务器握手失败。{eee}')

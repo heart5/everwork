@@ -319,7 +319,6 @@ def jinchustat(jinchujiluall, noteinfos):
 
 
 def jinchustattimer(jiangemiao):
-    global cfplife
     items = cfplife.items('impinfolist')
     noteinfolistinside = []
     for address, infoslicelist in items:
@@ -329,7 +328,6 @@ def jinchustattimer(jiangemiao):
         noteinfolistinside.append(infoslist[:-1])
     # print(noteinfolist)
 
-    global dirmainpath
     dfjinchu = pd.DataFrame(jilugooglefile(dirmainpath / 'data' / 'google'))
     itemswifi = jilugmail('Ifttt/Wifi', 'wifi', 'all')
     if itemswifi:

@@ -13,7 +13,6 @@ from func.first import dirmainpath
 def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum=100000, dirtarget='Inbox',
             unseen=False,
             topicloc='subject', topic='', datadir=os.path.join(getdirmain(), 'data', 'work')):
-    global log
 
     def parseheader(message):
         headermsg = []
@@ -145,11 +144,22 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
             serv = imaplib.IMAP4_SSL(hostmail, port)
             serv.login(usernamemail, passwordmail)
             break
-        except Exception as eee:
-            log.critical("第%d次（最多尝试%d次）连接登录邮件服务器获取目标邮件编号列表时失败。%s" % (i + 1, trytimes, eee))
+        except WindowsError as eee:
+            if eee.errno == 11001:
+                log.critical(f'寻址失败，貌似网络不通。{eee}')
+            elif eee.errno == 10060:
+                log.critical(f'够不着啊，是不是在墙外？！{eee}')
+            elif eee.errno == 10054:
+                log.critical(f'主机发脾气，强行断线了。{eee}')
+            elif eee.errno == 8:
+                log.critical(f'和evernote服务器握手失败。{eee}')
+            else:
+                log.critical(f'连接失败。{eee}')
+            log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接登录邮件服务器获取目标邮件编号列表时失败。")
             if i == (trytimes - 1):
                 log.critical('邮件服务器连接失败，只好无功而返。')
-                raise eee
+                # raise eee
+                return
             time.sleep(20)
 
     # if debug:
@@ -369,8 +379,10 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
         mailitemsjilu = getmail(hostg, usernameg, passwordg, debug=False, dirtarget=direc, unseen=True, topic=topic)
     except socket.error as se:
         log.critical("构建socket连接时出错。%s" % str(se))
+        return
     except Exception as e:
         log.critical('处理邮件时出现严重错误。%s' % str(e))
+        return
 
     itemslst = []
     if mailitemsjilu is False:

@@ -25,7 +25,7 @@ log2notetimer(60 * 45)
 weatherstattimer(60 * 60 * 1 + 60 * 5)
 jinchustattimer(60 * 60)
 peoplestattimer(60 * 25)
-# planfenxi(60 * 65 * 2)
+planfenxi(60 * 65 * 2)
 #
 # writeini()
 

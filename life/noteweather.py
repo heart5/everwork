@@ -18,7 +18,7 @@ import os, re, datetime, time, \
 from matplotlib.ticker import FuncFormatter
 from bs4 import BeautifulSoup
 from threading import Timer
-from func.first import dirmainpath
+from func.first import dirmainpath, touchfilepath2depth
 from func.logme import log
 from func.evernt import get_notestore, imglist2note
 from func.configpr import cfp, cfplife, inilifepath
@@ -248,8 +248,8 @@ def weatherstat(items, destguid=None):
     ax3.set_ylabel(u'（百分比%）')
     ax3.set_title(u'半月平均湿度图')
 
-    global dirmainpath
     img_wenshifeng_path = str(dirmainpath / "img" / 'weather' / 'wenshifeng.png')
+    touchfilepath2depth(img_wenshifeng_path)
     plt.savefig(img_wenshifeng_path)
 
     imglist = list()
@@ -286,6 +286,7 @@ def weatherstat(items, destguid=None):
 
     # plt.show()
     img_sunonoff_path = str(dirmainpath / 'img' / 'weather' / 'sunonoff.png')
+    touchfilepath2depth(img_sunonoff_path)
     plt.savefig(img_sunonoff_path)
     imglist.append(img_sunonoff_path)
     plt.close()
@@ -401,10 +402,10 @@ def weatherstattimer(jiangemiao):
 
 
 if __name__ == '__main__':
-    global log
     log.info(f'测试文件\t{__file__}')
     weatherstattimer(60 * 3)
     # weathertxtfilename = "data\\ifttt\\weather.txt"
     # usn = isweatherupdate(weathertxtfilename)
     # weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')
     # # print(getweatherfromgmail())
+    log.info('Done.文档测试结束！')

@@ -33,6 +33,7 @@ dbpathworkplan = str(getdirmain() / 'data' / 'workplan.db')
 dbpathquandan = str(getdirmain() / 'data' / 'quandan.db')
 ywananchor = 50000  # 纵轴标识万化锚点
 
+
 path2include = ['etc', 'func', 'work', 'life', 'study']
 for p2i in path2include:
     sys.path.append(str(dirmainpath / p2i))
