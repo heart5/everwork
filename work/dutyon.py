@@ -242,7 +242,7 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
     dfjiaxiusum = dfgzduty.loc[:, clsjiaxiu].apply(lambda x: sum(x), axis=1).rename('放休')
     # dfout.append(dfjiaxiusum)
     clsqingjia = [x for x in clsnames if x.find('假') > 0]
-    dfqingjia = dfgzduty.loc[:, clsqingjia].apply(lambda x: sum(x), axis=1).rename('请假')
+    dfqingjia = dfgzduty.loc[:, clsqingjia].apply(lambda x: sum(x), axis=1).rename('事年')
     # dfout.append(dfqingjia)
     dfout = pd.concat([dfshangban, dfjiaxiusum, dfqingjia], axis=1)
     if [x for x in clsnames if x.find('旷')] is None:
@@ -253,7 +253,7 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
     # print(dfout)
     dfout = pd.concat([dfout, dfgzduty.loc[:, ['起始日期', '截止日期']]], axis=1)
     dfout = pd.DataFrame(dfout)
-    dfout.sort_values(['截止日期', '出勤', '请假'], ascending=[False, False, False], inplace=True)
+    dfout.sort_values(['截止日期', '出勤', '事年'], ascending=[False, False, False], inplace=True)
     clsout = list(dfout.columns)
     clsnew = clsout[-2:] + [clsout[-3]] + clsout[:-3]
     # print(clsnew)
@@ -263,13 +263,18 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
 
 def showdutyon2note():
     recentdutyguid = '02540689-911d-4a2a-bd22-89fe44d41f2a'
-    tday = pd.to_datetime(datetime.datetime.today())
+    tday = pd.to_datetime(pd.to_datetime(datetime.datetime.today()).strftime('%F'))  # 罪魁祸首，日期中时间一定要归零
 
     dutytablelist = list()
     for i in range(1, 4, 1):
         thismonth = tday + MonthBegin((-1) * i)
-        print(thismonth)
-        dutytablelist.append(showdutyonfunc([thismonth]))
+        thismonthend = tday + MonthEnd((-1) * i + 1)
+        print(thismonth.strftime('%F'), thismonthend.strftime('%F'))
+        dtitemrange = list(pd.date_range(thismonth, thismonthend, freq='D'))
+        # print(dtitemrange)
+        dfitem, dfitemfrom, dfitemto = showdutyonfunc(dtitemrange)
+        # print(dfitem)
+        dutytablelist.append([dfitem, dfitemfrom, dfitemto])
     dutytableliststr = ''
     for i in range(len(dutytablelist)):
         dutytableliststr += f"{dutytablelist[i][1].strftime('%F')}至{dutytablelist[i][2].strftime('%F')}" \
@@ -278,7 +283,7 @@ def showdutyon2note():
 
     imglist2note(get_notestore(), [], recentdutyguid, '真元商贸员工出勤统计表（最近三个月）', dutytableliststr)
 
-    alldutyonguid = '3d927c7e-98a6-4761-b0c6-7fba1348244f'
+    alldutyonguid = '0d22c1f8-b92e-4c39-8d3e-7a6cb150e011'
     dfall, dfallfrom, dfallto = showdutyonfunc([pd.to_datetime('2010-10-22')])
     dutytableallstr = f"{dfallfrom.strftime('%F')}至{dfallto.strftime('%F')}" \
                       + tablehtml2evernote(dfall, dfallfrom.strftime('%Y-%m'), withindex=True)
@@ -292,14 +297,15 @@ def duty_timer(jiangemiao):
     timer_duty2note = Timer(jiangemiao, duty_timer, [jiangemiao])
     timer_duty2note.start()
 
+
 if __name__ == '__main__':
     # global log
     log.info(f'测试文件\t{__file__}')
 
-    duty_timer(60 * 5)
+    # duty_timer(60 * 5)
     showdutyon2note()
 
-    # df, dtf, dtt = showdutyon(['2010-10-22'], ['徐志伟', '梅富忠', '周莉'])
+    # df, dtf, dtt = showdutyonfunc(list(pd.date_range(pd.to_datetime('2018-7-1'), pd.to_datetime('2018-7-31'), freq='D')),zglist=['徐志伟', '梅富忠', '周莉'])
     # print(dtf.strftime('%F'), dtt.strftime('%F'))
     # print(df)
 
