@@ -78,7 +78,7 @@ def get_notestore():
         # log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
         return note_store
 
-    return trycounttimes(getnotestore, True)
+    return trycounttimes(getnotestore, True, 'evernote服务器')
 
 
 def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
@@ -176,7 +176,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
             time.sleep(sleeptime)
 
 
-def tablehtml2evernote(dataframe, tabeltitle, withindex=True):
+def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True):
     pd.set_option('max_colwidth', 200)
     df = pd.DataFrame(dataframe)
     outstr = df.to_html(justify='center', index=withindex).replace('class="dataframe">', 'align="center">'). \

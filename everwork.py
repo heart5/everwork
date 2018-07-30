@@ -10,6 +10,7 @@ from work.workplan import planfenxi
 from life.notejinchujilu import jinchustattimer
 from life.peoplelog2note import peoplestattimer
 from work.filemail import workfilefromgmail2datacenter
+from work.dutyon import duty_timer
 from func.logme import log
 
 log.debug('自动线程任务启动……')
@@ -26,6 +27,7 @@ weatherstattimer(60 * 60 * 1 + 60 * 5)
 jinchustattimer(60 * 60)
 peoplestattimer(60 * 25)
 planfenxi(60 * 65 * 2)
+duty_timer(60 * 60 * 24)
 #
 # writeini()
 

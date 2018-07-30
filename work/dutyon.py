@@ -6,7 +6,10 @@
 ['a582e11f-d6e6-4eb2-817f-196c70971f53', '武汉真元员工入职离职记录']
 """
 import math
-import numpy as np
+# import numpy as np
+from threading import Timer
+
+from pandas.tseries.offsets import *
 import sqlite3 as lite
 from bs4 import BeautifulSoup
 from func.evernt import *
@@ -111,14 +114,14 @@ def fetchattendance_from_evernote():
 
 
 def chuliworkmateduty_note(zhuti: list):
-    note_store = get_notestore()
     guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')
     note = None
     try:
+        note_store = get_notestore()
         note = note_store.getNote(guid, True, True, False, False)
         evernoteapijiayi()
     except ConnectionResetError as cre:
-        log.critical(f'服务器发脾气，强行断线！{cre}')
+        log.critical(f'服务器发脾气，强行重置了！{cre}')
     # print(timestamp2str(int(note.updated/1000)))
     # print(note.updateSequenceNum)
     cnxp = lite.connect(dbpathworkplan)
@@ -159,57 +162,158 @@ def chuliworkmateduty_note(zhuti: list):
     return dfresult
 
 
-def showdutyon():
+def showdutyonfunc(dtlist: list = None, zglist: list = None):
+    fetchattendance_from_evernote()
     zhutiss = ['入职', 'dutyon']
     dfduty = chuliworkmateduty_note(zhutiss)
     # print(dfduty)
-    zaizhi = list(dfduty[pd.isnull(dfduty.lizhi)].groupby('name').count().index)
+
+    # 处理参数：空则从本月1日到今天；一个则默认是起始日期，到今天；数组则判断大小
+    if dtlist is None:
+        dtto = pd.to_datetime(datetime.datetime.today())
+        dtfrom = pd.to_datetime(dtto.strftime('%Y-%m-01'))
+    elif len(dtlist) == 1:
+        dtto = pd.to_datetime(datetime.datetime.today())
+        dtshuru = pd.to_datetime(dtlist[0])
+        dtfrom = dtshuru
+    else:
+        dtto = max(dtlist)
+        dtfrom = min(dtlist)
+    # 首尾界限处理，最早公司创立日，最晚是今天
+    if dtfrom < pd.to_datetime('2010-10-22'):
+        dtfrom = pd.to_datetime('2010-10-22')
+    if dtto > pd.to_datetime(datetime.datetime.today()):
+        dtto = pd.to_datetime(datetime.datetime.today())
+    dtlistinner = pd.date_range(dtfrom, dtto, freq='D')
+    # print(dtfrom, type(dtfrom), dtto, type(dtto))
+    if zglist:
+        dfdutytarget = dfduty
+        zaizhi = zglist
+    else:
+        dfdutytarget = dfduty[((pd.isnull(dfduty.lizhi)) | (dfduty.lizhi >= dtfrom))]
+        # print(dfdutytarget)
+        dfdutytarget = dfdutytarget[dfdutytarget.ruzhi <= dtto]
+        # print(dfdutytarget)
+        zaizhi = list(dfdutytarget.groupby('name').count().index)
     print(f'{len(zaizhi)}\t{zaizhi}')
-    dfquanti = isworkday(['2016-1-1'], fromthen=True)
+
+    dfquanti = isworkday(list(dtlistinner))
     dtquanti = dfquanti.groupby('xingzhi').count()['date'].rename('公司')
-    print(dtquanti)
+    dtquanti['起始日期'] = dtfrom.strftime('%F')
+    dtquanti['截止日期'] = dtto.strftime('%F')
+    # print(list(dtquanti))
     dslist = [dtquanti]
     for zg in zaizhi:
         # print(zg)
-        zgruzhimax = dfduty[dfduty.name == zg]['ruzhi'].max()
-        dfgzmaxruizhi = dfduty[(dfduty.name == zg) & (dfduty.ruzhi == zgruzhimax)]
-        print(dfgzmaxruizhi)
-        zgruzhi, zglizhi = dfduty.loc[dfgzmaxruizhi.index, ['ruzhi', 'lizhi']].values[0]
-        print(zgruzhi, zglizhi)
-        dfzgwork = isworkday([pd.to_datetime('2016-1-1')], zg, fromthen=True)
+        zgruzhimax = dfdutytarget[dfdutytarget.name == zg]['ruzhi'].max()
+        dtfrom4 = dtfrom
+        if dtfrom4 < pd.to_datetime(zgruzhimax):
+            dtfrom4 = pd.to_datetime(zgruzhimax)
+        dfgzmaxruizhi = dfdutytarget[(dfdutytarget.name == zg) & (dfdutytarget.ruzhi == zgruzhimax)]
+        # print(dfgzmaxruizhi)
+        zgruzhi, zglizhi = dfdutytarget.loc[dfgzmaxruizhi.index, ['ruzhi', 'lizhi']].values[0]
+        # print(zgruzhi, type(zgruzhi), zglizhi, type(zglizhi))
+        dfzgwork = isworkday(list(dtlistinner), zg, fromthen=True)
         dfzgwork = dfzgwork[dfzgwork.date >= zgruzhi]
+        dtto4 = dtto
         if pd.notnull(zglizhi):
+            if dtto4 > pd.to_datetime(zglizhi):
+                dtto4 = pd.to_datetime(zglizhi)
             dfzgwork = dfzgwork[dfzgwork.date <= zglizhi]
         dszg = dfzgwork.groupby('xingzhi').count()['date']
         # print(dszg.name)
         dszg = pd.Series(dszg)
         dszg = dszg.rename(zg)
+        dszg['起始日期'] = dtfrom4.strftime('%F')
+        dszg['截止日期'] = dtto4.strftime('%F')
         # print(dszg.name)
         dslist.append(dszg)
 
     dfgzduty = pd.DataFrame(dslist)
     dfgzduty.fillna(0, inplace=True)
-    print(dfgzduty)
+    # print(dfgzduty)
 
-    dfout = pd.DataFrame()
+    # return dfgzduty, dtquanti, zaizhi
+
+    dfshangban = pd.DataFrame(dfgzduty['上班'].rename('出勤'))
+    # print(dfout)
     clsnames = list(dfgzduty.columns)
-    clsjiaxiu = [x for x in clsnames if (x.find('班') < 0) & (x.find('假') < 0) & (x.find('旷') < 0)]
-    dfjiaxiusum = dfgzduty.loc[:, clsjiaxiu].apply(lambda x : sum(x), axis=1).rename('假休')
+    clsjiaxiu = [x for x in clsnames if (x.find('班') < 0) & (x.find('假') < 0) & (x.find('旷') < 0) & (x.find('日期') < 0)]
+    dfjiaxiusum = dfgzduty.loc[:, clsjiaxiu].apply(lambda x: sum(x), axis=1).rename('放休')
+    # dfout.append(dfjiaxiusum)
     clsqingjia = [x for x in clsnames if x.find('假') > 0]
-    dfqingjia = dfgzduty.loc[:, clsqingjia].apply(lambda x : sum(x), axis=1).rename('请假')
-    dfkuanggong = None
-    if len([x for x in clsnames if x.find('旷') >= 0]) > 0:
-        dfkuanggong = dfgzduty['旷工']
-    dfout = pd.DataFrame([dfgzduty['上班'], dfjiaxiusum, dfqingjia, dfkuanggong]).T
-    return dfout
+    dfqingjia = dfgzduty.loc[:, clsqingjia].apply(lambda x: sum(x), axis=1).rename('请假')
+    # dfout.append(dfqingjia)
+    dfout = pd.concat([dfshangban, dfjiaxiusum, dfqingjia], axis=1)
+    if [x for x in clsnames if x.find('旷')] is None:
+        dfkuangong = pd.DataFrame(dfgzduty['旷工'])
+        dfout = pd.concat([dfout, dfkuangong], axis=1)
+    dfout = pd.DataFrame(dfout)
+    dfout['在职天数'] = dfout.apply(lambda x: sum(x), axis=1)
+    # print(dfout)
+    dfout = pd.concat([dfout, dfgzduty.loc[:, ['起始日期', '截止日期']]], axis=1)
+    dfout = pd.DataFrame(dfout)
+    dfout.sort_values(['截止日期', '出勤', '请假'], ascending=[False, False, False], inplace=True)
+    clsout = list(dfout.columns)
+    clsnew = clsout[-2:] + [clsout[-3]] + clsout[:-3]
+    # print(clsnew)
+    dfout = dfout.loc[:, clsnew]
+    return dfout, dtfrom, dtto
 
+
+def showdutyon2note():
+    recentdutyguid = '02540689-911d-4a2a-bd22-89fe44d41f2a'
+    tday = pd.to_datetime(datetime.datetime.today())
+
+    dutytablelist = list()
+    for i in range(1, 4, 1):
+        thismonth = tday + MonthBegin((-1) * i)
+        print(thismonth)
+        dutytablelist.append(showdutyonfunc([thismonth]))
+    dutytableliststr = ''
+    for i in range(len(dutytablelist)):
+        dutytableliststr += f"{dutytablelist[i][1].strftime('%F')}至{dutytablelist[i][2].strftime('%F')}" \
+                            + tablehtml2evernote(dutytablelist[i][0],
+                                                 dutytablelist[i][1].strftime('%Y-%m'), withindex=True)
+
+    imglist2note(get_notestore(), [], recentdutyguid, '真元商贸员工出勤统计表（最近三个月）', dutytableliststr)
+
+    alldutyonguid = '3d927c7e-98a6-4761-b0c6-7fba1348244f'
+    dfall, dfallfrom, dfallto = showdutyonfunc([pd.to_datetime('2010-10-22')])
+    dutytableallstr = f"{dfallfrom.strftime('%F')}至{dfallto.strftime('%F')}" \
+                      + tablehtml2evernote(dfall, dfallfrom.strftime('%Y-%m'), withindex=True)
+    imglist2note(get_notestore(), [], alldutyonguid, '真元员工出勤大统计', dutytableallstr)
+
+
+def duty_timer(jiangemiao):
+    showdutyon2note()
+
+    global timer_duty2note
+    timer_duty2note = Timer(jiangemiao, duty_timer, [jiangemiao])
+    timer_duty2note.start()
 
 if __name__ == '__main__':
     # global log
     log.info(f'测试文件\t{__file__}')
 
-    df = showdutyon()
-    print(df)
+    duty_timer(60 * 5)
+    showdutyon2note()
+
+    # df, dtf, dtt = showdutyon(['2010-10-22'], ['徐志伟', '梅富忠', '周莉'])
+    # print(dtf.strftime('%F'), dtt.strftime('%F'))
+    # print(df)
+
+    # df, dtf, dtt = showdutyon(zglist = ['徐志伟', '梅富忠', '甘微'])
+    # print(dtf.strftime('%F'), dtt.strftime('%F'))
+    # print(df)
+
+    # df, dtf, dtt = showdutyonfunc(list(pd.date_range(pd.to_datetime('2017-6-1'), pd.to_datetime('2018-3-1'), freq='D')))
+    # print(dtf.strftime('%F'), dtt.strftime('%F'))
+    # print(df)
+
+    # df, dtf, dtt = showdutyonfunc(list(pd.date_range(pd.to_datetime('2010-6-1'), pd.to_datetime('2018-12-1'), freq='D')))
+    # print(dtf.strftime('%F'), dtt.strftime('%F'))
+    # print(df)
     # fetchattendance_from_evernote(60 * 12)
     # dtlist = ['2018-6-14', '2018-6-10', '2018-5-1', '2018-3-4']
     # reslist = isworkday(dtlist)
