@@ -238,22 +238,31 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
     dfshangban = pd.DataFrame(dfgzduty['上班'].rename('出勤'))
     # print(dfout)
     clsnames = list(dfgzduty.columns)
-    clsjiaxiu = [x for x in clsnames if (x.find('班') < 0) & (x.find('假') < 0) & (x.find('旷') < 0) & (x.find('日期') < 0)]
-    dfjiaxiusum = dfgzduty.loc[:, clsjiaxiu].apply(lambda x: sum(x), axis=1).rename('放休')
+    # print(clsnames)
+    clsjiaxiu = [x for x in clsnames if
+                 (x.find('上班') < 0) & (x.find('请假') < 0) & (x.find('旷') < 0) & (x.find('日期') < 0)]
+    # print(clsjiaxiu)
+    # print(dfgzduty.loc[:, clsjiaxiu])
+    dfjiaxiusum = dfgzduty.loc[:, clsjiaxiu].apply(lambda x: sum(x), axis=1).rename('放休年')
     # dfout.append(dfjiaxiusum)
-    clsqingjia = [x for x in clsnames if x.find('假') > 0]
-    dfqingjia = dfgzduty.loc[:, clsqingjia].apply(lambda x: sum(x), axis=1).rename('事年')
+    # clsqingjia = [x for x in clsnames if x.find('假') > 0]
+    # dfqingjia = dfgzduty.loc[:, clsqingjia].apply(lambda x: sum(x), axis=1).rename('事年')
     # dfout.append(dfqingjia)
-    dfout = pd.concat([dfshangban, dfjiaxiusum, dfqingjia], axis=1)
-    if [x for x in clsnames if x.find('旷')] is None:
+    # dfout = pd.concat([dfshangban, dfjiaxiusum, dfqingjia], axis=1)
+    dfout = pd.concat([dfshangban, dfjiaxiusum], axis=1)
+    if len([x for x in clsnames if x.find('旷工') >= 0]) > 0:
         dfkuangong = pd.DataFrame(dfgzduty['旷工'])
         dfout = pd.concat([dfout, dfkuangong], axis=1)
+    if len([x for x in clsnames if x.find('请假') >= 0]) > 0:
+        dfqingjia = pd.DataFrame(dfgzduty['请假'])
+        dfout = pd.concat([dfout, dfqingjia], axis=1)
     dfout = pd.DataFrame(dfout)
     dfout['在职天数'] = dfout.apply(lambda x: sum(x), axis=1)
     # print(dfout)
     dfout = pd.concat([dfout, dfgzduty.loc[:, ['起始日期', '截止日期']]], axis=1)
     dfout = pd.DataFrame(dfout)
-    dfout.sort_values(['截止日期', '出勤', '事年'], ascending=[False, False, False], inplace=True)
+    print(dfout)
+    dfout.sort_values(['截止日期', '出勤', '请假'], ascending=[False, False, False], inplace=True)
     clsout = list(dfout.columns)
     clsnew = clsout[-2:] + [clsout[-3]] + clsout[:-3]
     # print(clsnew)
@@ -286,7 +295,7 @@ def showdutyon2note():
     alldutyonguid = '0d22c1f8-b92e-4c39-8d3e-7a6cb150e011'
     dfall, dfallfrom, dfallto = showdutyonfunc([pd.to_datetime('2010-10-22')])
     dutytableallstr = f"{dfallfrom.strftime('%F')}至{dfallto.strftime('%F')}" \
-                      + tablehtml2evernote(dfall, dfallfrom.strftime('%Y-%m'), withindex=True)
+                      + tablehtml2evernote(dfall, dfallto.strftime('%Y-%m'), withindex=True)
     imglist2note(get_notestore(), [], alldutyonguid, '真元员工出勤大统计', dutytableallstr)
 
 
@@ -305,32 +314,22 @@ if __name__ == '__main__':
     # duty_timer(60 * 5)
     showdutyon2note()
 
-    # df, dtf, dtt = showdutyonfunc(list(pd.date_range(pd.to_datetime('2018-7-1'), pd.to_datetime('2018-7-31'), freq='D')),zglist=['徐志伟', '梅富忠', '周莉'])
-    # print(dtf.strftime('%F'), dtt.strftime('%F'))
-    # print(df)
+    # df, dtf, dtt = showdutyonfunc(list(pd.date_range(pd.to_datetime('2018-7-1'), pd.to_datetime('2018-7-31'),
+    # freq='D')),zglist=['徐志伟', '梅富忠', '周莉']) print(dtf.strftime('%F'), dtt.strftime('%F')) print(df)
 
     # df, dtf, dtt = showdutyon(zglist = ['徐志伟', '梅富忠', '甘微'])
     # print(dtf.strftime('%F'), dtt.strftime('%F'))
     # print(df)
 
-    # df, dtf, dtt = showdutyonfunc(list(pd.date_range(pd.to_datetime('2017-6-1'), pd.to_datetime('2018-3-1'), freq='D')))
-    # print(dtf.strftime('%F'), dtt.strftime('%F'))
-    # print(df)
+    # df, dtf, dtt = showdutyonfunc(list(pd.date_range(pd.to_datetime('2017-6-1'), pd.to_datetime('2018-3-1'),
+    # freq='D'))) print(dtf.strftime('%F'), dtt.strftime('%F')) print(df)
 
-    # df, dtf, dtt = showdutyonfunc(list(pd.date_range(pd.to_datetime('2010-6-1'), pd.to_datetime('2018-12-1'), freq='D')))
-    # print(dtf.strftime('%F'), dtt.strftime('%F'))
-    # print(df)
-    # fetchattendance_from_evernote(60 * 12)
-    # dtlist = ['2018-6-14', '2018-6-10', '2018-5-1', '2018-3-4']
-    # reslist = isworkday(dtlist)
-    # print(dtlist)
-    # print(reslist)
-    # dtfrom = pd.to_datetime('2018-6-1')
-    # tianshu = 25
-    # drim = pd.date_range(dtfrom, dtfrom + datetime.timedelta(days=tianshu), freq='D').values
-    # # print(drim)
-    # resultlist = isworkday([pd.to_datetime('2018-7-16')], '梅富忠', fromthen=True).values
-    # weekdaychinese = ['日', '一', '二', '三', '四', '五', '六']
-    # for [dt, name, iswork, xingzhi, tianshu] in resultlist:
-    #     print(f'{dt}\t{weekdaychinese[int(dt.strftime("%w"))]}\t{iswork}\t{xingzhi}')
+    # df, dtf, dtt = showdutyonfunc(list(pd.date_range(pd.to_datetime('2010-6-1'), pd.to_datetime('2018-12-1'),
+    # freq='D'))) print(dtf.strftime('%F'), dtt.strftime('%F')) print(df) fetchattendance_from_evernote(60 * 12)
+    # dtlist = ['2018-6-14', '2018-6-10', '2018-5-1', '2018-3-4'] reslist = isworkday(dtlist) print(dtlist) print(
+    # reslist) dtfrom = pd.to_datetime('2018-6-1') tianshu = 25 drim = pd.date_range(dtfrom,
+    # dtfrom + datetime.timedelta(days=tianshu), freq='D').values # print(drim) resultlist = isworkday([
+    # pd.to_datetime('2018-7-16')], '梅富忠', fromthen=True).values weekdaychinese = ['日', '一', '二', '三', '四', '五',
+    # '六'] for [dt, name, iswork, xingzhi, tianshu] in resultlist: print(f'{dt}\t{weekdaychinese[int(dt.strftime(
+    # "%w"))]}\t{iswork}\t{xingzhi}')
     print('Done')
