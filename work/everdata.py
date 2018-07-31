@@ -77,7 +77,6 @@ def details2db(filename, sheetname, xiangmu, tablename):
     :param tablename:
     :return:
     """
-    global dirmainpath, log
     df = pd.read_excel(str(dirmainpath / 'data' / filename), sheetname='%s' % sheetname, index_col=0, parse_dates=True)
     log.info('读取%s' % filename)
     print(list(df.columns))
@@ -116,7 +115,6 @@ def details2db(filename, sheetname, xiangmu, tablename):
     # print(dfout.head(10))
 
     # 读取大数据的起止日期，不交叉、不是前置则可能是合法数据，二次检查后放行
-    global dbpathquandan
     cnxp = lite.connect(dbpathquandan)
 
     # dfout.to_sql(name=tablename, con=cnx, if_exists='replace', chunksize=10000)

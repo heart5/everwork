@@ -10,7 +10,7 @@
 """
 import os
 import datetime
-import xlrd
+# import xlrd
 import pandas as pd
 import sqlite3 as lite
 import evernote.edam.type.ttypes as Ttypes
@@ -23,47 +23,50 @@ from func.pdtools import dftotal2top
 
 
 def chulixls_order(orderfile):
-    book = xlrd.open_workbook(orderfile, encoding_override='gb18030')
-    sheet_name = book.sheet_names()[0]  # 获得指定索引的sheet表名字
-    print(sheet_name, end='\t')
-    sheet1 = book.sheet_by_name(sheet_name)  # 通过sheet名字来获取，当然如果知道sheet名字就可以直接指定
-    nrows = sheet1.nrows  # 获取行总数
-    ncols = sheet1.ncols
-    print(ncols, end='\t')
-    global log
-    if ncols != 13:
-        log.info(f'{orderfile}不是合格的日销售订单格式！')
-        print()
-        return
-    biglist = []
-    for i in range(nrows):
-        rowlist = []
-        for j in [1, 2, 5, 7, 9, 10]:
-            rowlist.append(sheet1.cell_value(i, j))
-        biglist.append(rowlist)
+    df = pd.read_excel(str(dirmainpath / 'data' / 'work' / '订单明细' / orderfile), index_col=0, parse_dates=True)
+    log.info('读取%s' % orderfile)
+    print(list(df.columns))
+    # ['日期', '单据编号', '摘要', '单位全名', '仓库全名', '商品编号', '商品全名', '规格', '型号', '产地', '单位', '数量', '单价', '金额', '数量1', '单价1',
+    # '金额1', '数量2', '单价2', '金额2']
+    totalin = ['%.2f' % df.loc[df.index.max()]['数量'], '%.2f' % df.loc[df.index.max()]['金额']]  # 从最后一行获取数量合计和金额合计，以备比较
+    print(totalin)
+    # df[xiangmu[0]] = None
+    # df = df.loc[:, ['日期', '单据编号', '单据类型', xiangmu[0], '摘要', '备注', '商品备注', xiangmu[1],
+    #                 '单价', '单位', '数量', '金额', '单位全名', '仓库全名', '部门全名']]
+    df = df.loc[:, df.columns[:-6]]
+    df['日期'] = pd.to_datetime(df['日期'])
+    # df['备注'] = df['备注'].astype(object)
+    dfdel = df[
+        (df.单位全名.isnull().values == True) & ((df.单据编号.isnull().values == True) | (df.单据编号 == '小计') | (df.单据编号 == '合计'))]
+    hangdel = list(dfdel.index)
+    print(hangdel)
+    df1 = df.drop(hangdel)  # 丢掉小计和合计行，另起DataFrame
+    dfzhiyuan = df1[df1.单位全名.isnull().values == True]  # 提取出项目名称行号
+    zyhang = list(dfzhiyuan.index)
+    zyming = list(dfzhiyuan['单据编号'])  # 项目名称
 
-    # print(biglist[0])
-    # print(biglist[1])
-    orderdatestr = biglist[1][0]
-    # print(orderdatestr)
-    orderdate = pd.to_datetime(orderdatestr)
-    print(orderdate, end='\t')
-    dforder = pd.DataFrame(biglist[1:-1], columns=biglist[0])
-    # dforder['日期'] = dforder['单据编号'].apply(lambda x: pd.to_datetime(x[3:13]))
-    dforder['日期'] = pd.to_datetime(dforder['日期'])
-    dforder['订单编号'] = dforder['单据编号'].apply(lambda x: x.split('-')[-1])
-    dforder['金额'] = dforder['金额'].apply(lambda x: int(x[:-3]) if type(x) != float else int(float(x)))
-    dforder = dforder.loc[:, ['单据编号', '日期', '订单编号', '往来单位', '经办人', '金额', '部门全名']]
-    dfordergengming = pd.DataFrame(dforder, copy=True)
-    dfordergengming.columns = ['单据编号', '日期', '订单编号', '客户名称', '业务人员', '订单金额', '部门']
-    dfordergengming.index = dforder['单据编号']
-    print(dfordergengming.shape[0])
+    # 每次填充df到最后一行，依次滚动更新之
+    df['员工名称'] = None
+    for i in range(len(zyhang)):
+        df.loc[zyhang[i]:, '员工名称'] = zyming[i]
 
-    return dfordergengming
+    # 丢掉项目名称行，留下纯数据
+    dfdel = df[df.单位全名.isnull().values == True]
+    # print(dfdel[['日期', '单据编号', '数量', '金额']])
+    hangdel = list(dfdel.index)
+    print(hangdel)
+    dfout = df.drop(hangdel)
+    dfout.index = range(len(dfout))
+    dfout = pd.DataFrame(dfout)
+    # print(dfout)
+    print(dfout.head(10))
+    log.info('共有%d条有效记录' % len(dfout))
+
+    print(dfout.groupby(['员工名称']).sum())
+    return dfout
 
 
 def chulidataindir_order(pathorder):
-    global dbpathworkplan
     cnxp = lite.connect(dbpathworkplan)
     tablename_order = 'salesorder'
     sqlstr = "select count(*)  from sqlite_master where type='table' and name = '%s'" % tablename_order
@@ -76,7 +79,6 @@ def chulidataindir_order(pathorder):
         dfresult = pd.DataFrame()
 
     notestr = '销售订单'
-    global cfpzysm, inizysmpath
     if cfpzysm.has_section(notestr) is False:
         cfpzysm.add_section(notestr)
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
@@ -143,7 +145,6 @@ def dingdanxiaoshouyuedufenxi(dforder):
     # descdb(dfall)
     zuijinchengjiaori = max(dfall['日期'])
     print(f'数据集最新日期：{zuijinchengjiaori}')
-    global cfpdata, inidatanotefilepath
     if cfpdata.has_option('ordersaleguidquyu', '数据最新日期'):
         daterec = pd.to_datetime(cfpdata.get('ordersaleguidquyu', '数据最新日期'))
         if daterec >= zuijinchengjiaori:  # and False:
@@ -370,7 +371,6 @@ def dingdanxiaoshouyuedufenxi(dforder):
 def showorderstat():
     # xlsfile = 'data\\work\\销售订单\\销售订单20180606__20180607034848_480667.xls'
     # dforder = chulixls_order(xlsfile)
-    global dirmainpath
     pathor = dirmainpath / 'data' / 'work' / '销售订单'
     dforder = chulidataindir_order(pathor)
     dingdanxiaoshouyuedufenxi(dforder)
@@ -384,7 +384,6 @@ def showorderstat():
     persons = list(dforderzuixinriqi.groupby('业务人员')['业务人员'].count().index)
     # print(persons)
     notestr = '每日销售订单核对'
-    global cfpzysm, inizysmpath
     if cfpzysm.has_section(notestr) is False:
         cfpzysm.add_section(notestr)
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
@@ -503,5 +502,5 @@ def showorderstat2note(jiangemiao):
 
 if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
-
+    chulixls_order('订单明细20180614.xls.xls')
     print('Done.测试完毕。')
