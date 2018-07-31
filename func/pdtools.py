@@ -119,8 +119,21 @@ def isworkday(dlist: list, person: str = '全体', fromthen=False):
                 item.append(dfperson.loc[dtdate, ['xingzhi']][0])
                 item.append(dfperson.loc[dtdate, ['tianshu']][0])
                 resultlist.append(item)
+                tianshu = dfperson.loc[dtdate, ['tianshu']][0]
+                # print(item, resultlist)
+                if tianshu < 1:
+                    itemnew = list()
+                    itemnew.append(dtdate)
+                    itemnew.append(person)
+                    itemnew.append(True)
+                    itemnew.append('上班')
+                    itemnew.append(1 - tianshu)
+                    # item[2] = True
+                    # item[3] = '上班'
+                    # item[4] = 1-tianshu
+                    resultlist.append(itemnew)
+                    # print(item, resultlist)
                 continue
-            pass
         else:
             item.append('全体')
         if dtdate in dfholiday[dfholiday.mingmu == '上班'].index:
@@ -147,6 +160,7 @@ def isworkday(dlist: list, person: str = '全体', fromthen=False):
         resultlist.append(item)
     dfout = pd.DataFrame(resultlist, columns=['date', 'name', 'work', 'xingzhi', 'tianshu'])
     dfout.sort_values(['date'], ascending=[False], inplace=True)
+    # print(dfout)
     return dfout
 
 

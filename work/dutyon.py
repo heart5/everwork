@@ -214,13 +214,14 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
         zgruzhi, zglizhi = dfdutytarget.loc[dfgzmaxruizhi.index, ['ruzhi', 'lizhi']].values[0]
         # print(zgruzhi, type(zgruzhi), zglizhi, type(zglizhi))
         dfzgwork = isworkday(list(dtlistinner), zg, fromthen=True)
+        # print(dfzgwork)
         dfzgwork = dfzgwork[dfzgwork.date >= zgruzhi]
         dtto4 = dtto
         if pd.notnull(zglizhi):
             if dtto4 > pd.to_datetime(zglizhi):
                 dtto4 = pd.to_datetime(zglizhi)
             dfzgwork = dfzgwork[dfzgwork.date <= zglizhi]
-        dszg = dfzgwork.groupby('xingzhi').count()['date']
+        dszg = dfzgwork.groupby('xingzhi').sum()['tianshu']
         # print(dszg.name)
         dszg = pd.Series(dszg)
         dszg = dszg.rename(zg)
@@ -261,7 +262,7 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
     # print(dfout)
     dfout = pd.concat([dfout, dfgzduty.loc[:, ['起始日期', '截止日期']]], axis=1)
     dfout = pd.DataFrame(dfout)
-    print(dfout)
+    # print(dfout)
     dfout.sort_values(['截止日期', '出勤', '请假'], ascending=[False, False, False], inplace=True)
     clsout = list(dfout.columns)
     clsnew = clsout[-2:] + [clsout[-3]] + clsout[:-3]
