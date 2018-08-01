@@ -42,7 +42,7 @@ def zipdata2one_timer(jiangemiao):
     except ValueError as wve:
         log.critical(f'自动备份至OneDrive目录时出现错误。{wve}')
     global timer_zip2one
-    timer_zip2one = Timer(jiangemiao, zipdir2one, [jiangemiao])
+    timer_zip2one = Timer(jiangemiao, zipdata2one_timer, [jiangemiao])
     timer_zip2one.start()
 
 
@@ -50,6 +50,6 @@ if __name__ == '__main__':
     print(f'开始测试文件\t{__file__}')
     # zipdir2one()
 
-    zipdata2one_timer(60*100)
+    zipdata2one_timer(60*2)
 
     print('Done.测试完成。')
