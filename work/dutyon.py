@@ -277,7 +277,10 @@ def showdutyon2note():
 
     dutytablelist = list()
     for i in range(1, 4, 1):
-        thismonth = tday + MonthBegin((-1) * i)
+        if tday.day == 1:
+            thismonth = tday
+        else:
+            thismonth = tday + MonthBegin((-1) * i)
         thismonthend = tday + MonthEnd((-1) * i + 1)
         print(thismonth.strftime('%F'), thismonthend.strftime('%F'))
         dtitemrange = list(pd.date_range(thismonth, thismonthend, freq='D'))
