@@ -33,6 +33,7 @@ from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernot
 from func.logme import log
 from func.first import dirmain, dirmainpath, dbpathworkplan, dbpathquandan
 from func.pdtools import dftotal2top
+from work.orderdetails import jiaoyanchanpinkehu
 
 
 def chulixls_order(orderfile):
@@ -76,7 +77,6 @@ def chulixls_order(orderfile):
 
 
 def chulidataindir_order(pathorder):
-    global dbpathworkplan
     cnxp = lite.connect(dbpathworkplan)
     tablename_order = 'salesorder'
     sqlstr = "select count(*)  from sqlite_master where type='table' and name = '%s'" % tablename_order
@@ -89,7 +89,6 @@ def chulidataindir_order(pathorder):
         dfresult = pd.DataFrame()
 
     notestr = '销售订单'
-    global cfpzysm, inizysmpath
     if cfpzysm.has_section(notestr) is False:
         cfpzysm.add_section(notestr)
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
@@ -134,7 +133,6 @@ def chulidataindir_order(pathorder):
     # descdb(dfdanjusuoyin)
     dfdanjusuoyin.to_sql('tmptable', cnxp, index=True, if_exists='replace')
     cursor = cnxp.cursor()
-    global dbpathquandan
     cursor.execute(f'attach database \'{dbpathquandan}\' as \'C\'')
     dfhanqu = pd.read_sql_query(
         'select tmptable.*,C.customer.往来单位编号 as 单位编号, substr(C.customer.往来单位编号, 1,2) as 区域,  '
@@ -145,6 +143,7 @@ def chulidataindir_order(pathorder):
     dfout = dfhanqu.loc[:, ['日期', '订单编号', '区域', '类型', '单位编号', '客户名称', '业务人员', '订单金额', '部门']]
     # descdb(dfout)
 
+    cursor.execute('detach database \'C\'')
     cnxp.close()
 
     return dfout
@@ -156,7 +155,6 @@ def dingdanxiaoshouyuedufenxi(dforder):
     # descdb(dfall)
     zuijinchengjiaori = max(dfall['日期'])
     print(f'数据集最新日期：{zuijinchengjiaori}')
-    global cfpdata, inidatanotefilepath
     if cfpdata.has_option('ordersaleguidquyu', '数据最新日期'):
         daterec = pd.to_datetime(cfpdata.get('ordersaleguidquyu', '数据最新日期'))
         if daterec >= zuijinchengjiaori:  # and False:
@@ -383,7 +381,6 @@ def dingdanxiaoshouyuedufenxi(dforder):
 def showorderstat():
     # xlsfile = 'data\\work\\销售订单\\销售订单20180606__20180607034848_480667.xls'
     # dforder = chulixls_order(xlsfile)
-    global dirmainpath
     pathor = dirmainpath / 'data' / 'work' / '销售订单'
     dforder = chulidataindir_order(pathor)
     dingdanxiaoshouyuedufenxi(dforder)
@@ -397,7 +394,6 @@ def showorderstat():
     persons = list(dforderzuixinriqi.groupby('业务人员')['业务人员'].count().index)
     # print(persons)
     notestr = '每日销售订单核对'
-    global cfpzysm, inizysmpath
     if cfpzysm.has_section(notestr) is False:
         cfpzysm.add_section(notestr)
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
@@ -411,9 +407,7 @@ def showorderstat():
                 nbody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
                 nbody += '<en-note>%s</en-note>' % plannote.title
                 plannote.content = nbody
-                global workplannotebookguid
                 plannote.notebookGuid = workplannotebookguid
-                global cfp
                 token = cfp.get('evernote', 'token')
                 note = notestore.createNote(token, plannote)
                 evernoteapijiayi()
@@ -505,6 +499,7 @@ def showorderstat2note(jiangemiao):
     workplannotebookguid = '2c8e97b5-421f-461c-8e35-0f0b1a33e91c'
     try:
         showorderstat()
+        jiaoyanchanpinkehu()
     except Exception as ee:
         log.critical('处理订单核对统计笔记时出现错误。%s' % str(ee))
         raise ee

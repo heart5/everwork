@@ -169,7 +169,7 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
     # print(dfduty)
 
     # 处理参数：空则从本月1日到今天；一个则默认是起始日期，到今天；数组则判断大小
-    if dtlist is None:
+    if len(dtlist) == 0:
         dtto = pd.to_datetime(datetime.datetime.today())
         dtfrom = pd.to_datetime(dtto.strftime('%Y-%m-01'))
     elif len(dtlist) == 1:
@@ -258,12 +258,13 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
         dfqingjia = pd.DataFrame(dfgzduty['请假'])
         dfout = pd.concat([dfout, dfqingjia], axis=1)
     dfout = pd.DataFrame(dfout)
+    dfout.fillna(0, inplace=True)
     dfout['在职天数'] = dfout.apply(lambda x: sum(x), axis=1)
     # print(dfout)
     dfout = pd.concat([dfout, dfgzduty.loc[:, ['起始日期', '截止日期']]], axis=1)
     dfout = pd.DataFrame(dfout)
     # print(dfout)
-    dfout.sort_values(['截止日期', '出勤', '请假'], ascending=[False, False, False], inplace=True)
+    dfout.sort_values(['截止日期', '出勤'], ascending=[False, False], inplace=True)
     clsout = list(dfout.columns)
     clsnew = clsout[-2:] + [clsout[-3]] + clsout[:-3]
     # print(clsnew)
@@ -277,6 +278,8 @@ def showdutyon2note():
 
     dutytablelist = list()
     for i in range(1, 4, 1):
+        if tday.day == 1:
+            tday = pd.to_datetime(tday.strftime('%Y-%m-02'))
         thismonth = tday + MonthBegin((-1) * i)
         thismonthend = tday + MonthEnd((-1) * i + 1)
         print(thismonth.strftime('%F'), thismonthend.strftime('%F'))

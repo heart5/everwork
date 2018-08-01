@@ -3,14 +3,19 @@
 用evernote作为工作平台，通过Python链接整理各种工作数据，呈现给各个相关岗位。.
 """
 # import imp4nb
+import sqlite3 as lite
 from life.noteweather import weatherstattimer  # 调用同目录下其他文件（py）中的函数
 from etc.log2note import log2notetimer
 from work.order import showorderstat2note
 from work.workplan import planfenxi
+from func.pdtools import dataokay
 from life.notejinchujilu import jinchustattimer
 from life.peoplelog2note import peoplestattimer
 from work.filemail import workfilefromgmail2datacenter
+from work.notesaledetails import pinpaifenxi
 from work.dutyon import duty_timer
+# from func.evernt import get_notestore
+from func.first import dbpathquandan
 from func.logme import log
 
 log.debug('自动线程任务启动……')
@@ -28,7 +33,11 @@ jinchustattimer(60 * 60)
 peoplestattimer(60 * 25)
 planfenxi(60 * 65 * 2)
 duty_timer(60 * 60 * 24)
-#
+
+cnx = lite.connect(dbpathquandan)
+dataokay(cnx)
+pinpaifenxi(cnx, daysbefore=30, brandnum=15)
+
 # writeini()
 
 # findnotebookfromevernote(token)
