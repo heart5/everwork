@@ -17,7 +17,10 @@ def zipdir2one():
     # for key in env_dlist:
     #     print(key, env_dlist[key])
     onedrivedir = Path(env_dlist['onedrive'])
-    targetzipfile = onedrivedir / '文档' / 'Program' / 'python' / 'everworkdataonly' / 'datauto.zip'
+    computername = env_dlist['COMPUTERNAME']
+    username = env_dlist['USERNAME']
+    targetzipfile = onedrivedir / '文档' / 'Program' / 'python' / 'everworkdataonly' \
+                    / f'datauto_{computername}_{username}.zip'
     print(targetzipfile)
     log.info(f'压缩目录《{sourcedir}》到OneDrive文件夹实现自动同步')
 
