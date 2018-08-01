@@ -8,7 +8,7 @@ import pandas as pd
 import sqlite3 as lite
 from func.configpr import cfpdata, inidatanotefilepath
 from func.evernt import imglist2note, get_notestore, token
-from func.first import dbpathquandan, touchfilepath2depth
+from func.first import dbpathquandan, touchfilepath2depth, dbpathdingdanmingxi
 from func.pdtools import dataokay, dfin2imglist, updatesection, readinisection2df
 from func.logme import log
 
@@ -45,7 +45,7 @@ def getgroupdf(dfs, xiangmus, period='month'):
     return dfout
 
 
-def fenxiyueduibi(note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnxf, pinpai='', cum=False):
+def fenxiyueduibi(sqlstr, xiangmu, notefenbudf, noteleixingdf, cnxf, pinpai='', cum=False):
     # global log
     log.info(sqlstr)
     xmclause = xiangmu[0]
@@ -56,20 +56,33 @@ def fenxiyueduibi(note_store, sqlstr, xiangmu, notefenbudf, noteleixingdf, cnxf,
     sqlz = sqlstr % (xmclause, jineclause, brclause)
     dfz = pd.read_sql_query(sqlz, cnxf, parse_dates=['日期'])
     log.info(sqlz)
+    cursor = cnxf.cursor()
+    cursor.execute(f'attach database \'{dbpathdingdanmingxi}\' as \'C\'')
+    sqlznew = sqlz.replace('xiaoshoumingxi', 'C.orderdetails')
+    log.info(sqlznew)
+    dfznew = pd.read_sql_query(sqlznew, cnxf, parse_dates=['日期'])
+    # print(dfznew)
 
     xmclause = xiangmu[1]
     jineclause = ' and (金额 < 0) '
     sqlf = sqlstr % (xmclause, jineclause, brclause)
     dff = pd.read_sql_query(sqlf, cnxf, parse_dates=['日期'])
     log.info(sqlf)
+    sqlfnew = sqlf.replace('xiaoshoumingxi', 'C.orderdetails')
+    log.info(sqlznew)
+    dffnew = pd.read_sql_query(sqlfnew, cnxf, parse_dates=['日期'])
+    # print(dffnew)
+    cursor.execute('detach database \'C\'')
+    cursor.close()
 
-    df = pd.merge(dfz, dff, how='outer', on=['日期', '年月', '客户编码', '区域', '类型', '品牌'], sort=True)
+    df = pd.merge(dfz.append(dfznew), dff.append(dffnew), how='outer', on=['日期', '年月', '客户编码', '区域', '类型', '品牌'],
+                  sort=True)
+    df.fillna(0, inplace=True)
     # print(df.tail(10))
-    # df = df.fillna(0)
-    kuangjiachutu(note_store, notefenbudf, noteleixingdf, df, xiangmu, cnxf, pinpai, cum)
+    kuangjiachutu(notefenbudf, noteleixingdf, df, xiangmu, cnxf, pinpai, cum)
 
 
-def kuangjiachutu(note_store, notefenbudf, noteleixingdf, df, xiangmu, cnxk, pinpai, cum=False):
+def kuangjiachutu(notefenbudf, noteleixingdf, df, xiangmu, cnxk, pinpai, cum=False):
     # global log
     dfquyu = pd.read_sql('select * from quyu', cnxk, index_col='index')
     dfleixing = pd.read_sql('select * from leixing', cnxk, index_col='index')
@@ -109,7 +122,8 @@ def kuangjiachutu(note_store, notefenbudf, noteleixingdf, df, xiangmu, cnxk, pin
                 imglist = dfin2imglist(dfin, cum=cum, leixingset=leixingset, fenbuset=fenbuset, pinpai=pinpai)
                 htable = dfin[dfin.index > (dfin.index.max() + pd.Timedelta(days=-365))].sort_index(
                     ascending=False).to_html().replace('class="dataframe"', '')
-                imglist2note(note_store, imglist, notefenbudf.loc[fenbuset]['guid'], notefenbudf.loc[fenbuset]['title'],
+                imglist2note(get_notestore(), imglist, notefenbudf.loc[fenbuset]['guid'],
+                             notefenbudf.loc[fenbuset]['title'],
                              neirong=htable)
         else:
             log.debug(str(df['日期'].max()) + '\t：\t' + leixingset)
@@ -127,23 +141,32 @@ def kuangjiachutu(note_store, notefenbudf, noteleixingdf, df, xiangmu, cnxk, pin
             if leixingset in targetlist:
                 htable = dfin[dfin.index > (dfin.index.max() + pd.Timedelta(days=-365))].sort_index(
                     ascending=False).to_html().replace('class="dataframe"', '')
-                imglist2note(note_store, imglist, noteleixingdf.loc[leixingset]['guid'],
+                imglist2note(get_notestore(), imglist, noteleixingdf.loc[leixingset]['guid'],
                              noteleixingdf.loc[leixingset]['title'], neirong=htable)
 
 
-def pinpaifenxi(note_store, cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
-    # global log
-    qrypinpai = "select max(日期) as 最近日期, sum(金额) as 销售金额, product.品牌名称 as 品牌 from xiaoshoumingxi,product " \
-                "where (product.商品全名 = xiaoshoumingxi.商品全名) group by 品牌 order by 最近日期"
+def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
+    cursor = cnxp.cursor()
+    cursor.execute(f'attach database \'{dbpathdingdanmingxi}\' as \'C\'')
+    qrypinpai = "select max(日期) as 最近日期, sum(金额) as 销售金额, product.品牌名称 as 品牌 , " \
+                "product.推广等级 as 等级 from C.orderdetails,product " \
+                "where (product.商品全名 = C.orderdetails.商品全名) and (等级 > 2) group by 品牌 order by 最近日期"
     dff = pd.read_sql_query(qrypinpai, cnxp, parse_dates=['最近日期'])
+    cursor.execute('detach database \'C\'')
+    cursor.close()
     # print(dff)
     brandlist = list(dff[dff.最近日期 >= (dff.最近日期.max() + pd.Timedelta(days=daysbefore * (-1)))]['品牌'])
+    print(brandlist)
+    # dfbrand = pd.read_sql_query('select 品牌名称, max(推广等级) as 等级 from product group by 品牌名称 order by 等级 desc', cnxp)
+    # # print(dfbrand)
+    # brandlist = list(dfbrand[dfbrand.等级 > 2]['品牌名称'])[::-1]
+    # print(brandlist)
     if len(brandlist) > brandnum:
         brandlist = brandlist[brandnum * (-1):]
     # brandlist = list(dff['品牌'])
     brandlist.append('')
-    # brandlist = brandlist[4:]
     print(brandlist)
+    note_store = get_notestore()
     for br in brandlist:
         log.info('第%d个品牌：%s，共有%d个品牌' % (brandlist.index(br) + 1, br, len(brandlist)))
         updatesection(cfpdata, 'guid%snb' % fenbu, br + 'kehuguid%s' % fenbu, inidatanotefilepath, token, note_store,
@@ -166,7 +189,7 @@ def pinpaifenxi(note_store, cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
                  'where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) ' \
                  '%s %s group by 日期,客户编码 order by 日期'  # % (xmclause,jineclause, brclause)
         xiangmu = ['销售金额', '退货金额']
-        fenxiyueduibi(note_store, qrystr, xiangmu, notefbxsdf, notelxxsdf, cnxp, pinpai=br, cum=True)
+        fenxiyueduibi(qrystr, xiangmu, notefbxsdf, notelxxsdf, cnxp, pinpai=br, cum=True)
         # fenximonthduibi(token, note_store, cnxp, notefbxsdf, notelxxsdf, '金额', pinpai=br, cum=True)
 
         # notelxkhdf = ['']
@@ -180,12 +203,12 @@ def pinpaifenxi(note_store, cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
                  'where (customer.往来单位 = xiaoshoumingxi.单位全名)  and (product.商品全名 = xiaoshoumingxi.商品全名) ' \
                  '%s %s group by 日期,客户编码 order by 日期'  # % (xmclause,jineclause, brclause)
         xiangmu = ['销售客户数', '退货客户数']
-        fenxiyueduibi(note_store, qrystr, xiangmu, notefbkhdf, notelxkhdf, cnxp, pinpai=br)
+        fenxiyueduibi(qrystr, xiangmu, notefbkhdf, notelxkhdf, cnxp, pinpai=br)
         # fenximonthduibi(token, note_store, '退货客户数', notefbkhdf, notelxkhdf, cnxp, pinpai=br)
 
 
 if __name__ == '__main__':
     cnx = lite.connect(dbpathquandan)
     dataokay(cnx)
-    pinpaifenxi(get_notestore(), cnx, daysbefore=15, brandnum=1)
+    pinpaifenxi(cnx, daysbefore=30, brandnum=15)
     print('Done.')

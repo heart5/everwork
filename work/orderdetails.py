@@ -199,7 +199,7 @@ def showorderstat():
     # dforder = chulixls_order(xlsfile)
     pathor = dirmainpath / 'data' / 'work' / '销售订单'
     dforder = chulidataindir_order(pathor)
-    jiaoyanchanpinkehu(dforder)
+    jiaoyanchanpinkehu()
     dforder = dforder.loc[:, ['日期', '订单编号', '区域', '类型', '客户名称', '业务人员', '订单金额']]
     dforder.sort_values(by=['日期', '订单编号', '业务人员'], ascending=False, inplace=True)
     zuixinriqi = dforder.groupby(['日期'])['日期'].size().index.max()

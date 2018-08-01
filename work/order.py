@@ -77,7 +77,6 @@ def chulixls_order(orderfile):
 
 
 def chulidataindir_order(pathorder):
-    global dbpathworkplan
     cnxp = lite.connect(dbpathworkplan)
     tablename_order = 'salesorder'
     sqlstr = "select count(*)  from sqlite_master where type='table' and name = '%s'" % tablename_order
@@ -90,7 +89,6 @@ def chulidataindir_order(pathorder):
         dfresult = pd.DataFrame()
 
     notestr = '销售订单'
-    global cfpzysm, inizysmpath
     if cfpzysm.has_section(notestr) is False:
         cfpzysm.add_section(notestr)
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
@@ -135,7 +133,6 @@ def chulidataindir_order(pathorder):
     # descdb(dfdanjusuoyin)
     dfdanjusuoyin.to_sql('tmptable', cnxp, index=True, if_exists='replace')
     cursor = cnxp.cursor()
-    global dbpathquandan
     cursor.execute(f'attach database \'{dbpathquandan}\' as \'C\'')
     dfhanqu = pd.read_sql_query(
         'select tmptable.*,C.customer.往来单位编号 as 单位编号, substr(C.customer.往来单位编号, 1,2) as 区域,  '
@@ -146,6 +143,7 @@ def chulidataindir_order(pathorder):
     dfout = dfhanqu.loc[:, ['日期', '订单编号', '区域', '类型', '单位编号', '客户名称', '业务人员', '订单金额', '部门']]
     # descdb(dfout)
 
+    cursor.execute('detach database \'C\'')
     cnxp.close()
 
     return dfout
@@ -157,7 +155,6 @@ def dingdanxiaoshouyuedufenxi(dforder):
     # descdb(dfall)
     zuijinchengjiaori = max(dfall['日期'])
     print(f'数据集最新日期：{zuijinchengjiaori}')
-    global cfpdata, inidatanotefilepath
     if cfpdata.has_option('ordersaleguidquyu', '数据最新日期'):
         daterec = pd.to_datetime(cfpdata.get('ordersaleguidquyu', '数据最新日期'))
         if daterec >= zuijinchengjiaori:  # and False:
