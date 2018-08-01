@@ -35,6 +35,7 @@ dirmain = str(getdirmain())
 dirlog = str(getdirmain() / 'log' / 'everwork.log')
 dbpathworkplan = str(getdirmain() / 'data' / 'workplan.db')
 dbpathquandan = str(getdirmain() / 'data' / 'quandan.db')
+dbpathdingdanmingxi = str(getdirmain() / 'data' / 'dingdanmingxi.db')
 ywananchor = 50000  # 纵轴标识万化锚点
 
 

@@ -62,7 +62,6 @@ def chengbenjiaupdateall(cnxc):
     del dfsall['index']
     dfsall = chengbenjiaupdatedf(dfsall, cnxc)
     dfsall.to_sql(name='xiaoshoumingxi', con=cnxc, if_exists='replace', chunksize=10000)
-    global log
     log.info('要更新%d记录中的成本价和毛利内容' % len(dfsall))
     dfsall['年月'] = dfsall['日期'].apply(lambda x: datetime.datetime.strftime(x, '%Y%m'))
     print(dfsall.groupby('年月', as_index=False)[['数量', '成本金额', '金额', '毛利']].sum())
@@ -267,7 +266,6 @@ def customerweihu2systable():
 
 
 def jiaoyankehuchanpin():
-    global dbpathquandan
     cnx = lite.connect(dbpathquandan)
 
     dataokay(cnx)

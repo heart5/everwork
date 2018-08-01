@@ -33,6 +33,7 @@ from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernot
 from func.logme import log
 from func.first import dirmain, dirmainpath, dbpathworkplan, dbpathquandan
 from func.pdtools import dftotal2top
+from work.orderdetails import jiaoyanchanpinkehu
 
 
 def chulixls_order(orderfile):
@@ -383,7 +384,6 @@ def dingdanxiaoshouyuedufenxi(dforder):
 def showorderstat():
     # xlsfile = 'data\\work\\销售订单\\销售订单20180606__20180607034848_480667.xls'
     # dforder = chulixls_order(xlsfile)
-    global dirmainpath
     pathor = dirmainpath / 'data' / 'work' / '销售订单'
     dforder = chulidataindir_order(pathor)
     dingdanxiaoshouyuedufenxi(dforder)
@@ -397,7 +397,6 @@ def showorderstat():
     persons = list(dforderzuixinriqi.groupby('业务人员')['业务人员'].count().index)
     # print(persons)
     notestr = '每日销售订单核对'
-    global cfpzysm, inizysmpath
     if cfpzysm.has_section(notestr) is False:
         cfpzysm.add_section(notestr)
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
@@ -411,9 +410,7 @@ def showorderstat():
                 nbody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
                 nbody += '<en-note>%s</en-note>' % plannote.title
                 plannote.content = nbody
-                global workplannotebookguid
                 plannote.notebookGuid = workplannotebookguid
-                global cfp
                 token = cfp.get('evernote', 'token')
                 note = notestore.createNote(token, plannote)
                 evernoteapijiayi()
@@ -505,6 +502,7 @@ def showorderstat2note(jiangemiao):
     workplannotebookguid = '2c8e97b5-421f-461c-8e35-0f0b1a33e91c'
     try:
         showorderstat()
+        jiaoyanchanpinkehu()
     except Exception as ee:
         log.critical('处理订单核对统计笔记时出现错误。%s' % str(ee))
         raise ee

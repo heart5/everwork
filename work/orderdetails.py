@@ -9,27 +9,39 @@
 992afcfb-3afb-437b-9eb1-7164d5207564 在职业务人员名单
 """
 import os
+import sys
 import datetime
 # import xlrd
 import pandas as pd
+import numpy as np
 import sqlite3 as lite
 import evernote.edam.type.ttypes as Ttypes
 from threading import Timer
+from pathlib import Path
+
+import xlrd
+
 from func.configpr import cfp, cfpzysm, inizysmpath, cfpdata, inidatanotefilepath
 from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
 from func.logme import log
-from func.first import dirmain, dirmainpath, dbpathworkplan, dbpathquandan
-from func.pdtools import dftotal2top
+from func.first import dirmain, dirmainpath, dbpathworkplan, dbpathquandan, dbpathdingdanmingxi
+from func.pdtools import dftotal2top, dataokay
 
 
-def chulixls_order(orderfile):
-    df = pd.read_excel(str(dirmainpath / 'data' / 'work' / '订单明细' / orderfile), index_col=0, parse_dates=True)
-    log.info('读取%s' % orderfile)
-    print(list(df.columns))
+def chulixls_order(orderfile: Path):
+    try:
+        content = xlrd.open_workbook(filename=orderfile, encoding_override='gb18030')
+        df = pd.read_excel(content, index_col=0, parse_dates=True, engine='xlrd')
+        log.info(f'读取{orderfile}')
+        # print(list(df.columns))
+    except UnicodeDecodeError as ude:
+        log.critical(f'读取{orderfile}时出现解码错误。{ude}')
+        return
     # ['日期', '单据编号', '摘要', '单位全名', '仓库全名', '商品编号', '商品全名', '规格', '型号', '产地', '单位', '数量', '单价', '金额', '数量1', '单价1',
     # '金额1', '数量2', '单价2', '金额2']
     totalin = ['%.2f' % df.loc[df.index.max()]['数量'], '%.2f' % df.loc[df.index.max()]['金额']]  # 从最后一行获取数量合计和金额合计，以备比较
-    print(totalin)
+    print(df['日期'].iloc[1], end='\t')
+    print(totalin, end='\t')
     # df[xiangmu[0]] = None
     # df = df.loc[:, ['日期', '单据编号', '单据类型', xiangmu[0], '摘要', '备注', '商品备注', xiangmu[1],
     #                 '单价', '单位', '数量', '金额', '单位全名', '仓库全名', '部门全名']]
@@ -39,7 +51,7 @@ def chulixls_order(orderfile):
     dfdel = df[
         (df.单位全名.isnull().values == True) & ((df.单据编号.isnull().values == True) | (df.单据编号 == '小计') | (df.单据编号 == '合计'))]
     hangdel = list(dfdel.index)
-    print(hangdel)
+    # print(hangdel)
     df1 = df.drop(hangdel)  # 丢掉小计和合计行，另起DataFrame
     dfzhiyuan = df1[df1.单位全名.isnull().values == True]  # 提取出项目名称行号
     zyhang = list(dfzhiyuan.index)
@@ -54,51 +66,58 @@ def chulixls_order(orderfile):
     dfdel = df[df.单位全名.isnull().values == True]
     # print(dfdel[['日期', '单据编号', '数量', '金额']])
     hangdel = list(dfdel.index)
-    print(hangdel)
+    # print(hangdel)
     dfout = df.drop(hangdel)
     dfout.index = range(len(dfout))
     dfout = pd.DataFrame(dfout)
     # print(dfout)
-    print(dfout.head(10))
+    # print(dfout.head(10))
     log.info('共有%d条有效记录' % len(dfout))
+    # print(list(dfout.columns))
+    if (totalin[0] == '%.2f' % dfout.sum()['数量']) & (totalin[1] == '%.2f' % dfout.sum()['金额']):
+        dfgrp = dfout.groupby(['员工名称']).sum()[['数量', '金额']]
+        dfgrp.loc['汇总'] = dfgrp.sum()
+        print(dfgrp.loc['汇总'].values)
+        return dfout
+    else:
+        log.warning(f'对读入文件《{orderfile}》的数据整理有误！总数量和总金额对不上！')
+        return
 
-    print(dfout.groupby(['员工名称']).sum())
-    return dfout
 
-
-def chulidataindir_order(pathorder):
-    cnxp = lite.connect(dbpathworkplan)
-    tablename_order = 'salesorder'
+def chulidataindir_order(pathorder: Path):
+    cnxp = lite.connect(dbpathdingdanmingxi)
+    tablename_order = 'orderdetails'
     sqlstr = "select count(*)  from sqlite_master where type='table' and name = '%s'" % tablename_order
     tablexists = pd.read_sql_query(sqlstr, cnxp).iloc[0, 0] > 0
     if tablexists:
+        # dfresult = pd.DataFrame()
         dfresult = pd.read_sql('select * from \'%s\'' % tablename_order, cnxp, parse_dates=['日期'])
         log.info('订单数据表%s已存在， 从中读取%d条数据记录。' % (tablename_order, dfresult.shape[0]))
     else:
         log.info('订单数据表%s不存在，将创建之。' % tablename_order)
         dfresult = pd.DataFrame()
 
-    notestr = '销售订单'
+    notestr = '订单明细'
     if cfpzysm.has_section(notestr) is False:
         cfpzysm.add_section(notestr)
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
     files = os.listdir(str(pathorder))
-    for fname in files[::-1]:
-        if fname.startswith('销售订单') and (fname.endswith('xls') or fname.endswith('xlsx')):
+    for fname in files:
+        if fname.startswith('订单明细') and (fname.endswith('xls') or fname.endswith('xlsx')):
             yichulifilelist = list()
-            if cfpzysm.has_option('销售订单', '已处理文件清单'):
-                yichulifilelist = cfpzysm.get('销售订单', '已处理文件清单').split()
+            if cfpzysm.has_option('订单明细', '已处理文件清单'):
+                yichulifilelist = cfpzysm.get('订单明细', '已处理文件清单').split()
             if fname in yichulifilelist:
                 continue
             print(fname, end='\t')
-            dffname = chulixls_order(str(pathorder / fname))
+            dffname = chulixls_order(pathorder / fname)
             if dffname is None:
                 continue
             dfresult = dfresult.append(dffname)
             print(dffname.shape[0], end='\t')
             print(dfresult.shape[0])
             yichulifilelist.append(fname)
-            cfpzysm.set('销售订单', '已处理文件清单', '%s' % '\n'.join(yichulifilelist))
+            cfpzysm.set('订单明细', '已处理文件清单', '%s' % '\n'.join(yichulifilelist))
             cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
 
     # dfresult.drop_duplicates(['单据编号', '日期', '订单编号', '客户名称', '业务人员', '订单金额', '部门'], inplace=True)
@@ -109,263 +128,70 @@ def chulidataindir_order(pathorder):
     datezhiyu = max(dfresult['日期'])
     print(f'除重后有{dfresult.shape[0]}条记录；数据起于{dateqiyu}，止于{datezhiyu}')
     dfttt = dfresult.drop_duplicates()
-    if cfpzysm.has_option('销售订单', '记录数'):
-        jilucont = cfpzysm.getint('销售订单', '记录数')
+    if cfpzysm.has_option('订单明细', '记录数'):
+        jilucont = cfpzysm.getint('订单明细', '记录数')
     else:
         jilucont = 0
     if dfttt.shape[0] > jilucont:
         dfttt.to_sql(tablename_order, cnxp, index=False, if_exists='replace')
-        cfpzysm.set('销售订单', '记录数', '%d' % dfttt.shape[0])
+        cfpzysm.set('订单明细', '记录数', '%d' % dfttt.shape[0])
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
-        log.info('增加有效销售订单数据%d条。' % (dfttt.shape[0] - jilucont))
-
-    dfdanjusuoyin = dfresult.loc[:, ['日期', '订单编号', '客户名称', '业务人员', '订单金额', '部门']]
-    # descdb(dfdanjusuoyin)
-    dfdanjusuoyin.to_sql('tmptable', cnxp, index=True, if_exists='replace')
-    cursor = cnxp.cursor()
-    global dbpathquandan
-    cursor.execute(f'attach database \'{dbpathquandan}\' as \'C\'')
-    dfhanqu = pd.read_sql_query(
-        'select tmptable.*,C.customer.往来单位编号 as 单位编号, substr(C.customer.往来单位编号, 1,2) as 区域,  '
-        'substr(C.customer.往来单位编号, 12, 1) as 类型 from tmptable, C.customer '
-        'where (tmptable.客户名称 = C.customer.往来单位) order by 日期 desc',
-        cnxp, parse_dates=['日期'])
-    # descdb(dfhanqu)
-    dfout = dfhanqu.loc[:, ['日期', '订单编号', '区域', '类型', '单位编号', '客户名称', '业务人员', '订单金额', '部门']]
-    # descdb(dfout)
+        log.info('增加有效订单明细数据%d条。' % (dfttt.shape[0] - jilucont))
 
     cnxp.close()
 
-    return dfout
+    return dfttt
 
 
-def dingdanxiaoshouyuedufenxi(dforder):
-    dfall = dforder.loc[:, :]
-    dfall['年月'] = dfall['日期'].apply(lambda x: x.strftime('%Y%m'))
-    # descdb(dfall)
-    zuijinchengjiaori = max(dfall['日期'])
-    print(f'数据集最新日期：{zuijinchengjiaori}')
-    if cfpdata.has_option('ordersaleguidquyu', '数据最新日期'):
-        daterec = pd.to_datetime(cfpdata.get('ordersaleguidquyu', '数据最新日期'))
-        if daterec >= zuijinchengjiaori:  # and False:
-            log.info(f'订单数据集无更新，返回')
-            return
-    zuiyuanriqi = zuijinchengjiaori + datetime.timedelta(days=-365)
-    zuiyuanyuechu = pd.to_datetime(f"{zuiyuanriqi.strftime('%Y-%m')}-01")
-    print(zuiyuanyuechu)
-    dfkehu = dfall.groupby(['单位编号', '客户名称', '区域', '类型'], as_index=False).count()
-    dfkehu.drop_duplicates(['单位编号'], keep='last', inplace=True)
-    dfkehuzhengli = dfkehu[['单位编号', '客户名称', '区域', '类型']]
-    dfkehuzhengli.index = dfkehuzhengli['单位编号']
-    del dfkehuzhengli['单位编号']
-    # descdb(dfkehuzhengli)
-    dsquyuzuixinriqi = pd.Series(dfall[dfall.日期 == zuijinchengjiaori].groupby('区域').count().index.values)
-    # print(dsquyuzuixinriqi.values)
-    dfyuetongji = dfall[dfall.日期 >= zuiyuanyuechu].groupby(by=['年月', '单位编号'], as_index=False, sort=True)['订单金额'].sum()
-    dfyuetongji['订单金额'] = dfyuetongji['订单金额'].astype(int)
-    # descdb(dfyuetongji)
-    dfpivot = dfyuetongji.pivot(index='单位编号', values='订单金额', columns='年月')
-    dfpivot = pd.DataFrame(dfpivot)
-    cls = list(dfpivot.columns)
-    # print(cls)
-    # for cl in cls:
-    #     dfpivot[cl] = dfpivot[cl].astype(int)
-    dfpivot['单位编号'] = dfpivot.index
-    dfpivot['客户名称'] = dfpivot['单位编号'].apply(lambda x: dfkehuzhengli.loc[x][0])
-    dfpivot['区域'] = dfpivot['单位编号'].apply(lambda x: dfkehuzhengli.loc[x][1])
-    dfpivot['类型'] = dfpivot['单位编号'].apply(lambda x: dfkehuzhengli.loc[x][2])
-    clsnew = ['客户名称', '区域', '类型'] + cls
-    # print(clsnew)
-    dfpivot = dfpivot.loc[:, clsnew]
-    dfpivot['成交月数'] = dfpivot.apply(lambda x: x[-13:].count(), axis=1)
+def jiaoyanchanpinkehu():
+    targetpath = dirmainpath / 'data' / 'work' / '订单明细'
+    # chulixls_order(targetpath / '订单明细20180614.xls.xls')
+    dforder = chulidataindir_order(targetpath)
 
-    def shouciyuefen(xx):
-        for i in range(len(xx)):
-            # print(xx[i])
-            if xx[i] > 0:
-                return i
-        else:
-            return 12
+    cnxp = lite.connect(dbpathquandan)
+    dataokay(cnxp)
 
-    dfpivot['首次成交月份'] = dfpivot.apply(lambda x: clsnew[shouciyuefen(x[3:16]) + 3], axis=1)
-    dfpivot['首交月数'] = dfpivot.apply(lambda x: 13 - shouciyuefen(x[3:16]), axis=1)
+    dfchanpin = pd.read_sql(f'select * from product', cnxp, index_col='index')
+    print(dfchanpin.columns)
+    dfchanpingrp = dfchanpin.groupby(['商品全名']).count()
+    print(dfchanpin.shape[0])
 
-    def zuijinyuefen(xx):
-        for i in range(len(xx) - 1, -1, -1):
-            # print(f'{xx[i]}\t{i}')
-            if xx[i] > 0:
-                return i
-        else:
-            return 12
+    # dforder = pd.read_sql(f'select 商品全名, 商品编号, 单价, 金额 from xiaoshoumingxi', cnxp)
+    print(dforder.columns)
+    dict_mapping = {'单价': 'max', '金额': 'sum'}
+    dfordergrp = dforder.groupby(['商品全名', '商品编号'], as_index=False).agg(dict_mapping)
+    dfordergrp.index = dfordergrp['商品全名']
+    print(dfordergrp.shape[0])
+    dfall = dfordergrp.join(dfchanpingrp, how='outer')
+    # print(dfall)
+    # dfall['商品编号'] = dfall['商品编号'].apply(lambda x: str(int(x)) if np.isnan(x) == False else x)
+    dfduibichanpin = dfall[np.isnan(dfall.品牌名称)][['商品编号', '单价', '金额']]
+    if dfduibichanpin.shape[0] > 0:
+        chanpinnotin = list(dfduibichanpin.index)
+        log.critical(f'产品档案需要更新，下列产品未包含：{chanpinnotin}')
+        return False
 
-    dfpivot['最近成交月份'] = dfpivot.apply(lambda x: clsnew[zuijinyuefen(x[3:16]) + 3], axis=1)
-    dfpivot['尾交月数'] = dfpivot.apply(lambda x: 13 - zuijinyuefen(x[3:16]), axis=1)
-    dfpivot['有效月数'] = dfpivot['首交月数'] - dfpivot['尾交月数'] + 1
-    dfpivot.fillna(0, inplace=True)
-    dfpivot['年总金额'] = dfpivot.apply(lambda x: sum(x[3:16]), axis=1)
-    # print(dfpivot.iloc[0, :])
-    dfpivot['年总金额'] = dfpivot['年总金额'].astype(int)
+    dfkehu = pd.read_sql(f'select * from customer', cnxp, index_col='index')
+    print(dfkehu.columns)
+    dfkehugrp = dfkehu.groupby(['往来单位']).count()
+    print(dfkehugrp.shape[0])
 
-    def youxiaoyuejun(jine, yueshu):
-        if yueshu == 0:
-            return 0
-        else:
-            return jine / yueshu
+    # dforder = pd.read_sql(f'select 单位全名, 数量, 金额 from xiaoshoumingxi', cnxp)
+    print(dforder.columns)
+    dict_mapping = {'数量': 'sum', '金额': 'sum'}
+    dfordergrp = dforder.groupby(['单位全名'], as_index=False).agg(dict_mapping)
+    dfordergrp.index = dfordergrp['单位全名']
+    print(dfordergrp.shape[0])
+    dfall = dfordergrp.join(dfkehugrp, how='outer')
+    # print(dfall)
+    # dfall['商品编号'] = dfall['商品编号'].apply(lambda x: str(int(x)) if np.isnan(x) == False else x)
+    dfduibikehu = dfall[np.isnan(dfall.往来单位编号)][['往来单位编号', '数量', '金额']]
+    if dfduibikehu.shape[0] > 0:
+        kehunotin = list(dfduibikehu.index)
+        log.critical(f'客户档案需要更新，下列客户未包含：{kehunotin}')
+        return False
 
-    dfpivot['有效月均'] = dfpivot.apply(lambda x: youxiaoyuejun(x.年总金额, x.有效月数), axis=1)
-    dfpivot['有效月均'] = dfpivot['有效月均'].astype(int)
-    dfpivot.sort_values(['区域', '有效月均'], ascending=[True, False], inplace=True)
-    # descdb(dfpivot)
-    # clsnewnew = clsnew + ['有效月均', '年总金额']
-    # dfout = dfpivot[(dfpivot.有效月均 > 300) | (dfpivot.首交月数 < 5)]
-    # print(dfout[dfout.首交月数 < 5])
-    dfout = dfpivot
-    # dfshow = dfout.loc[:, clsnewnew]
-    dfshow = dfout.loc[:, :]
-    dfshow.fillna(0, inplace=True)
-    for cl in cls:
-        dfshow[cl] = dfshow[cl].astype(int)
-    # print(dfshow[dfshow.类型 == 'I'])
-    # descdb(dfshow)
-
-    cnx = lite.connect(dbpathworkplan)
-    # dfshow.to_sql('tmptable', cnx, index=True, if_exists='replace')
-    cursor = cnx.cursor()
-    cursor.execute(f'attach database \'{dbpathquandan}\' as \'C\'')
-    dfquyu = pd.read_sql('select * from C.quyu', cnx, index_col='index')
-    dfquyu.drop_duplicates(['区域'], keep='first', inplace=True)
-    dfquyu.index = dfquyu['区域']
-    del dfquyu['区域']
-    # descdb(dfquyu)
-    dfleixing = pd.read_sql('select * from C.leixing', cnx, index_col='index')
-    dfleixing.index = dfleixing['编码']
-    del dfleixing['编码']
-    # descdb(dfleixing)
-
-    dfshow['区域名称'] = dfshow['区域'].apply(lambda x: dfquyu.loc[x][0])
-    # print(dfshow[dfshow.类型 == '0'])
-    dfshow['类型小类'] = dfshow['类型'].apply(lambda x: dfleixing.loc[x][0])
-    dfshow['类型大类'] = dfshow['类型'].apply(lambda x: dfleixing.loc[x][1])
-
-    # descdb(dfshow)
-    cnx.close()
-
-    dfzhongduan = dfshow[dfshow.类型大类 == '终端客户']
-    # descdb(dfzhongduan)
-
-    targetlist = list()
-    dfzdall = dfzhongduan.loc[:, :]
-    # descdb(dfzdall)
-
-    notestore = get_notestore()
-    quyuset = set(dsquyuzuixinriqi.apply(lambda x: dfquyu.loc[x][0]).values)
-    print(quyuset)
-    # quyuset = set(list(dfzdall['区域名称']))
-    for qy in quyuset:
-        dfslice = dfzdall[dfzdall.区域名称 == qy]
-        dfslicesingle = dfslice.loc[:, :]
-        del dfslicesingle['区域名称']
-        # descdb(dfslicesingle)
-        print(qy, end='\t')
-        print(dfslicesingle.shape[0], end='\t')
-        # descdb(dfslicesingle)
-        if cfpdata.has_option('guidquyunb', qy):
-            nbguid = cfpdata.get('guidquyunb', qy)
-        else:
-            try:
-                notebook = Ttypes.Notebook()
-                notebook.name = qy
-                notebook = notestore.createNotebook(notebook)
-                nbguid = notebook.guid
-                cfpdata.set('guidquyunb', qy, nbguid)
-                cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
-            except Exception as eeeee:
-                nbguid = None
-                log.critical(f'创建《{qy}》笔记本时出现错误。{eeeee}')
-        print(nbguid, end='\t')
-        if cfpdata.has_option('ordersaleguidquyu', qy + 'guid'):
-            ntguid = cfpdata.get('ordersaleguidquyu', qy + 'guid')
-        else:
-            try:
-                note = Ttypes.Note()
-                note.title = qy + "订单金额年度分析"
-                note.content = '<?xml version="1.0" encoding="UTF-8"?>' \
-                               '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
-                note.content += '<en-note>专营休闲美食</en-note>'
-                note.notebookGuid = nbguid
-                note = notestore.createNote(note)
-                evernoteapijiayi()
-                ntguid = note.guid
-                cfpdata.set('ordersaleguidquyu', qy + 'guid', ntguid)
-                cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
-            except Exception as ee:
-                ntguid = None
-                log.critical(f'创建《{qy}订单金额年度分析》笔记时出现错误。{ee}')
-        print(ntguid)
-        target = list()
-        target.append(qy)
-        target.append(ntguid)
-        target.append(dfslicesingle)
-        targetlist.append(target)
-
-    # descdb(dfshow[dfshow.index.str.find('XF') >= 0])
-    lqzlist = [['连锁客户', '0e8ba322-4874-4627-a6de-13c69fffc88d'],
-               ['渠道客户', '4AC03027-5929-415B-9711-0A8170263189'.lower()],
-               ['直销客户', 'B0731D74-C268-417E-A8B7-7BE3EE590FAE'.lower()]
-               ]
-    for [mingmu, mmguid] in lqzlist:
-        dfls = dfshow.loc[:, :]
-        dfls = dfls[dfls.类型大类 == mingmu]
-        # dfls = dfls[str(dfls.index)[7:9] == 'XF']
-        del dfls['类型大类']
-        dfls.sort_values(['有效月均'], ascending=False, inplace=True)
-        target = list()
-        target.append(mingmu)
-        target.append(mmguid)
-        target.append(dfls)
-        targetlist.append(target)
-    lslist = [['学府超市', 'XF', 'ce26a763-81cc-421f-8430-22dab21ba43e'],
-              ['红生超市', 'HS', '1F0995DA-1DEC-4333-8EA6-8C85B54E2B71'.lower()],
-              ['五分钟', 'WF', '41518B63-FF81-4719-BFE0-0E5BBFBC295A'.lower()]
-              ]
-    for [mingcheng, bianma, guid] in lslist:
-        dfls = dfshow.loc[:, :]
-        dfls = dfls[dfls.index.str.find(bianma) >= 0]
-        del dfls['类型大类']
-        if dfls.shape[0] == 0:
-            log.info(f'连锁超市{mingcheng}没有数据记录，跳过')
-            continue
-        dfls.sort_values(['有效月均'], ascending=False, inplace=True)
-        target = list()
-        target.append(mingcheng)
-        target.append(guid)
-        target.append(dfls)
-        targetlist.append(target)
-
-    # print(targetlist)
-    for [qy, ntguid, dfslicesingle] in targetlist:
-        try:
-            dfzdclnames = list(dfslicesingle.columns)
-            # print(dfzdclnames)
-            dfzdclnames3 = dfzdclnames[3:16]
-            dfzdclnamesnew = [dfzdclnames[0]] + [dfzdclnames[-2]] + dfzdclnames3 + [dfzdclnames[23]] + [dfzdclnames[22]]
-            # print(dfzdclnamesnew)
-
-            stattitle = f'总客户：{dfslicesingle.shape[0]}，' \
-                        f'在线客户（前三个月有成交记录）：{dfslicesingle[dfslicesingle.尾交月数 <= 4].shape[0]}，' \
-                        f'本月成交客户：{dfslicesingle[dfslicesingle.尾交月数 == 1].shape[0]}'
-            imglist2note(notestore, [], ntguid, qy + '订单金额年度分析',
-                         tablehtml2evernote(dftotal2top(dfslicesingle.loc[:, dfzdclnamesnew]), stattitle,
-                                            withindex=False))
-            cfpdata.set('ordersaleguidquyu', qy + 'count', f'{dfslicesingle.shape[0]}')
-            cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
-            log.info(f'{qy}数据项目成功更新')
-        except Exception as eee:
-            log.critical(f'《{qy}订单金额年度分析》笔记更新时出现错误。{eee}')
-        # print(dfslicesingle.shape[0])
-    else:
-        cfpdata.set('ordersaleguidquyu', '数据最新日期', f'{zuijinchengjiaori}')
-        cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
+    cnxp.close()
 
 
 def showorderstat():
@@ -373,7 +199,7 @@ def showorderstat():
     # dforder = chulixls_order(xlsfile)
     pathor = dirmainpath / 'data' / 'work' / '销售订单'
     dforder = chulidataindir_order(pathor)
-    dingdanxiaoshouyuedufenxi(dforder)
+    jiaoyanchanpinkehu(dforder)
     dforder = dforder.loc[:, ['日期', '订单编号', '区域', '类型', '客户名称', '业务人员', '订单金额']]
     dforder.sort_values(by=['日期', '订单编号', '业务人员'], ascending=False, inplace=True)
     zuixinriqi = dforder.groupby(['日期'])['日期'].size().index.max()
@@ -502,5 +328,6 @@ def showorderstat2note(jiangemiao):
 
 if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
-    chulixls_order('订单明细20180614.xls.xls')
+
+    jiaoyanchanpinkehu()
     print('Done.测试完毕。')
