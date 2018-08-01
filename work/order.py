@@ -26,12 +26,12 @@ import datetime
 import xlrd
 import pandas as pd
 import sqlite3 as lite
-import evernote.edam.type.ttypes as Ttypes
+import evernote.edam.type.ttypes as ttypes
 from threading import Timer
 from func.configpr import cfp, cfpzysm, inizysmpath, cfpdata, inidatanotefilepath
 from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
 from func.logme import log
-from func.first import dirmain, dirmainpath, dbpathworkplan, dbpathquandan
+from func.first import dirmainpath, dbpathworkplan, dbpathquandan
 from func.pdtools import dftotal2top
 from work.orderdetails import jiaoyanchanpinkehu
 
@@ -44,7 +44,6 @@ def chulixls_order(orderfile):
     nrows = sheet1.nrows  # 获取行总数
     ncols = sheet1.ncols
     print(ncols, end='\t')
-    global log
     if ncols != 13:
         log.info(f'{orderfile}不是合格的日销售订单格式！')
         print()
@@ -283,13 +282,13 @@ def dingdanxiaoshouyuedufenxi(dforder):
             nbguid = cfpdata.get('guidquyunb', qy)
         else:
             try:
-                notebook = Ttypes.Notebook()
+                notebook = ttypes.Notebook()
                 notebook.name = qy
                 notebook = notestore.createNotebook(notebook)
                 nbguid = notebook.guid
                 cfpdata.set('guidquyunb', qy, nbguid)
                 cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
-            except Exception as eeeee:
+            except WindowsError as eeeee:
                 nbguid = None
                 log.critical(f'创建《{qy}》笔记本时出现错误。{eeeee}')
         print(nbguid, end='\t')
@@ -297,7 +296,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
             ntguid = cfpdata.get('ordersaleguidquyu', qy + 'guid')
         else:
             try:
-                note = Ttypes.Note()
+                note = ttypes.Note()
                 note.title = qy + "订单金额年度分析"
                 note.content = '<?xml version="1.0" encoding="UTF-8"?>' \
                                '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
@@ -308,7 +307,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
                 ntguid = note.guid
                 cfpdata.set('ordersaleguidquyu', qy + 'guid', ntguid)
                 cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
-            except Exception as ee:
+            except WindowsError as ee:
                 ntguid = None
                 log.critical(f'创建《{qy}订单金额年度分析》笔记时出现错误。{ee}')
         print(ntguid)
@@ -370,7 +369,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
             cfpdata.set('ordersaleguidquyu', qy + 'count', f'{dfslicesingle.shape[0]}')
             cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
             log.info(f'{qy}数据项目成功更新')
-        except Exception as eee:
+        except WindowsError as eee:
             log.critical(f'《{qy}订单金额年度分析》笔记更新时出现错误。{eee}')
         # print(dfslicesingle.shape[0])
     else:
@@ -401,7 +400,7 @@ def showorderstat():
         if cfpzysm.has_option(notestr + 'guid', person) is False:
             try:
                 notestore = get_notestore()
-                plannote = Ttypes.Note()
+                plannote = ttypes.Note()
                 plannote.title = notestr + person
                 nbody = '<?xml version="1.0" encoding="UTF-8"?>'
                 nbody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
@@ -453,7 +452,7 @@ def showorderstat():
         if cfpzysm.has_option(notestr, person) is False:
             try:
                 notestore = get_notestore()
-                plannote = Ttypes.Note()
+                plannote = ttypes.Note()
                 plannote.title = notestr + person
                 nbody = '<?xml version="1.0" encoding="UTF-8"?>'
                 nbody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
@@ -508,6 +507,7 @@ def showorderstat2note(jiangemiao):
     timer_showorderstat = Timer(jiangemiao, showorderstat2note, [jiangemiao])
     timer_showorderstat.start()
 
+
 if __name__ == '__main__':
     # chulidataindir_order()
     showorderstat()
@@ -519,4 +519,3 @@ if __name__ == '__main__':
     #     print("%s = %s" %(item[1], item[0]))
 
     pass
-
