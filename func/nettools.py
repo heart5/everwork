@@ -6,6 +6,7 @@ import time
 from func.logme import log
 import requests
 from bs4 import BeautifulSoup
+import struct
 
 
 def trycounttimes(jutifunc, returnresult=False, servname='服务器'):
@@ -19,7 +20,7 @@ def trycounttimes(jutifunc, returnresult=False, servname='服务器'):
             else:
                 jutifunc()
             break
-        except (WindowsError, ConnectionRefusedError, ConnectionError) as eee:
+        except (WindowsError, ConnectionRefusedError, ConnectionResetError, ConnectionError, struct.error) as eee:
             if eee.errno == 11001:
                 log.critical(f'寻址失败，貌似网络不通。{eee}')
             elif eee.errno == 10061:
