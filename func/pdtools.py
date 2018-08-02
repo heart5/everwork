@@ -16,6 +16,7 @@ from pylab import *
 from func.evernt import evernoteapijiayi, makenote
 from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
 from func.logme import log
+from func.nettools import trycounttimes
 
 # plot中显示中文
 mpl.rcParams['font.sans-serif'] = ['SimHei']
@@ -585,21 +586,26 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
     nbfbdf = readinisection2df(cfpp, fromsection, zhuti)
     # print(nbfbdf)
     for aa in nbfbdf.index:
-        try:
-            guid = cfpp.get(tosection, aa)
-            if len(guid) > 0:
-                # print('笔记《' + str(aa) + zhuti + '》已存在，guid为：' + guid)
-                continue
-        except Exception as ee:
-            log.info('笔记《' + str(aa) + zhuti + '》不存在，将被创建……%s' % str(ee))
-        note = ttypes.Note()
-        note.title = nbfbdf.loc[aa]['title']
-        # print(aa + '\t\t' + note.title, end='\t\t')
-        parentnotebook = note_store.getNotebook(nbfbdf.loc[aa]['guid'])
-        evernoteapijiayi()
-        note = makenote(token, note_store, note.title, parentnotebook=parentnotebook)
-        # print(note.guid + '\t\t' + note.title)
-        cfpp.set(tosection, aa, note.guid)
+        def setguid():
+            try:
+                guid = cfpp.get(tosection, aa)
+                if len(guid) > 0:
+                    # print('笔记《' + str(aa) + zhuti + '》已存在，guid为：' + guid)
+                    return
+            except Exception as ee:
+                log.info('笔记《' + str(aa) + zhuti + '》不存在，将被创建……%s' % str(ee))
+            note = ttypes.Note()
+            note.title = nbfbdf.loc[aa]['title']
+            # print(aa + '\t\t' + note.title, end='\t\t')
+            parentnotebook = note_store.getNotebook(nbfbdf.loc[aa]['guid'])
+            evernoteapijiayi()
+            note = makenote(token, note_store, note.title, parentnotebook=parentnotebook)
+            # print(note.guid + '\t\t' + note.title)
+            cfpp.set(tosection, aa, note.guid)
+
+        trycounttimes(setguid, False, 'evernote服务器')
+
+
     cfpp.write(open(inifile, 'w', encoding='utf-8'))
 
 
