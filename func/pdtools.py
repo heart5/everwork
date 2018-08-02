@@ -552,7 +552,8 @@ def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount
                 # print(riqiendwith)
                 imglistson = chuturizhexian(dfmoban, riqiendwith, cln, cum=cum, leixing=leixingset, quyu=fenbuset,
                                             pinpai=pinpai, imgpath=dirmainpath / 'img' / fenbuset)
-                imglist += imglistson
+                if imglistson is not None:
+                    imglist += imglistson
             if len(imglist) >= imgmonthcount:
                 imglist = imglist[:imgmonthcount]
         nianshu = dfmoban.index.max().year - dfmoban.index.min().year + 1
