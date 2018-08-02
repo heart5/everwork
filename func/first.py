@@ -17,6 +17,8 @@ def touchfilepath2depth(filepath: Path):
     if not os.path.exists(os.path.split(str(filepath))[0]):
         os.makedirs(os.path.split(str(filepath))[0])
         print(f'目录《{os.path.split(str(filepath))[0]}》不存在，构建之。')
+    else:
+        print(f'目录《{os.path.split(str(filepath))[0]}》已现实存在，不需要重新构建。')
     # if not os.path.exists(str(filepath)):
     #     fp = open(str(filepath), 'w', encoding='utf-8')
     #     fp.close()
