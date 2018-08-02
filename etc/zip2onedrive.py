@@ -6,7 +6,7 @@ import os
 import zipfile
 from pathlib import Path
 from threading import Timer
-from func.first import dirmainpath
+from func.first import dirmainpath, touchfilepath2depth
 from func.logme import log
 
 
@@ -21,7 +21,19 @@ def zipdir2one():
     username = env_dlist['USERNAME']
     targetzipfile = onedrivedir / '文档' / 'Program' / 'python' / 'everworkdataonly' \
                     / f'datauto_{computername}_{username}.zip'
+    targetzipfile_name = targetzipfile.name
+    targetzipfile_newname = targetzipfile_name.replace('.', '_other.')
+    print(targetzipfile_name)
+    print(targetzipfile_newname)
+    targetzipfile.rename(targetzipfile_newname)
     print(targetzipfile)
+    if not targetzipfile.is_file():
+        print(f'{targetzipfile}文件不存在，需要创建。')
+        touchfilepath2depth(targetzipfile)
+    elif not zipfile.is_zipfile(targetzipfile):
+        print(f'{targetzipfile}不是一个合格的zip文件。')
+
+        targetzipfile =targetzipfile
     log.info(f'压缩目录《{sourcedir}》到OneDrive文件夹实现自动同步')
 
     filelist = list()
@@ -30,10 +42,11 @@ def zipdir2one():
         for filename in filenames:
             filelist.append(os.path.join(dirpath, filename))
     print(filelist)
-    for tar in filelist:
-        newzip.write(tar, tar[len(sourcedir):])  # tar为写入的文件，tar[len(filePath)]为保存的文件名
-    newzip.close()
-    log.info(f'成功压缩备份至：{targetzipfile}')
+
+    # for tar in filelist:
+    #     newzip.write(tar, tar[len(sourcedir):])  # tar为写入的文件，tar[len(filePath)]为保存的文件名
+    # newzip.close()
+    # log.info(f'成功压缩备份至：{targetzipfile}')
 
 
 def zipdata2one_timer(jiangemiao):
@@ -50,6 +63,6 @@ if __name__ == '__main__':
     print(f'开始测试文件\t{__file__}')
     # zipdir2one()
 
-    zipdata2one_timer(60*2)
+    zipdata2one_timer(60*200)
 
     print('Done.测试完成。')
