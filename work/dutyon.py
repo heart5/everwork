@@ -35,7 +35,7 @@ def chuliholidayleave_note(zhuti: list):
     soup = BeautifulSoup(note.content, "html.parser").get_text().strip()
     # print(soup)
     # pattern = re.compile(u'(\d{4}-\d{2}-\d{2})[,，](\w+)[,，](\d{1,2}?)', re.U)
-    pattern = re.compile(u'(\d{4}-\d{2}-\d{2})', re.U)
+    pattern = re.compile(u'(\d{4}-\d{1,2}-\d{1,2})', re.U)
     splititems = re.split(pattern, soup)[1:]
     # print(splititems)
     resultlisthd = list()
@@ -115,15 +115,19 @@ def fetchattendance_from_evernote():
 
 def chuliworkmateduty_note(zhuti: list):
     guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')
-    note = None
     try:
         note_store = get_notestore()
         note = note_store.getNote(guid, True, True, False, False)
         evernoteapijiayi()
+        # print(timestamp2str(int(note.updated/1000)))
+        # print(note.updateSequenceNum)
     except ConnectionResetError as cre:
         log.critical(f'服务器发脾气，强行重置了！{cre}')
-    # print(timestamp2str(int(note.updated/1000)))
-    # print(note.updateSequenceNum)
+        return
+    except AttributeError as abe:
+        log.critical(f'发生属性错误。{abe}')
+        return
+
     cnxp = lite.connect(dbpathworkplan)
 
     if cfpworkplan.has_option('行政管理', f'{zhuti[0]}updatenum'):
@@ -167,6 +171,8 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
     zhutiss = ['入职', 'dutyon']
     dfduty = chuliworkmateduty_note(zhutiss)
     # print(dfduty)
+    if dfduty is None:
+        return
 
     # 处理参数：空则从本月1日到今天；一个则默认是起始日期，到今天；数组则判断大小
     if len(dtlist) == 0:
@@ -304,7 +310,10 @@ def showdutyon2note():
 
 
 def duty_timer(jiangemiao):
-    showdutyon2note()
+    try:
+        showdutyon2note()
+    except TypeError as te:
+        log.critical(f'类型错误。{te}')
 
     global timer_duty2note
     timer_duty2note = Timer(jiangemiao, duty_timer, [jiangemiao])
@@ -313,10 +322,10 @@ def duty_timer(jiangemiao):
 
 if __name__ == '__main__':
     # global log
-    log.info(f'测试文件\t{__file__}')
+    log.info(f'运行文件\t{__file__}')
 
-    # duty_timer(60 * 5)
-    showdutyon2note()
+    duty_timer(60 * 60 * 3 + 60 * 37)
+    # showdutyon2note()
 
     # df, dtf, dtt = showdutyonfunc(list(pd.date_range(pd.to_datetime('2018-7-1'), pd.to_datetime('2018-7-31'),
     # freq='D')),zglist=['徐志伟', '梅富忠', '周莉']) print(dtf.strftime('%F'), dtt.strftime('%F')) print(df)
