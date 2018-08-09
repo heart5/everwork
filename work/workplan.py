@@ -7,11 +7,12 @@
 名称：业务计划总结    guid：2c8e97b5-421f-461c-8e35-0f0b1a33e91c    更新序列号：471364    默认笔记本：False
 创建时间：2016-02-16 19:56:56    更新时间：2018-02-25 00:24:57    笔记本组：None
 
+e0c1c1d4-3c91-4dfd-9d9d-fb0058f25a0f 业务推广日工作总结和计划——毛少华
 5830a2f2-7a76-4f1a-a167-1bd18818a141 业务推广日工作总结和计划——周莉
 ddf1cbea-c6e4-4d74-9782-51017c798a99 业务推广日工作总结和计划——陈威
 252e380f-11ff-4fe5-bb0c-fc24af74d385 业务推广日工作总结和计划—陈益
 ac7088ee-c1eb-4489-b249-e22692706d15 业务推广日工作总结和计划——梅富忠
-ED569A94-28F0-4C61-B81A-D38D6CB52A92 业务推广日工作总结和计划——梅富忠 为什么guid变了？！
+ed569a94-28f0-4c61-b81a-d38d6cb52a92 业务推广日工作总结和计划——梅富忠 为什么guid变了？！
 443f5b18-d0d9-436a-9f9e-5c7a070b8726 业务推广日工作总结和计划——徐志伟
 b627331e-179f-4d69-a8cf-807a1d0f6862 业务推广计划和总结—王家龙
 6e68b4ee-78f8-456e-bf76-71547e83ae21 业务推广日工作总结和计划——陈威
@@ -55,7 +56,7 @@ def chulinote_workplan(wenben: str):
     :param wenben: 原始字符串文本，一般是从笔记中提取的纯文本
     :return: 日期工作日志列表
     """
-    pattern = re.compile('(\d{4}\s*[年\\\.-]\d{1,2}\s*[月\\\.-]\d{1,2}\s*[日|号]?)(?:(?:[,， 。])?(?:周.))?', re.U)
+    pattern = re.compile('(\d{4}\s*[年\\\.-]\d{1,2}\s*[月\\\.-]\d{1,2}\s*[日|号]?)(?:(?:[,，\s。])?(?:周.))?', re.U)
     splititems = re.split(pattern, wenben)
     # print(len(splititems))
     splititems = splititems[1:]
@@ -219,7 +220,23 @@ def planfenxifunc():
         note_store = get_notestore()
         #  从印象笔记中取得在职业务列表
         persons = BeautifulSoup(note_store.getNoteContent('992afcfb-3afb-437b-9eb1-7164d5207564'),
-                                'html.parser').get_text().strip().split()
+                                'html.parser')
+        # print(persons)
+        pslist = list()
+        patn = re.compile('\s*[,，]\s*')
+        for ddiv in persons.find_all('div'):
+            psitem = re.split(patn, ddiv.get_text())
+            if len(psitem) == 3:
+                atom = list()
+                atom.append(psitem[0])
+                atom.append(pd.to_datetime(psitem[1]))
+                atom.append(pd.to_datetime(psitem[2]))
+                pslist.append(atom)
+        personsdf = pd.DataFrame(pslist, columns=['name', 'shanggang', 'ligang'])
+        personsdfzaigang = personsdf[pd.isnull(personsdf['ligang'])]
+        # print(personsdfzaigang)
+        persons = list(personsdfzaigang['name'])
+        print(persons)
         evernoteapijiayi()
         #  更新相应数据表内容
         updatedb_workplan(note_store, persons)
@@ -266,6 +283,8 @@ def planfenxifunc():
             for person in persons:
                 resultlist = isworkday(dtqujian, person)
                 dftmp = pd.DataFrame(resultlist, columns=['date', 'name', 'work', 'xingzhi', 'tianshu'])
+                shanggangdate = personsdf[personsdf.name == person]['shanggang'].values[0]
+                dftmp = dftmp[dftmp.date >= shanggangdate]
                 if dfqujian.shape[0] == 0:
                     dfqujian = dftmp
                 else:
@@ -335,6 +354,8 @@ def planfenxifunc():
             else:
                 updatable = True
             if updatable:
+                if dfperson.shape[0] == 0:
+                    continue
                 log.info('%s的业务日志条目数增加至%d，日志更新表中最新日期为：%s。'
                          % (person, planitemscount, str(dfperson.iloc[0]['nianyueri'])))
                 cfpworkplan.set('业务计划总结itemscount', person, '%d' % planitemscount)
@@ -449,9 +470,10 @@ def chayanshuju():
 
 
 if __name__ == '__main__':
-    log.info(f'测试文件\t{__file__}')
+    log.info(f'运行文件\t{__file__}')
     # gezhongzaxiang()
-    planfenxifunc()
+    # planfenxifunc()
+    planfenxi(60 * 60 * 2 + 60 * 29)
     # chayanshuju()
     # chulioldversion()
     print('Done')
