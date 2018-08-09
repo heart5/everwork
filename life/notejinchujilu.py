@@ -389,7 +389,6 @@ def jinchustattimer(jiangemiao):
 
 
 if __name__ == '__main__':
-    token = cfp.get('evernote', 'token')
     # findnotefromnotebook(token, 'c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b', '统计')
 
     noteinfolist = [
