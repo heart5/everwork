@@ -410,10 +410,10 @@ def weatherstattimer(jiangemiao):
 
 
 if __name__ == '__main__':
-    log.info(f'测试文件\t{__file__}')
-    weatherstattimer(60 * 3)
+    log.info(f'运行文件\t{__file__}')
+    weatherstattimer(60 * 60 + 60 * 28)
     # weathertxtfilename = "data\\ifttt\\weather.txt"
     # usn = isweatherupdate(weathertxtfilename)
     # weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')
     # # print(getweatherfromgmail())
-    log.info('Done.文档测试结束！')
+    log.info('Done！')
