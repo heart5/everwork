@@ -9,7 +9,6 @@ from func.mailsfunc import getmail
 
 
 def fetchworkfile_from_gmail(topic):
-    global cfp, log
     hostg = cfp.get('gmail', 'host')
     usernameg = cfp.get('gmail', 'username')
     passwordg = cfp.get('gmail', 'password')
@@ -40,7 +39,6 @@ def workfilefromgmail2datacenter(jiangemiao):
 
 
 if __name__ == '__main__':
-    global log
-    log.info(f'测试文件\t{__file__}')
-    workfilefromgmail2datacenter(60 * 21)
+    log.info(f'运行文件\t{__file__}')
+    workfilefromgmail2datacenter(60 * 53)
     print('Done')
