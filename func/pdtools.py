@@ -42,10 +42,13 @@ def dftotal2top(df: pd.DataFrame):
     :return: pd.DataFrame
     """
     # print(df.dtypes)
+    if df.shape[0] == 0:  # 传入DataFrame为空则直接返回
+        return
     dfslicesingle = df.loc[:, :]
     # print(dfslicesingle.dtypes)
     numtypelist = [float, float64, int, int64]
     # dfslicesingle.loc['汇总'] = dfslicesingle.apply(lambda x: x.sum() if dtype(x) in numtypelist else None)
+    # print(dfslicesingle)
     dfslicesingle.loc['汇总'] = dfslicesingle.apply(lambda x: x.sum() if x.name.find('日期') < 0 else None)
     # print(list(dfslicesingle.columns))
     # print(list(dfslicesingle.loc['汇总']))
