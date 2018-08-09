@@ -38,13 +38,13 @@ def zipdir2one():
         print(f'{targetzipfile}不是一个合格的zip文件。')
         targetzipfile =targetzipfilenew
     else:
-        targetzip = zipfile.ZipFile(targetzipfile, 'r')
+        targetzip = zipfile.ZipFile(str(targetzipfile), 'r')
         print(targetzip.namelist())
         targetzip.close()
 
     log.info(f'压缩目录《{sourcedir}》到OneDrive文件夹实现自动同步')
     filelist = list()
-    newzip = zipfile.ZipFile(targetzipfile, 'w', zipfile.ZIP_DEFLATED)
+    newzip = zipfile.ZipFile(str(targetzipfile), 'w', zipfile.ZIP_DEFLATED)
     for dirpath, dirnames, filenames in os.walk(sourcedir):
         for filename in filenames:
             filelist.append(os.path.join(dirpath, filename))
@@ -68,8 +68,8 @@ def zipdata2one_timer(jiangemiao):
 
 if __name__ == '__main__':
     print(f'开始测试文件\t{__file__}')
-    zipdir2one()
+    # zipdir2one()
 
-    # zipdata2one_timer(60*5)
+    zipdata2one_timer(60 * 154)
 
     print('Done.测试完成。')
