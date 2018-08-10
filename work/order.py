@@ -501,7 +501,7 @@ def showorderstat2note(jiangemiao):
         jiaoyanchanpinkehu()
     except Exception as ee:
         log.critical('处理订单核对统计笔记时出现错误。%s' % str(ee))
-        raise ee
+        # raise ee
 
     global timer_showorderstat
     timer_showorderstat = Timer(jiangemiao, showorderstat2note, [jiangemiao])
@@ -510,12 +510,12 @@ def showorderstat2note(jiangemiao):
 
 if __name__ == '__main__':
     # chulidataindir_order()
-    showorderstat()
-    # showorderstat2note(60 * 10)
+    # showorderstat()
+    showorderstat2note(60 * 60 + 60 * 18)
     # chulixls_order(get_notestore())
     # token = cfp.get('evernote', 'token')
     # guids = findnotefromnotebook(token, '2c8e97b5-421f-461c-8e35-0f0b1a33e91c', '销售订单')
     # for item in guids:
     #     print("%s = %s" %(item[1], item[0]))
 
-    pass
+    print('Done')
