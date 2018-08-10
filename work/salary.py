@@ -8,7 +8,7 @@ import pandas as pd
 import sqlite3 as lite
 
 from func.first import dbpathquandan, dirmainpath
-from func.pdtools import descdb
+from func.pdtools import descdb, dataokay, desclitedb
 from func.logme import log
 
 
@@ -38,7 +38,7 @@ def salesjiangjin(cnxs):
 
     # print(df[df.业务主管 == '耿华忠'].groupby(['年月', '业务主管', '客户名称', '单据编号'])['销售金额净'].sum())
 
-    dftarget = df[df.年月 >= '201701'].groupby(['年月', '业务主管', '等级', '产品'], as_index=False)['销售金额净', '毛利净', '业绩奖金'].sum()
+    dftarget = df[df.年月 >= '201801'].groupby(['年月', '业务主管', '等级', '产品'], as_index=False)['销售金额净', '毛利净', '业绩奖金'].sum()
     dfyd = dftarget.groupby(['年月', '业务主管', '等级'], as_index=False)['销售金额净', '毛利净', '业绩奖金'].sum()
     dfyt = dfyd.groupby(['年月', '业务主管', '等级'])['销售金额净', '毛利净', '业绩奖金'].sum().unstack().fillna(value=0).sort_index(
         ascending=False)
@@ -65,23 +65,27 @@ def peisonghesuan(cnxp):
     df['订单净值'] = df.fillna(0)['订单金额'] - df.fillna(0)['客户拒收'] - df.fillna(0)['无货金额'] \
                  - df.fillna(0)['少配金额'] - df.fillna(0)['配错未要']
 
-    # global dirmainpath
+    df['优惠'] = df['优惠'].fillna(0)
+    df['优惠'] = df['优惠'].astype(float)
+    # print(df.tail(10))
     xlswriter = pd.ExcelWriter(str(dirmainpath / 'data' / '全单统计.xlsx'))
     feipeihuoliebiao = ['陈列', '返利', '赠送', '作废', np.nan]
-    df = df[(df.年月收款 >= '201701') & (df.配货人.isin(feipeihuoliebiao).values == False)]
+    df = df[(df.年月收款 >= '201801') & (df.配货人.isin(feipeihuoliebiao).values == False)]
 
     dfpeihuo = df.groupby(['年月订单', '配货人'], as_index=False)['订单日期', '错配'].count().sort_index(ascending=False)
-    print(dfpeihuo.tail(30))
+    # print(dfpeihuo.tail(30))
     dfpeihuo.to_excel(xlswriter, '配货统计', freeze_panes=[1, 2])
 
     dfyewujushou = df.groupby(['年月送达', '业务主管'], as_index=False)['订单日期', '客户拒收'].count().sort_index(ascending=False)
-    print(dfyewujushou.head(20))
+    # print(dfyewujushou.head(20))
     dfyewujushou.to_excel(xlswriter, '业务订单拒收统计', freeze_panes=[1, 2])
 
+    # print(df.dtypes)
     dfhuikuan = df.groupby(['年月收款', '业务主管'], as_index=False)[
         '订单净值', '实收金额', '优惠', '退货金额', '客户拒收', '无货金额', '少配金额', '配错未要'].sum()
+    # print(dfhuikuan)
     dfhuikuan['回款净值'] = dfhuikuan['实收金额'] - dfhuikuan['优惠'] * 8 - dfhuikuan['退货金额'] * 4
-    print(dfhuikuan.tail(30))
+    # print(dfhuikuan.tail(30))
     dfhuikuan.sort_index(ascending=False).to_excel(xlswriter, '业务回款统计', freeze_panes=[1, 2])
 
     dfhuikuan = df.groupby(['年月收款'], as_index=False)['订单净值', '实收金额', '优惠', '退货金额', '客户拒收', '无货金额', '少配金额', '配错未要'].sum()
@@ -101,11 +105,10 @@ def peisonghesuan(cnxp):
 
 
 if __name__ == '__main__':
-    # global log
     log.info(f'测试文件\t{__file__}')
     cnx = lite.connect(dbpathquandan)
-    # dataokay(cnx)
-    # desclitedb(cnx)
+    dataokay(cnx)
+    desclitedb(cnx)
     salesjiangjin(cnx)
     peisonghesuan(cnx)
     cnx.close()
