@@ -152,7 +152,7 @@ def chuliworkmateduty_note(zhuti: list):
             im.append(pd.to_datetime(ims[1]))
             im.append(pd.to_datetime(ims[2]))
             items.append(im)
-    print(items)
+    # print(items)
 
     dfresult = pd.DataFrame(items, columns=['name', 'ruzhi', 'lizhi'])
     dfresult.sort_values(['ruzhi', 'lizhi'], ascending=[False, False])
@@ -314,6 +314,8 @@ def duty_timer(jiangemiao):
         showdutyon2note()
     except TypeError as te:
         log.critical(f'类型错误。{te}')
+    except EDAMUserException as eue:
+        log.critical(f'evernote用户错误。{eue}')
 
     global timer_duty2note
     timer_duty2note = Timer(jiangemiao, duty_timer, [jiangemiao])
