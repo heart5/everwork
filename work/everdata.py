@@ -7,18 +7,19 @@ from odps.df import DataFrame
 from func.pdtools import descdb
 from func.logme import log
 from func.first import dirmainpath, dbpathquandan
-from func.pdtools import dataokay
+from func.pdtools import dataokay, desclitedb
 
-def chengbenjiaupdatedf(dfsall, cnxx):
+
+def chengbenjiaupdatedf(dfsall, cnxxc):
     """
     :param dfsall: 按照日期排序的销售明细记录
-    :param cnxx: 数据库连接，为了查询生成产品价格变动记录
+    :param cnxxc: 数据库连接，为了查询生成产品价格变动记录
     :return:
     """
 
     # 读取进货记录（排除退货记录）
     dfpros = pd.read_sql_query('select 产品名称, strftime(\'%Y%m\',日期) as 年月, 金额 as 进货金额, 数量 as 进货数量, '
-                               '单价 as 进货单价 from jinghuomingxi where 金额 >=0 order by 年月, 产品名称', cnxx)
+                               '单价 as 进货单价 from jinghuomingxi where 金额 >=0 order by 年月, 产品名称', cnxxc)
     dfpros = DataFrame(dfpros)
     descdb(dfpros[dfpros.进货金额 == 0].to_pandas())
 
@@ -28,7 +29,6 @@ def chengbenjiaupdatedf(dfsall, cnxx):
     descdb(dfpro.to_pandas())
     dfpro = dfpro.groupby(['产品名称', '单价']).agg(年月=dfpro.年月.min(), 进货金额=dfpro.进货金额.sum()).sort(['产品名称', '年月'])
     descdb(dfpro.to_pandas())
-    global log
     log.info('共有%d条产品价格记录，共有%d条产品价格记录（含调价）'
              % (dfpro.groupby('产品名称').agg(dfpro.单价.count()).to_pandas().shape[0], dfpro.to_pandas().shape[0]))
 
@@ -134,7 +134,7 @@ def details2db(filename, sheetname, xiangmu, tablename):
                 log.info('要更新%d记录中的成本价和毛利内容' % dfout.shape[0])
             print('请仔细检查！%s' % datestr4data)
             print('如果确保无误，请放行下面两行代码')
-            # dfout.to_sql(name=tablename, con=cnx, if_exists='append', chunksize=10000)
+            # dfout.to_sql(name=tablename, con=cnxp, if_exists='append', chunksize=10000)
             # log.info('成功从数据文件《%s》中添加%d条记录到总数据表中。' % (filename, len(dfout)))
     else:
         log.warning('对读入文件《%s》的数据整理有误！总数量和总金额对不上！' % filename)
@@ -149,7 +149,6 @@ def customerweihu2systable():
     处理客户档案维护记录，规整（填充日期、取有效数据集、板块排序、拆分内容后取有效信息并填充、抽取改编码客户、抽出重复录入纪录）后输出，对改编码客户进行条码更新，手工进入《系统表》
     :return:
     """
-    global dirmainpath, log
     writer = pd.ExcelWriter(str(dirmainpath / 'data' / '结果输出.xlsx'))
 
     df = pd.read_csv(str(dirmainpath / 'data' / 'kehudanganweihu.txt'), sep=']', header=None, names=['日期', '内容'],
@@ -293,7 +292,8 @@ def jiaoyankehuchanpin():
 
 
 if __name__ == '__main__':
-    # dfs = details2db('职员销售明细表（2018.5.1-5.31）.xls.xls', '职员销售明细表（2018.5.1-5.31）.xls',
+    log.info(f'运行文件\t{__file__}')
+    # dfs = details2db('职员销售明细表（2018.7.1-7.31）.xls__20180803165312_602795.xls', '职员销售明细表（2018.7.1-7.31）.xls',
     #                  ['职员名称', '商品全名'], 'xiaoshoumingxi')
     # print(dfs.columns)
     # dfgs = dfs.groupby(['日期', '职员名称'], as_index=False)['数量', '金额'].count()
@@ -304,11 +304,11 @@ if __name__ == '__main__':
     # print(dfg.shape[0])
     # print(dfg.tail(30))
 
-    # dfp = details2db('商品进货明细表（2018.4.24-5.31）.xls.xls',
-    #                  '商品进货明细表（2018.4.24-5.31）.xls',
+    # dfp = details2db('商品进货明细表（2018.7.1-2018.7.31）.xls__20180803165312_635711.xls',
+    #                  '商品进货明细表（2018.7.1-2018.7.31）.xls',
     #                  ['产品名称', '经办人'],
     #                  'jinghuomingxi')
-    # writer = pd.ExcelWriter('data\\进货分析.xlsx')
+    # writer = pd.ExcelWriter(str(dirmainpath / 'data' /'进货分析.xlsx'))
     # dfp.to_excel(writer, sheet_name='商品进货记录', freeze_panes={1, 2})
     # dfg = dfp.groupby(['产品名称', '单价'], as_index=False) \
     #     .apply(lambda t: t[t.日期 == t.日期.min()][['产品名称', '日期', '单价']]).sort_values(['产品名称', '日期'])
@@ -318,8 +318,9 @@ if __name__ == '__main__':
     # writer.close()
 
     cnxx = lite.connect(dbpathquandan)
-
-    # desclitedb(cnx)
+    desclitedb(cnxx)
+    dataokay(cnxx)
+    # jiaoyankehuchanpin()
 
     # for i in range(len(dfs)):
     #     dfs.loc[i, '成本单价'] = chengbenjia(dfs.iloc[i]['商品全名'], dfs.iloc[i]['日期'], dfgqc)
@@ -332,9 +333,8 @@ if __name__ == '__main__':
     #
     # writer.save()
     # writer.close()
-    # customerweihu2systable()
-
-    dataokay(cnxx)
-    # jiaoyankehuchanpin()
+    customerweihu2systable()
+    # chengbenjiaupdateall(cnxx)
 
     cnxx.close()
+    print('Done')
