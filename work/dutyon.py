@@ -4,8 +4,10 @@
 ['c1b8297a-2c3a-4afc-9faf-e36484495529', '武汉真元放假调休记录'],
 ['040509c2-a8bf-4af9-9296-3d41321889d9', '武汉真元员工请假记录']
 ['a582e11f-d6e6-4eb2-817f-196c70971f53', '武汉真元员工入职离职记录']
+['72e6a107-0f78-4339-af6d-cbd927bf7713', '真元商贸员工打卡记录']
 """
 import math
+import ssl
 # import numpy as np
 from threading import Timer
 
@@ -20,6 +22,7 @@ from func.first import dbpathworkplan
 
 def chuliholidayleave_note(zhuti: list):
     note_store = get_notestore()
+    print(zhuti)
     guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')
     note = note_store.getNote(guid, True, True, False, False)
     evernoteapijiayi()
@@ -32,63 +35,92 @@ def chuliholidayleave_note(zhuti: list):
     if note.updateSequenceNum <= updatenumold:
         log.info(f'{zhuti[0]}笔记内容无更新。')
         return False
-    soup = BeautifulSoup(note.content, "html.parser").get_text().strip()
+    souporigin = BeautifulSoup(note.content, "html.parser")
     # print(soup)
-    # pattern = re.compile(u'(\d{4}-\d{2}-\d{2})[,，](\w+)[,，](\d{1,2}?)', re.U)
-    pattern = re.compile(u'(\d{4}-\d{1,2}-\d{1,2})', re.U)
-    splititems = re.split(pattern, soup)[1:]
-    # print(splititems)
-    resultlisthd = list()
-    for i in range(int(len(splititems) / 2)):
-        item = list()
-        item.append(pd.to_datetime(splititems[i * 2]))
-        *names, daynum = re.split('[,，]', splititems[i * 2 + 1])
-        # print(sitems)
-        if len(names) == 2:
-            if names[1].find('上班') >= 0:
-                names.append('上班')
+    isjiaqi = False
+    items = list()
+    columns = list()
+    for item in souporigin.find_all('div'):
+        pattern = re.compile(u'[,，\s]', re.U)
+        itemtext = item.get_text().strip()
+        ims = re.split(pattern, itemtext)
+        if len(ims) == 0:
+            continue
+        if len(ims) == 3:
+            item = list()
+            dtpattern = re.compile(u'(\d{4}-\d{1,2}-\d{1,2})', re.U)
+            if re.fullmatch(dtpattern, ims[0]):
+                isjiaqi = True
+                columns = ['date', 'mingmu', 'xingzhi', 'tianshu']
+                item.append(pd.to_datetime(ims[0]))
+                if ims[1].find('上班') >= 0:
+                    item.append('上班')
+                else:
+                    item.append('放假')
+                item.append(ims[1])
+                item.append(ims[2])
+                items.append(item)
+            elif re.fullmatch(dtpattern, ims[1]):
+                columns = ['name', 'ruzhi', 'lizhi']
+                item.append(ims[0])
+                item.append(pd.to_datetime(ims[1]))
+                item.append(pd.to_datetime(ims[2]))
+                items.append(item)
+        elif len(ims) == 4:
+            item = list()
+            dtpattern = re.compile(u'(\d{4}-\d{1,2}-\d{1,2})', re.U)
+            if re.fullmatch(dtpattern, ims[0]):
+                isjiaqi = True
+                columns = ['date', 'mingmu', 'xingzhi', 'tianshu']
+                item.append(pd.to_datetime(ims[0]))
+                item.append(ims[1])
+                item.append(ims[2])
+                item.append(ims[3])
+                items.append(item)
+            elif re.fullmatch(dtpattern, ims[1]):
+                columns = ['date', 'name', 'mingmu', 'shenpi']
+                item.append(pd.to_datetime(ims[1]))
+                item.append(ims[0])
+                item.append(ims[2])
+                item.append(ims[3])
+                items.append(item)
+
+    if isjiaqi:
+        resultlisthd = items
+        dfresult = None
+        for [dtinfor, mingmu, xingzhiinfor, tian] in resultlisthd:
+            numfloat = float(tian)
+            numceil = math.ceil(numfloat)
+            numfloor = math.floor(numfloat)
+            driminfor = pd.date_range(dtinfor, dtinfor + datetime.timedelta(days=int(numceil) - 1), freq='D')
+            if dfresult is None:
+                dfresult = pd.DataFrame(index=driminfor)
+                dfresult['mingmu'] = mingmu
+                dfresult['xingzhi'] = xingzhiinfor
+                dfresult['tianshu'] = 1
+                # dfresult['tianshu'] = dfresult['tianshu'].astype(float)
+                if numfloat > numfloor:
+                    xtian = numfloat - numfloor
+                    # print(f'{numfloat}\t{numceil}\t{numfloor}\t{mingmu}\t{xingzhi}\t{tian}\t{xtian}')
+                    dfresult.ix[-1, ['tianshu']] = xtian
             else:
-                names.append('放假')
-        # item.append(names[1:])
-        item.append(names[1])
-        item.append(names[2])
-        item.append(daynum)
-        resultlisthd.append(item)
-
-    # print(resultlist)
-
-    dfresult = None
-    for [dtinfor, mingmu, xingzhiinfor, tian] in resultlisthd:
-        numfloat = float(tian)
-        numceil = math.ceil(numfloat)
-        numfloor = math.floor(numfloat)
-        driminfor = pd.date_range(dtinfor, dtinfor + datetime.timedelta(days=int(numceil) - 1), freq='D')
-        if dfresult is None:
-            dfresult = pd.DataFrame(index=driminfor)
-            dfresult['mingmu'] = mingmu
-            dfresult['xingzhi'] = xingzhiinfor
-            dfresult['tianshu'] = 1
-            # dfresult['tianshu'] = dfresult['tianshu'].astype(float)
-            if numfloat > numfloor:
-                xtian = numfloat - numfloor
-                # print(f'{numfloat}\t{numceil}\t{numfloor}\t{mingmu}\t{xingzhi}\t{tian}\t{xtian}')
-                dfresult.ix[-1, ['tianshu']] = xtian
-        else:
-            dftmp = pd.DataFrame(index=driminfor)
-            dftmp['mingmu'] = mingmu
-            dftmp['xingzhi'] = xingzhiinfor
-            dftmp['tianshu'] = 1
-            # dfresult['tianshu'] = dfresult['tianshu'].astype(float)
-            if numfloat > numfloor:
-                xtian = numfloat - numfloor
-                # print(f'{numfloat}\t{numceil}\t{numfloor}\t{mingmu}\t{xingzhi}\t{tian}\t{xtian}')
-                dftmp.ix[-1, ['tianshu']] = xtian
-            dfresult = dfresult.append(dftmp)
-
-    dfresult.sort_index(ascending=False, inplace=True)
-    dfresult['date'] = dfresult.index
-    # dfresult['idx'] = range(dfresult.shape[0])
-    dfresult = dfresult.reset_index(drop=True)
+                dftmp = pd.DataFrame(index=driminfor)
+                dftmp['mingmu'] = mingmu
+                dftmp['xingzhi'] = xingzhiinfor
+                dftmp['tianshu'] = 1
+                # dfresult['tianshu'] = dfresult['tianshu'].astype(float)
+                if numfloat > numfloor:
+                    xtian = numfloat - numfloor
+                    # print(f'{numfloat}\t{numceil}\t{numfloor}\t{mingmu}\t{xingzhi}\t{tian}\t{xtian}')
+                    dftmp.ix[-1, ['tianshu']] = xtian
+                dfresult = dfresult.append(dftmp)
+        dfresult.sort_index(ascending=False, inplace=True)
+        dfresult['date'] = dfresult.index
+        # dfresult['idx'] = range(dfresult.shape[0])
+        dfresult = dfresult.reset_index(drop=True)
+    else:
+        dfresult = pd.DataFrame(items, columns=columns)
+    print(dfresult)
     cnxp = lite.connect(dbpathworkplan)
     dfresult.to_sql(zhuti[1], cnxp, if_exists='replace')  # index, ['mingmu', 'xingzhi', 'tianshu', 'date']
     cnxp.close()
@@ -100,7 +132,7 @@ def chuliholidayleave_note(zhuti: list):
 
 def fetchattendance_from_evernote():
     try:
-        zhutis = [['放假', 'holiday'], ['请假', 'leave']]
+        zhutis = [['放假', 'holiday'], ['请假', 'leave'], ['打卡', 'checkin'], ['入职', 'dutyon']]
         for zhuti in zhutis:
             dfresult = chuliholidayleave_note(zhuti)
             if dfresult is not False:
@@ -115,6 +147,7 @@ def fetchattendance_from_evernote():
 
 def chuliworkmateduty_note(zhuti: list):
     guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')
+    note = None
     try:
         note_store = get_notestore()
         note = note_store.getNote(guid, True, True, False, False)
@@ -126,6 +159,9 @@ def chuliworkmateduty_note(zhuti: list):
         return
     except AttributeError as abe:
         log.critical(f'发生属性错误。{abe}')
+        return
+    except ssl.SSLEOFError as ssle:
+        log.critical(f'握手错误，违反通讯协议。{ssle}')
         return
 
     cnxp = lite.connect(dbpathworkplan)
@@ -143,7 +179,7 @@ def chuliworkmateduty_note(zhuti: list):
     souporigin = BeautifulSoup(note.content, "html.parser")
     items = list()
     for item in souporigin.find_all('div'):
-        pattern = re.compile(u'[,，]', re.U)
+        pattern = re.compile(u'[,，\s]', re.U)
         itemtext = item.get_text().strip()
         ims = re.split(pattern, itemtext)
         if len(ims) == 3:
@@ -275,6 +311,16 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
     clsnew = clsout[-2:] + [clsout[-3]] + clsout[:-3]
     # print(clsnew)
     dfout = dfout.loc[:, clsnew]
+    cnxp = lite.connect(dbpathworkplan)
+    dfcheckin = pd.read_sql_query('select * from checkin', cnxp, index_col='index', parse_dates=['0'])
+    cnxp.close()
+    dfcheckin.columns = ['date', 'name', 'mingmu', 'shenpi']
+    dfcheckin = dfcheckin[(dfcheckin.date >= dtfrom) & (dfcheckin.date <= dtto)]
+    dfcheckinout = dfcheckin[dfcheckin['shenpi'] == ''].groupby(['name', 'mingmu']).count()['shenpi'].unstack()
+    if dfcheckinout.shape[0] > 0:
+        print(dfcheckinout)
+        dfout = pd.concat([dfout, dfcheckinout], axis=1)
+    dfout.fillna(0, inplace=True)
     return dfout, dtfrom, dtto
 
 
@@ -283,7 +329,7 @@ def showdutyon2note():
     tday = pd.to_datetime(pd.to_datetime(datetime.datetime.today()).strftime('%F'))  # 罪魁祸首，日期中时间一定要归零
 
     dutytablelist = list()
-    for i in range(1, 4, 1):
+    for i in range(1, 9, 1):
         if tday.day == 1:
             tday = pd.to_datetime(tday.strftime('%Y-%m-02'))
         thismonth = tday + MonthBegin((-1) * i)
