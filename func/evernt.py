@@ -62,6 +62,10 @@ def get_notestore():
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
     def getnotestore():
+        global note_store
+        if note_store is not None:
+            log.info(f'note_store健壮存在：{note_store}')
+            return note_store
         userstore = client.get_user_store()
         evernoteapijiayi()
         version_ok = userstore.checkVersion(
@@ -75,11 +79,13 @@ def get_notestore():
         # print("Is my Evernote API version up to date? ", str(version_ok))
         note_store = client.get_note_store()
         evernoteapijiayi()
-        # log.debug('成功连接Evernote服务器！构建notestore：%s' % note_store)
+        log.critical(f'成功连接Evernote服务器！构建notestore：{note_store}')
         return note_store
 
     return trycounttimes(getnotestore, True, 'evernote服务器')
 
+
+note_store = None
 
 def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     """
