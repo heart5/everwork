@@ -97,7 +97,7 @@ def peisonghesuan(cnxp):
     dfkefu = df.groupby(['年月送达', '送货人', '客户类型']).agg(
         {'订单净值': ['sum', 'count'], '客户拒收': ['sum', 'count']}).unstack().sort_index(ascending=False)
     print(dfkefu.tail(20))
-
+    dfkefu.fillna(0, inplace=True)
     dfkefu.to_excel(xlswriter, '配送统计', freeze_panes=[3, 2])
     xlswriter.close()
 
