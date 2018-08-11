@@ -27,6 +27,8 @@ def trycounttimes(jutifunc, returnresult=False, servname='服务器'):
                 log.critical(f'被主动拒绝，好没面啊！{eee}')
             elif eee.errno == 10060:
                 log.critical(f'够不着啊，是不是在墙外？！{eee}')
+            elif eee.errno == 10048:
+                log.critical(f'多次强行连接，被拒了！{eee}')
             elif eee.errno == 10054:
                 log.critical(f'主机发脾气，强行断线了。{eee}')
             elif eee.errno == 8:
