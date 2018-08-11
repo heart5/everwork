@@ -212,5 +212,5 @@ def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
 if __name__ == '__main__':
     cnx = lite.connect(dbpathquandan)
     dataokay(cnx)
-    pinpaifenxi(cnx, daysbefore=30, brandnum=3)
+    pinpaifenxi(cnx, daysbefore=30, brandnum=20)
     print('Done.')

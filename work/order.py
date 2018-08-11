@@ -499,9 +499,8 @@ def showorderstat2note(jiangemiao):
     try:
         showorderstat()
         jiaoyanchanpinkehu()
-    except Exception as ee:
-        log.critical('处理订单核对统计笔记时出现错误。%s' % str(ee))
-        # raise ee
+    except NameError as nee:
+        log.critical(f'处理订单核对统计笔记时出现错误。{nee}')
 
     global timer_showorderstat
     timer_showorderstat = Timer(jiangemiao, showorderstat2note, [jiangemiao])
