@@ -2,7 +2,7 @@
 """
 功能描述
 """
-# import os
+import os
 import evernote.edam.type.ttypes as ttypes
 import pandas as pd
 import sqlite3 as lite
