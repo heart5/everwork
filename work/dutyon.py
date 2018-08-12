@@ -5,6 +5,7 @@
 ['040509c2-a8bf-4af9-9296-3d41321889d9', '武汉真元员工请假记录']
 ['a582e11f-d6e6-4eb2-817f-196c70971f53', '武汉真元员工入职离职记录']
 ['72e6a107-0f78-4339-af6d-cbd927bf7713', '真元商贸员工打卡记录']
+['e28fcbb1-1b8f-4384-a4d2-c5e234c1e602', '武汉高温纪录']
 """
 import math
 import ssl
@@ -40,9 +41,18 @@ def chuliholidayleave_note(zhuti: list):
     isjiaqi = False
     items = list()
     columns = list()
-    for item in souporigin.find_all('div'):
-        pattern = re.compile(u'[,，\s]', re.U)
+    for item in souporigin.find_all(['div', 'p']):
         itemtext = item.get_text().strip()
+        if len(itemtext) ==0 :
+            continue
+        patterntime = u'(\w*\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)\s*'
+        splititems = re.split(patterntime, itemtext)
+        if len(splititems) == 3:
+            # columns = ['hottime']
+            itemtime = time.strptime(splititems[1], '%B %d, %Y at %I:%M%p')
+            items.append(itemtime)
+            continue
+        pattern = re.compile(u'[,，\s]', re.U)
         ims = re.split(pattern, itemtext)
         if len(ims) == 0:
             continue
@@ -85,6 +95,7 @@ def chuliholidayleave_note(zhuti: list):
                 item.append(ims[3])
                 items.append(item)
 
+    print(items)
     if isjiaqi:
         resultlisthd = items
         dfresult = None
@@ -132,7 +143,7 @@ def chuliholidayleave_note(zhuti: list):
 
 def fetchattendance_from_evernote():
     try:
-        zhutis = [['放假', 'holiday'], ['请假', 'leave'], ['打卡', 'checkin'], ['入职', 'dutyon']]
+        zhutis = [['放假', 'holiday'], ['请假', 'leave'], ['打卡', 'checkin'], ['入职', 'dutyon'], ['高温', 'hot']]
         for zhuti in zhutis:
             dfresult = chuliholidayleave_note(zhuti)
             if dfresult is not False:
@@ -372,7 +383,8 @@ if __name__ == '__main__':
     # global log
     log.info(f'运行文件\t{__file__}')
 
-    duty_timer(60 * 60 * 3 + 60 * 37)
+    fetchattendance_from_evernote()
+    # duty_timer(60 * 60 * 3 + 60 * 37)
     # showdutyon2note()
 
     # df, dtf, dtt = showdutyonfunc(list(pd.date_range(pd.to_datetime('2018-7-1'), pd.to_datetime('2018-7-31'),
