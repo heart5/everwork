@@ -122,7 +122,7 @@ def isworkday(dlist: list, person: str = '全体', fromthen=False):
         dlist = pd.date_range(dlist[0], datetime.datetime.today(), freq='D')
     cnxpi = lite.connect(dbpathworkplan)
     dfholiday = pd.read_sql('select distinct * from holiday', cnxpi, index_col='date', parse_dates=['date'])
-    del dfholiday['index']
+    # del dfholiday['index']
     # print(dfholiday)
     dfleave = pd.read_sql('select distinct date,mingmu,xingzhi,tianshu from leave', cnxpi, parse_dates=['date'])
     # print(dfleave)
