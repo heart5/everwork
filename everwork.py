@@ -34,9 +34,9 @@ peoplestattimer(60 * 25)
 planfenxi(60 * 65 * 2)
 duty_timer(60 * 60 * 24)
 
-cnx = lite.connect(dbpathquandan)
-dataokay(cnx)
-pinpaifenxi(cnx, daysbefore=30, brandnum=15)
+# cnx = lite.connect(dbpathquandan)
+# dataokay(cnx)
+# pinpaifenxi(cnx, daysbefore=30, brandnum=15)
 
 # writeini()
 
