@@ -141,7 +141,7 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
     def getservmail():
         servmail = imaplib.IMAP4_SSL(hostmail, port)
         servmail.login(usernamemail, passwordmail)
-        print(f'成功登陆到邮箱：{hostmail}。{servmail}')
+        log.info(f'成功登陆到邮箱：{hostmail}。{servmail}')
         return servmail
 
     serv = trycounttimes(getservmail, True, '邮箱服务器')
