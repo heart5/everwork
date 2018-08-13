@@ -141,6 +141,7 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
     def getservmail():
         servmail = imaplib.IMAP4_SSL(hostmail, port)
         servmail.login(usernamemail, passwordmail)
+        print(f'成功登陆到邮箱：{hostmail}。{servmail}')
         return servmail
 
     serv = trycounttimes(getservmail, True, '邮箱服务器')
@@ -330,7 +331,6 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
         log.info("《%s-%s》现有%d条记录。" % (mingmu, fenleistr, len(itemsr)))
         return itemsr
 
-    global cfp
     hostg = cfp.get('gmail', 'host')
     usernameg = cfp.get('gmail', 'username')
     passwordg = cfp.get('gmail', 'password')
@@ -360,7 +360,6 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
                     else:
                         itemslst.append(headerjilu[1] + '\t' + textstrjilu)
 
-    global dirmainpath
     txtfilename = str(dirmainpath / 'data' / 'ifttt' / f'{mingmu}_gmail_{fenleistr}.txt')
     if len(itemslst) > 0:  # or True:
         items = itemslst + readfromtxt(txtfilename)
