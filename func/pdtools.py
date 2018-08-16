@@ -126,6 +126,7 @@ def isworkday(dlist: list, person: str = '全体', fromthen=False):
     # print(dfholiday)
     dfleave = pd.read_sql('select distinct date,mingmu,xingzhi,tianshu from leave', cnxpi, parse_dates=['date'])
     # print(dfleave)
+    cnxpi.close()
     resultlist = list()
     for dt in dlist:
         item = list()
@@ -192,7 +193,6 @@ def isworkday(dlist: list, person: str = '全体', fromthen=False):
 
 
 def gengxinfou(filename, conn, tablename='fileread'):
-    # global log
     try:
         create_tb_cmd = "CREATE TABLE IF NOT EXISTS %s " \
                         "('文件名' TEXT," \
