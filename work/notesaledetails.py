@@ -4,6 +4,8 @@
 """
 
 # from imp4nb import *
+from threading import Timer
+
 import pandas as pd
 import sqlite3 as lite
 from func.configpr import cfpdata, inidatanotefilepath
@@ -209,8 +211,17 @@ def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
         # fenximonthduibi(token, note_store, '退货客户数', notefbkhdf, notelxkhdf, cnxp, pinpai=br)
 
 
-if __name__ == '__main__':
+def pinpaifenxi_timer(jiangemiao):
     cnx = lite.connect(dbpathquandan)
     dataokay(cnx)
     pinpaifenxi(cnx, daysbefore=30, brandnum=20)
+    cnx.close()
+
+    global timer_pinpai2note
+    timer_pinpai2note = Timer(jiangemiao, pinpaifenxi, [jiangemiao])
+    timer_pinpai2note.start()
+
+
+if __name__ == '__main__':
+    pinpaifenxi_timer(60 * 60 * 3)
     print('Done.')
