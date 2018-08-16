@@ -30,7 +30,7 @@ def zipdir2one():
     # print(zipfilenamenew)
     targetzipdir = Path(onedrivedir) / '文档' / 'Program' / 'python' / 'everworkdataonly'
     targetzipfile = targetzipdir / zipfilename
-    addextstr = datetime.datetime.now().strftime("%F_%T")
+    addextstr = datetime.datetime.now().strftime("_%Y%m%d%H%M%S")
     zipfilename = f"datauto_{platform.uname().system}_{platform.uname().machine}_{platform.uname().node}{addextstr}.zip"
     targetzipfileadd = targetzipdir / zipfilename
     # print(targetzipfileadd)
@@ -54,7 +54,7 @@ def zipdir2one():
             fileinname = fileinfo.filename
             filestructtime = fileinfo.date_time[0:6]
             fileinmtime = datetime.datetime(*filestructtime).strftime('%F %T')
-            flnamesinzip[fileinname]=fileinmtime
+            flnamesinzip[fileinname] = fileinmtime
             # print(flnamesinzip)
             # print(f'{fileinname}\t{fileinmtime}')
         # print(targetzip.filelist())
@@ -74,7 +74,7 @@ def zipdir2one():
     for tar in filelist:
         flmtime = time.strftime('%F %T', time.localtime(os.path.getmtime(tar)))
         # print(f'{tar[len(sourcedir) + 1:]}')
-        if tar[len(sourcedir) + 1 :].replace('\\', '/') in flnamesinzip.keys():
+        if tar[len(sourcedir) + 1:].replace('\\', '/') in flnamesinzip.keys():
             flmtimeinzip = flnamesinzip[tar[len(sourcedir) + 1:].replace('\\', '/')]
             dtzip = datetime.datetime.strptime(flmtimeinzip, '%Y-%m-%d %H:%M:%S')
             dtnow = datetime.datetime.strptime(flmtime, '%Y-%m-%d %H:%M:%S')
@@ -103,7 +103,8 @@ def zipdir2one():
                 newzip.write(tar, tar[len(sourcedir):])
             except FileNotFoundError as fnfe:
                 log.critical(f'文件找不到，可能是临时文件。{tar}\t{fnfe}')
-                continue
+            except OSError as ose:
+                log.critical(f'出现系统错误。{ose}')
         newzip.close()
         log.info(f'成功压缩{updateoradd}备份至：{targetzipfileadd}')
 
@@ -122,6 +123,6 @@ if __name__ == '__main__':
     print(f'开始测试文件\t{__file__}')
     # zipdir2one()
 
-    zipdata2one_timer(60 * 154)
+    zipdata2one_timer(60 * 60 * 12 + 60 * 35)
 
     print('Done.测试完成。')
