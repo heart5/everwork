@@ -289,7 +289,7 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
         # print(xiuzheng)
         dszg['下雨'] = dfraindone.shape[0] - xiuzheng
 
-        # print(dszg.name)
+        # print(f'{dszg.name}：{list(dszg)}')
         dslist.append(dszg)
 
     dfgzduty = pd.DataFrame(dslist)
@@ -347,6 +347,7 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
     dfout = pd.DataFrame(dfout)
     # print(dfout.columns)
     dfout.fillna(0, inplace=True)
+    dfout.index.names = [f'{dfout.shape[0] - 1}']
     return dfout, dtfrom, dtto
 
 
@@ -354,7 +355,7 @@ def showdutyon2note():
     recentdutyguid = '02540689-911d-4a2a-bd22-89fe44d41f2a'
     tday = pd.to_datetime(pd.to_datetime(datetime.datetime.today()).strftime('%F'))  # 罪魁祸首，日期中时间一定要归零
 
-    monthnum = 12
+    monthnum = 14
     dutytablelist = list()
     for i in range(1, monthnum, 1):
         if tday.day == 1:
