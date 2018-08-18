@@ -64,7 +64,7 @@ def get_notestore():
     def getnotestore():
         global note_store
         if note_store is not None:
-            log.info(f'note_store健壮存在：{note_store}')
+            # log.info(f'note_store健壮存在：{note_store}')
             return note_store
         userstore = client.get_user_store()
         evernoteapijiayi()
@@ -193,12 +193,12 @@ def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True):
 
 def findnotefromnotebook(tokenfnfn, notebookguid, titlefind, notecount=10000):
     """
-    列出笔记本中的笔记信息
-    :param tokenfnfn:
-    :param notebookguid:
-    :param titlefind:
-    :param notecount:
-    :return:
+    列出笔记本中包含某关键词的笔记信息
+    :param tokenfnfn: token
+    :param notebookguid: 笔记本的guid
+    :param titlefind: 关键词
+    :param notecount: 搜索结果数量限值
+    :return: 列表，包含形如[noteguid, notetitle]的list
     """
     note_store = get_notestore()
     notefilter = NoteFilter()
