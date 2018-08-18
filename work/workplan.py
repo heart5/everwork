@@ -215,8 +215,8 @@ def planfenxifunc():
     cnxp = lite.connect(dbpathworkplan)
     tablename_updated = 'planupdated'
     errorshowstr = '更新业务日志汇总笔记时出现错误。'
-    fetchattendance_from_evernote()
     try:
+        fetchattendance_from_evernote()
         note_store = get_notestore()
         #  从印象笔记中取得在职业务列表
         persons = BeautifulSoup(note_store.getNoteContent('992afcfb-3afb-437b-9eb1-7164d5207564'),
@@ -367,8 +367,8 @@ def planfenxifunc():
     except AttributeError as ae:
         log.critical(f'{errorshowstr}属性错误：{ae}')
 
-    # except Exception as eee:
-    #     log.critical(f'{errorshowstr}{eee}')
+    except Exception as eee:
+        log.critical(f'{errorshowstr}{eee}')
     # raise eee
     finally:
         cnxp.close()
@@ -473,7 +473,8 @@ if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     # gezhongzaxiang()
     # planfenxifunc()
-    planfenxi(60 * 60 * 2 + 60 * 29)
+    planfenxi(60 * 6)
+    # planfenxi(60 * 60 * 2 + 60 * 29)
     # chayanshuju()
     # chulioldversion()
     print('Done')
