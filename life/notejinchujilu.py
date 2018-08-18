@@ -52,7 +52,6 @@ def jilugooglefile(filepath):
     filelist = [ff for ff in listdir(str(filepath)) if isfile(str(filepath / ff))]
     print(filelist)
     dfout = None
-    global log
     for i in range(len(filelist)):
         df = pd.read_excel(str(filepath / filelist[i]), sheetname='工作表1',
                            header=None, index_col=0, parse_dates=True)
