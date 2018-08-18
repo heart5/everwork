@@ -374,7 +374,10 @@ def isweatherupdate(weathertxtfilename):
 
 def weatherstattimer(jiangemiao):
     weathertxtfilename = str(dirmainpath / 'data' / 'ifttt' / 'weather.txt')
-    fetchweatherinfo_from_gmail(weathertxtfilename)
+    try:
+        fetchweatherinfo_from_gmail(weathertxtfilename)
+    except Exception as weathererror:
+        log.critical(f'从邮箱获取天气信息邮件时出现错误。{weathererror}')
 
     if cfplife.has_option('天气', '笔记最新日期'):
         weathernotelastestday = cfplife.get('天气', '笔记最新日期')
