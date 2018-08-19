@@ -191,7 +191,7 @@ def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True):
     return outstr
 
 
-def findnotefromnotebook(tokenfnfn, notebookguid, titlefind, notecount=10000):
+def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000):
     """
     列出笔记本中包含某关键词的笔记信息
     :param tokenfnfn: token
@@ -218,15 +218,15 @@ def findnotefromnotebook(tokenfnfn, notebookguid, titlefind, notecount=10000):
     # p_noteattributeundertoken(note)
     # print ourNoteList.notes[5] #打印NoteMetadata
 
-    items = []
-    for note in ournotelist.notes:
-        if note.title.find(titlefind) >= 0:
-            item = list()
-            item.append(note.guid)
-            item.append(note.title)
-            # print(note.guid, note.title)
-            # p_noteattributeundertoken(note)
-            items.append(item)
+    items = [[note.guid, note.title] for note in ournotelist.notes if note.title.find(titlefind) >= 0]
+    # for note in ournotelist.notes:
+    #     if note.title.find(titlefind) >= 0:
+    #         item = list()
+    #         item.append(note.guid)
+    #         item.append(note.title)
+    #         # print(note.guid, note.title)
+    #         # p_noteattributeundertoken(note)
+    #         items.append(item)
 
     return items
 
