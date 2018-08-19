@@ -25,34 +25,41 @@ from bs4 import BeautifulSoup
 
 from func.logme import log
 from func.evernt import findnotefromnotebook, token, get_notestore, evernoteapijiayi
+from func.nettools import trycounttimes
 
 
 def fetchfinacefromliushui():
-    note_store = get_notestore()
     nbguid = '34b5423f-296f-4a87-b8c0-2ca0a6113053'
-    finacenotefind = findnotefromnotebook(token, nbguid, '储蓄卡')
+    finacenotefind = findnotefromnotebook(token, nbguid)
 
-    ptn = re.compile(u'\s*(\d{4}年\d{1,2}月\d{1,2}日)\s+([出入])\s+([\d.]+元)\s+(.+)')
+    ptn = re.compile(u'^(\d{4}年\d{1,2}月\d{1,2}日)\s+([出入])\s+([\d.]+)[日美]?元\s*')
     resultlist = list()
     for item in finacenotefind:
-        note = note_store.getNote(item[0], True, True, False, False)
+        note_store = get_notestore()
+
+        def getnote():
+            return note_store.getNote(item[0], True, True, False, False)
+
+        note = trycounttimes(getnote, True, 'evernote服务器')
         evernoteapijiayi()
         print(f'{item[0]}\t{item[1]}')
         souporigin = BeautifulSoup(note.content, "html.parser")
         # print(souporigin)
         # for im in souporigin.find_all(re.compile("^div$")):
         itemlist = list()
-        for im in souporigin.find_all(re.compile("^div$")):
+        for im in souporigin.find_all('div'):
             imtxt = im.get_text()
-            if im.has_attr('style'):
-                print(f'{len(im.attrs)}\t{im.attrs}')
+            if len(im.attrs) > 0:
+                # print(f'{len(im.attrs)}\t{im.attrs}')
                 continue
             if len(imtxt) == 0:
                 continue
-            if len(re.split(ptn, imtxt)) != 6:
-                print(imtxt)
+            if len(re.split(ptn, imtxt)) != 5:
+                if len(re.split('^(\d{4}年\d{1,2}月\d{1,2}日)\s+', imtxt)) > 1:
+                    print(f'{len(re.split(ptn, imtxt))}\t{re.split(ptn, imtxt)}\t{imtxt}')
                 continue
-            itemlist.append(re.split(ptn, imtxt))
+            itemlist.append(re.split(ptn, imtxt)[1:] + [item[1]])
+        print(itemlist)
         resultlist.append(itemlist)
 
     return resultlist
