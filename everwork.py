@@ -8,15 +8,16 @@ from life.noteweather import weatherstattimer  # 调用同目录下其他文件�
 from etc.log2note import log2notetimer
 from work.order import showorderstat2note
 from work.workplan import planfenxi
-from func.pdtools import dataokay
+# from func.pdtools import dataokay
 from life.notejinchujilu import jinchustattimer
 from life.peoplelog2note import peoplestattimer
 from work.filemail import workfilefromgmail2datacenter
 from work.notesaledetails import pinpaifenxi_timer
 from work.dutyon import duty_timer
+from work.bankcard import financetimer
 from etc.zip2onedrive import zipdata2one_timer
 # from func.evernt import get_notestore
-from func.first import dbpathquandan
+# from func.first import dbpathquandan
 from func.logme import log
 
 log.debug('自动线程任务启动……')
@@ -34,8 +35,10 @@ jinchustattimer(60 * 60)
 peoplestattimer(60 * 25)
 planfenxi(60 * 65 * 2)
 duty_timer(60 * 60 * 24)
+financetimer(60 * 60 * 3 + 60 * 33)
 pinpaifenxi_timer(60 * 60 * 24)
 zipdata2one_timer(60 * 60 * 12 + 60 * 35)
+
 # writeini()
 
 # findnotebookfromevernote(token)
