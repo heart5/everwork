@@ -629,7 +629,7 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
             # print(note.guid + '\t\t' + note.title)
             cfpp.set(tosection, aa, note.guid)
 
-        trycounttimes(setguid, False, 'evernote服务器')
+        trycounttimes(setguid, '', False, 'evernote服务器')
 
     cfpp.write(open(inifile, 'w', encoding='utf-8'))
 

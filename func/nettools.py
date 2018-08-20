@@ -9,16 +9,22 @@ from bs4 import BeautifulSoup
 import struct
 
 
-def trycounttimes(jutifunc, returnresult=False, servname='服务器'):
+def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务器'):
     trytimes = 3
     sleeptime = 15
     for i in range(trytimes):
         try:
             if returnresult:
-                result = jutifunc()
+                if len(inputparam) == 0:
+                    result = jutifunc()
+                else:
+                    result = jutifunc(inputparam)
                 return result
             else:
-                jutifunc()
+                if len(inputparam) == 0:
+                    jutifunc()
+                else:
+                    jutifunc(inputparam)
             break
         except (WindowsError, ConnectionRefusedError, ConnectionResetError, ConnectionError, struct.error) as eee:
             if eee.errno == 11001:

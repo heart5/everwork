@@ -144,7 +144,7 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
         log.info(f'成功登陆到邮箱：{hostmail}。{servmail}')
         return servmail
 
-    serv = trycounttimes(getservmail, True, '邮箱服务器')
+    serv = trycounttimes(getservmail, '', True, '邮箱服务器')
 
     # if debug:
     #     serv.debug = 4
@@ -215,7 +215,7 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
         counttarget = len(numlistinside)
         log.info('已有%d封邮件，准备处理%d封邮件……' % (countstart, counttarget))
 
-        servinner = trycounttimes(getservmail, True, '邮箱服务器')
+        servinner = trycounttimes(getservmail, '', True, '邮箱服务器')
         type, data = servinner.select(dirtarget)
 
         count = 0
