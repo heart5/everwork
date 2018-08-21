@@ -62,16 +62,21 @@ def fetchfinacefromliushui():
         rstexistlst.extend(souptrtxtlst)
     # print(rstexistlst)
 
-    nbguid = '34b5423f-296f-4a87-b8c0-2ca0a6113053'
-    finacenotefind = findnotefromnotebook(token, nbguid, '6028')
-    print(finacenotefind)
+    rstexistlsthashhlst = [hash(tuple(x)) for x in rstexistlst]
+    rstexistlsthashhlsthash = hash(tuple(rstexistlsthashhlst))
+    resulthash = rstexistlsthashhlsthash
 
-    ptn = re.compile(u'^(\d{4}年\d{1,2}月\d{1,2}日)\s+([出入])\s+([\d.]+)[日美]?元\s*')
-    dubiousitems = list()
     financesection = '财务流水账'
     if not cfpzysm.has_section(financesection):
         cfpzysm.add_section(financesection)
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+
+    nbguid = '34b5423f-296f-4a87-b8c0-2ca0a6113053'
+    finacenotefind = findnotefromnotebook(token, nbguid)
+    print(finacenotefind)
+
+    ptn = re.compile(u'^(\d{4}年\d{1,2}月\d{1,2}日)\s+([出入])\s+([\d.]+)[日美]?元\s*')
+    dubiousitems = list()
     for item in finacenotefind:
         note = trycounttimes(getnote, inputparam=item[0], returnresult=True, servname='evernote服务器')
         if not cfpzysm.has_option(financesection, item[0]):
@@ -114,12 +119,24 @@ def fetchfinacefromliushui():
         cfpzysm.set(financesection, item[0], f'{item[2]}')
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
 
-    return rstexistlst, dubiousitems
+    rstexistlsthashhlst = [hash(tuple(x)) for x in rstexistlst]
+    rstexistlsthashhlsthash = hash(tuple(rstexistlsthashhlst))
+
+    if resulthash == rstexistlsthashhlsthash:
+        updatable = False
+    else:
+        updatable = True
+
+    return rstexistlst, dubiousitems, updatable
 
 
 def chaijie2note():
-    resultlst, dubiouslst = fetchfinacefromliushui()
+    resultlst, dubiouslst, noteupdatable = fetchfinacefromliushui()
     # print(resultlst)
+    if not noteupdatable:
+        log.info('所有财务笔记都没有更新')
+        return
+
     nowstr = datetime.datetime.now().strftime('%F %T')
     if len(dubiouslst) > 0:
         imglist2note(get_notestore(), list(), 'a8335080-9d3a-4f6d-8a05-9e88d5fa1eff', f'资金流水疑似问题条目（{nowstr}）',
