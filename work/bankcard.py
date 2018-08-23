@@ -7,8 +7,10 @@
 资金流水疑似问题条目：a8335080-9d3a-4f6d-8a05-9e88d5fa1eff
 货款回笼流水账：4992b5bf-a81e-4b5a-aa4f-2a86ae420285
 上游付款流水账：5eaf0153-816c-4def-b26e-439a21000be3
+待确认回款条目：5105d7e0-9b16-41cc-b200-afa7782c6a3c
 
 全纪录 to 公司相关流水
+金真心（公帐）：f295b983-eaf2-469f-a3e6-c200bb62c081
 招行（9929）：0248c009-f709-40b2-9cf1-f28ed6b3a44e
 农商行（6047：82e5d858-5fc5-4816-8cc0-f83eb261b4f2
 工行（7520）：1fa53462-ba4b-42b3-87b1-d03f0dd7f432
@@ -137,19 +139,25 @@ def chaijie2note():
         log.info('所有财务笔记都没有更新')
         return
 
+    warnnomodifystr = '<span style="font-weight:bold;color:red;">本笔记通过轮询资金流水账自动生成，' \
+                      '请勿手工修改，因为修改部分在下次更新时会被自动冲掉</span>'
     nowstr = datetime.datetime.now().strftime('%F %T')
     if len(dubiouslst) > 0:
         imglist2note(get_notestore(), list(), 'a8335080-9d3a-4f6d-8a05-9e88d5fa1eff', f'资金流水疑似问题条目（{nowstr}）',
                      tablehtml2evernote(pd.DataFrame(dubiouslst), tabeltitle='资金流水疑似问题条目', withindex=False))
     dfall = pd.DataFrame(resultlst, columns=['date', 'ru', 'jine', 'mingmu', 'card', 'guid'])
     dfall.sort_values(['date'], ascending=False, inplace=True)
+    dfchuru = dfall[(dfall.mingmu.str.startswith('货款') == True) & (dfall.mingmu.str.count('[?？]') >= 1)]
+    imglist2note(get_notestore(), list(), '5105d7e0-9b16-41cc-b200-afa7782c6a3c', f'待确认回款条目（{nowstr}）',
+                 warnnomodifystr + tablehtml2evernote(dfchuru[dfchuru.ru],
+                                                      tabeltitle='待确认回款条目', withindex=False))
     dfchuru = dfall[dfall.mingmu.str.startswith('货款') == True]
     imglist2note(get_notestore(), list(), '4992b5bf-a81e-4b5a-aa4f-2a86ae420285', f'货款回笼流水账（{nowstr}）',
-                 tablehtml2evernote(dfchuru[dfchuru.ru],
-                                    tabeltitle='货款回笼流水账', withindex=False))
+                 warnnomodifystr + tablehtml2evernote(dfchuru[dfchuru.ru],
+                                                      tabeltitle='货款回笼流水账', withindex=False))
     imglist2note(get_notestore(), list(), '5eaf0153-816c-4def-b26e-439a21000be3', f'上游付款流水账（{nowstr}）',
-                 tablehtml2evernote(dfchuru[dfchuru.ru == False],
-                                    tabeltitle='上游付款流水账', withindex=False))
+                 warnnomodifystr + tablehtml2evernote(dfchuru[dfchuru.ru == False],
+                                                      tabeltitle='上游付款流水账', withindex=False))
     # print(dfall)
 
 
@@ -164,6 +172,6 @@ def financetimer(jiangemiao):
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     # chaijie2note()
-    financetimer(60 * 16)
+    financetimer(60 * 26)
     # finacetimer(60 * 60 * 2 + 60 * 48)
     print('Done.完毕。')
