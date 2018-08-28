@@ -11,6 +11,7 @@
 
 全纪录 to 公司相关流水
 金真心（公帐）：f295b983-eaf2-469f-a3e6-c200bb62c081
+金真心公帐：de4535fe-7dce-4c0a-a845-484e8384186b
 招行（9929）：0248c009-f709-40b2-9cf1-f28ed6b3a44e
 农商行（6047：82e5d858-5fc5-4816-8cc0-f83eb261b4f2
 工行（7520）：1fa53462-ba4b-42b3-87b1-d03f0dd7f432
@@ -38,61 +39,18 @@ from func.nettools import trycounttimes
 from func.configpr import cfpzysm, inizysmpath
 
 
-def fetchfinacefromliushui():
-    def getnote(targetguid):
-        note_store = get_notestore()
-        notereturn = note_store.getNote(targetguid, True, True, False, False)
-        evernoteapijiayi()
-        return notereturn
+def rulambda(x):
+    if x in ['入', 'True']:
+        return True
+    else:
+        return False
 
-    rulambda = lambda x: True if x in ['入', 'True'] else False
 
-    # 货款回笼和上游付款noteguid
-    resultnoteguids = ['4992b5bf-a81e-4b5a-aa4f-2a86ae420285', '5eaf0153-816c-4def-b26e-439a21000be3']
-    # 取得已经有的
-    rstexistlst = list()
-    for resultnoteguid in resultnoteguids:
-        notechuru = trycounttimes(getnote, inputparam=resultnoteguid, returnresult=True, servname='evernote服务器')
-        souporigin = BeautifulSoup(notechuru.content, 'html.parser')
-        souptr = souporigin.find_all('tr')
-        if len(souptr) == 0:
-            continue
-        # 用rulambda函数转换字符串的'True'为True，False一样；转换日期为datetime类型
-        souptrtxtlst = [[datetime.datetime.strptime(x.get_text().split('\n')[1], '%Y-%m-%d')]
-                        + [rulambda(x.get_text().split('\n')[2])] + x.get_text().split('\n')[3:-1]
-                        for x in souptr[1:]]
-        rstexistlst.extend(souptrtxtlst)
-    # print(rstexistlst)
-
-    rstexistlsthashhlst = [hash(tuple(x)) for x in rstexistlst]
-    rstexistlsthashhlsthash = hash(tuple(rstexistlsthashhlst))
-    resulthash = rstexistlsthashhlsthash
-
-    financesection = '财务流水账'
-    if not cfpzysm.has_section(financesection):
-        cfpzysm.add_section(financesection)
-        cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
-
-    nbguid = '34b5423f-296f-4a87-b8c0-2ca0a6113053'
-    finacenotefind = findnotefromnotebook(token, nbguid)
-    print(finacenotefind)
-
+def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
+    souporigin = BeautifulSoup(content, "html.parser")
     ptn = re.compile(u'^(\d{4}年\d{1,2}月\d{1,2}日)\s+([出入])\s+([\d.]+)[日美]?元\s*')
-    dubiousitems = list()
-    for item in finacenotefind:
-        note = trycounttimes(getnote, inputparam=item[0], returnresult=True, servname='evernote服务器')
-        if not cfpzysm.has_option(financesection, item[0]):
-            updatenum = 0
-        else:
-            updatenum = cfpzysm.getint(financesection, item[0])
-        if item[2] == updatenum:
-            print(f'{item[0]}\t{item[1]}\t{len(rstexistlst)}\t无内容更新。')
-            continue
-        print(f'{item[0]}\t{item[1]}\t{len(rstexistlst)}', end='\t')
-        rstexistlst = [x for x in rstexistlst if x[5] != item[0]]
-        print(len(rstexistlst), end='\t')
-        souporigin = BeautifulSoup(note.content, "html.parser")
-        itemlist = list()
+    itemlist = list()
+    if item[0] != 'f295b983-eaf2-469f-a3e6-c200bb62c081':
         for im in souporigin.find_all('div'):
             imtxt = im.get_text()
             if len(im.attrs) > 0:
@@ -115,7 +73,87 @@ def fetchfinacefromliushui():
                 log.critical(f'出现日期范围错误：{item[0]}\t{item[1]}\t{imtxt}。{ve}')
                 continue
             itemlist.append(imlst[:-2])
-            rstexistlst.append(imlst)
+            resultlst.append(imlst)
+    else:
+        souptrs = souporigin.find_all('tr')
+        trlst = [[x.get_text() for x in y.find_all('td')] for y in souptrs]
+        gongzhanglist = list()
+        for tritem in trlst[1:]:
+            tmdate = datetime.datetime.strptime(tritem[0], '%Y%m%d')
+            if len(tritem[1]) == 0:
+                tmru = True
+                tmjine = float(tritem[2].replace(',', ''))
+            else:
+                tmru = False
+                tmjine = float(tritem[1].replace(',', ''))
+            if len(tritem[5]) == 0:
+                tmmingmu = tritem[7] + ',' + tritem[4]
+            elif tritem[5] == '白晔峰':
+                tmmingmu = tritem[4] + ',' + tritem[5] + ',（' + tritem[6][-4:] + '）'
+            else:
+                tmmingmu = '货款' + ',' + tritem[5] + ',（' + tritem[6][-4:] + '）'
+            imlist = [tmdate, tmru, tmjine, tmmingmu, item[1], item[0]]
+            gongzhanglist.append(imlist[:-2])
+            resultlst.append(imlist)
+        nowstr = datetime.datetime.now().strftime('%F %T')
+        imglist2note(get_notestore(), [], 'de4535fe-7dce-4c0a-a845-484e8384186b', f'金真心公帐流水（{nowstr}）',
+                     tablehtml2evernote(pd.DataFrame(gongzhanglist), tabeltitle='金真心公帐流水', withindex=False))
+
+def fetchfinacefromliushui():
+    def getnote(targetguid):
+        note_store = get_notestore()
+        notereturn = note_store.getNote(targetguid, True, True, False, False)
+        evernoteapijiayi()
+        return notereturn
+
+    # 货款回笼和上游付款noteguid
+    resultnoteguids = ['4992b5bf-a81e-4b5a-aa4f-2a86ae420285', '5eaf0153-816c-4def-b26e-439a21000be3']
+    # 取得已经有的
+    rstexistlst = list()
+    for resultnoteguid in resultnoteguids:
+        notechuru = trycounttimes(getnote, inputparam=resultnoteguid, returnresult=True, servname='evernote服务器')
+        souporigin = BeautifulSoup(notechuru.content, 'html.parser')
+        souptr = souporigin.find_all('tr')
+        # print(souptr[1:])
+        if len(souptr) == 0:
+            continue
+        # 用rulambda函数转换字符串的'True'为True，False一样；转换日期为datetime类型
+        souptrtxtlst = [[datetime.datetime.strptime(x.find_all('td')[0].get_text(), '%Y-%m-%d')]
+                        + [rulambda(x.find_all('td')[1].get_text())] + [
+                            float(x.find_all('td')[2].get_text())] + x.find_all('td')[3:]
+                        for x in souptr[1:]]
+        rstexistlst.extend(souptrtxtlst)
+    print(rstexistlst)
+
+    rstexistlsthashhlst = [hash(tuple(x)) for x in rstexistlst]
+    rstexistlsthashhlsthash = hash(tuple(rstexistlsthashhlst))
+    resulthash = rstexistlsthashhlsthash
+
+    financesection = '财务流水账'
+    if not cfpzysm.has_section(financesection):
+        cfpzysm.add_section(financesection)
+        cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+
+    yinhangkanbguid = '34b5423f-296f-4a87-b8c0-2ca0a6113053'
+    caiwuguanlinbguid = 'bec668cd-bc55-4496-83e3-660044042399'
+    finacenotefind = findnotefromnotebook(token, yinhangkanbguid)
+    finacenotefind.extend(findnotefromnotebook(token, caiwuguanlinbguid, '金真心公账（353000）进出明细'))
+    print(finacenotefind)
+
+    dubiousitems = list()
+    for item in finacenotefind:
+        note = trycounttimes(getnote, inputparam=item[0], returnresult=True, servname='evernote服务器')
+        if not cfpzysm.has_option(financesection, item[0]):
+            updatenum = 0
+        else:
+            updatenum = cfpzysm.getint(financesection, item[0])
+        if item[2] == updatenum:
+            print(f'{item[0]}\t{item[1]}\t{len(rstexistlst)}\t无内容更新。')
+            continue
+        print(f'{item[0]}\t{item[1]}\t{len(rstexistlst)}', end='\t')
+        rstexistlst = [x for x in rstexistlst if x[5] != item[0]]
+        print(len(rstexistlst), end='\t')
+        getnotecontent2resultlst(item, note.content, dubiousitems, rstexistlst)
         print(len(rstexistlst))
         # print(itemlist)
         cfpzysm.set(financesection, item[0], f'{item[2]}')
@@ -168,6 +206,7 @@ def financetimer(jiangemiao):
     timer_finace = Timer(jiangemiao, financetimer, [jiangemiao])
     # print(timer_weather)
     timer_finace.start()
+
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
