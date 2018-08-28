@@ -67,7 +67,7 @@ def get_notestore():
             # log.info(f'note_store健壮存在：{note_store}')
             return note_store
         userstore = client.get_user_store()
-        evernoteapijiayi()
+        # evernoteapijiayi()
         version_ok = userstore.checkVersion(
             "Evernote EDAMTest (Python)",
             EDAM_VERSION_MAJOR,
@@ -86,6 +86,7 @@ def get_notestore():
 
 
 note_store = None
+
 
 def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     """
@@ -355,23 +356,31 @@ def evernoteapijiayi():
     evernote API调用次数加一，如果达到限值则sleep后归零。又及，多次测试，限值应该是300次每个小时，整点清零重来。
     :return:
     """
-    global ENtimes
-    log.debug('动用了Evernote API %s 次……' % ENtimes)
+    global ENtimes, note_store
+    log.debug(f'动用了Evernote API({note_store}) {ENtimes} 次……')
     ENtimes += 1
     evernoteapiclearatzero()
-    if ENtimes >= 290:
+    if (ENtimes >= 290) or (note_store is None):
         now = datetime.datetime.now()
         # 强制小时数加一在零点的时候会出错，采用timedelta解决问题
         nexthour = now + datetime.timedelta(hours=1)
         zhengdian = pd.to_datetime(
             '%4d-%2d-%2d %2d:00:00' % (nexthour.year, nexthour.month, nexthour.day, nexthour.hour))
-        secondsaferzhengdian = np.random.randint(0, 300)
+        secondsaferzhengdian = np.random.randint(0, 50)
         sleep_seconds = (zhengdian - now).seconds + secondsaferzhengdian
         starttimeafterzhengdian = pd.to_datetime(zhengdian + datetime.timedelta(seconds=secondsaferzhengdian))
-        log.info(f'Evernote API 调用已达{ENtimes:d}次，休息{sleep_seconds:d}秒，待{str(starttimeafterzhengdian)}再开干……')
-        ENtimes = 0
-        writeini()
-        time.sleep(sleep_seconds)
+        # note_store = None
+        log.info(f'Evernote API{note_store} 调用已达{ENtimes:d}次，'
+                 f'休息{secondsaferzhengdian:d}秒，重新构造一个服务器连接再开干……')
+        time.sleep(secondsaferzhengdian)
+        note_store = get_notestore()
+        while note_store is None:
+            log.info(f'休息{secondsaferzhengdian:d}秒，重新构造一个服务器连接再开干……')
+            time.sleep(np.random.randint(0, 50))
+            note_store = get_notestore()
+            log.info(f'构建新的evernote服务器连接：{note_store}')
+            ENtimes = 0
+            writeini()
 
 
 # print('我是evernt啊')
