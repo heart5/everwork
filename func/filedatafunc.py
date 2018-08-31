@@ -4,6 +4,7 @@
 """
 import os
 import pandas as pd
+import numpy as np
 import sqlite3 as lite
 from pathlib import Path
 
@@ -107,11 +108,25 @@ def fenliu2note(dfzhibubao):
     print(zhmulti)
     zhmultichaifen = [[[x[0], [y, x[1][1]]] for y in x[1][0].split(',')] for x in zhmulti]
     print(zhmultichaifen)
-    zhmultichaifenchild = zhmultichaifen[0]
+    zhmultichaifenchild = [x for y in zhmultichaifen for x in y]
     print(zhmultichaifenchild)
-    zhresult = zhonlyone.extend(zhmultichaifenchild[0])
+    zhresult = zhonlyone + zhmultichaifenchild
     print(zhresult)
-    pass
+    # zhfine = [x for y in zhresult for x in y]
+    zhfine = [[x[0], ','.join([y for y in x[1]])] for x in zhresult]
+    print(zhfine)
+    zhdf = pd.DataFrame(zhfine, columns=['name', 'codename'])
+    zhdf.index = zhdf['name']
+    zhds = zhdf['codename']
+    dfall['账户名称'] = dfall['对方账户'] + ',' + dfall['对方名称']
+    dfall['名称'] = dfall['账户名称'].map(
+        lambda x : zhds[zhds == x].index.values[0] if len(zhds[zhds == x].index.values) > 0 else np.NaN)
+    dfall.sort_values('日期', ascending=False, inplace=True)
+    cls = list(dfall.columns)
+    clsnew = cls[:-2] + [cls[-1]]
+    print(clsnew)
+
+    return dfall.loc[:, clsnew]
 
 
 if __name__ == '__main__':
@@ -119,6 +134,7 @@ if __name__ == '__main__':
     cnxp = lite.connect(dbpathdingdanmingxi)
     pathalipay = dirmainpath / 'data' / 'finance' / 'alipay'
     dfall = chulidataindir(cnxp, 'alipay', '支付宝流水', '2088802968197536', '支付宝', pathalipay, chulixls_zhifubao)
-    fenliu2note(dfall)
-    # print(dfall)
+    zhds = fenliu2note(dfall)
+    print(zhds)
+    cnxp.close()
     print('Done.完毕。')
