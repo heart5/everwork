@@ -99,6 +99,7 @@ def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
         imglist2note(get_notestore(), [], 'de4535fe-7dce-4c0a-a845-484e8384186b', f'金真心公帐流水（{nowstr}）',
                      tablehtml2evernote(pd.DataFrame(gongzhanglist), tabeltitle='金真心公帐流水', withindex=False))
 
+
 def fetchfinacefromliushui():
     def getnote(targetguid):
         note_store = get_notestore()
