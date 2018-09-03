@@ -2,6 +2,7 @@
 """
 功能描述
 """
+import datetime
 import os
 import pandas as pd
 import numpy as np
@@ -10,6 +11,7 @@ from pathlib import Path
 
 import xlrd
 
+from func.evernt import imglist2note, get_notestore, tablehtml2evernote
 from func.first import dbpathdingdanmingxi, dirmainpath
 from func.logme import log
 from func.configpr import cfpzysm, inizysmpath
@@ -99,7 +101,7 @@ def chulidataindir(cnxp, tablename, mingmu, fnstart, notestr, pathorder: Path, c
     return dfttt
 
 
-def fenliu2note(dfzhibubao):
+def fenliu2note(dfall):
     zhfromini = [[x, cfpzysm.get('支付宝账户', x).split()] for x in cfpzysm.options('支付宝账户')]
     # print(zhfromini)
     zhonlyone = [x for x in zhfromini if len(x[1][0].split(',')) == 1]
@@ -123,18 +125,64 @@ def fenliu2note(dfzhibubao):
         lambda x : zhds[zhds == x].index.values[0] if len(zhds[zhds == x].index.values) > 0 else np.NaN)
     dfall.sort_values('日期', ascending=False, inplace=True)
     cls = list(dfall.columns)
-    clsnew = cls[:-2] + [cls[-1]]
+    # clsnew = cls[:-2] + [cls[-1]]
+    clsnew = cls
     print(clsnew)
 
-    return dfall.loc[:, clsnew]
+    dfout = dfall.loc[:, clsnew]
+    # dfout['date'] = dfout['日期'].map(lambda x : pd.to_datetime(x.strftime('%F')))
+    dfout['date'] = dfout['日期']
+    dfout['ru'] = dfout['收入（+元）'].map(lambda x: False if x == ' ' else True)
+    dfout['jine'] = dfout['收入（+元）'] + dfout['支出（-元）']
+
+    def showmingmu(ru, shangpinmingcheng, beizhu, zhanghumingcheng, mingcheng):
+        if not ru:
+            return
+        if pd.isnull(mingcheng) & (zhanghumingcheng != ' , '):
+            return '货款，' + '|'.join([shangpinmingcheng, beizhu, zhanghumingcheng])
+        elif (mingcheng != '白晔峰') & (not pd.isnull(mingcheng)):
+            return '货款，' + '|'.join([shangpinmingcheng, beizhu, zhanghumingcheng]) + ',经手人' + mingcheng
+        else:
+            return
+
+    dfout['mingmu'] = dfout.apply(lambda x: showmingmu(x.ru, x.商品名称, x.备注, x.账户名称, x.名称), axis=1)
+    dfout['card'] = '支付宝白晔峰流水条目'
+    dfout['guid'] = 'f5bad0ca-d7e4-4148-99ac-d3472f1c8d80'
+
+    dffine = dfout[dfout.mingmu.isnull() == False].loc[:, ['date', 'ru', 'jine', 'mingmu', 'card', 'guid']]
+
+    return dffine
 
 
-if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
+def alipay2note():
     cnxp = lite.connect(dbpathdingdanmingxi)
     pathalipay = dirmainpath / 'data' / 'finance' / 'alipay'
     dfall = chulidataindir(cnxp, 'alipay', '支付宝流水', '2088802968197536', '支付宝', pathalipay, chulixls_zhifubao)
     zhds = fenliu2note(dfall)
-    print(zhds)
     cnxp.close()
+
+    financesection = '财务流水账'
+    item = '支付宝白晔峰流水条目'
+    if not cfpzysm.has_option(financesection, item):
+        count = 0
+    else:
+        count = cfpzysm.getint(financesection, item)
+    if count == zhds.shape[0]:
+        log.info(f'{item}\t{zhds.shape[0]}\t无内容更新。')
+        return zhds
+    else:
+        log.info(f'{item}\t{zhds.shape[0]}\t内容有更新。')
+    nowstr = datetime.datetime.now().strftime('%F %T')
+    imglist2note(get_notestore(), [], 'f5bad0ca-d7e4-4148-99ac-d3472f1c8d80', f'支付宝白晔峰流水（{nowstr}）',
+                 tablehtml2evernote(zhds, tabeltitle='支付宝白晔峰流水', withindex=False))
+    cfpzysm.set(financesection, item, f'{zhds.shape[0]}')
+    cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+
+    return zhds
+
+
+if __name__ == '__main__':
+    log.info(f'运行文件\t{__file__}')
+    zhds = alipay2note()
+    # print(zhds)
     print('Done.完毕。')
