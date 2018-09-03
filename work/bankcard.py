@@ -11,7 +11,10 @@
 
 全纪录 to 公司相关流水
 金真心（公帐）：f295b983-eaf2-469f-a3e6-c200bb62c081
+
+支付宝白晔峰流水：f5bad0ca-d7e4-4148-99ac-d3472f1c8d80
 金真心公帐：de4535fe-7dce-4c0a-a845-484e8384186b
+
 招行（9929）：0248c009-f709-40b2-9cf1-f28ed6b3a44e
 农商行（6047：82e5d858-5fc5-4816-8cc0-f83eb261b4f2
 工行（7520）：1fa53462-ba4b-42b3-87b1-d03f0dd7f432
@@ -37,6 +40,7 @@ from func.logme import log
 from func.evernt import findnotefromnotebook, token, get_notestore, evernoteapijiayi, imglist2note, tablehtml2evernote
 from func.nettools import trycounttimes
 from func.configpr import cfpzysm, inizysmpath
+from func.filedatafunc import alipay2note
 
 
 def rulambda(x):
@@ -50,7 +54,7 @@ def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
     souporigin = BeautifulSoup(content, "html.parser")
     ptn = re.compile(u'^(\d{4}年\d{1,2}月\d{1,2}日)\s+([出入])\s+([\d.]+)[日美]?元\s*')
     itemlist = list()
-    if item[0] != 'f295b983-eaf2-469f-a3e6-c200bb62c081':
+    if not (item[0] in ['f295b983-eaf2-469f-a3e6-c200bb62c081', 'f5bad0ca-d7e4-4148-99ac-d3472f1c8d80']):
         for im in souporigin.find_all('div'):
             imtxt = im.get_text()
             if len(im.attrs) > 0:
@@ -74,7 +78,7 @@ def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
                 continue
             itemlist.append(imlst[:-2])
             resultlst.append(imlst)
-    else:
+    elif item[0] == 'f295b983-eaf2-469f-a3e6-c200bb62c081':
         souptrs = souporigin.find_all('tr')
         trlst = [[x.get_text() for x in y.find_all('td')] for y in souptrs]
         gongzhanglist = list()
@@ -98,6 +102,10 @@ def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
         nowstr = datetime.datetime.now().strftime('%F %T')
         imglist2note(get_notestore(), [], 'de4535fe-7dce-4c0a-a845-484e8384186b', f'金真心公帐流水（{nowstr}）',
                      tablehtml2evernote(pd.DataFrame(gongzhanglist), tabeltitle='金真心公帐流水', withindex=False))
+    elif item[0] == 'f5bad0ca-d7e4-4148-99ac-d3472f1c8d80':
+        zhds = alipay2note()
+        zhdslst = [[x for x in y] for y in zhds.values]
+        resultlst.extend(zhdslst)
 
 
 def fetchfinacefromliushui():
@@ -139,6 +147,7 @@ def fetchfinacefromliushui():
     caiwuguanlinbguid = 'bec668cd-bc55-4496-83e3-660044042399'
     finacenotefind = findnotefromnotebook(token, yinhangkanbguid)
     finacenotefind.extend(findnotefromnotebook(token, caiwuguanlinbguid, '金真心公账（353000）进出明细'))
+    # finacenotefind.extend(findnotefromnotebook(token, caiwuguanlinbguid, '支付宝白晔峰流水'))
     print(finacenotefind)
 
     dubiousitems = list()
@@ -152,6 +161,7 @@ def fetchfinacefromliushui():
             print(f'{item[0]}\t{item[1]}\t{len(rstexistlst)}\t无内容更新。')
             continue
         print(f'{item[0]}\t{item[1]}\t{len(rstexistlst)}', end='\t')
+        # print(rstexistlst)
         rstexistlst = [x for x in rstexistlst if x[5] != item[0]]
         print(len(rstexistlst), end='\t')
         getnotecontent2resultlst(item, note.content, dubiousitems, rstexistlst)
@@ -201,6 +211,7 @@ def chaijie2note():
 
 
 def financetimer(jiangemiao):
+    # alipay2note()
     chaijie2note()
 
     global timer_finace
