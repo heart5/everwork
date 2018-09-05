@@ -127,7 +127,7 @@ def fetchfinacefromliushui():
         if len(souptr) == 0:
             continue
         # 用rulambda函数转换字符串的'True'为True，False一样；转换日期为datetime类型
-        souptrtxtlst = [[datetime.datetime.strptime(x.find_all('td')[0].get_text(), '%Y-%m-%d')]
+        souptrtxtlst = [[datetime.datetime.strptime(x.find_all('td')[0].get_text()[:10], '%Y-%m-%d')]
                         + [rulambda(x.find_all('td')[1].get_text())] + [
                             float(x.find_all('td')[2].get_text())] + x.find_all('td')[3:]
                         for x in souptr[1:]]
