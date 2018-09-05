@@ -26,7 +26,8 @@ def chulixls_zhifubao(orderfile):
         df.columns = ['日期', '支付宝交易号', '支付宝流水号', '商户订单号', '账务类型',
                       '收入（+元）', '支出（-元）', '账户余额（元）', '服务费（元）', '支付渠道', '签约产品',
                       '对方账户', '对方名称', '银行订单号', '商品名称', '备注']
-        print(list(df.columns))
+        df['日期'] = pd.to_datetime(df['日期'])
+        print(df.columns)
         return df
     except UnicodeDecodeError as ude:
         log.critical(f'读取{orderfile}时出现解码错误。{ude}')
@@ -87,14 +88,14 @@ def chulidataindir(cnxp, tablename, mingmu, fnstart, notestr, pathorder: Path, c
     print(f'除重后有{dfresult.shape[0]}条记录；数据起于{dateqiyu}，止于{datezhiyu}')
     dfttt = dfresult.drop_duplicates()
     if cfpzysm.has_option(notestr, '记录数'):
-        jilucont = cfpzysm.getint(notestr, '记录数')
+        jilucount = cfpzysm.getint(notestr, '记录数')
     else:
-        jilucont = 0
-    if dfttt.shape[0] > jilucont:
+        jilucount = 0
+    if dfttt.shape[0] > jilucount:
         dfttt.to_sql(tablename, cnxp, index=False, if_exists='replace')
         cfpzysm.set(notestr, '记录数', '%d' % dfttt.shape[0])
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
-        log.info(f'增加有效{mingmu}明细数据{dfttt.shape[0] - jilucont}条。')
+        log.info(f'增加有效{mingmu}明细数据{dfttt.shape[0] - jilucount}条。')
 
     cnxp.close()
 
