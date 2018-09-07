@@ -78,7 +78,7 @@ def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
                 continue
             itemlist.append(imlst[:-2])
             resultlst.append(imlst)
-    elif item[0] == 'f295b983-eaf2-469f-a3e6-c200bb62c081':
+    elif item[0] == 'f295b983-eaf2-469f-a3e6-c200bb62c081':  # 金真心公帐流水
         souptrs = souporigin.find_all('tr')
         trlst = [[x.get_text() for x in y.find_all('td')] for y in souptrs]
         gongzhanglist = list()
@@ -102,9 +102,10 @@ def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
         nowstr = datetime.datetime.now().strftime('%F %T')
         imglist2note(get_notestore(), [], 'de4535fe-7dce-4c0a-a845-484e8384186b', f'金真心公帐流水（{nowstr}）',
                      tablehtml2evernote(pd.DataFrame(gongzhanglist), tabeltitle='金真心公帐流水', withindex=False))
-    elif item[0] == 'f5bad0ca-d7e4-4148-99ac-d3472f1c8d80':
+    elif item[0] == 'f5bad0ca-d7e4-4148-99ac-d3472f1c8d80':  # 支付宝流水
         zhds = alipay2note()
         zhdslst = [[x for x in y] for y in zhds.values]
+        print(zhdslst)
         resultlst.extend(zhdslst)
 
 
@@ -132,10 +133,12 @@ def fetchfinacefromliushui():
                             float(x.find_all('td')[2].get_text())] + x.find_all('td')[3:]
                         for x in souptr[1:]]
         rstexistlst.extend(souptrtxtlst)
-    print(rstexistlst)
 
     rstexistlsthashhlst = [hash(tuple(x)) for x in rstexistlst]
     rstexistlsthashhlsthash = hash(tuple(rstexistlsthashhlst))
+    log.info(f'从现有结果笔记中读取有效记录{len(rstexistlst)}条。')
+    # print(rstexistlst)
+    print(rstexistlsthashhlsthash)
     resulthash = rstexistlsthashhlsthash
 
     financesection = '财务流水账'
@@ -145,7 +148,7 @@ def fetchfinacefromliushui():
 
     yinhangkanbguid = '34b5423f-296f-4a87-b8c0-2ca0a6113053'
     caiwuguanlinbguid = 'bec668cd-bc55-4496-83e3-660044042399'
-    finacenotefind = findnotefromnotebook(token, yinhangkanbguid)
+    finacenotefind = findnotefromnotebook(token, yinhangkanbguid, '9929')
     finacenotefind.extend(findnotefromnotebook(token, caiwuguanlinbguid, '金真心公账（353000）进出明细'))
     # finacenotefind.extend(findnotefromnotebook(token, caiwuguanlinbguid, '支付宝白晔峰流水'))
     print(finacenotefind)
@@ -172,6 +175,9 @@ def fetchfinacefromliushui():
 
     rstexistlsthashhlst = [hash(tuple(x)) for x in rstexistlst]
     rstexistlsthashhlsthash = hash(tuple(rstexistlsthashhlst))
+    log.info(f'轮询笔记后有效记录共有：{len(rstexistlst)}条。')
+    print(rstexistlsthashhlsthash)
+
 
     if resulthash == rstexistlsthashhlsthash:
         updatable = False
