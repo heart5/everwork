@@ -79,6 +79,7 @@ def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
             itemlist.append(imlst[:-2])
             resultlst.append(imlst)
     elif item[0] == 'f295b983-eaf2-469f-a3e6-c200bb62c081':  # 金真心公帐流水
+        print(f'金真心公帐流水之前，总记录数为：{len(resultlst)}', end='\t')
         souptrs = souporigin.find_all('tr')
         trlst = [[x.get_text() for x in y.find_all('td')] for y in souptrs]
         gongzhanglist = list()
@@ -99,14 +100,18 @@ def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
             imlist = [tmdate, tmru, tmjine, tmmingmu, item[1], item[0]]
             gongzhanglist.append(imlist[:-2])
             resultlst.append(imlist)
+        print(f'金真心公帐流水之后，总记录数为：{len(resultlst)}')
+
         nowstr = datetime.datetime.now().strftime('%F %T')
         imglist2note(get_notestore(), [], 'de4535fe-7dce-4c0a-a845-484e8384186b', f'金真心公帐流水（{nowstr}）',
                      tablehtml2evernote(pd.DataFrame(gongzhanglist), tabeltitle='金真心公帐流水', withindex=False))
     elif item[0] == 'f5bad0ca-d7e4-4148-99ac-d3472f1c8d80':  # 支付宝流水
         zhds = alipay2note()
         zhdslst = [[x for x in y] for y in zhds.values]
-        print(zhdslst)
+        # print(zhdslst)
+        print(f'支付宝流水之前，总记录数为：{len(resultlst)}', end='\t')
         resultlst.extend(zhdslst)
+        print(f'支付宝流水之后，总记录数为：{len(resultlst)}')
 
 
 def fetchfinacefromliushui():
@@ -148,7 +153,7 @@ def fetchfinacefromliushui():
 
     yinhangkanbguid = '34b5423f-296f-4a87-b8c0-2ca0a6113053'
     caiwuguanlinbguid = 'bec668cd-bc55-4496-83e3-660044042399'
-    finacenotefind = findnotefromnotebook(token, yinhangkanbguid, '9929')
+    finacenotefind = findnotefromnotebook(token, yinhangkanbguid)
     finacenotefind.extend(findnotefromnotebook(token, caiwuguanlinbguid, '金真心公账（353000）进出明细'))
     # finacenotefind.extend(findnotefromnotebook(token, caiwuguanlinbguid, '支付宝白晔峰流水'))
     print(finacenotefind)
@@ -178,7 +183,6 @@ def fetchfinacefromliushui():
     log.info(f'轮询笔记后有效记录共有：{len(rstexistlst)}条。')
     print(rstexistlsthashhlsthash)
 
-
     if resulthash == rstexistlsthashhlsthash:
         updatable = False
     else:
@@ -200,16 +204,21 @@ def chaijie2note():
     if len(dubiouslst) > 0:
         imglist2note(get_notestore(), list(), 'a8335080-9d3a-4f6d-8a05-9e88d5fa1eff', f'资金流水疑似问题条目（{nowstr}）',
                      tablehtml2evernote(pd.DataFrame(dubiouslst), tabeltitle='资金流水疑似问题条目', withindex=False))
+
     dfall = pd.DataFrame(resultlst, columns=['date', 'ru', 'jine', 'mingmu', 'card', 'guid'])
     dfall.sort_values(['date'], ascending=False, inplace=True)
+
     dfchuru = dfall[(dfall.mingmu.str.startswith('货款') == True) & (dfall.mingmu.str.count('[?？]') >= 1)]
     imglist2note(get_notestore(), list(), '5105d7e0-9b16-41cc-b200-afa7782c6a3c', f'待确认回款条目（{nowstr}）',
                  warnnomodifystr + tablehtml2evernote(dfchuru[dfchuru.ru],
                                                       tabeltitle='待确认回款条目', withindex=False))
+
     dfchuru = dfall[dfall.mingmu.str.startswith('货款') == True]
+    print(f'')
     imglist2note(get_notestore(), list(), '4992b5bf-a81e-4b5a-aa4f-2a86ae420285', f'货款回笼流水账（{nowstr}）',
                  warnnomodifystr + tablehtml2evernote(dfchuru[dfchuru.ru],
                                                       tabeltitle='货款回笼流水账', withindex=False))
+
     imglist2note(get_notestore(), list(), '5eaf0153-816c-4def-b26e-439a21000be3', f'上游付款流水账（{nowstr}）',
                  warnnomodifystr + tablehtml2evernote(dfchuru[dfchuru.ru == False],
                                                       tabeltitle='上游付款流水账', withindex=False))
