@@ -1,4 +1,4 @@
 import wikipedia
 
-result = wikipedia.page('person')
+result = wikipedia.page('AI')
 print(result.summary)
