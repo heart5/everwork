@@ -33,6 +33,6 @@ def countdown(n):
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    countdown(10000000000000)
-    countdown(112239142799421987142791274)
+    countdown(10008888)
+    countdown(1122343535)
     print('Done.完毕。')
