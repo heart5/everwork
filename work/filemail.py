@@ -6,6 +6,7 @@ from threading import Timer
 from func.logme import log
 from func.configpr import cfp
 from func.mailsfunc import getmail
+from func.wrapfuncs import timethis
 
 
 def fetchworkfile_from_gmail(topic):
@@ -27,6 +28,7 @@ def fetchworkfile_from_gmail(topic):
     log.info('从Gmail邮箱目录《%s》中获取%d封%s新邮件。' % (dirwork, len(itemslst), topicstring))
 
 
+@timethis
 def workfilefromgmail2datacenter(jiangemiao):
     try:
         fetchworkfile_from_gmail('')

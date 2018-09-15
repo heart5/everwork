@@ -11,8 +11,10 @@ from func.first import getdirmain
 from func.configpr import getcfp
 from func.evernt import get_notestore, imglist2note
 from func.logme import log
+from func.wrapfuncs import timethis
 
 
+@timethis
 def log2notetimer(jiangemiao):
     pathlog = getdirmain() / 'log'
     files = os.listdir(str(pathlog))

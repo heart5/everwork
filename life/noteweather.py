@@ -29,6 +29,8 @@ from func.first import dirmainpath, touchfilepath2depth
 from pylab import *
 from func.logme import log
 from func.mailsfunc import getmail
+from func.wrapfuncs import timethis
+
 
 # plot中显示中文
 mpl.rcParams['font.sans-serif'] = ['SimHei']
@@ -372,6 +374,7 @@ def isweatherupdate(weathertxtfilename):
         return False
 
 
+@timethis
 def weatherstattimer(jiangemiao):
     weathertxtfilename = str(dirmainpath / 'data' / 'ifttt' / 'weather.txt')
     try:
