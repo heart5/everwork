@@ -177,7 +177,7 @@ def fetchattendance_from_evernote():
             dfresult = chuliholidayleave_note(zhuti)
             if dfresult is not False:
                 descdb(dfresult)
-    except WindowsError as wine:
+    except (WindowsError, Exception) as wine:
         topic = [x for [x, *y] in zhutis]
         log.critical(f'从evernote获取{topic}笔记信息时出现未名错误。{wine}')
 
