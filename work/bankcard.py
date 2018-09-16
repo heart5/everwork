@@ -38,7 +38,7 @@ from bs4 import BeautifulSoup
 
 from func.logme import log
 from func.evernt import findnotefromnotebook, token, get_notestore, evernoteapijiayi, imglist2note, tablehtml2evernote
-from func.nettools import trycounttimes
+from func.nettools import trycounttimes2
 from func.configpr import cfpzysm, inizysmpath
 from func.filedatafunc import alipay2note
 
@@ -115,6 +115,7 @@ def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
 
 
 def fetchfinacefromliushui():
+    @trycounttimes2('evernote服务器')
     def getnote(targetguid):
         note_store = get_notestore()
         notereturn = note_store.getNote(targetguid, True, True, False, False)
@@ -126,7 +127,7 @@ def fetchfinacefromliushui():
     # 取得已经有的
     rstexistlst = list()
     for resultnoteguid in resultnoteguids:
-        notechuru = trycounttimes(getnote, inputparam=resultnoteguid, returnresult=True, servname='evernote服务器')
+        notechuru = getnote(resultnoteguid)
         souporigin = BeautifulSoup(notechuru.content, 'html.parser')
         souptr = souporigin.find_all('tr')
         # print(souptr[1:])
@@ -160,7 +161,7 @@ def fetchfinacefromliushui():
 
     dubiousitems = list()
     for item in finacenotefind:
-        note = trycounttimes(getnote, inputparam=item[0], returnresult=True, servname='evernote服务器')
+        note = getnote(item[0])
         if not cfpzysm.has_option(financesection, item[0]):
             updatenum = 0
         else:

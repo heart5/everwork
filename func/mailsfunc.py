@@ -8,7 +8,7 @@ from func.logme import log
 from func.first import getdirmain
 from func.configpr import cfp
 from func.first import dirmainpath
-from func.nettools import trycounttimes
+from func.nettools import trycounttimes2
 
 
 def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum=100000, dirtarget='Inbox',
@@ -138,13 +138,14 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
 
         return bodymsg
 
+    @trycounttimes2(f'{hostmail}邮箱服务器')
     def getservmail():
         servmail = imaplib.IMAP4_SSL(hostmail, port)
         servmail.login(usernamemail, passwordmail)
         log.info(f'成功登陆到邮箱：{hostmail}。{servmail}')
         return servmail
 
-    serv = trycounttimes(getservmail, '', True, '邮箱服务器')
+    serv = getservmail()
 
     # if debug:
     #     serv.debug = 4
@@ -215,7 +216,7 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
         counttarget = len(numlistinside)
         log.info('已有%d封邮件，准备处理%d封邮件……' % (countstart, counttarget))
 
-        servinner = trycounttimes(getservmail, '', True, '邮箱服务器')
+        servinner = getservmail()
         type, data = servinner.select(dirtarget)
 
         count = 0

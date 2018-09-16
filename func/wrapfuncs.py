@@ -4,6 +4,7 @@
 """
 import time
 from functools import wraps
+from inspect import signature
 from func.logme import log
 
 
@@ -26,13 +27,31 @@ def timethis(func):
 
 
 @timethis
-def countdown(n):
+def countdown(n: int):
+    '''
+    倒计时
+    :param n:
+    :return: NULL
+    '''
+    print(n)
     while n > 0:
         n -= 1
 
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    countdown(10008888)
-    countdown(1122343535)
+    countdown(100088)
+    print(countdown.__name__)
+    print(countdown.__doc__)
+    print(countdown.__annotations__)
+    countdown(12234353)
+    countdown(500)
+    countdown.__wrapped__(500)
+    print(signature(countdown))
+    print(countdown.__class__)
+    print(countdown.__closure__)
+    print(countdown.__code__)
+    print(countdown.__defaults__)
+    print(countdown.__dict__)
+    print(countdown.__dir__())
     print('Done.完毕。')

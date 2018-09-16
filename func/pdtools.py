@@ -16,7 +16,7 @@ from pylab import *
 from func.evernt import evernoteapijiayi, makenote
 from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
 from func.logme import log
-from func.nettools import trycounttimes
+from func.nettools import trycounttimes2
 
 # plot中显示中文
 mpl.rcParams['font.sans-serif'] = ['SimHei']
@@ -612,6 +612,7 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
     nbfbdf = readinisection2df(cfpp, fromsection, zhuti)
     # print(nbfbdf)
     for aa in nbfbdf.index:
+        @trycounttimes2('evernote服务器')
         def setguid():
             try:
                 guid = cfpp.get(tosection, aa)
@@ -629,7 +630,7 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
             # print(note.guid + '\t\t' + note.title)
             cfpp.set(tosection, aa, note.guid)
 
-        trycounttimes(setguid, '', False, 'evernote服务器')
+        setguid()
 
     cfpp.write(open(inifile, 'w', encoding='utf-8'))
 

@@ -18,7 +18,7 @@ from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_M
 from func.configpr import cfp, inifilepath
 from func.first import dirlog
 from func.logme import log
-from func.nettools import trycounttimes
+from func.nettools import trycounttimes2
 
 
 def get_notestore():
@@ -61,6 +61,7 @@ def get_notestore():
 
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
+    @trycounttimes2('evernote服务器')
     def getnotestore():
         global note_store
         if note_store is not None:
@@ -82,7 +83,7 @@ def get_notestore():
         log.critical(f'成功连接Evernote服务器！构建notestore：{note_store}')
         return note_store
 
-    return trycounttimes(getnotestore, '', True, 'evernote服务器')
+    return getnotestore()
 
 
 note_store = None
@@ -211,12 +212,13 @@ def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000)
                                            includeAttributes=True,
                                            includeLargestResourceMime=True, includeLargestResourceSize=True)
 
+    @trycounttimes2('evernote服务器')
     def findnote():
         notelist = note_store.findNotesMetadata(tokenfnfn, notefilter, 0, notecount, notemetaspec)
         evernoteapijiayi()
         return notelist
 
-    ournotelist = trycounttimes(findnote, '', True, 'evernote服务器')
+    ournotelist = findnote()
 
     # print ourNoteList.notes[-1].title  #测试打印指定note的标题
     # print note_store.getNoteContent(ourNoteList.notes[-1].guid)  #测试打印指定note的内容
