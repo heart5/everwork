@@ -3,6 +3,9 @@
 用evernote作为工作平台，通过Python链接整理各种工作数据，呈现给各个相关岗位。.
 """
 # import imp4nb
+import sys
+
+sys.path.extend(['func', 'work', 'etc'])
 import sqlite3 as lite
 from life.noteweather import weatherstattimer  # 调用同目录下其他文件（py）中的函数
 from etc.log2note import log2notetimer
