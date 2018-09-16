@@ -5,6 +5,7 @@
 # import imp4nb
 import sys
 
+
 sys.path.extend(['func', 'work', 'etc'])
 import sqlite3 as lite
 from life.noteweather import weatherstattimer  # 调用同目录下其他文件（py）中的函数
