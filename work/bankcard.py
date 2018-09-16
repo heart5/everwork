@@ -84,6 +84,8 @@ def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
         trlst = [[x.get_text() for x in y.find_all('td')] for y in souptrs]
         gongzhanglist = list()
         for tritem in trlst[1:]:
+            if len(tritem[0]) == 0:  # 判断空数据行行，跳过
+                continue
             tmdate = datetime.datetime.strptime(tritem[0], '%Y%m%d')
             if len(tritem[1]) == 0:
                 tmru = True
