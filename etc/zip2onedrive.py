@@ -8,7 +8,7 @@ import os
 import time
 import zipfile
 os.sys.path.append('/storage/emulated/0/.0code/everwork/everwork')
-os.sys.path.append('~/ewbase/func')
+os.sys.path.append('/storage/emulated/0/.0code/everwork/everwork/func')
 print(os.sys.path)
 from pathlib import Path
 from threading import Timer
@@ -22,6 +22,8 @@ def zipdir2one():
     env_dlist = os.environ
     # for key in env_dlist:
     #    print(key, env_dlist[key])
+    if env_dlist['onedrive'] is None:
+        env_dlist['onedrive'] = '/storage/emulated/0/Documents'
     onedrivedir = Path(env_dlist['onedrive'])
     # zipfilename = f'datauto_{platform.node()}.zip'
     zipfilename = f"datauto_{platform.uname().system}_{platform.uname().machine}_{platform.uname().node}.zip"
