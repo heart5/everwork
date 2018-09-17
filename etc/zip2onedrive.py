@@ -22,9 +22,10 @@ def zipdir2one():
     env_dlist = os.environ
     # for key in env_dlist:
     #    print(key, env_dlist[key])
-    if env_dlist['onedrive'] is None:
-        env_dlist['onedrive'] = '/storage/emulated/0/Documents'
-    onedrivedir = Path(env_dlist['onedrive'])
+    if 'onedrive' in env_dlist.items():
+        onedrivedir = Path(env_dlist['onedrive'])
+    else:
+        onedrivedir = Path('/storage/emulated/0/Documents')
     # zipfilename = f'datauto_{platform.node()}.zip'
     zipfilename = f"datauto_{platform.uname().system}_{platform.uname().machine}_{platform.uname().node}.zip"
     # print(zipfilename)
