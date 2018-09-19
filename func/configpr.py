@@ -3,9 +3,12 @@
 输出相应的配置处理器
 可用的处理有：everwork, everdatanote, everlife, everzysm, everworkplan
 """
-from configparser import ConfigParser
-from func.first import getdirmain, touchfilepath2depth
 from pathlib import Path
+from configparser import ConfigParser
+import pathmagic
+
+with pathmagic.context():
+    from func.first import getdirmain, touchfilepath2depth
 
 
 def getcfp(cfpfilename: str):

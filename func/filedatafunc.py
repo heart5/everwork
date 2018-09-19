@@ -8,13 +8,15 @@ import pandas as pd
 import numpy as np
 import sqlite3 as lite
 from pathlib import Path
-
 import xlrd
 
-from func.evernt import imglist2note, get_notestore, tablehtml2evernote
-from func.first import dbpathdingdanmingxi, dirmainpath
-from func.logme import log
-from func.configpr import cfpzysm, inizysmpath
+import pathmagic
+
+with pathmagic.context():
+    from func.evernt import imglist2note, get_notestore, tablehtml2evernote
+    from func.first import dbpathdingdanmingxi, dirmainpath
+    from func.logme import log
+    from func.configpr import cfpzysm, inizysmpath
 
 
 def chulixls_zhifubao(orderfile):
@@ -123,7 +125,7 @@ def fenliu2note(dfall):
     zhds = zhdf['codename']
     dfall['账户名称'] = dfall['对方账户'] + ',' + dfall['对方名称']
     dfall['名称'] = dfall['账户名称'].map(
-        lambda x : zhds[zhds == x].index.values[0] if len(zhds[zhds == x].index.values) > 0 else np.NaN)
+        lambda x: zhds[zhds == x].index.values[0] if len(zhds[zhds == x].index.values) > 0 else np.NaN)
     dfall.sort_values('日期', ascending=False, inplace=True)
     cls = list(dfall.columns)
     # clsnew = cls[:-2] + [cls[-1]]

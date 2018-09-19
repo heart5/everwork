@@ -4,15 +4,18 @@
 """
 
 # from imp4nb import *
-from threading import Timer
-
 import pandas as pd
 import sqlite3 as lite
-from func.configpr import cfpdata, inidatanotefilepath
-from func.evernt import imglist2note, get_notestore, token
-from func.first import dbpathquandan, touchfilepath2depth, dbpathdingdanmingxi
-from func.pdtools import dataokay, dfin2imglist, updatesection, readinisection2df
-from func.logme import log
+from threading import Timer
+
+import pathmagic
+
+with pathmagic.context():
+    from func.configpr import cfpdata, inidatanotefilepath
+    from func.evernt import imglist2note, get_notestore, token
+    from func.first import dbpathquandan, touchfilepath2depth, dbpathdingdanmingxi
+    from func.pdtools import dataokay, dfin2imglist, updatesection, readinisection2df
+    from func.logme import log
 
 
 def getgroupdf(dfs, xiangmus, period='month'):

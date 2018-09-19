@@ -28,12 +28,16 @@ import pandas as pd
 import sqlite3 as lite
 import evernote.edam.type.ttypes as ttypes
 from threading import Timer
-from func.configpr import cfp, cfpzysm, inizysmpath, cfpdata, inidatanotefilepath
-from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
-from func.logme import log
-from func.first import dirmainpath, dbpathworkplan, dbpathquandan
-from func.pdtools import dftotal2top
-from work.orderdetails import jiaoyanchanpinkehu
+
+import pathmagic
+
+with pathmagic.context():
+    from func.configpr import cfp, cfpzysm, inizysmpath, cfpdata, inidatanotefilepath
+    from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
+    from func.logme import log
+    from func.first import dirmainpath, dbpathworkplan, dbpathquandan
+    from func.pdtools import dftotal2top
+    from work.orderdetails import jiaoyanchanpinkehu
 
 
 def chulixls_order(orderfile):

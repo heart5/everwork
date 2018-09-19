@@ -5,9 +5,11 @@
 import os
 import sys
 from pathlib import Path
-sys.path.append(os.path.split(os.getcwd())[0])
-sys.path.append(os.getcwd())
-import func.fordirmainonly as fdmo
+
+import pathmagic
+
+with pathmagic.context():
+    import func.fordirmainonly as fdmo
 
 
 # from func.logme import log

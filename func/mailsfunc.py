@@ -2,13 +2,23 @@
 """
 功能描述
 """
-import os, re, datetime, time, email, imaplib, ssl, threading, socket
+import datetime
+import email
+import imaplib
+import os
+import re
+import socket
+import threading
 from bs4 import BeautifulSoup
-from func.logme import log
-from func.first import getdirmain
-from func.configpr import cfp
-from func.first import dirmainpath
-from func.nettools import trycounttimes2
+
+import pathmagic
+
+with pathmagic.context():
+    from func.configpr import cfp
+    from func.first import dirmainpath
+    from func.first import getdirmain
+    from func.logme import log
+    from func.nettools import trycounttimes2
 
 
 def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum=100000, dirtarget='Inbox',
@@ -78,7 +88,7 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
             partitem = []
             # 这里要判断是否是multipart，是的话，里面的数据是一个message 列表
             if not part.is_multipart():
-                charset = part.get_charset()
+                # charset = part.get_charset()
                 # print('charset: ', charset)
                 contenttype = part.get_content_type()
                 # print('content-type', contenttype)
@@ -355,8 +365,7 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
                     if bodyonly:  # 只要邮件body文本，否则增加邮件标题部分内容
                         itemslst.append(textstrjilu)
                     elif headerjilu[1].startswith('SMS with') or headerjilu[1].endswith('的短信记录') \
-                            or headerjilu[1].endswith(
-                        '的通话记录'):  # 对特别记录增补时间戳
+                            or headerjilu[1].endswith('的通话记录'):  # 对特别记录增补时间戳
                         itemslst.append(headerjilu[1] + '\t' + str(headerjilu[0]) + '，' + textstrjilu)
                     else:
                         itemslst.append(headerjilu[1] + '\t' + textstrjilu)

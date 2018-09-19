@@ -3,10 +3,14 @@
 功能描述
 """
 from threading import Timer
-from func.logme import log
-from func.configpr import cfp
-from func.mailsfunc import getmail
-from func.wrapfuncs import timethis
+
+import pathmagic
+
+with pathmagic.context():
+    from func.logme import log
+    from func.configpr import cfp
+    from func.mailsfunc import getmail
+    from func.wrapfuncs import timethis
 
 
 def fetchworkfile_from_gmail(topic):

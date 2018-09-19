@@ -9,20 +9,24 @@
 ['e5d81ffa-89e7-49ff-bd4c-a5a71ae14320', '武汉雨天记录']
 """
 import math
-import ssl
+import sqlite3 as lite
+# import ssl
 # import numpy as np
 from threading import Timer
-
 from pandas.tseries.offsets import *
-import sqlite3 as lite
 from bs4 import BeautifulSoup
-from func.evernt import *
-from func.pdtools import descdb, isworkday
-from func.configpr import cfpworkplan as cfpworkplan, iniworkplanpath as iniworkplanpath
-from func.first import dbpathworkplan
+
+import pathmagic
+
+with pathmagic.context():
+    from func.evernt import *
+    from func.pdtools import descdb, isworkday
+    from func.configpr import cfpworkplan as cfpworkplan, iniworkplanpath as iniworkplanpath
+    from func.first import dbpathworkplan
 
 
 def chuliholidayleave_note(zhuti: list):
+    global note_store
     note_store = get_notestore()
     # print(zhuti)
     guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')

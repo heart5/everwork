@@ -4,15 +4,17 @@
 """
 import time
 import random
-
 from requests.packages.urllib3 import HTTPConnectionPool
 from requests.packages.urllib3.exceptions import NewConnectionError
-
-from func.logme import log
 import requests
 from bs4 import BeautifulSoup
 import struct
 from functools import wraps
+
+import pathmagic
+
+with pathmagic.context():
+    from func.logme import log
 
 
 def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务器'):

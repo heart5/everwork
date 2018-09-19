@@ -9,23 +9,25 @@
 992afcfb-3afb-437b-9eb1-7164d5207564 在职业务人员名单
 """
 import os
-import sys
-import datetime
+# import sys
+# import datetime
 # import xlrd
 import pandas as pd
 import numpy as np
 import sqlite3 as lite
 import evernote.edam.type.ttypes as Ttypes
+import xlrd
 from threading import Timer
 from pathlib import Path
 
-import xlrd
+import pathmagic
 
-from func.configpr import cfp, cfpzysm, inizysmpath, cfpdata, inidatanotefilepath
-from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
-from func.logme import log
-from func.first import dirmain, dirmainpath, dbpathworkplan, dbpathquandan, dbpathdingdanmingxi
-from func.pdtools import dftotal2top, dataokay
+with pathmagic.context():
+    from func.configpr import cfp, cfpzysm, inizysmpath, cfpdata, inidatanotefilepath
+    from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
+    from func.logme import log
+    from func.first import dirmain, dirmainpath, dbpathworkplan, dbpathquandan, dbpathdingdanmingxi
+    from func.pdtools import dftotal2top, dataokay
 
 
 def chulixls_order(orderfile: Path):

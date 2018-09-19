@@ -5,25 +5,33 @@ import大集合
 everwork的各种函数
 """
 
-import time, datetime, calendar as cal, hashlib, binascii, re, os, socket, random, email, imaplib, subprocess, locale, \
-    threading, html, struct, ssl, itertools, \
-    logging as lg, logging.handlers as lgh, pandas as pd, sqlite3 as lite, matplotlib.pyplot as plt, \
-    evernote.edam.type.ttypes as Ttypes, evernote.edam.error.ttypes as Etypes, \
-    evernote.edam.userstore.constants as UserStoreConstants, \
-    evernote.edam.notestore.NoteStore as NoteStore
-from pylab import *
-from configparser import ConfigParser
-from matplotlib.ticker import MultipleLocator, FuncFormatter
-from mpl_toolkits.mplot3d import Axes3D
+import binascii
+import datetime
+import email
+import evernote.edam.error.ttypes as Etypes
+import evernote.edam.notestore.NoteStore as NoteStore
+import evernote.edam.type.ttypes as Ttypes
+import evernote.edam.userstore.constants as UserStoreConstants
 from evernote.api.client import EvernoteClient
-from pandas.tseries.offsets import *
+import hashlib
+import imaplib
+import pandas as pd
+import re
+import socket
+import sqlite3 as lite
+import ssl
+import threading
+import time
+from configparser import ConfigParser
 from bs4 import BeautifulSoup
-from os import listdir
-from os.path import isfile, join
-from odps.df import DataFrame
-from threading import Timer
-from multiprocessing import Process, Pool, Queue
-from func.logme import log
+# from matplotlib.ticker import FuncFormatter
+from pandas.tseries.offsets import *
+from pylab import *
+
+import pathmagic
+
+with pathmagic.context():
+    from func.logme import log
 
 
 def dirbuildfirst():
@@ -178,7 +186,7 @@ def use_logging(level='debug'):
         def wrapper(*args, **kwargs):
             if level == 'debug':
                 log.debug("%s 启动运行" % func.__name__)
-            return func(*args)
+            return func(*args, **kwargs)
         return wrapper
     return decorator
 
@@ -208,7 +216,7 @@ def readinisection2df(cfpp: ConfigParser, section: object, biaoti: object):
     return df
 
 
-def yingdacal(x, cnx):
+def yingdacal(x: pd.datetime, cnx):
     """
     :type x: datetime
     :type cnx: object

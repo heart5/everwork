@@ -5,15 +5,19 @@
 import time
 from functools import wraps
 from inspect import signature
-from func.logme import log
+
+import pathmagic
+
+with pathmagic.context():
+    from func.logme import log
 
 
 def timethis(func):
-    '''
+    """
     装饰执行时间（tida）
     :param func:
     :return:
-    '''
+    """
 
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -28,11 +32,11 @@ def timethis(func):
 
 @timethis
 def countdown(n: int):
-    '''
+    """
     倒计时
     :param n:
     :return: NULL
-    '''
+    """
     print(n)
     while n > 0:
         n -= 1

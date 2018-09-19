@@ -6,7 +6,11 @@
 import logging as lg
 import logging.handlers as lgh
 import os
-from func.first import dirlog, touchfilepath2depth
+
+import pathmagic
+
+with pathmagic.context():
+    from func.first import dirlog, touchfilepath2depth
 
 
 def mylog():

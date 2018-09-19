@@ -7,9 +7,12 @@ import numpy as np
 import pandas as pd
 import sqlite3 as lite
 
-from func.first import dbpathquandan, dirmainpath
-from func.pdtools import descdb, dataokay, desclitedb
-from func.logme import log
+import pathmagic
+
+with pathmagic.context():
+    from func.first import dbpathquandan, dirmainpath
+    from func.pdtools import descdb, dataokay, desclitedb
+    from func.logme import log
 
 
 def salesjiangjin(cnxs):

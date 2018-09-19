@@ -22,14 +22,18 @@ import re
 import time
 from threading import Timer
 from bs4 import BeautifulSoup
-# from matplotlib.ticker import FuncFormatter
-from func.configpr import cfp, cfplife, inilifepath
-from func.evernt import get_notestore, imglist2note
-from func.first import dirmainpath, touchfilepath2depth
 from pylab import *
-from func.logme import log
-from func.mailsfunc import getmail
-from func.wrapfuncs import timethis
+# from matplotlib.ticker import FuncFormatter
+
+import pathmagic
+
+with pathmagic.context():
+    from func.configpr import cfp, cfplife, inilifepath
+    from func.evernt import get_notestore, imglist2note
+    from func.first import dirmainpath, touchfilepath2depth
+    from func.logme import log
+    from func.mailsfunc import getmail
+    from func.wrapfuncs import timethis
 
 
 # plot中显示中文

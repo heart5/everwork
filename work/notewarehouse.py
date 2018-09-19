@@ -11,9 +11,13 @@
 import pandas as pd
 from matplotlib.pyplot import subplot2grid, figure, bar, gca, plot, legend, savefig, title, close
 from matplotlib.ticker import FuncFormatter
-from func.first import dirmainpath
-from func.pdtools import chuturizhexian
-from func.evernt import imglist2note
+
+import pathmagic
+
+with pathmagic.context():
+    from func.first import dirmainpath
+    from func.pdtools import chuturizhexian
+    from func.evernt import imglist2note
 
 
 def pickstat(note_store, cnx, destguid=None, notetitle='', cum=False):

@@ -2,12 +2,19 @@
 # 整理并导入原始数据
 # from imp4nb import *
 
-import re, datetime, pandas as pd, sqlite3 as lite
+import datetime
+import pandas as pd
+import re
+import sqlite3 as lite
 from odps.df import DataFrame
-from func.pdtools import descdb
-from func.logme import log
-from func.first import dirmainpath, dbpathquandan
-from func.pdtools import dataokay, desclitedb
+
+import pathmagic
+
+with pathmagic.context():
+    from func.first import dirmainpath, dbpathquandan
+    from func.logme import log
+    from func.pdtools import dataokay, desclitedb
+    from func.pdtools import descdb
 
 
 def chengbenjiaupdatedf(dfsall, cnxxc):

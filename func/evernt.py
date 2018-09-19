@@ -15,10 +15,14 @@ from evernote.edam.error.ttypes import EDAMNotFoundException, EDAMSystemExceptio
 from evernote.edam.notestore.NoteStore import NoteFilter, NotesMetadataResultSpec
 from evernote.edam.type.ttypes import Note, Resource, Data
 from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_MINOR
-from func.configpr import cfp, inifilepath
-from func.first import dirlog
-from func.logme import log
-from func.nettools import trycounttimes2
+
+import pathmagic
+
+with pathmagic.context():
+    from func.configpr import cfp, inifilepath
+    from func.first import dirlog
+    from func.logme import log
+    from func.nettools import trycounttimes2
 
 
 def get_notestore():
@@ -202,6 +206,7 @@ def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000)
     :param notecount: 搜索结果数量限值
     :return: 列表，包含形如[noteguid, notetitle]的list
     """
+    global note_store
     note_store = get_notestore()
     notefilter = NoteFilter()
     notefilter.notebookGuid = notebookguid
@@ -371,6 +376,7 @@ def evernoteapijiayi():
         secondsaferzhengdian = np.random.randint(0, 50)
         sleep_seconds = (zhengdian - now).seconds + secondsaferzhengdian
         starttimeafterzhengdian = pd.to_datetime(zhengdian + datetime.timedelta(seconds=secondsaferzhengdian))
+        print(f'{sleep_seconds}\t{starttimeafterzhengdian}')
         # note_store = None
         log.info(f'Evernote API{note_store} 调用已达{ENtimes:d}次，'
                  f'休息{secondsaferzhengdian:d}秒，重新构造一个服务器连接再开干……')

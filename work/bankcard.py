@@ -31,16 +31,19 @@
 """
 import datetime
 import re
-from threading import Timer
-
 import pandas as pd
 from bs4 import BeautifulSoup
+from threading import Timer
 
-from func.logme import log
-from func.evernt import findnotefromnotebook, token, get_notestore, evernoteapijiayi, imglist2note, tablehtml2evernote
-from func.nettools import trycounttimes2
-from func.configpr import cfpzysm, inizysmpath
-from func.filedatafunc import alipay2note
+import pathmagic
+
+with pathmagic.context():
+    from func.logme import log
+    from func.evernt import findnotefromnotebook, token, get_notestore, evernoteapijiayi, \
+        imglist2note, tablehtml2evernote
+    from func.nettools import trycounttimes2
+    from func.configpr import cfpzysm, inizysmpath
+    from func.filedatafunc import alipay2note
 
 
 def rulambda(x):

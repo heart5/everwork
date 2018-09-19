@@ -13,10 +13,13 @@ from pandas.tseries.offsets import *
 # from numpy import *
 from pylab import *
 
-from func.evernt import evernoteapijiayi, makenote
-from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
-from func.logme import log
-from func.nettools import trycounttimes2
+import pathmagic
+
+with pathmagic.context():
+    from func.evernt import evernoteapijiayi, makenote
+    from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
+    from func.logme import log
+    from func.nettools import trycounttimes2
 
 # plot中显示中文
 mpl.rcParams['font.sans-serif'] = ['SimHei']

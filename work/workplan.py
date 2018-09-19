@@ -32,13 +32,17 @@ import re
 import sqlite3 as lite
 from threading import Timer
 from bs4 import BeautifulSoup
-from func.configpr import cfpworkplan, iniworkplanpath
-from func.evernt import findnotefromnotebook, get_notestore, evernoteapijiayi, token, \
-    timestamp2str, tablehtml2evernote, imglist2note
-from func.first import dbpathworkplan
-from func.logme import log
-from func.pdtools import isworkday, descdb
-from work.dutyon import fetchattendance_from_evernote
+
+import pathmagic
+
+with pathmagic.context():
+    from func.configpr import cfpworkplan, iniworkplanpath
+    from func.evernt import findnotefromnotebook, get_notestore, evernoteapijiayi, token, \
+        timestamp2str, tablehtml2evernote, imglist2note
+    from func.first import dbpathworkplan
+    from func.logme import log
+    from func.pdtools import isworkday, descdb
+    from work.dutyon import fetchattendance_from_evernote
 
 
 def gezhongzaxiang():

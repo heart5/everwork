@@ -33,19 +33,25 @@ a7e84055-f075-44ab-8205-5a42f3f05284 汉阳办进出记录统计图表    hanyan
 """
 
 # from imp4nb import *
-import os, re, time, datetime, pandas as pd, matplotlib.pyplot as plt
-from os import listdir
-from os.path import isfile, join
-from bs4 import BeautifulSoup
-from threading import Timer
-from matplotlib.ticker import MultipleLocator, FuncFormatter
-from pandas.tseries.offsets import *
+import datetime
+import matplotlib.pyplot as plt
+import pandas as pd
+import re
+import time
 import pygsheets
-from func.logme import log
-from func.first import dirmainpath
-from func.evernt import get_notestore, evernoteapijiayi, tablehtml2evernote, imglist2note
-from func.configpr import cfp, inifilepath, cfplife, inilifepath
-from func.mailsfunc import jilugmail
+from os import listdir
+from os.path import isfile
+from threading import Timer
+from bs4 import BeautifulSoup
+from pandas.tseries.offsets import *
+
+import pathmagic
+
+with pathmagic.context():
+    from func.configpr import cfplife
+    from func.evernt import get_notestore, evernoteapijiayi, tablehtml2evernote, imglist2note
+    from func.logme import log
+    from func.mailsfunc import jilugmail
 
 
 def jilugooglefile(filepath):

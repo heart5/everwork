@@ -6,14 +6,20 @@
 """
 
 # from imp4nb import *
-import re, datetime, pandas as pd
+import datetime
+import pandas as pd
+import re
 from threading import Timer
-from bs4 import BeautifulSoup
-from func.first import dirmainpath
-from func.logme import log
-from func.evernt import get_notestore, token, imglist2note, tablehtml2evernote
-from func.configpr import cfp, cfplife, inilifepath
-from func.mailsfunc import jilugmail
+
+import pathmagic
+
+with pathmagic.context():
+    from func.evernt import get_notestore, imglist2note, tablehtml2evernote
+    from func.mailsfunc import jilugmail
+    from func.logme import log
+    from func.configpr import cfplife, inilifepath
+    from func.first import dirmainpath
+
 
 def notification2df(items):
     split_items = list()
@@ -22,7 +28,7 @@ def notification2df(items):
 
     dfnoti = pd.DataFrame(split_items, columns=('atime', 'shuxing', 'topic', 'content'))
     dfnoti['received'] = True
-    global log
+    # global log
     log.info('系统提醒记录有%d条。' % dfnoti.shape[0])
     # descdb(dfnoti)
     dfnoti.drop_duplicates(inplace=True)
@@ -40,7 +46,7 @@ def notification2df(items):
     try:
         notestore = get_notestore()
         xiangmu = ['微信', '支付宝', 'QQ', '日历']
-        global cfplife, inilifepath
+        # global cfplife, inilifepath
         for xm in xiangmu:
             biaoti = '系统提醒（%s）记录' % xm
             dfxm = dfnoti[dfnoti.shuxing == xm]
@@ -62,7 +68,7 @@ def notification2df(items):
 
 def callsms2df(itemstr):
     # 读取老记录
-    global dirmainpath
+    # global dirmainpath
     with open(str(dirmainpath / 'data' / 'ifttt' / 'smslog_gmail_all.txt'), 'r', encoding='utf-8') as fsms:
         items = [line.strip() for line in fsms if len(line.strip()) > 0]
     itemstr = itemstr + items
@@ -219,16 +225,16 @@ def callsms2df(itemstr):
 
 
 def peoplestattimer(jiangemiao):
-    dfpeople = pd.DataFrame()
-
     strjilunotifi = jilugmail('Ifttt/Notification', 'notification', 'all')
     if strjilunotifi:
-        dfnoti = notification2df(strjilunotifi)
+        # dfnoti = notification2df(strjilunotifi)
+        notification2df(strjilunotifi)
     # print(dfnoti.head(5))
     strjilucallsms = jilugmail('Ifttt/CallSmsLog', 'callsmslog', 'all', bodyonly=False)
     if strjilucallsms:
         # callsmsold('data\\ifttt\\smslog_gmail_all.txt')
-        dfcs = callsms2df(strjilucallsms)
+        # dfcs = callsms2df(strjilucallsms)
+        callsms2df(strjilucallsms)
 
     global timer_jinchu
     timer_jinchu = Timer(jiangemiao, peoplestattimer, [jiangemiao])
