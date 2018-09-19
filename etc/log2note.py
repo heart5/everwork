@@ -6,15 +6,15 @@ log目录
 """
 
 import os
-import pathmagic  # noqa
-
-assert pathmagic
 from threading import Timer
-from func.first import getdirmain
-from func.configpr import getcfp
-from func.evernt import get_notestore, imglist2note
-from func.logme import log
-from func.wrapfuncs import timethis
+import pathmagic
+
+with pathmagic.context():
+    from func.first import getdirmain
+    from func.configpr import getcfp
+    from func.evernt import get_notestore, imglist2note
+    from func.logme import log
+    from func.wrapfuncs import timethis
 
 
 @timethis

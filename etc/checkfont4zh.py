@@ -3,9 +3,12 @@
 功能描述
 """
 
-from func.logme import log
 from matplotlib.font_manager import FontManager
 import subprocess
+import pathmagic
+
+with pathmagic.context():
+    from func.logme import log
 
 fm = FontManager()
 mat_fonts = set(f.name for f in fm.ttflist)

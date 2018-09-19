@@ -10,7 +10,15 @@ import sys
 # modpath = os.sep.join(bp + ['src'])
 # sys.path.insert(0, modpath)
 # sys.path.insert(0,os.sep.join(bp))
-sys.path.extend(['..', '.'])
+
+
+class context:
+    def __enter__(self):
+        sys.path.extend(['..', '.'])
+
+    def __exit__(self, *args):
+        pass
+
 
 if __name__ == '__main__':
     print(f'运行文件\t{__file__}')

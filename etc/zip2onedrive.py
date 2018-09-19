@@ -7,13 +7,13 @@ import platform
 import os
 import time
 import zipfile
-os.sys.path.append('/storage/emulated/0/.0code/everwork/everwork')
-os.sys.path.append('/storage/emulated/0/.0code/everwork/everwork/func')
-print(os.sys.path)
 from pathlib import Path
 from threading import Timer
-from func.first import dirmainpath, touchfilepath2depth
-from func.logme import log
+import pathmagic
+
+with pathmagic.context():
+    from func.first import dirmainpath, touchfilepath2depth
+    from func.logme import log
 
 
 def zipdir2one():
@@ -29,7 +29,7 @@ def zipdir2one():
     # zipfilename = f'datauto_{platform.node()}.zip'
     zipfilename = f"datauto_{platform.uname().system}_{platform.uname().machine}_{platform.uname().node}.zip"
     # print(zipfilename)
-    zipfilenamenew = zipfilename.replace('.zip', '_other.zip')
+    # zipfilenamenew = zipfilename.replace('.zip', '_other.zip')
     # print(zipfilenamenew)
     targetzipdir = Path(onedrivedir) / '文档' / 'Program' / 'python' / 'everworkdataonly'
     targetzipfile = targetzipdir / zipfilename
@@ -37,7 +37,7 @@ def zipdir2one():
     zipfilename = f"datauto_{platform.uname().system}_{platform.uname().machine}_{platform.uname().node}{addextstr}.zip"
     targetzipfileadd = targetzipdir / zipfilename
     # print(targetzipfileadd)
-    targetzipfilenew = targetzipdir / zipfilenamenew
+    # targetzipfilenew = targetzipdir / zipfilenamenew
     # print(targetzipfilenew)
     # print(targetzipfile)
     flnamesinzip = dict()
@@ -46,7 +46,7 @@ def zipdir2one():
         touchfilepath2depth(targetzipfile)
     elif not zipfile.is_zipfile(targetzipfile):
         print(f'{targetzipfile}不是一个合格的zip文件。')
-        targetzipfile = targetzipfilenew
+        # targetzipfile = targetzipfilenew
     elif zipfile.is_zipfile(targetzipfile):
         print(f'合格的zip文件{targetzipfile}已经存在。')
         targetzip = zipfile.ZipFile(str(targetzipfile), 'r')
