@@ -24,6 +24,7 @@ with pathmagic.context():
     from func.configpr import cfpworkplan as cfpworkplan, iniworkplanpath as iniworkplanpath
     from func.first import dbpathworkplan
     from func.wrapfuncs import timethis
+    from func.nettools import trycounttimes2
 
 
 @timethis
@@ -32,8 +33,14 @@ def chuliholidayleave_note(zhuti: list):
     note_store = get_notestore()
     # print(zhuti)
     guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')
-    note = note_store.getNote(guid, True, True, False, False)
-    evernoteapijiayi()
+
+    @trycounttimes2('evernote服务器')
+    def getnote(guidin):
+        notein = note_store.getNote(guidin, True, True, False, False)
+        evernoteapijiayi()
+        return notein
+
+    note = getnote(guid)
     # print(timestamp2str(int(note.updated/1000)))
     # print(note.updateSequenceNum)
     if cfpworkplan.has_option('行政管理', f'{zhuti[0]}updatenum'):
