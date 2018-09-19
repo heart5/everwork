@@ -40,7 +40,7 @@ peoplestattimer(60 * 25)
 planfenxi(60 * 65 * 2)
 duty_timer(60 * 60 * 24)
 financetimer(60 * 60 * 3 + 60 * 33)
-pinpaifenxi_timer(60 * 60 * 24)
+pinpaifenxi_timer(60 * 60 * 4)
 zipdata2one_timer(60 * 60 * 12 + 60 * 35)
 
 # writeini()
