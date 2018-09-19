@@ -4,7 +4,7 @@
 """
 import time
 import random
-from requests.packages.urllib3 import HTTPConnectionPool
+# from requests.packages.urllib3 import HTTPConnectionPool
 from requests.packages.urllib3.exceptions import NewConnectionError
 import requests
 from bs4 import BeautifulSoup
@@ -97,18 +97,18 @@ def trycounttimes2(servname='服务器', maxtimes=3, maxsecs=15):
 
     return decorate
 
+
 if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
 
-
     @trycounttimes2('xmu.edu.cn网站服务器')
-    def fetchfromnet(address: object):
-        '''
+    def fetchfromnet(addressin: object):
+        """
         从网址获取内容
-        :param address: 网址
+        :param addressin: 网址
         :return: 页面内容html
-        '''
-        r = requests.get(address)
+        """
+        r = requests.get(addressin)
         html = r.content
         return html
 
