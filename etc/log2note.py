@@ -6,6 +6,9 @@ log目录
 """
 
 import os
+import pathmagic  # noqa
+
+assert pathmagic
 from threading import Timer
 from func.first import getdirmain
 from func.configpr import getcfp
@@ -16,6 +19,7 @@ from func.wrapfuncs import timethis
 
 @timethis
 def log2notetimer(jiangemiao):
+    print(getdirmain())
     pathlog = getdirmain() / 'log'
     files = os.listdir(str(pathlog))
     loglines = []
@@ -27,7 +31,6 @@ def log2notetimer(jiangemiao):
     # global cfp, inifilepath
     cfp, cfppath = getcfp('everwork')
     everlogc = cfp.getint('evernote', 'everlogc')
-    global log
     if len(loglines) == everlogc:  # <=调整为==，用来应对log文件崩溃重建的情况
         log.info('暂无新记录，不更新everworklog笔记。')
     else:
