@@ -48,10 +48,11 @@ from pandas.tseries.offsets import *
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfplife
+    from func.configpr import cfplife, inilifepath
     from func.evernt import get_notestore, evernoteapijiayi, tablehtml2evernote, imglist2note
     from func.logme import log
     from func.mailsfunc import jilugmail
+    from func.first import dirmainpath
 
 
 def jilugooglefile(filepath):
@@ -81,7 +82,7 @@ def jilugooglefile(filepath):
 
 def jilugoogledrive():
     # 验证登录
-    global dirmainpath
+    # global dirmainpath
     gc = pygsheets.authorize(service_file=str(dirmainpath / 'data' / 'imp' / 'ewjinchu.json'))
     files = gc.list_ssheets()
     dffiles = pd.DataFrame(files)
@@ -180,9 +181,9 @@ def wifitodf(itemstr, noteinfolistw):
         dfnotename = dfwifi[['entered', 'shuxing', 'address']]
         dfwificount = dfwifi.shape[0]  # shape[0]获得行数，shape[1]则是列数
         print(dfwificount, end='\t')
-        global cfp, inifilepath
-        if cfp.has_option('wifi', 'itemnumber'):
-            ntupdatenum = dfwificount > cfp.getint('wifi', 'itemnumber')  # 新数据集记录数和存档比较
+        # global cfp, inifilepath
+        if cfplife.has_option('wifi', 'itemnumber'):
+            ntupdatenum = dfwificount > cfplife.getint('wifi', 'itemnumber')  # 新数据集记录数和存档比较
         else:
             ntupdatenum = True
         print(ntupdatenum, end='\t')
@@ -203,8 +204,8 @@ def wifitodf(itemstr, noteinfolistw):
             imglist2note(notestore, [], '971f14c0-dea9-4f13-9a16-ee6e236e25be', 'WIFI连接统计表',
                          wifitongjinametablestr + wifijilutablestr + wifitongjialltablestr)
 
-            cfp.set('wifi', 'itemnumber', '%d' % dfwificount)
-            cfp.write(open(inifilepath, 'w', encoding='utf-8'))
+            cfplife.set('wifi', 'itemnumber', '%d' % dfwificount)
+            cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
     except Exception as eee:
         log.critical('更新WIFI连接统计笔记时出现错误。%s' % str(eee))
 
@@ -313,7 +314,7 @@ def jinchustat(jinchujiluall, noteinfos):
 
     imglist = []
     # plt.show()
-    global dirmainpath
+    # global dirmainpath
     img_jinchu_path = str(dirmainpath / 'img' / 'jichubyfgongsi.png')
     plt.savefig(img_jinchu_path)
     imglist.append(img_jinchu_path)
@@ -369,8 +370,8 @@ def jinchustattimer(jiangemiao):
             dfjinchuitem.sort_index(ascending=False, inplace=True)
             dfjinchucount = dfjinchuitem.shape[0]  # shape[0]获得行数，shape[1]则是列数
             print(dfjinchucount, end='\t')
-            if cfp.has_option('jinchu', noteinfo[1]):
-                ntupdatenum = dfjinchucount > cfp.getint('jinchu', noteinfo[1])  # 新数据集记录数和存档比较
+            if cfplife.has_option('jinchu', noteinfo[1]):
+                ntupdatenum = dfjinchucount > cfplife.getint('jinchu', noteinfo[1])  # 新数据集记录数和存档比较
             else:
                 ntupdatenum = True
             print(ntupdatenum, end='\t')
@@ -380,8 +381,8 @@ def jinchustattimer(jiangemiao):
             if ntupdatenum:  # or True:
                 # print(dfjinchu.head(5))
                 jinchustat(dfjinchuitem, noteinfo[1:])
-                cfp.set('jinchu', noteinfo[1], '%d' % dfjinchucount)
-                cfp.write(open(inifilepath, 'w', encoding='utf-8'))
+                cfplife.set('jinchu', noteinfo[1], '%d' % dfjinchucount)
+                cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
                 log.info('%s成功更新入图表统计笔记，将于%d秒后再次自动检查并更新' % (str(noteinfo), jiangemiao))
     except Exception as eee:
         log.critical('读取系列进出笔记并更新统计信息时出现未名错误。%s' % str(eee))
