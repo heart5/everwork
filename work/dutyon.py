@@ -23,8 +23,10 @@ with pathmagic.context():
     from func.pdtools import descdb, isworkday
     from func.configpr import cfpworkplan as cfpworkplan, iniworkplanpath as iniworkplanpath
     from func.first import dbpathworkplan
+    from func.wrapfuncs import timethis
 
 
+@timethis
 def chuliholidayleave_note(zhuti: list):
     global note_store
     note_store = get_notestore()
@@ -167,6 +169,7 @@ def chuliholidayleave_note(zhuti: list):
     return dfresult
 
 
+@timethis
 def fetchattendance_from_evernote():
     zhutis = [
         ['放假', 'holiday'],
@@ -190,6 +193,7 @@ def fetchattendance_from_evernote():
     # timer_holiday2datacenter.start()
 
 
+@timethis
 def showdutyonfunc(dtlist: list = None, zglist: list = None):
     fetchattendance_from_evernote()
     cnxwp = lite.connect(dbpathworkplan)
@@ -355,6 +359,7 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
     return dfout, dtfrom, dtto
 
 
+@timethis
 def showdutyon2note():
     recentdutyguid = '02540689-911d-4a2a-bd22-89fe44d41f2a'
     tday = pd.to_datetime(pd.to_datetime(datetime.datetime.today()).strftime('%F'))  # 罪魁祸首，日期中时间一定要归零
