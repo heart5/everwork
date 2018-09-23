@@ -364,10 +364,10 @@ def planfenxifunc():
                          % (person, planitemscount, str(dfperson.iloc[0]['nianyueri'])))
                 cfpworkplan.set('业务计划总结itemscount', person, '%d' % planitemscount)
                 cfpworkplan.write(open(iniworkplanpath, 'w', encoding='utf-8'))
-    except WindowsError as wine:
-        if wine.errno == 10054:
+    except OSError as ose:
+        if ose.errno == 10054:
             log.critical(f'远程主机发脾气了，强行断线。')
-        log.critical(f'{errorshowstr}Windows错误：{wine}')
+        log.critical(f'{errorshowstr}Windows错误：{ose}')
     except AttributeError as ae:
         log.critical(f'{errorshowstr}属性错误：{ae}')
 

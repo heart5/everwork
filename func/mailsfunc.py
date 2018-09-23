@@ -266,11 +266,11 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
                 count = count + 1
             except ConnectionAbortedError as cae:
                 log.critical("获取邮件[%s,%d/%d]时出现ConnectionAbortedError错误。%s" % (num, count, totalcount, str(cae)))
-            except WindowsError as we:
-                if we.errno == 10053:
-                    log.critical("获取邮件[%s,%d/%d]时出现操作系统错误，和服务器的连接被强行终止。%s" % (num, count, totalcount, str(we)))
+            except OSError as ose:
+                if ose.errno == 10053:
+                    log.critical("获取邮件[%s,%d/%d]时出现操作系统错误，和服务器的连接被强行终止。%s" % (num, count, totalcount, str(ose)))
                 else:
-                    log.critical("获取邮件[%s,%d/%d]时出现操作系统错误。%s" % (num, count, totalcount, str(we)))
+                    log.critical("获取邮件[%s,%d/%d]时出现操作系统错误。%s" % (num, count, totalcount, str(ose)))
             except imaplib.IMAP4.error as iie:
                 log.critical("获取邮件[%s,%d/%d]时出现imaplib.IMAP4.error错误。%s" % (num, count, totalcount, str(iie)))
             except imaplib.IMAP4.abort as iia:

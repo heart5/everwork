@@ -1359,7 +1359,7 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
                 count = count + 1
             except ConnectionAbortedError as cae:
                 log.critical("获取邮件[%s,%d/%d]时出现ConnectionAbortedError错误。%s" % (num, count, totalcount, str(cae)))
-            except WindowsError as we:
+            except OSError as we:
                 if we.errno == 10053:
                     log.critical("获取邮件[%s,%d/%d]时出现操作系统错误，和服务器的连接被强行终止。%s" % (num, count, totalcount, str(we)))
                 else:

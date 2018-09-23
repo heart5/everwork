@@ -292,7 +292,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
                 nbguid = notebook.guid
                 cfpdata.set('guidquyunb', qy, nbguid)
                 cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
-            except WindowsError as eeeee:
+            except OSError as eeeee:
                 nbguid = None
                 log.critical(f'创建《{qy}》笔记本时出现错误。{eeeee}')
         print(nbguid, end='\t')
@@ -311,7 +311,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
                 ntguid = note.guid
                 cfpdata.set('ordersaleguidquyu', qy + 'guid', ntguid)
                 cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
-            except WindowsError as ee:
+            except OSError as ee:
                 ntguid = None
                 log.critical(f'创建《{qy}订单金额年度分析》笔记时出现错误。{ee}')
         print(ntguid)
@@ -373,7 +373,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
             cfpdata.set('ordersaleguidquyu', qy + 'count', f'{dfslicesingle.shape[0]}')
             cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
             log.info(f'{qy}数据项目成功更新')
-        except WindowsError as eee:
+        except OSError as eee:
             log.critical(f'《{qy}订单金额年度分析》笔记更新时出现错误。{eee}')
         # print(dfslicesingle.shape[0])
     else:

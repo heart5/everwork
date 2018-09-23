@@ -191,9 +191,9 @@ def fetchattendance_from_evernote():
             dfresult = chuliholidayleave_note(zhuti)
             if dfresult is not False:
                 descdb(dfresult)
-    except (WindowsError, Exception) as wine:
+    except OSError as exp:
         topic = [x for [x, *y] in zhutis]
-        log.critical(f'从evernote获取{topic}笔记信息时出现未名错误。{wine}')
+        log.critical(f'从evernote获取{topic}笔记信息时出现未名错误。{exp}')
 
     # global timer_holiday2datacenter
     # timer_holiday2datacenter = Timer(jiangemiao, fetchattendance_from_evernote, [jiangemiao])

@@ -34,7 +34,7 @@ def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务�
                 else:
                     jutifunc(inputparam)
             break
-        except (WindowsError, ConnectionRefusedError, ConnectionResetError, ConnectionError, struct.error) as eee:
+        except (OSError, ConnectionRefusedError, ConnectionResetError, ConnectionError, struct.error) as eee:
             if eee.errno == 11001:
                 log.critical(f'寻址失败，貌似网络不通。{eee}')
             elif eee.errno == 10061:
@@ -68,7 +68,7 @@ def trycounttimes2(servname='服务器', maxtimes=3, maxsecs=15):
                 try:
                     result = jutifunc(*args, **kwargs)
                     return result
-                except (WindowsError, ConnectionRefusedError, ConnectionResetError,
+                except (OSError, ConnectionRefusedError, ConnectionResetError,
                         NewConnectionError, ConnectionError, struct.error) as eee:
                     if eee.errno == 11001:
                         log.critical(f'寻址失败，貌似网络不通。{eee}')
