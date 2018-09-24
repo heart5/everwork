@@ -23,10 +23,10 @@ from pathlib import Path
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfp, cfpzysm, inizysmpath, cfpdata, inidatanotefilepath
+    from func.configpr import cfp, cfpzysm, inizysmpath
     from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
     from func.logme import log
-    from func.first import dirmain, dirmainpath, dbpathworkplan, dbpathquandan, dbpathdingdanmingxi
+    from func.first import dirmainpath, dbpathquandan, dbpathdingdanmingxi
     from func.pdtools import dftotal2top, dataokay
 
 
@@ -227,7 +227,7 @@ def showorderstat():
                 plannote.content = nbody
                 global workplannotebookguid
                 plannote.notebookGuid = workplannotebookguid
-                global cfp
+                # global cfp
                 token = cfp.get('evernote', 'token')
                 note = notestore.createNote(token, plannote)
                 evernoteapijiayi()
@@ -330,6 +330,6 @@ def showorderstat2note(jiangemiao):
 
 if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
-
     jiaoyanchanpinkehu()
+    showorderstat2note(60 * 15)
     print('Done.测试完毕。')

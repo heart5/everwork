@@ -3,26 +3,28 @@
 用evernote作为工作平台，通过Python链接整理各种工作数据，呈现给各个相关岗位。.
 """
 # import imp4nb
-import sys
+# import sys
+# sys.path.extend(['func', 'work', 'life', 'etc'])
+# import sqlite3 as lite
 
+import pathmagic
 
-sys.path.extend(['func', 'work', 'life', 'etc'])
-import sqlite3 as lite
-from life.noteweather import weatherstattimer  # 调用同目录下其他文件（py）中的函数
-from etc.log2note import log2notetimer
-from work.order import showorderstat2note
-from work.workplan import planfenxi
-# from func.pdtools import dataokay
-from life.notejinchujilu import jinchustattimer
-from life.peoplelog2note import peoplestattimer
-from work.filemail import workfilefromgmail2datacenter
-from work.notesaledetails import pinpaifenxi_timer
-from work.dutyon import duty_timer
-from work.bankcard import financetimer
-from etc.zip2onedrive import zipdata2one_timer
-# from func.evernt import get_notestore
-# from func.first import dbpathquandan
-from func.logme import log
+with pathmagic.context():
+    from life.noteweather import weatherstattimer  # 调用同目录下其他文件（py）中的函数
+    from etc.log2note import log2notetimer
+    from work.order import showorderstat2note
+    from work.workplan import planfenxi
+    # from func.pdtools import dataokay
+    from life.notejinchujilu import jinchustattimer
+    from life.peoplelog2note import peoplestattimer
+    from work.filemail import workfilefromgmail2datacenter
+    from work.notesaledetails import pinpaifenxi_timer
+    from work.dutyon import duty_timer
+    from work.bankcard import financetimer
+    from etc.zip2onedrive import zipdata2one_timer
+    # from func.evernt import get_notestore
+    # from func.first import dbpathquandan
+    from func.logme import log
 
 log.debug('自动线程任务启动……')
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
