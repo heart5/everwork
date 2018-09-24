@@ -35,18 +35,21 @@ def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务�
                     jutifunc(inputparam)
             break
         except (OSError, ConnectionRefusedError, ConnectionResetError, ConnectionError, struct.error) as eee:
-            if eee.errno == 11001:
-                log.critical(f'寻址失败，貌似网络不通。{eee}')
-            elif eee.errno == 10061:
-                log.critical(f'被主动拒绝，好没面啊！{eee}')
-            elif eee.errno == 10060:
-                log.critical(f'够不着啊，是不是在墙外？！{eee}')
-            elif eee.errno == 10048:
-                log.critical(f'多次强行连接，被拒了！{eee}')
-            elif eee.errno == 10054:
-                log.critical(f'主机发脾气，强行断线了。{eee}')
-            elif eee.errno == 8:
-                log.critical(f'和evernote服务器握手失败。{eee}')
+            if hasattr(eee, 'errno'):
+                if eee.errno == 11001:
+                    log.critical(f'寻址失败，貌似网络不通。{eee}')
+                elif eee.errno == 10061:
+                    log.critical(f'被主动拒绝，好没面啊！{eee}')
+                elif eee.errno == 10060:
+                    log.critical(f'够不着啊，是不是在墙外？！{eee}')
+                elif eee.errno == 10048:
+                    log.critical(f'多次强行连接，被拒了！{eee}')
+                elif eee.errno == 10054:
+                    log.critical(f'主机发脾气，强行断线了。{eee}')
+                elif eee.errno == 8:
+                    log.critical(f'和evernote服务器握手失败。{eee}')
+                else:
+                    log.critical(f'连接失败。{eee.errno}\t{eee}')
             else:
                 log.critical(f'连接失败。{eee}')
             log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
@@ -70,18 +73,21 @@ def trycounttimes2(servname='服务器', maxtimes=3, maxsecs=15):
                     return result
                 except (OSError, ConnectionRefusedError, ConnectionResetError,
                         NewConnectionError, ConnectionError, struct.error) as eee:
-                    if eee.errno == 11001:
-                        log.critical(f'寻址失败，貌似网络不通。{eee}')
-                    elif eee.errno == 10061:
-                        log.critical(f'被主动拒绝，好没面啊！{eee}')
-                    elif eee.errno == 10060:
-                        log.critical(f'够不着啊，是不是在墙外？！{eee}')
-                    elif eee.errno == 10048:
-                        log.critical(f'多次强行连接，被拒了！{eee}')
-                    elif eee.errno == 10054:
-                        log.critical(f'主机发脾气，强行断线了。{eee}')
-                    elif eee.errno == 8:
-                        log.critical(f'和{servname}握手失败。{eee}')
+                    if hasattr(eee, 'errno'):
+                        if eee.errno == 11001:
+                            log.critical(f'寻址失败，貌似网络不通。{eee}')
+                        elif eee.errno == 10061:
+                            log.critical(f'被主动拒绝，好没面啊！{eee}')
+                        elif eee.errno == 10060:
+                            log.critical(f'够不着啊，是不是在墙外？！{eee}')
+                        elif eee.errno == 10048:
+                            log.critical(f'多次强行连接，被拒了！{eee}')
+                        elif eee.errno == 10054:
+                            log.critical(f'主机发脾气，强行断线了。{eee}')
+                        elif eee.errno == 8:
+                            log.critical(f'和{servname}握手失败。{eee}')
+                        else:
+                            log.critical(f'连接失败。{eee.errno}\t{eee}')
                     else:
                         log.critical(f'连接失败。{eee.errno}\t{eee}')
                     log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
