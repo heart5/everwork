@@ -35,7 +35,7 @@ def zipdir2one():
     targetzipfile = targetzipdir / zipfilename
     addextstr = datetime.datetime.now().strftime("_%Y%m%d%H%M%S")
     zipfilename = f"datauto_{platform.uname().system}_{platform.uname().machine}_{platform.uname().node}{addextstr}"
-    targetzipfileadd = targetzipdir / zipfilename
+    # targetzipfileadd = targetzipdir / zipfilename
     rt = os.system(f'7z u -r {targetzipfile} {str(sourcedirpath)+".7z"}')
     if rt == 0:
         log.info(f'成功运行7zip更新了压缩文件包：{targetzipfile}')
@@ -146,8 +146,8 @@ def p7zip2one():
 
 def zipdata2one_timer(jiangemiao):
     try:
-        # zipdir2one()
-        p7zip2one()
+        zipdir2one()
+        # p7zip2one()
     except ValueError as wve:
         log.critical(f'自动备份至OneDrive目录时出现错误。{wve}')
     global timer_zip2one
