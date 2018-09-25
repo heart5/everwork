@@ -89,7 +89,7 @@ def trycounttimes2(servname='服务器', maxtimes=3, maxsecs=15):
                         else:
                             log.critical(f'连接失败。{eee.errno}\t{eee}')
                     else:
-                        log.critical(f'连接失败。{eee.errno}\t{eee}')
+                        log.critical(f'连接失败。{eee}')
                     log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接服务器时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
