@@ -27,15 +27,23 @@ def zipdir2one():
     else:
         onedrivedir = Path('/storage/emulated/0/Documents')
     # zipfilename = f'datauto_{platform.node()}.zip'
-    zipfilename = f"datauto_{platform.uname().system}_{platform.uname().machine}_{platform.uname().node}.zip"
+    zipfilename = f"datauto_{platform.uname().system}_{platform.uname().machine}_{platform.uname().node}"
     # print(zipfilename)
     # zipfilenamenew = zipfilename.replace('.zip', '_other.zip')
     # print(zipfilenamenew)
     targetzipdir = Path(onedrivedir) / '文档' / 'Program' / 'python' / 'everworkdataonly'
     targetzipfile = targetzipdir / zipfilename
     addextstr = datetime.datetime.now().strftime("_%Y%m%d%H%M%S")
-    zipfilename = f"datauto_{platform.uname().system}_{platform.uname().machine}_{platform.uname().node}{addextstr}.zip"
+    zipfilename = f"datauto_{platform.uname().system}_{platform.uname().machine}_{platform.uname().node}{addextstr}"
     targetzipfileadd = targetzipdir / zipfilename
+    rt = os.system(f'7z u -r {targetzipfile} {str(sourcedirpath)+".7z"}')
+    if rt == 0:
+        log.info(f'成功运行7zip更新了压缩文件包：{targetzipfile}')
+        return
+    zipfilename = zipfilename + '.zip'
+    targetzipfile = targetzipdir / zipfilename
+    targetzipfileadd = targetzipdir / zipfilename
+
     # print(targetzipfileadd)
     # targetzipfilenew = targetzipdir / zipfilenamenew
     # print(targetzipfilenew)
@@ -112,9 +120,34 @@ def zipdir2one():
         log.info(f'成功压缩{updateoradd}备份至：{targetzipfileadd}')
 
 
+def p7zip2one():
+    sourcedirpath = dirmainpath / 'data'
+    sourcedir = str(sourcedirpath)
+    print(str(sourcedir))
+    env_dlist = os.environ
+    # for key in env_dlist:
+    #    print(key, env_dlist[key])
+    if 'onedrive' in env_dlist:
+        onedrivedir = Path(env_dlist['onedrive'])
+    else:
+        onedrivedir = Path('/storage/emulated/0/Documents')
+    # zipfilename = f'datauto_{platform.node()}.zip'
+    zipfilename = f"datauto_{platform.uname().system}_{platform.uname().machine}_{platform.uname().node}.7z"
+    # print(zipfilename)
+    # zipfilenamenew = zipfilename.replace('.zip', '_other.zip')
+    # print(zipfilenamenew)
+    targetzipdir = Path(onedrivedir) / '文档' / 'Program' / 'python' / 'everworkdataonly'
+    targetzipfile = targetzipdir / zipfilename
+
+    # rt = os.popen(f'7z u -r {targetzipfile} {str(sourcedirpath)}')
+    rt = os.system(f'7z u -r {targetzipfile} {str(sourcedirpath)}')
+    print(rt)
+
+
 def zipdata2one_timer(jiangemiao):
     try:
-        zipdir2one()
+        # zipdir2one()
+        p7zip2one()
     except ValueError as wve:
         log.critical(f'自动备份至OneDrive目录时出现错误。{wve}')
     global timer_zip2one
