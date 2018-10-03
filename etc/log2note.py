@@ -58,6 +58,6 @@ def log2notetimer(jiangemiao):
 
 if __name__ == '__main__':
     # global log
-    log.info(f'运行文件\t{__file__}')
-    log2notetimer(60 * 32)
+#    # log.info(f'运行文件\t{__file__}')
+    log2notetimer(60 * 5)
     print('Done.')
