@@ -16,7 +16,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.6.6
+#     version: 3.6.1
 # ---
 
 import datetime, os
@@ -25,15 +25,20 @@ print(datetime.datetime.now().strftime('%F %T'))
 
 # +
 # %matplotlib inline
+import matplotlib as mpl
 import pandas as pd
 
-A = [[12, 2, 37, 4],
+# plot中显示中文
+mpl.rcParams['font.sans-serif'] = ['SimHei']
+mpl.rcParams['axes.unicode_minus'] = False
+
+A = [[15, 22, 3, 44],
      [5, 6, 7, 8]]
 
 [[r[c] for r in A] for c in range(len(A[0]))]
 
-sr = pd.Series(A[1], index=['a', 'b', 'c', 'd'])
-sr.name = 'heart5\'home'
+sr = pd.Series(A[0], index=['a', 'b', 'c', 'd'])
+sr.name = 'heart5\'home人员'
 sr.plot(kind='pie')
 
 
