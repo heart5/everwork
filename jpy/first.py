@@ -27,12 +27,12 @@ print(datetime.datetime.now().strftime('%F %T'))
 # %matplotlib inline
 import pandas as pd
 
-A = [[12, 2, 37, 4],
+A = [[62, 12, 37, 49],
      [5, 6, 7, 8]]
 
 [[r[c] for r in A] for c in range(len(A[0]))]
 
-sr = pd.Series(A[1], index=['a', 'b', 'c', 'd'])
+sr = pd.Series(A[0], index=['a', 'b', 'c', 'd'])
 sr.name = 'heart5\'home'
 sr.plot(kind='pie')
 
