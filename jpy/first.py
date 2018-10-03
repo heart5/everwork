@@ -27,13 +27,13 @@ print(datetime.datetime.now().strftime('%F %T'))
 # %matplotlib inline
 import pandas as pd
 
-A = [[1, 2, 3, 4],
+A = [[12, 2, 37, 4],
      [5, 6, 7, 8]]
 
 [[r[c] for r in A] for c in range(len(A[0]))]
 
 sr = pd.Series(A[1], index=['a', 'b', 'c', 'd'])
-sr.name='heart5\'home'
+sr.name = 'heart5\'home'
 sr.plot(kind='pie')
 
 
