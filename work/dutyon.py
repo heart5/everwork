@@ -312,8 +312,10 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
     # print(dfgzduty)
 
     # return dfgzduty, dtquanti, zaizhi
-
-    dfshangban = pd.DataFrame(dfgzduty['上班'].rename('出勤'))
+    if '上班' in list(dfgzduty.columns):
+        dfshangban = pd.DataFrame(dfgzduty['上班'].rename('出勤'))
+    else:
+        dfshangban = pd.DataFrame()
     # print(dfout)
     clsnames = list(dfgzduty.columns)
     # print(clsnames)
@@ -342,7 +344,7 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
     dfout = pd.concat([dfout, dfgzduty.loc[:, ['起始日期', '截止日期']]], axis=1)
     dfout = pd.DataFrame(dfout)
     # print(dfout)
-    dfout.sort_values(['截止日期', '出勤'], ascending=[False, False], inplace=True)
+    # dfout.sort_values(['截止日期', '出勤'], ascending=[False, False], inplace=True)
     clsout = list(dfout.columns)
     # print(clsout)
     clsnew = clsout[-2:] + [clsout[-3]] + clsout[:-3]
@@ -404,6 +406,8 @@ def duty_timer(jiangemiao):
         showdutyon2note()
     except TypeError as te:
         log.critical(f'类型错误。{te}')
+    except KeyError as ke:
+        log.critical(f'健值错误哦。{ke}')
     except EDAMUserException as eue:
         log.critical(f'evernote用户错误。{eue}')
 
