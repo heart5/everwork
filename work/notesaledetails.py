@@ -13,8 +13,9 @@ import pathmagic
 with pathmagic.context():
     from func.configpr import cfpdata, inidatanotefilepath
     from func.evernt import imglist2note, get_notestore, token
-    from func.first import dbpathquandan, touchfilepath2depth, dbpathdingdanmingxi
+    from func.first import dbpathquandan, dbpathdingdanmingxi
     from func.pdtools import dataokay, dfin2imglist, updatesection, readinisection2df
+    from func.wrapfuncs import timethis
     from func.logme import log
 
 
@@ -50,6 +51,7 @@ def getgroupdf(dfs, xiangmus, period='month'):
     return dfout
 
 
+@timethis
 def fenxiyueduibi(sqlstr, xiangmu, notefenbudf, noteleixingdf, cnxf, pinpai='', cum=False):
     # global log
     log.info(sqlstr)
@@ -89,6 +91,7 @@ def fenxiyueduibi(sqlstr, xiangmu, notefenbudf, noteleixingdf, cnxf, pinpai='', 
     kuangjiachutu(notefenbudf, noteleixingdf, df, xiangmu, cnxf, pinpai, cum)
 
 
+@timethis
 def kuangjiachutu(notefenbudf, noteleixingdf, df, xiangmu, cnxk, pinpai, cum=False):
     # global log
     dfquyu = pd.read_sql('select * from quyu', cnxk, index_col='index')
@@ -152,6 +155,7 @@ def kuangjiachutu(notefenbudf, noteleixingdf, df, xiangmu, cnxk, pinpai, cum=Fal
                              noteleixingdf.loc[leixingset]['title'], neirong=htable)
 
 
+@timethis
 def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
     cursor = cnxp.cursor()
     cursor.execute(f'attach database \'{dbpathdingdanmingxi}\' as \'C\'')
