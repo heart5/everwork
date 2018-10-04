@@ -33,18 +33,18 @@ def fetchworkfile_from_gmail(topic):
 
 
 @timethis
-def workfilefromgmail2datacenter(jiangemiao):
+def filegmailevernote2datacenter(jiangemiao):
     try:
         fetchworkfile_from_gmail('')
     except Exception as eeee:
         log.critical('从gmail信箱获取工作文件时出现未名错误。%s' % (str(eeee)))
 
     global timer_filegmail2datacenter
-    timer_filegmail2datacenter = Timer(jiangemiao, workfilefromgmail2datacenter, [jiangemiao])
+    timer_filegmail2datacenter = Timer(jiangemiao, filegmailevernote2datacenter, [jiangemiao])
     timer_filegmail2datacenter.start()
 
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    workfilefromgmail2datacenter(60 * 53)
+    filegmailevernote2datacenter(60 * 53)
     print('Done')
