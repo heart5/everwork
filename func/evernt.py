@@ -167,25 +167,32 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     # Finally, send the new note to Evernote using the updateNote method
     # The new Note object that is returned will contain server-generated
     # attributes such as the new note's unique GUID.
-    trytimes = 3
-    sleeptime = 20
-    for i in range(trytimes):
-        try:
-            if notestore is None:
-                log.info(f'notestore失效，重新构建evernote服务器连接以便进行笔记《{note.title}》的内容更新操作。')
-                updated_note = get_notestore().updateNote(note)
-            else:
-                updated_note = notestore.updateNote(note)
-            evernoteapijiayi()
-            log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
-            break
-        except Exception as eee:
-            log.critical("第%d次（最多尝试%d次）更新笔记《%s》时失败，将于%d秒后重试。%s"
-                         % (i + 1, trytimes, note.title, sleeptime, eee))
-            if i == (trytimes - 1):
-                log.critical(f'更新笔记《{note.title}》失败，只好无功而返。')
-                raise eee
-            time.sleep(sleeptime)
+    @trycounttimes2('evernote服务器')
+    def updatenote(notesrc):
+        updated_note = get_notestore().updateNote(notesrc)
+        evernoteapijiayi()
+        log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
+
+    updatenote(note)
+    # trytimes = 3
+    # sleeptime = 20
+    # for i in range(trytimes):
+    #     try:
+    #         if notestore is None:
+    #             log.info(f'notestore失效，重新构建evernote服务器连接以便进行笔记《{note.title}》的内容更新操作。')
+    #             updated_note = get_notestore().updateNote(note)
+    #         else:
+    #             updated_note = notestore.updateNote(note)
+    #         evernoteapijiayi()
+    #         log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
+    #         break
+    #     except Exception as eee:
+    #         log.critical("第%d次（最多尝试%d次）更新笔记《%s》时失败，将于%d秒后重试。%s"
+    #                      % (i + 1, trytimes, note.title, sleeptime, eee))
+    #         if i == (trytimes - 1):
+    #             log.critical(f'更新笔记《{note.title}》失败，只好无功而返。')
+    #             raise eee
+    #         time.sleep(sleeptime)
 
 
 def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True):
@@ -371,8 +378,9 @@ def evernoteapijiayi():
         now = datetime.datetime.now()
         # 强制小时数加一在零点的时候会出错，采用timedelta解决问题
         nexthour = now + datetime.timedelta(hours=1)
-        zhengdian = pd.to_datetime(
-            '%4d-%2d-%2d %2d:00:00' % (nexthour.year, nexthour.month, nexthour.day, nexthour.hour))
+        # zhengdian = pd.to_datetime(
+        #     '%04d-%02d-%02d %02d:00:00' % (nexthour.year, nexthour.month, nexthour.day, nexthour.hour))
+        zhengdian = nexthour.replace(minute=0, second=0,microsecond=0)
         secondsaferzhengdian = np.random.randint(0, 50)
         sleep_seconds = (zhengdian - now).seconds + secondsaferzhengdian
         starttimeafterzhengdian = pd.to_datetime(zhengdian + datetime.timedelta(seconds=secondsaferzhengdian))
