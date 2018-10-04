@@ -33,7 +33,7 @@ with pathmagic.context():
     from func.first import dirmainpath, touchfilepath2depth
     from func.logme import log
     from func.mailsfunc import getmail
-    from func.wrapfuncs import timethis
+    from func.wrapfuncs import timethis, ift2phone
 
 
 # plot中显示中文
@@ -379,7 +379,13 @@ def isweatherupdate(weathertxtfilename):
 
 
 @timethis
+@ift2phone()
 def weatherstattimer(jiangemiao):
+    """
+    天气信息自动轮询并更新至笔记
+    :param jiangemiao:
+    :return:
+    """
     weathertxtfilename = str(dirmainpath / 'data' / 'ifttt' / 'weather.txt')
     try:
         fetchweatherinfo_from_gmail(weathertxtfilename)

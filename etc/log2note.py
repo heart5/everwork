@@ -6,9 +6,7 @@ log目录
 """
 
 import os
-import platform
 from threading import Timer
-from py2ifttt import IFTTT
 import pathmagic
 
 with pathmagic.context():
@@ -16,10 +14,11 @@ with pathmagic.context():
     from func.configpr import getcfp
     from func.evernt import get_notestore, imglist2note
     from func.logme import log
-    from func.wrapfuncs import timethis
+    from func.wrapfuncs import timethis, ift2phone
 
 
 @timethis
+@ift2phone()
 def log2notetimer(jiangemiao):
     print(getdirmain())
     pathlog = getdirmain() / 'log'
@@ -50,9 +49,6 @@ def log2notetimer(jiangemiao):
             cfp.set('evernote', 'everlogc', '%d' % len(loglines))
             cfp.write(open(cfppath, 'w', encoding='utf-8'))
             log.info('新的log错误信息成功更新入笔记，将于%d秒后再次自动检查并更新' % jiangemiao)
-            pu = platform.uname()
-            ifttt = IFTTT('0sa6Pl_UJ9a_w6UQlYuDJ', 'everwork')
-            ifttt.notify(f'{pu.machine}_{pu.node}', '更新错误log到印象笔记', f'{__name__}')
         except Exception as eeee:
             log.critical('处理新log错误信息到笔记时出现未名错误。%s' % (str(eeee)))
 
