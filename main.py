@@ -15,7 +15,7 @@ from work.workplan import planfenxi
 # from func.pdtools import dataokay
 from life.notejinchujilu import jinchustattimer
 from life.peoplelog2note import peoplestattimer
-from work.filemail import workfilefromgmail2datacenter
+from work.fetchdata import filegmailevernote2datacenter
 from work.notesaledetails import pinpaifenxi_timer
 from work.dutyon import duty_timer
 from work.bankcard import financetimer
@@ -31,7 +31,7 @@ log.debug('自动线程任务启动……')
 # cnx.close()
 # isnoteupdate(token, note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
 
-workfilefromgmail2datacenter(60 * 55)
+filegmailevernote2datacenter(60 * 55)
 showorderstat2note(60 * 60 * 1 + 60 * 8)
 log2notetimer(60 * 45)
 weatherstattimer(60 * 60 * 1 + 60 * 5)
