@@ -1,4 +1,24 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext_format_version: '1.3'
+#   jupytext_formats: py:light
+#   kernelspec:
+#     display_name: Python 3
+#     language: python
+#     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.6.6
+# ---
+
 """
 用evernote作为工作平台，通过Python链接整理各种工作数据，呈现给各个相关岗位。.
 """

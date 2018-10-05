@@ -1,3 +1,24 @@
+# -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext_format_version: '1.3'
+#   jupytext_formats: py:light
+#   kernelspec:
+#     display_name: Python 3
+#     language: python
+#     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.6.6
+# ---
+
 """
 4524187f-c131-4d7d-b6cc-a1af20474a7f notification 笔记本
 4a940ff2-74a8-4584-be46-aa6d68a4fa53 everworklog 笔记
