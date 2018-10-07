@@ -20,6 +20,7 @@ with pathmagic.context():
     from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
     from func.logme import log
     from func.nettools import trycounttimes2
+    from func.wrapfuncs import timethis
 
 # plot中显示中文
 mpl.rcParams['font.sans-serif'] = ['SimHei']
@@ -120,6 +121,7 @@ def dftotal2top(df: pd.DataFrame):
     return dfout
 
 
+@timethis
 def isworkday(dlist: list, person: str = '全体', fromthen=False):
     if fromthen and (len(dlist) == 1):
         dlist = pd.date_range(dlist[0], datetime.datetime.today(), freq='D')
