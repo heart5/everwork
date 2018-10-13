@@ -19,6 +19,7 @@ with pathmagic.context():
 def zipdir2one():
     sourcedirpath = dirmainpath / 'data'
     sourcedir = str(sourcedirpath)
+    # sourcedir = ""
     env_dlist = os.environ
     # for key in env_dlist:
     #    print(key, env_dlist[key])
