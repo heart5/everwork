@@ -1,6 +1,6 @@
 # encoding:utf-8
 """
-模块说明
+备份数据目录data到压缩文件
 """
 import datetime
 import platform
@@ -36,7 +36,7 @@ def zipdir2one():
     addextstr = datetime.datetime.now().strftime("_%Y%m%d%H%M%S")
     zipfilename = f"datauto_{platform.uname().system}_{platform.uname().machine}_{platform.uname().node}{addextstr}"
     # targetzipfileadd = targetzipdir / zipfilename
-    rt = os.system(f'7z u -r {targetzipfile} {str(sourcedirpath)+".7z"}')
+    rt = os.system(f'7z u -r {str(targetzipfile)+".7z"} {str(sourcedirpath)}')
     if rt == 0:
         log.info(f'成功运行7zip更新了压缩文件包：{targetzipfile}')
         return
