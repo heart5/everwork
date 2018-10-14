@@ -1,12 +1,13 @@
 # encoding:utf-8
 """
-功能描述
+装饰器函数集，ift2phone、timethis
 """
 import time
 import platform
 from functools import wraps
 from inspect import signature
 from py2ifttt import IFTTT
+from nettools import trycounttimes2
 
 import pathmagic
 
@@ -14,6 +15,7 @@ with pathmagic.context():
     from func.logme import log
 
 
+@trycounttimes2()
 def ift2phone(msg=None):
     """
     目标函数运行时将信息通过ifttt发送至手机
@@ -50,7 +52,14 @@ def timethis(func):
         start = time.time()
         result = func(*args, **kwargs)
         end = time.time()
-        print(func.__name__, end - start)
+        timelen = end - start
+        if timelen >= (60 * 60):
+            timelenstr = f'{int(timelen / (60 * 60))}小时{int((timelen % (60*60)) / 60)}分钟{timelen % (60*60) % 60:07.4f}秒'
+        elif timelen >= 60:
+            timelenstr = f'{int(timelen / 60)}分钟{timelen % 60:.4f}秒'
+        else:
+            timelenstr = f'{timelen % 60:.4f}秒'
+        print(func.__name__, timelenstr)
         return result
 
     return wrapper

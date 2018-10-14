@@ -16,6 +16,10 @@ with pathmagic.context():
     from func.logme import log
 
 
+def zap():
+    pass
+
+
 def zipdir2one():
     sourcedirpath = dirmainpath / 'data'
     sourcedir = str(sourcedirpath)

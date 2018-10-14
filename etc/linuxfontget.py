@@ -1,4 +1,4 @@
 import matplotlib
-
-ftpath = matplotlib.matplotlib_fname()
+  
+ftypath = matplotlib.matplotlib_fname()
 print(ftpath)
