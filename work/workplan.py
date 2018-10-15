@@ -42,7 +42,7 @@ with pathmagic.context():
     from func.first import dbpathworkplan
     from func.logme import log
     from func.pdtools import isworkday, descdb
-    from work.dutyon import fetchattendance_from_evernote
+    # from work.dutyon import fetchattendance_from_evernote
 
 
 def gezhongzaxiang():
@@ -220,7 +220,7 @@ def planfenxifunc():
     tablename_updated = 'planupdated'
     errorshowstr = '更新业务日志汇总笔记时出现错误。'
     try:
-        fetchattendance_from_evernote()
+        # fetchattendance_from_evernote()
         note_store = get_notestore()
         #  从印象笔记中取得在职业务列表
         persons = BeautifulSoup(note_store.getNoteContent('992afcfb-3afb-437b-9eb1-7164d5207564'),
