@@ -2,6 +2,7 @@
 """
 功能描述
 """
+import ssl
 import time
 import random
 # from requests.packages.urllib3 import HTTPConnectionPool
@@ -72,7 +73,7 @@ def trycounttimes2(servname='服务器', maxtimes=3, maxsecs=15):
                     result = jutifunc(*args, **kwargs)
                     return result
                 except (OSError, ConnectionRefusedError, ConnectionResetError,
-                        NewConnectionError, ConnectionError, struct.error) as eee:
+                        NewConnectionError, ConnectionError, struct.error, ssl.SSLError) as eee:
                     if hasattr(eee, 'errno'):
                         if eee.errno == 11001:
                             log.critical(f'寻址失败，貌似网络不通。{eee}')
