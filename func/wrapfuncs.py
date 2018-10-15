@@ -23,7 +23,6 @@ def logit(func):
     return with_logging
 
 
-@trycounttimes2("ifttt服务器")
 def ift2phone(msg=None):
     """
     目标函数运行时将信息通过ifttt发送至手机
@@ -32,6 +31,7 @@ def ift2phone(msg=None):
     """
     def decorate(func):
 
+        @trycounttimes2("ifttt服务器")
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
