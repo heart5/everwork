@@ -7,19 +7,27 @@ import platform
 from functools import wraps
 from inspect import signature
 from py2ifttt import IFTTT
-from nettools import trycounttimes2
 
 import pathmagic
 
 with pathmagic.context():
     from func.logme import log
+    from func.nettools import trycounttimes2
 
 
-@trycounttimes2()
+def logit(func):
+    @wraps(func)
+    def with_logging(*args, **kwargs):
+        log.info(f'{func.__name__}函数被调用，参数列表：{args}')
+        return func(*args, **kwargs)
+    return with_logging
+
+
+@trycounttimes2("ifttt服务器")
 def ift2phone(msg=None):
     """
     目标函数运行时将信息通过ifttt发送至手机
-    :param func:
+    :param msg:
     :return:
     """
     def decorate(func):
@@ -33,7 +41,7 @@ def ift2phone(msg=None):
                 msginner = func.__doc__
             else:
                 msginner = msg
-            ifttt.notify(f'{pu.machine}_{pu.node}', f'{msginner}', f'{func.__name__}')
+            ifttt.notify(f'{pu.machine}_{pu.node}', f'{msginner}_{args}', f'{func.__name__}')
             return result
 
         return wrapper
@@ -47,6 +55,8 @@ def timethis(func):
     :param func:
     :return:
     """
+
+    @logit
     @wraps(func)
     def wrapper(*args, **kwargs):
         start = time.time()
@@ -54,11 +64,11 @@ def timethis(func):
         end = time.time()
         timelen = end - start
         if timelen >= (60 * 60):
-            timelenstr = f'{int(timelen / (60 * 60))}小时{int((timelen % (60*60)) / 60)}分钟{timelen % (60*60) % 60:07.4f}秒'
+            timelenstr = f'{int(timelen / (60 * 60))}小时{int((timelen % (60*60)) / 60)}分钟{timelen % (60*60) % 60:.2f}秒'
         elif timelen >= 60:
-            timelenstr = f'{int(timelen / 60)}分钟{timelen % 60:.4f}秒'
+            timelenstr = f'{int(timelen / 60)}分钟{timelen % 60:.2f}秒'
         else:
-            timelenstr = f'{timelen % 60:.4f}秒'
+            timelenstr = f'{timelen % 60:.2f}秒'
         print(func.__name__, timelenstr)
         return result
 
@@ -66,6 +76,7 @@ def timethis(func):
 
 
 @timethis
+# @ift2phone("倒数计时器")
 @ift2phone()
 def countdown(n: int):
     """
@@ -76,6 +87,8 @@ def countdown(n: int):
     print(n)
     while n > 0:
         n -= 1
+        if (n % 5000) == 0:
+            print(n)
 
 
 if __name__ == '__main__':
