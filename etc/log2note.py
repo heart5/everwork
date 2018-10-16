@@ -50,6 +50,7 @@ def log2notetimer(jiangemiao):
             loglines = loglines + [line.strip() for line in flog if line.find('CRITICAL') >= 0]
 
     print(f'日志共有{len(loglines)}条记录')
+    #print()
     # global cfp, inifilepath
     cfp, cfppath = getcfp('everwork')
     everlogc = cfp.getint('evernote', 'everlogc')
