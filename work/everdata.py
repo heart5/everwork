@@ -300,7 +300,7 @@ def jiaoyankehuchanpin():
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    # dfs = details2db('职员销售明细表（2018.7.1-7.31）.xls__20180803165312_602795.xls', '职员销售明细表（2018.7.1-7.31）.xls',
+    # dfs = details2db('职员销售明细表（2018.8.1-2018.8.31）__20180915190256_019083.xls', '职员销售明细表（2018.8.1-2018.8.31）',
     #                  ['职员名称', '商品全名'], 'xiaoshoumingxi')
     # print(dfs.columns)
     # dfgs = dfs.groupby(['日期', '职员名称'], as_index=False)['数量', '金额'].count()
@@ -311,8 +311,8 @@ if __name__ == '__main__':
     # print(dfg.shape[0])
     # print(dfg.tail(30))
 
-    # dfp = details2db('商品进货明细表（2018.7.1-2018.7.31）.xls__20180803165312_635711.xls',
-    #                  '商品进货明细表（2018.7.1-2018.7.31）.xls',
+    # dfp = details2db('商品进货明细表（2018.8.1-2018.8.31）__20180915190256_031100.xls',
+    #                  '商品进货明细表（2018.8.1-2018.8.31）',
     #                  ['产品名称', '经办人'],
     #                  'jinghuomingxi')
     # writer = pd.ExcelWriter(str(dirmainpath / 'data' /'进货分析.xlsx'))
@@ -340,7 +340,7 @@ if __name__ == '__main__':
     #
     # writer.save()
     # writer.close()
-    customerweihu2systable()
+    # customerweihu2systable()
     # chengbenjiaupdateall(cnxx)
 
     cnxx.close()

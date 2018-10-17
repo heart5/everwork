@@ -35,9 +35,39 @@ with pathmagic.context():
     from func.configpr import cfp, cfpzysm, inizysmpath, cfpdata, inidatanotefilepath
     from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
     from func.logme import log
-    from func.first import dirmainpath, dbpathworkplan, dbpathquandan
+    from func.first import dirmainpath, dbpathworkplan, dbpathquandan, dbpathdingdanmingxi
     from func.pdtools import dftotal2top
     from work.orderdetails import jiaoyanchanpinkehu
+
+
+def fixerrodata4db():
+    """
+    用于底层修正文员的录入错误，直接操作数据库，必须谨慎
+    :return:
+    """
+    cnxp = lite.connect(dbpathdingdanmingxi)
+    tablename_order = 'orderdetails'
+    # cnxp = lite.connect(dbpathworkplan)
+    # tablename_order = 'salesorder'
+    dfresult = pd.read_sql('select * from \'%s\'' % tablename_order, cnxp, parse_dates=['日期'])
+    print(dfresult.columns)
+    print(dfresult[dfresult.单位全名.str.contains('交通')])
+    cursor = cnxp.cursor()
+    # sqlstr = f'select * from {tablename_order} where 业务人员 like \'%周莉%\''
+    # sqlstr = f'select * from {tablename_order} where 单据编号 like \'%SD-2018-10-16-00417%\''
+    sqlstr = f'select * from {tablename_order} where 单据编号 = \'SD-2018-10-16-00417\''
+    print(sqlstr)
+    result = cursor.execute(sqlstr).fetchall()
+    print(result)
+    # for row in result:
+    #     print(row)
+
+    # sqlstr = f'update {tablename_order} set 单位全名 = \'联合一百麦加超市（长江鑫都） 15827398886\' ' \
+    #          f'where 单据编号 = \'SD-2018-10-16-00417\''
+    # print(sqlstr)
+    # result = cursor.execute(sqlstr).fetchall()
+    # cnxp.commit()
+    # print(result)
 
 
 def chulixls_order(orderfile):
@@ -512,9 +542,10 @@ def showorderstat2note(jiangemiao):
 
 
 if __name__ == '__main__':
+    fixerrodata4db()
     # chulidataindir_order()
     # showorderstat()
-    showorderstat2note(60 * 60 + 60 * 18)
+    # showorderstat2note(60 * 60 + 60 * 18)
     # chulixls_order(get_notestore())
     # token = cfp.get('evernote', 'token')
     # guids = findnotefromnotebook(token, '2c8e97b5-421f-461c-8e35-0f0b1a33e91c', '销售订单')
