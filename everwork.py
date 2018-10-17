@@ -1,31 +1,8 @@
 # encoding:utf-8
-# ---
-# jupyter:
-#   jupytext_format_version: '1.3'
-#   jupytext_formats: py:light
-#   kernelspec:
-#     display_name: Python 3
-#     language: python
-#     name: python3
-#   language_info:
-#     codemirror_mode:
-#       name: ipython
-#       version: 3
-#     file_extension: .py
-#     mimetype: text/x-python
-#     name: python
-#     nbconvert_exporter: python
-#     pygments_lexer: ipython3
-#     version: 3.6.6
-# ---
 
 """
 用evernote作为工作平台，通过Python链接整理各种工作数据，呈现给各个相关岗位。.
 """
-# import imp4nb
-# import sys
-# sys.path.extend(['func', 'work', 'life', 'etc'])
-# import sqlite3 as lite
 
 import pathmagic
 
@@ -65,9 +42,5 @@ financetimer(60 * 60 * 3 + 60 * 33)
 pinpaifenxi_timer(60 * 60 * 4)
 zipdata2one_timer(60 * 60 * 12 + 60 * 35)
 
-# writeini()
-
-# findnotebookfromevernote(token)
-# log.debug('程序结束！')
 # print(vars())
 log.info('自动线程任务启动完毕！')
