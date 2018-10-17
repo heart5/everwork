@@ -54,7 +54,7 @@ def log2notetimer(jiangemiao):
     # global cfp, inifilepath
     cfp, cfppath = getcfp('everwork')
     everlogc = cfp.getint('evernote', 'everlogc')
-    if len(loglines) == everlogc:  # <=调整为==，用来应对log文件崩溃重建的情况
+    if len(loglines) == everlogc and False:  # <=调整为==，用来应对log文件崩溃重建的情况
         log.info('暂无新记录，不更新everworklog笔记。')
     else:
         loglinestr = '\n'.join(loglines[::-1])
@@ -62,7 +62,10 @@ def log2notetimer(jiangemiao):
         loglinestr = loglinestr.replace('>', '》')
         loglinestr = loglinestr.replace('&', '并符')
         loglinestr = loglinestr.replace('=', '等于')
-        loglinestr = '<pre>' + loglinestr + '</pre>'
+        logbytestr = str(loglinestr.encode('utf-8'))
+        logbytestr = logbytestr.replace('\x16', '')
+        loglinestr = bytes(logbytestr, encoding='utf-8')
+        loglinestr = '<pre>' + str(loglinestr) + '</pre>'
         # print(loglinestr)
         noteguid_lognote = '4a940ff2-74a8-4584-be46-aa6d68a4fa53'
         try:
