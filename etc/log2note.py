@@ -49,22 +49,24 @@ def log2notetimer(jiangemiao):
         with open(pathlog / fname, 'r', encoding='utf-8') as flog:
             loglines = loglines + [line.strip() for line in flog if line.find('CRITICAL') >= 0]
 
-    print(f'日志共有{len(loglines)}条记录')
+    loglimit = 1000
+    print(f'严重的日志共有{len(loglines)}条记录，只取最新的{loglimit}条')
     #print()
     # global cfp, inifilepath
     cfp, cfppath = getcfp('everwork')
     everlogc = cfp.getint('evernote', 'everlogc')
-    if len(loglines) == everlogc and False:  # <=调整为==，用来应对log文件崩溃重建的情况
+    if len(loglines) == everlogc:  # <=调整为==，用来应对log文件崩溃重建的情况
         log.info('暂无新记录，不更新everworklog笔记。')
     else:
+        loglines = loglines[(-1 * loglimit):]
         loglinestr = '\n'.join(loglines[::-1])
         loglinestr = loglinestr.replace('<', '《')
         loglinestr = loglinestr.replace('>', '》')
         loglinestr = loglinestr.replace('&', '并符')
         loglinestr = loglinestr.replace('=', '等于')
-        logbytestr = str(loglinestr.encode('utf-8'))
-        logbytestr = logbytestr.replace('\x16', '')
-        loglinestr = bytes(logbytestr, encoding='utf-8')
+        # logbytestr = str(loglinestr.encode('utf-8'))
+        # logbytestr = logbytestr.replace('\x16', '')
+        # loglinestr = bytes(logbytestr, encoding='utf-8')
         loglinestr = '<pre>' + str(loglinestr) + '</pre>'
         # print(loglinestr)
         noteguid_lognote = '4a940ff2-74a8-4584-be46-aa6d68a4fa53'
@@ -85,5 +87,5 @@ def log2notetimer(jiangemiao):
 if __name__ == '__main__':
     # global log
     # log.info(f'运行文件\t{__file__}')
-    log2notetimer(60 * 5)
+    log2notetimer(60 * 37)
     print('Done.')
