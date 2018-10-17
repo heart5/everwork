@@ -49,7 +49,7 @@ def log2notetimer(jiangemiao):
         with open(pathlog / fname, 'r', encoding='utf-8') as flog:
             loglines = loglines + [line.strip() for line in flog if line.find('CRITICAL') >= 0]
 
-    loglimit = 1000
+    loglimit = 500
     print(f'严重的日志共有{len(loglines)}条记录，只取最新的{loglimit}条')
     #print()
     # global cfp, inifilepath
