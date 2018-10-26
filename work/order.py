@@ -36,7 +36,7 @@ with pathmagic.context():
     from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
     from func.logme import log
     from func.first import dirmainpath, dbpathworkplan, dbpathquandan, dbpathdingdanmingxi
-    from func.pdtools import dftotal2top
+    from func.pdtools import dftotal2top, dfin2imglist
     from work.orderdetails import jiaoyanchanpinkehu
 
 
@@ -414,6 +414,8 @@ def dingdanxiaoshouyuedufenxi(dforder):
 def showorderstat():
     # xlsfile = 'data\\work\\销售订单\\销售订单20180606__20180607034848_480667.xls'
     # dforder = chulixls_order(xlsfile)
+    # global workplannotebookguid
+    workplannotebookguid = '2c8e97b5-421f-461c-8e35-0f0b1a33e91c'
     pathor = dirmainpath / 'data' / 'work' / '销售订单'
     dforder = chulidataindir_order(pathor)
     dingdanxiaoshouyuedufenxi(dforder)
@@ -526,10 +528,66 @@ def showorderstat():
     else:
         log.info('下列人员的销售订单金额月度分析正常处置完毕：%s' % persons)
 
+    dfsales = pd.DataFrame(dforder)
+    dfsales = dfsales.groupby(['日期', '业务人员'], as_index=False).sum()
+    # persons = list(dfsales.groupby('业务人员')['业务人员'].count().index)
+    # print(persons)
+    dfsales.sort_values(['日期'], inplace=True)
+    notestr = '销售金额分析图表'
+    if cfpzysm.has_section(notestr) is False:
+        cfpzysm.add_section(notestr)
+        cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+    for person in persons:
+        if cfpzysm.has_option(notestr, person) is False:
+            try:
+                notestore = get_notestore()
+                plannote = ttypes.Note()
+                plannote.title = notestr + person
+                nbody = '<?xml version="1.0" encoding="UTF-8"?>'
+                nbody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
+                nbody += '<en-note>%s</en-note>' % plannote.title
+                plannote.content = nbody
+                plannote.notebookGuid = workplannotebookguid
+                # cfp, cfppath = getcfp('everwork')
+                token = cfp.get('evernote', 'token')
+                note = notestore.createNote(token, plannote)
+                evernoteapijiayi()
+                cfpzysm.set(notestr, person, '%s' % note.guid)
+                cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+                log.info('成功创建%s的%s笔记' % (person, notestr))
+            except Exception as ee:
+                log.critical('创建%s的%s笔记时出现错误。%s' % (person, notestr, str(ee)))
+                continue
+        dfperson = dfsales[dfsales.业务人员 == person]
+        zuixinriqi = dfperson.groupby(['日期'])['日期'].size().index.max()
+        orderdatestr = zuixinriqi.strftime('%F')
+        if cfpzysm.has_option(notestr, person + '最新订单日期'):
+            ordertoday = cfpzysm.get(notestr, person + '最新订单日期')
+            # print(f'{zuixinriqi}\t{ordertoday}')
+            if zuixinriqi <= pd.to_datetime(ordertoday): # and False:
+                continue
+        dfpersonsum = dfperson['订单金额'].sum()
+        dfperson = dfperson.groupby(['日期']).sum()
+        # del dfperson['业务人员']
+        print(person, end='\t')
+        print(dfpersonsum, end='\t')
+        personguid = cfpzysm.get(notestr, person)
+        print(personguid)
+        # neirong = tablehtml2evernote(dftotal2top(dfperson), f'{orderdatestr[:-3]}{notestr}', withindex=False)
+        neirong = ""
+        # print(neirong)
+        try:
+            notestore = get_notestore()
+            imglist = dfin2imglist(dfperson, cum=True)
+            imglist2note(notestore, imglist, personguid, '%s——%s（%s）' % (notestr, person, orderdatestr[:-3]), neirong)
+            cfpzysm.set(notestr, person + '最新订单日期', '%s' % orderdatestr)
+            cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+        except Exception as eeee:
+            log.critical('更新笔记%s——%s（%s）时出现严重错误。%s' % (notestr, person, orderdatestr, str(eeee)))
+    else:
+        log.info('下列人员的销售金额分析图表正常处置完毕：%s' % persons)
 
 def showorderstat2note(jiangemiao):
-    global workplannotebookguid
-    workplannotebookguid = '2c8e97b5-421f-461c-8e35-0f0b1a33e91c'
     try:
         showorderstat()
         jiaoyanchanpinkehu()
@@ -542,9 +600,9 @@ def showorderstat2note(jiangemiao):
 
 
 if __name__ == '__main__':
-    fixerrodata4db()
+    # fixerrodata4db()
     # chulidataindir_order()
-    # showorderstat()
+    showorderstat()
     # showorderstat2note(60 * 60 + 60 * 18)
     # chulixls_order(get_notestore())
     # token = cfp.get('evernote', 'token')
