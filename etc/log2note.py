@@ -51,7 +51,7 @@ def log2notetimer(jiangemiao):
 
     loglimit = 500
     print(f'严重的日志共有{len(loglines)}条记录，只取最新的{loglimit}条')
-    #print()
+    # print()
     # global cfp, inifilepath
     cfp, cfppath = getcfp('everwork')
     everlogc = cfp.getint('evernote', 'everlogc')
