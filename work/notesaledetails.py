@@ -68,7 +68,7 @@ def fenxiyueduibi(sqlstr, xiangmu, notefenbudf, noteleixingdf, cnxf, pinpai='', 
     sqlznew = sqlz.replace('xiaoshoumingxi', 'C.orderdetails')
     log.info(sqlznew)
     dfznew = pd.read_sql_query(sqlznew, cnxf, parse_dates=['日期'])
-    dfznew = dfznew[dfznew.日期 >= pd.to_datetime('2018-9-1')]  # 实际销售数据和订单品项数据的交界线
+    dfznew = dfznew[dfznew.日期 >= pd.to_datetime('2018-10-1')]  # 实际销售数据和订单品项数据的交界线
     # print(dfznew)
 
     xmclause = xiangmu[1]
@@ -79,7 +79,7 @@ def fenxiyueduibi(sqlstr, xiangmu, notefenbudf, noteleixingdf, cnxf, pinpai='', 
     sqlfnew = sqlf.replace('xiaoshoumingxi', 'C.orderdetails')
     log.info(sqlznew)
     dffnew = pd.read_sql_query(sqlfnew, cnxf, parse_dates=['日期'])
-    dffnew = dffnew[dffnew.日期 >= pd.to_datetime('2018-9-1')]  # 实际销售数据和订单品项数据的交界线
+    dffnew = dffnew[dffnew.日期 >= pd.to_datetime('2018-10-1')]  # 实际销售数据和订单品项数据的交界线
     # print(dffnew)
     cursor.execute('detach database \'C\'')
     cursor.close()
