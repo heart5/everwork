@@ -137,7 +137,7 @@ def zipdata2one_timer(jiangemiao):
 
 if __name__ == '__main__':
     print(f'开始测试文件\t{__file__}')
-    # zipdir2one()
+    zipdir2one()
 
     zipdata2one_timer(60 * 60 * 12 + 60 * 35)
 

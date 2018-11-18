@@ -23,8 +23,8 @@ with pathmagic.context():
     from func.wrapfuncs import timethis
 
 # plot中显示中文
-mpl.rcParams['font.sans-serif'] = ['SimHei']
-mpl.rcParams['axes.unicode_minus'] = False
+# mpl.rcParams['font.sans-serif'] = ['SimHei']
+# mpl.rcParams['axes.unicode_minus'] = False
 
 
 # 显示DataFrame或Series的轮廓信息
