@@ -7,7 +7,10 @@ from matplotlib.font_manager import FontManager
 
 print(matplotlib.matplotlib_fname())    # 包含全路径的配置文件
 
+
 fm = FontManager()
+
+
 # print(fm.findfont(matplotlib.font_manager.FontProperties(), fontext='ttf'))
 # mat_fonts = set(f.fname for f in fm.ttflist) # matplotlib可用的字体路径列表
 # print(mat_fonts)
