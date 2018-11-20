@@ -46,4 +46,7 @@ def tuling_reply(msg):
 
 # 为了让实验过程更加方便（修改程序不用多次扫码），我们使用热启动
 itchat.auto_login(hotReload=True)
+friends = itchat.get_friends(update=True)
+for fr in friends:
+    print(fr)
 itchat.run()
