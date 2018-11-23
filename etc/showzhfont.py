@@ -5,11 +5,9 @@ import subprocess
 import matplotlib
 from matplotlib.font_manager import FontManager
 
-print(matplotlib.matplotlib_fname())    # 包含全路径的配置文件
-
+# print(matplotlib.matplotlib_fname())    # 包含全路径的配置文件
 
 fm = FontManager()
-
 
 # print(fm.findfont(matplotlib.font_manager.FontProperties(), fontext='ttf'))
 # mat_fonts = set(f.fname for f in fm.ttflist) # matplotlib可用的字体路径列表
@@ -27,12 +25,15 @@ zhfs = set(f for f in zhfs if len(f) > 0)
 # print(zhfs)
 # zhfs.pop()
 # print(zhfs)
-zh_fonts = set(f.split(',', 1)[0] for f in outputsplit if len(f.split(',',
-                                                                      1)[0]) > 0)
+zh_fonts = set(f.split(',', 1)[0]
+               for f in outputsplit if len(f.split(',', 1)[0]) > 0)
 # print(zh_fonts)
 available = mat_fonts & zhfs    # matplotlib字体和操作系统字体取交集
 
+
+# @profile
 print('*' * 10, '可用的中文字体（取交集）', '*' * 10)
 for f in available:
     print(f)
 #     print(len(mat_fonts))
+print("All thing done.")
