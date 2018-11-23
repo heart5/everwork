@@ -136,7 +136,7 @@ def details2db(filename, sheetname, xiangmu, tablename):
             # exit(2)
         else:
             print(dfout.tail())
-            if (xiangmu[0] == '职员名称'):
+            if xiangmu[0] == '职员名称':
                 dfout = chengbenjiaupdatedf(dfout, cnxp)
                 log.info('要更新%d记录中的成本价和毛利内容' % dfout.shape[0])
             print('请仔细检查！%s' % datestr4data)
@@ -300,22 +300,23 @@ def jiaoyankehuchanpin():
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    # dfs = details2db('职员销售明细表（2018.9.1-2018.9.30）__20181029184227_481988.xlsx', '职员销售明细表（2018.9.1-2018.9.30）',
+
+    # dfs = details2db('职员销售明细表（2018.10.1-2018.10.31）.xlsx', '职员销售明细表（2018.10.1-2018.10.31）',
     #                  ['职员名称', '商品全名'], 'xiaoshoumingxi')
     # print(dfs.columns)
     # dfgs = dfs.groupby(['日期', '职员名称'], as_index=False)['数量', '金额'].count()
     # # dfgs['日期', '职员名称'] = dfgs.index
-    # descdb(dfgs)
+    # # descdb(dfgs)
     # dfg = dfgs.groupby(['职员名称'], as_index=False).apply(lambda t: t[t.金额 == t.金额.max()]) \
     #     .sort_values(['金额'], ascending=False)
     # print(dfg.shape[0])
     # print(dfg.tail(30))
 
-    # dfp = details2db('商品进货明细表（2018.9.1-2018.9.30）__20181029184227_498515.xlsx',
-    #                  '商品进货明细表（2018.9.1-2018.9.30）',
+    # dfp = details2db('商品进货明细表（2018.10.1-2018.10.31）.xlsx',
+    #                  '商品进货明细表（2018.10.1-2018.10.31）',
     #                  ['产品名称', '经办人'],
     #                  'jinghuomingxi')
-    # writer = pd.ExcelWriter(str(dirmainpath / 'data' /'进货分析.xlsx'))
+    # writer = pd.ExcelWriter(str(dirmainpath / 'data' / '进货分析.xlsx'))
     # dfp.to_excel(writer, sheet_name='商品进货记录', freeze_panes={1, 2})
     # dfg = dfp.groupby(['产品名称', '单价'], as_index=False) \
     #     .apply(lambda t: t[t.日期 == t.日期.min()][['产品名称', '日期', '单价']]).sort_values(['产品名称', '日期'])
@@ -341,7 +342,7 @@ if __name__ == '__main__':
     # writer.save()
     # writer.close()
     # customerweihu2systable()
-    # chengbenjiaupdateall(cnxx)
+    chengbenjiaupdateall(cnxx)
 
     cnxx.close()
     print('Done')
