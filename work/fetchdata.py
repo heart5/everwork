@@ -1,6 +1,6 @@
 # encoding:utf-8
 """
-功能描述
+获取数据
 """
 import datetime
 import math
@@ -29,7 +29,8 @@ def fetchworkfile_from_gmail(topic):
     usernameg = cfp.get('gmail', 'username')
     passwordg = cfp.get('gmail', 'password')
     dirwork = 'Work'
-    mailitemsg = getmail(hostg, usernameg, passwordg, dirtarget=dirwork, unseen=True, topic=topic)
+    mailitemsg = getmail(hostg, usernameg, passwordg,
+                         dirtarget=dirwork, unseen=True, topic=topic)
     # mailitemsg = getmail(hostg, usernameg, passwordg, dirtarget='Work', topic=topic)
     if mailitemsg is False:
         log.info('Gmail信箱目录《%s》中暂无新邮件。' % dirwork)
@@ -40,7 +41,8 @@ def fetchworkfile_from_gmail(topic):
         itemslst.append(headerg[1])
     print(itemslst)
     topicstring = '“%s”相关的' % topic if len(topic) > 0 else ''
-    log.info('从Gmail邮箱目录《%s》中获取%d封%s新邮件。' % (dirwork, len(itemslst), topicstring))
+    log.info('从Gmail邮箱目录《%s》中获取%d封%s新邮件。' %
+             (dirwork, len(itemslst), topicstring))
 
 
 @timethis
@@ -153,7 +155,8 @@ def chuliholidayleave_note(zhuti: list):
             numfloat = float(tian)
             numceil = math.ceil(numfloat)
             numfloor = math.floor(numfloat)
-            driminfor = pd.date_range(dtinfor, dtinfor + datetime.timedelta(days=int(numceil) - 1), freq='D')
+            driminfor = pd.date_range(
+                dtinfor, dtinfor + datetime.timedelta(days=int(numceil) - 1), freq='D')
             if dfresult is None:
                 dfresult = pd.DataFrame(index=driminfor)
                 dfresult['mingmu'] = mingmu
@@ -184,10 +187,12 @@ def chuliholidayleave_note(zhuti: list):
         dfresult = pd.DataFrame(items, columns=columns)
     # print(dfresult)
     cnxp = lite.connect(dbpathworkplan)
-    dfresult.to_sql(zhuti[1], cnxp, if_exists='replace', index=None)  # index, ['mingmu', 'xingzhi', 'tianshu', 'date']
+    # index, ['mingmu', 'xingzhi', 'tianshu', 'date']
+    dfresult.to_sql(zhuti[1], cnxp, if_exists='replace', index=None)
     cnxp.close()
     log.info(f'{zhuti[0]}数据表更新了{dfresult.shape[0]}条记录。')
-    cfpworkplan.set('行政管理', f'{zhuti[0]}updatenum', '%d' % note.updateSequenceNum)
+    cfpworkplan.set('行政管理', f'{zhuti[0]}updatenum',
+                    '%d' % note.updateSequenceNum)
     cfpworkplan.write(open(iniworkplanpath, 'w', encoding='utf-8'))
     return dfresult
 
@@ -221,11 +226,13 @@ def filegmailevernote2datacenter(jiangemiao):
         log.critical('从gmail信箱、本地文件或evernote中获取数据时出现未名错误。%s' % (str(eeee)))
 
     global timer_filegmail2datacenter
-    timer_filegmail2datacenter = Timer(jiangemiao, filegmailevernote2datacenter, [jiangemiao])
+    timer_filegmail2datacenter = Timer(
+        jiangemiao, filegmailevernote2datacenter, [jiangemiao])
     timer_filegmail2datacenter.start()
 
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    filegmailevernote2datacenter(60 * 53)
+    # filegmailevernote2datacenter(60 * 53)
+    fetchworkfile_from_gmail('')
     print('Done')

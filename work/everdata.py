@@ -326,8 +326,8 @@ if __name__ == '__main__':
     # writer.close()
 
     cnxx = lite.connect(dbpathquandan)
-    desclitedb(cnxx)
     dataokay(cnxx)
+    desclitedb(cnxx)
     # jiaoyankehuchanpin()
 
     # for i in range(len(dfs)):
@@ -342,7 +342,7 @@ if __name__ == '__main__':
     # writer.save()
     # writer.close()
     # customerweihu2systable()
-    chengbenjiaupdateall(cnxx)
+    # chengbenjiaupdateall(cnxx)
 
     cnxx.close()
     print('Done')
