@@ -1,3 +1,5 @@
+#!PREFIX//bin/python
+
 import socket
 
 def get_host_ip():
