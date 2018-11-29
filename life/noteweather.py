@@ -44,7 +44,8 @@ with pathmagic.context():
 def getweatherfromevernote():
     noteguid_weather = '277dff5e-7042-47c0-9d7b-aae270f903b8'
     note_store = get_notestore()
-    soup = BeautifulSoup(note_store.getNoteContent(noteguid_weather), "html.parser")
+    soup = BeautifulSoup(note_store.getNoteContent(
+        noteguid_weather), "html.parser")
     # evernoteapijiayi()
     # tags = soup.find('en-note')
     # print tags
@@ -64,7 +65,8 @@ def getweatherfromgmail():
     host = cfp.get('gmail', 'host')
     username = cfp.get('gmail', 'username')
     password = cfp.get('gmail', 'password')
-    mailitems = getmail(host, username, password, dirtarget='Ifttt/Weather', unseen=True, topic='武汉每日天气 @行政管理 +')
+    mailitems = getmail(host, username, password,
+                        dirtarget='Ifttt/Weather', unseen=True, topic='武汉每日天气 @行政管理 +')
     if mailitems is False:
         return False
     split_items = []
@@ -102,9 +104,11 @@ def weatherstat(items, destguid=None):
             stritem = [pd.Timestamp(jj[0]),
                        jj[1], jj[2], jj[3], jj[4],
                        # pd.Timestamp(jj[5]).strftime("%I%M"),
-                       int(pd.Timestamp(jj[5]).strftime("%H")) * 60 + int(pd.Timestamp(jj[5]).strftime("%M")),
+                       int(pd.Timestamp(jj[5]).strftime("%H")) * \
+                       60 + int(pd.Timestamp(jj[5]).strftime("%M")),
                        # pd.Timestamp(jj[6]),
-                       int(pd.Timestamp(jj[6]).strftime("%H")) * 60 + int(pd.Timestamp(jj[6]).strftime("%M")),
+                       int(pd.Timestamp(jj[6]).strftime("%H")) * \
+                       60 + int(pd.Timestamp(jj[6]).strftime("%M")),
                        jj[7]]
             datei = stritem[0]
             dates = "%04d-%02d-%02d" % (datei.year, datei.month, datei.day)
@@ -126,7 +130,8 @@ def weatherstat(items, destguid=None):
     df.dropna(how='all', inplace=True)  # 去掉空行，索引日期，后面索引值相同的行会被置空，需要去除
     # print(len(df))
     # df['gaowen'] = df['gaowen'].apply(lambda x: np.nan if str(x).isspace() else int(x))   #处理空字符串为空值的另外一骚
-    df['gaowen'] = df['gaowen'].apply(lambda x: int(x) if x else None)  # 数字串转换成整数，如果空字符串则为空值
+    df['gaowen'] = df['gaowen'].apply(lambda x: int(
+        x) if x else None)  # 数字串转换成整数，如果空字符串则为空值
     df['diwen'] = df['diwen'].apply(lambda x: int(x) if x else None)
     df['fengsu'] = df['fengsu'].apply(lambda x: int(x) if x else None)
     df['shidu'] = df['shidu'].apply(lambda x: int(x) if x else None)
@@ -152,7 +157,8 @@ def weatherstat(items, destguid=None):
     ax1.plot(df['diwen'], lw=0.3, label=u'日低温')
     ax1.plot(df['wendu'], 'g', lw=0.7, label=u'日温度（高温低温平均）')
     quyangtianshu = 10
-    ax1.plot(df['wendu'].resample('%dD' % quyangtianshu).mean(), 'b', lw=1.2, label='日温度（每%d天平均）' % quyangtianshu)
+    ax1.plot(df['wendu'].resample('%dD' % quyangtianshu).mean(),
+             'b', lw=1.2, label='日温度（每%d天平均）' % quyangtianshu)
     ax1.plot(df[df.fengsu > 5]['fengsu'], '*', label='风速（大于五级）')
     plt.legend()
     #  起始统计日
@@ -208,7 +214,8 @@ def weatherstat(items, destguid=None):
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
 
     # 最近一年最高温
-    kedu = df_recent_year[df_recent_year.gaowen == df_recent_year.iloc[-364:]['gaowen'].max()].iloc[0]
+    kedu = df_recent_year[df_recent_year.gaowen ==
+                          df_recent_year.iloc[-364:]['gaowen'].max()].iloc[0]
     # print(kedu)
     ax1.plot([kedu['date'], kedu['date']], [0, kedu['gaowen']], 'c--')
     ax1.scatter([kedu['date'], ], [kedu['gaowen']], 50, color='Wheat')
@@ -220,7 +227,8 @@ def weatherstat(items, destguid=None):
                  xytext=(-10, -20), textcoords='offset points', fontsize=8,
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
     # 最近一年最低温
-    kedu = df_recent_year[df_recent_year.diwen == df_recent_year.iloc[-364:]['diwen'].min()].iloc[0]
+    kedu = df_recent_year[df_recent_year.diwen ==
+                          df_recent_year.iloc[-364:]['diwen'].min()].iloc[0]
     ax1.plot([kedu['date'], kedu['date']], [0, kedu['diwen']], 'c--')
     ax1.scatter([kedu['date'], ], [kedu['diwen']], 50, color='Wheat')
     ax1.annotate(str(kedu['diwen']), xy=(kedu['date'], kedu['diwen']), xycoords='data',
@@ -289,7 +297,8 @@ def weatherstat(items, destguid=None):
     plt.grid(True)
     ax2 = ax1.twinx()
     print(ax2)
-    plt.plot(df_recent_year['date'], df_recent_year['richang'], 'r', lw=1.5, label=u'日长')
+    plt.plot(df_recent_year['date'],
+             df_recent_year['richang'], 'r', lw=1.5, label=u'日长')
     ax = plt.gca()
     # ax.yaxis.set_major_formatter(FuncFormatter(min_formatter)) # 主刻度文本用pi_formatter函数计算
     ax.yaxis.set_major_formatter(
@@ -312,20 +321,6 @@ def weatherstat(items, destguid=None):
     imglist2note(get_notestore(), imglist, destguid, '武汉天气图')
 
 
-def readfromweathertxt(weathertxtfilename):
-    with open(weathertxtfilename, 'r', encoding='utf-8') as ftxt:
-        items = [line.strip() for line in ftxt]  # strip()，去除行首行尾的空格
-    return items
-
-
-def write2weathertxt(weathertxtfilename, inputitemlist):
-    # print(inputitemlist)
-    fileobject = open(weathertxtfilename, 'w', encoding='utf-8')
-    for item in inputitemlist:
-        # print(item)
-        fileobject.write(str(item) + '\n')
-    fileobject.close()
-
 
 def fetchweatherinfo_from_gmail(weathertxtfilename):
     if cfplife.has_option('天气', '存储数据最新日期'):
@@ -344,7 +339,8 @@ def fetchweatherinfo_from_gmail(weathertxtfilename):
             for itemg in itemfromtxt:
                 items.append(str(itemg))
             write2weathertxt(weathertxtfilename, items)
-            weathertxtlastestday = time.strftime('%F', time.strptime(items[0].split(' ：')[0], '%B %d, %Y at %I:%M%p'))
+            weathertxtlastestday = time.strftime('%F', time.strptime(
+                items[0].split(' ：')[0], '%B %d, %Y at %I:%M%p'))
             cfplife.set('天气', '存储数据最新日期', '%s' % weathertxtlastestday)
             cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
 
@@ -400,9 +396,9 @@ def weatherstattimer(jiangemiao):
         cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
     today = datetime.datetime.now().strftime('%F')
     weathertxtlastestday = cfplife.get('天气', '存储数据最新日期')
-    if today == weathernotelastestday: # and False:
+    if today == weathernotelastestday:  # and False:
         print('今天的天气信息统计笔记已刷新，本次轮询跳过')
-    elif today == weathertxtlastestday: # or True:
+    elif today == weathertxtlastestday:  # or True:
         try:
             items = readfromweathertxt(weathertxtfilename)
             weatherstat(items, '296f57a3-c660-4dd5-885a-56492deb2cee')

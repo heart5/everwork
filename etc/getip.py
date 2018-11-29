@@ -1,4 +1,4 @@
-#!PREFIX//bin/python
+#!PREFIX/bin/python
 
 import socket
 
