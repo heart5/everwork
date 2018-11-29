@@ -3,6 +3,7 @@
 功能描述
 """
 import ssl
+import socket
 import time
 import random
 # from requests.packages.urllib3 import HTTPConnectionPool
@@ -16,6 +17,21 @@ import pathmagic
 
 with pathmagic.context():
     from func.logme import log
+
+def get_host_ip():
+    """
+    查询本机ip地址
+    :return: ip
+    """
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        sn = s.getsockname()
+        # print(sn)
+        ip = sn[0]
+    finally:
+        s.close()
+    return ip
 
 
 def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务器'):
