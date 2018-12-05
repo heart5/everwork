@@ -5,7 +5,7 @@ import subprocess
 import matplotlib
 from matplotlib.font_manager import FontManager
 
-# print(matplotlib.matplotlib_fname())    # 包含全路径的配置文件
+print(matplotlib.matplotlib_fname())    # 包含全路径的配置文件
 
 fm = FontManager()
 

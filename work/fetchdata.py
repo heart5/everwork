@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 
 import pathmagic
 from func.first import dbpathworkplan
-from func.pdtools import descdb
+# from func.pdtools import descdb
 
 with pathmagic.context():
     from func.logme import log
@@ -67,7 +67,7 @@ def chuliholidayleave_note(zhuti: list):
         updatenumold = 0
     if note.updateSequenceNum <= updatenumold:
         log.info(f'{zhuti[0]}笔记内容无更新。')
-        return False
+        return
     souporigin = BeautifulSoup(note.content, "html.parser")
     # print(soup)
     isjiaqi = False
@@ -194,7 +194,6 @@ def chuliholidayleave_note(zhuti: list):
     cfpworkplan.set('行政管理', f'{zhuti[0]}updatenum',
                     '%d' % note.updateSequenceNum)
     cfpworkplan.write(open(iniworkplanpath, 'w', encoding='utf-8'))
-    return dfresult
 
 
 @timethis
@@ -209,9 +208,7 @@ def fetchattendance_from_evernote():
     ]
     try:
         for zhuti in zhutis:
-            dfresult = chuliholidayleave_note(zhuti)
-            if dfresult is not False:
-                descdb(dfresult)
+            chuliholidayleave_note(zhuti)
     except OSError as exp:
         topic = [x for [x, *y] in zhutis]
         log.critical(f'从evernote获取{topic}笔记信息时出现未名错误。{exp}')
