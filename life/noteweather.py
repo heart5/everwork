@@ -321,7 +321,6 @@ def weatherstat(items, destguid=None):
     imglist2note(get_notestore(), imglist, destguid, '武汉天气图')
 
 
-
 def fetchweatherinfo_from_gmail(weathertxtfilename):
     if cfplife.has_option('天气', '存储数据最新日期'):
         weathertxtlastestday = cfplife.get('天气', '存储数据最新日期')
@@ -383,6 +382,7 @@ def weatherstattimer(jiangemiao):
     :return:
     """
     weathertxtfilename = str(dirmainpath / 'data' / 'ifttt' / 'weather.txt')
+    print(weathertxtfilename)
     try:
         fetchweatherinfo_from_gmail(weathertxtfilename)
     except Exception as weathererror:

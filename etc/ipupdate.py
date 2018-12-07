@@ -14,7 +14,7 @@ import pathmagic
 
 with pathmagic.context():
     from func.first import getdirmain
-    from func.nettools import get_host_ip
+    from func.nettools import get_host_ip, get_ip
     from func.evernt import get_notestore, imglist2note
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
@@ -60,5 +60,5 @@ print(device_id)
 if __name__ == '__main__':
     # global log
     print(f'运行文件\t{__file__}')
-    print(get_host_ip())
+    print(get_ip('wlan0'))
     print('Done.')
