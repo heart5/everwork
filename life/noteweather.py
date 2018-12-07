@@ -321,6 +321,21 @@ def weatherstat(items, destguid=None):
     imglist2note(get_notestore(), imglist, destguid, '武汉天气图')
 
 
+def readfromweathertxt(weathertxtfilename):
+    with open(weathertxtfilename, 'r', encoding='utf-8') as ftxt:
+        items = [line.strip() for line in ftxt]  # strip()，去除行首行尾的空格
+    return items
+
+
+def write2weathertxt(weathertxtfilename, inputitemlist):
+    # print(inputitemlist)
+    fileobject = open(weathertxtfilename, 'w', encoding='utf-8')
+    for item in inputitemlist:
+        # print(item)
+        fileobject.write(str(item) + '\n')
+    fileobject.close()
+
+
 def fetchweatherinfo_from_gmail(weathertxtfilename):
     if cfplife.has_option('天气', '存储数据最新日期'):
         weathertxtlastestday = cfplife.get('天气', '存储数据最新日期')
