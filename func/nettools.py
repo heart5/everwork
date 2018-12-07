@@ -6,6 +6,9 @@ import ssl
 import socket
 import time
 import random
+import platform
+import os
+import re
 # from requests.packages.urllib3 import HTTPConnectionPool
 from requests.packages.urllib3.exceptions import NewConnectionError
 import requests
@@ -18,11 +21,31 @@ import pathmagic
 with pathmagic.context():
     from func.logme import log
 
+
+def get_ip(*args):
+    if platform.system() == 'Windows':
+        my_name = socket.getfqdn(socket.gethostbyname('localhost'))
+        print(my_name)
+        my_addr = socket.gethostbyname(my_name)
+        print(my_addr)
+        ip = my_addr.split('\n')[0]
+        return ip
+    else:
+
+        my_addr = os.popen(
+            "ifconfig | grep -A 1 %s|tail -1| awk '{print $2}'" % args[0]).read()
+        print(my_addr)
+        ip = re.search(r'(?<![\.\d])(?:25[0-5]\.|2[0-4]\d\.|[01]?\d\d?\.)'
+                       r'{3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?![\.\d])', my_addr).group()
+        return ip
+
+
 def get_host_ip():
     """
     查询本机ip地址
     :return: ip
     """
+    s = None
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('8.8.8.8', 80))
@@ -137,7 +160,7 @@ if __name__ == '__main__':
 
 
     # html2 = trycounttimes2(fetchfromnet, '', True, 'xmu.edu.cn网站服务器')
-    address = 'http://www.wise1.xmu.edu.cn/people/faculty'
+    address = 'http://www.wise.xmu.edu.cn/people/faculty'
     print(fetchfromnet.__doc__)
     html2 = fetchfromnet(address)
     if html2 is None:
@@ -149,5 +172,7 @@ if __name__ == '__main__':
         url = a['href']
         name = a.get_text()
         print(f'{name},{url}')
+
+    print(get_ip())
 
     print('Done.测试完毕。')
