@@ -476,8 +476,8 @@ def chayanshuju():
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     # gezhongzaxiang()
-    # planfenxifunc()
-    planfenxi(60 * 6)
+    planfenxifunc()
+    # planfenxi(60 * 6)
     # planfenxi(60 * 60 * 2 + 60 * 29)
     # chayanshuju()
     # chulioldversion()
