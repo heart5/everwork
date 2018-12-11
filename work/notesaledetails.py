@@ -218,11 +218,16 @@ def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
         # fenximonthduibi(token, note_store, '退货客户数', notefbkhdf, notelxkhdf, cnxp, pinpai=br)
 
 
-def pinpaifenxi_timer(jiangemiao):
+
+def pinpaifenxido():
     cnx = lite.connect(dbpathquandan)
     dataokay(cnx)
     pinpaifenxi(cnx, daysbefore=30, brandnum=20)
     cnx.close()
+
+
+def pinpaifenxi_timer(jiangemiao):
+    pinpaifenxido()
 
     global timer_pinpai2note
     timer_pinpai2note = Timer(jiangemiao, pinpaifenxi, [jiangemiao])
@@ -230,5 +235,6 @@ def pinpaifenxi_timer(jiangemiao):
 
 
 if __name__ == '__main__':
-    pinpaifenxi_timer(60 * 60 * 3)
+    # pinpaifenxi_timer(60 * 60 * 3)
+    pinpaifenxido()
     print('Done.')
