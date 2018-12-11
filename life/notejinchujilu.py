@@ -56,7 +56,8 @@ with pathmagic.context():
 
 
 def jilugooglefile(filepath):
-    filelist = [ff for ff in listdir(str(filepath)) if isfile(str(filepath / ff))]
+    filelist = [ff for ff in listdir(
+        str(filepath)) if isfile(str(filepath / ff))]
     print(filelist)
     dfout = None
     for i in range(len(filelist)):
@@ -68,7 +69,8 @@ def jilugooglefile(filepath):
         # descdb(df)
         df['shuxing'] = df.iloc[:, 1].apply(lambda x: x.split(' ')[0])
         df['didian'] = df.iloc[:, 1].apply(lambda x: x.split(' ')[1])
-        df['entered'] = df.iloc[:, 0].apply(lambda x: True if x == 'entered' else False)
+        df['entered'] = df.iloc[:, 0].apply(
+            lambda x: True if x == 'entered' else False)
         dff = df.iloc[:, [6, 4, 5]]
         dff.columns = ['entered', 'shuxing', 'address']
         # descdb(dff)
@@ -83,7 +85,8 @@ def jilugooglefile(filepath):
 def jilugoogledrive():
     # 验证登录
     # global dirmainpath
-    gc = pygsheets.authorize(service_file=str(dirmainpath / 'data' / 'imp' / 'ewjinchu.json'))
+    gc = pygsheets.authorize(service_file=str(
+        dirmainpath / 'data' / 'imp' / 'ewjinchu.json'))
     files = gc.list_ssheets()
     dffiles = pd.DataFrame(files)
     # print(dffiles.head())
@@ -98,14 +101,16 @@ def jilugoogledrive():
         dfboottrails = dfboottrails.append(df, True)
         # print(df.head())
     dfboottrails.columns = ['atime', 'entered', 'xingzhi', 'tu', 'tulian']
-    dfboottrails = pd.concat([dfboottrails, dfboottrails['xingzhi'].str.split(r' ', expand=True)], axis=1)
+    dfboottrails = pd.concat(
+        [dfboottrails, dfboottrails['xingzhi'].str.split(r' ', expand=True)], axis=1)
     dfboottrails = pd.DataFrame(dfboottrails)
     dfboottrails.rename(columns={0: 'shuxing', 1: 'address'}, inplace=True)
     dfboottrails.drop_duplicates(inplace=True)
     dfbout = dfboottrails.loc[:, ['atime', 'entered', 'shuxing', 'address']]
     dfbout['atime'] = dfbout['atime'].apply(
         lambda x: pd.to_datetime(time.strftime('%Y-%m-%d %H:%M', time.strptime(x, '%B %d, %Y at %I:%M%p'))))
-    dfbout['entered'] = dfbout['entered'].apply(lambda x: True if x == 'entered' else False)
+    dfbout['entered'] = dfbout['entered'].apply(
+        lambda x: True if x == 'entered' else False)
     dfbout['atime'] = dfbout['atime'].astype(pd.datetime)
     dfbout.index = dfbout['atime']
     dfbout = dfbout.sort_index()
@@ -138,7 +143,8 @@ def wifitodf(itemstr, noteinfolistw):
     items_split = []
     for i in range(int(len(slices) / 4)):
         zhizi = list()
-        zhizi.append(datetime.datetime.strptime(slices[i * 4 + 3], '%B %d, %Y at %I:%M%p'))
+        zhizi.append(datetime.datetime.strptime(
+            slices[i * 4 + 3], '%B %d, %Y at %I:%M%p'))
         if slices[i * 4 + 1].startswith('dis'):
             zhizi.append(False)
         else:
@@ -166,7 +172,8 @@ def wifitodf(itemstr, noteinfolistw):
                 dfwifilist.append(item)
                 break
 
-    dfwifi = pd.DataFrame(dfwifilist, columns=('atime', 'entered', 'name', 'shuxing', 'address'))
+    dfwifi = pd.DataFrame(dfwifilist, columns=(
+        'atime', 'entered', 'name', 'shuxing', 'address'))
     dfwifi.drop_duplicates(inplace=True)
     # descdb(dfwifi)
     dfwifi.sort_values(['atime'], ascending=False, inplace=True)
@@ -183,7 +190,8 @@ def wifitodf(itemstr, noteinfolistw):
         print(dfwificount, end='\t')
         # global cfp, inifilepath
         if cfplife.has_option('wifi', 'itemnumber'):
-            ntupdatenum = dfwificount > cfplife.getint('wifi', 'itemnumber')  # 新数据集记录数和存档比较
+            ntupdatenum = dfwificount > cfplife.getint(
+                'wifi', 'itemnumber')  # 新数据集记录数和存档比较
         else:
             ntupdatenum = True
         print(ntupdatenum, end='\t')
@@ -191,16 +199,22 @@ def wifitodf(itemstr, noteinfolistw):
         print(dfwifi.index[0])
         if ntupdatenum:  # or True:
             dfnotename.reset_index(inplace=True)
-            dfnotenameg = pd.DataFrame(dfnotename.groupby(['address']).max()['atime'])
-            dfnotenameg['count'] = dfnotename.groupby(['address']).count()['atime']
+            dfnotenameg = pd.DataFrame(
+                dfnotename.groupby(['address']).max()['atime'])
+            dfnotenameg['count'] = dfnotename.groupby(
+                ['address']).count()['atime']
             dfnotenameg.sort_values(['atime'], ascending=False, inplace=True)
-            wifitongjinametablestr = tablehtml2evernote(dfnotenameg, 'WIFI（特定）统计')
-            wifijilutablestr = tablehtml2evernote(dfnotename.head(50), 'WIFI（特定）连接记录')
+            wifitongjinametablestr = tablehtml2evernote(
+                dfnotenameg, 'WIFI（特定）统计')
+            wifijilutablestr = tablehtml2evernote(
+                dfnotename.head(50), 'WIFI（特定）连接记录')
             dfwifiall.reset_index(inplace=True)
-            dfnoteallg = pd.DataFrame(dfwifiall.groupby(['name']).max()['atime'])
+            dfnoteallg = pd.DataFrame(
+                dfwifiall.groupby(['name']).max()['atime'])
             dfnoteallg['count'] = dfwifiall.groupby(['name']).count()['atime']
             dfnoteallg.sort_values(['atime'], ascending=False, inplace=True)
-            wifitongjialltablestr = tablehtml2evernote(dfnoteallg, 'WIFI（全部）统计')
+            wifitongjialltablestr = tablehtml2evernote(
+                dfnoteallg, 'WIFI（全部）统计')
             imglist2note(notestore, [], '971f14c0-dea9-4f13-9a16-ee6e236e25be', 'WIFI连接统计表',
                          wifitongjinametablestr + wifijilutablestr + wifitongjialltablestr)
 
@@ -246,7 +260,8 @@ def itemstodf(itemstr, noteinfos):
         lambda x: pd.to_datetime(time.strftime('%Y-%m-%d %H:%M', time.strptime(x, '%B %d, %Y at %I:%M%p'))))
     dfjc.index = dfjc['atime']
     dfjc = dfjc.sort_index()  # 排序
-    dfjc['entered'] = dfjc['eort'].apply(lambda x: True if x == 'entered' else False)
+    dfjc['entered'] = dfjc['eort'].apply(
+        lambda x: True if x == 'entered' else False)
     dfjc['shuxing'] = noteinfos[2]
     dfjc['address'] = noteinfos[1]
     dfout = dfjc[['entered', 'shuxing', 'address']]
@@ -267,10 +282,13 @@ def jinchustat(jinchujiluall, noteinfos):
     dfjc = jinchujiluall[jinchujiluall.address == address][['entered']]
     # descdb(dfjc)
     dfjc['atime'] = dfjc.index
-    dfjc['nianyue'] = dfjc['atime'].apply(lambda x: datetime.datetime.strftime(x, '%Y%m'))
-    dfjc['小时'] = dfjc['atime'].apply(lambda x: datetime.datetime.strftime(x, '%H'))
+    dfjc['nianyue'] = dfjc['atime'].apply(
+        lambda x: datetime.datetime.strftime(x, '%Y%m'))
+    dfjc['小时'] = dfjc['atime'].apply(
+        lambda x: datetime.datetime.strftime(x, '%H'))
     # print(dfjc.tail(10))
-    dfff = dfjc[dfjc.entered == False].groupby(['nianyue', '小时'])['entered'].count()  # 以离开为进出标准
+    dfff = dfjc[dfjc.entered == False].groupby(
+        ['nianyue', '小时'])['entered'].count()  # 以离开为进出标准
     dffu = dfff.unstack(fill_value=0)
     # print(dffu)
 
@@ -281,15 +299,18 @@ def jinchustat(jinchujiluall, noteinfos):
             dffu[colname] = 0
     lst = sorted(list(dffu.columns))
     dffu = dffu[lst]
-    dfrange = pd.date_range(dfjc.index.min(), dfjc.index.max() + MonthBegin(), freq='M')
-    ddrange = pd.Series(dfrange).apply(lambda x: datetime.datetime.strftime(x, "%Y%m"))
+    dfrange = pd.date_range(
+        dfjc.index.min(), dfjc.index.max() + MonthBegin(), freq='M')
+    ddrange = pd.Series(dfrange).apply(
+        lambda x: datetime.datetime.strftime(x, "%Y%m"))
     dffu = dffu.reindex(ddrange, fill_value=0)
     # 列尾行尾增加汇总
     dffu['行合计'] = dffu.apply(lambda x: x.sum(), axis=1)
     dffu.loc['列合计'] = dffu.apply(lambda x: x.sum())
     # print(dffu)
 
-    lastestitems = tablehtml2evernote(dfjc[['entered']].head(5), notetitle.replace('统计图表', '记录'))
+    lastestitems = tablehtml2evernote(
+        dfjc[['entered']].head(5), notetitle.replace('统计图表', '记录'))
     stattable = tablehtml2evernote(dffu.sort_index(ascending=False), notetitle)
     hout = lastestitems + stattable
     # print(h)
@@ -299,7 +320,8 @@ def jinchustat(jinchujiluall, noteinfos):
     del dffu['行合计']
     dffu = dffu.iloc[:-1]
     dffu['nianyue'] = dffu.index
-    dffu['nianyue'] = dffu['nianyue'].apply(lambda x: pd.to_datetime("%s-%s-01" % (x[:4], x[-2:])))
+    dffu['nianyue'] = dffu['nianyue'].apply(
+        lambda x: pd.to_datetime("%s-%s-01" % (x[:4], x[-2:])))
     dffu.index = dffu['nianyue']
     del dffu['nianyue']
     # descdb(dffu)
@@ -324,7 +346,7 @@ def jinchustat(jinchujiluall, noteinfos):
     imglist2note(get_notestore(), imglist, destguid, notetitle, hout)
 
 
-def jinchustattimer(jiangemiao):
+def jinchustatdo():
     items = cfplife.items('impinfolist')
     noteinfolistinside = []
     for address, infoslicelist in items:
@@ -349,29 +371,34 @@ def jinchustattimer(jiangemiao):
     try:
         for noteinfo in noteinfolistinside:
             if len(noteinfo[0]) > 0:  # 有数据源笔记的guid就处理该笔记
-                dfjinchunote = itemstodf(jilunote(noteinfo), noteinfo)  # 从evernote相应笔记中获取记录
+                dfjinchunote = itemstodf(
+                    jilunote(noteinfo), noteinfo)  # 从evernote相应笔记中获取记录
             else:
                 dfjinchunote = pd.DataFrame()
             # print(dfjinchunote)
             dfjinchuloop = dfjinchu.append(dfjinchunote)
 
-            itemsgmail = jilugmail('Ifttt/Location', 'jinchu', noteinfo[2] + '_' + noteinfo[1], noteinfo[5])
+            itemsgmail = jilugmail(
+                'Ifttt/Location', 'jinchu', noteinfo[2] + '_' + noteinfo[1], noteinfo[5])
             dfjinchugmail = itemstodf(itemsgmail, noteinfo)
             dfjinchuloop = dfjinchuloop.append(dfjinchugmail)
             # descdb(dfjinchuloop)
-            dfjinchuloop = dfjinchuloop[dfjinchuloop.address == noteinfo[1]]  # 缩减记录集合，只处理当前循环项目相关记录
+            # 缩减记录集合，只处理当前循环项目相关记录
+            dfjinchuloop = dfjinchuloop[dfjinchuloop.address == noteinfo[1]]
             if dfjinchuloop.shape[0] == 0:
                 continue
             # descdb(dfjinchuloop)
             dfjinchuitem = dfjinchuloop[['entered', 'shuxing', 'address']]
             dfjinchuitem['time'] = dfjinchuitem.index
-            dfjinchuitem.drop_duplicates(inplace=True)  # 默认根据全部列值进行判断，duplicated方法亦然，所以强增time列配合
+            # 默认根据全部列值进行判断，duplicated方法亦然，所以强增time列配合
+            dfjinchuitem.drop_duplicates(inplace=True)
             del dfjinchuitem['time']
             dfjinchuitem.sort_index(ascending=False, inplace=True)
             dfjinchucount = dfjinchuitem.shape[0]  # shape[0]获得行数，shape[1]则是列数
             print(dfjinchucount, end='\t')
             if cfplife.has_option('jinchu', noteinfo[1]):
-                ntupdatenum = dfjinchucount > cfplife.getint('jinchu', noteinfo[1])  # 新数据集记录数和存档比较
+                ntupdatenum = dfjinchucount > cfplife.getint(
+                    'jinchu', noteinfo[1])  # 新数据集记录数和存档比较
             else:
                 ntupdatenum = True
             print(ntupdatenum, end='\t')
@@ -383,10 +410,14 @@ def jinchustattimer(jiangemiao):
                 jinchustat(dfjinchuitem, noteinfo[1:])
                 cfplife.set('jinchu', noteinfo[1], '%d' % dfjinchucount)
                 cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
-                log.info('%s成功更新入图表统计笔记，将于%d秒后再次自动检查并更新' % (str(noteinfo), jiangemiao))
+                log.info('%s成功更新入图表统计笔记' % noteinfo)
     except Exception as eee:
         log.critical('读取系列进出笔记并更新统计信息时出现未名错误。%s' % str(eee))
         # raise eee
+
+
+def jinchustattimer(jiangemiao):
+    jinchustatdo()
 
     global timer_jinchu
     timer_jinchu = Timer(jiangemiao, jinchustattimer, [jiangemiao])
@@ -397,18 +428,19 @@ def jinchustattimer(jiangemiao):
 if __name__ == '__main__':
     # findnotefromnotebook(token, 'c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b', '统计')
 
-    noteinfolist = [
-        ['d8fa0226-88ac-4b6c-b8fd-63a9038a6abf', 'huadianxiaolu', 'home', '08a01c35-d16d-4b22-b7f7-61e3993fd2cb',
-         '家进出统计图表（岳家嘴）', '白晔峰家附近区域进出记录', ['60bf0', '60bf0_5g', '60bf0_plus']],
-        ['1ea50564-dee7-4e82-87b5-39703671e623', 'dingziqiao', 'life', '6eef085c-0e84-4753-bf3e-b45473a12274',
-         '进出统计图表（丁字桥）', '丁字桥', ['wx-sgkf', '大浪淘沙']],
-        ['24aad619-2356-499e-9fa7-f685af3a81b1', 'maotanhuamushichang', 'work', '2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e',
-         '公司进出记录统计图表', '花木市场', ['zysm3100', 'zysm2100', 'zysm4100', 'zysm5100', 'zysm_friends', 'zyck']],
-        ['38f4b1a9-7d6e-4091-928e-c82d7d3717c5', 'qiwei', 'work', '294b584f-f34a-49f0-b4d3-08085a37bfd5',
-         '进出统计图表（创食人）', '创食人', ['qw2', 'zcb']]
-    ]
+    # noteinfolist = [
+        # ['d8fa0226-88ac-4b6c-b8fd-63a9038a6abf', 'huadianxiaolu', 'home', '08a01c35-d16d-4b22-b7f7-61e3993fd2cb',
+         # '家进出统计图表（岳家嘴）', '白晔峰家附近区域进出记录', ['60bf0', '60bf0_5g', '60bf0_plus']],
+        # ['1ea50564-dee7-4e82-87b5-39703671e623', 'dingziqiao', 'life', '6eef085c-0e84-4753-bf3e-b45473a12274',
+         # '进出统计图表（丁字桥）', '丁字桥', ['wx-sgkf', '大浪淘沙']],
+        # ['24aad619-2356-499e-9fa7-f685af3a81b1', 'maotanhuamushichang', 'work', '2d908c33-d0a2-4d42-8d4d-5a0bc9d2ff7e',
+         # '公司进出记录统计图表', '花木市场', ['zysm3100', 'zysm2100', 'zysm4100', 'zysm5100', 'zysm_friends', 'zyck']],
+        # ['38f4b1a9-7d6e-4091-928e-c82d7d3717c5', 'qiwei', 'work', '294b584f-f34a-49f0-b4d3-08085a37bfd5',
+         # '进出统计图表（创食人）', '创食人', ['qw2', 'zcb']]
+    # ]
 
-    jinchustattimer(60 * 32)
+    # jinchustattimer(60 * 32)
+    jinchustatdo()
 
     # dfjilu = jilugmail('Ifttt/SmsLog', 'smslog', 'all', bodyonly=False)
     # print(dfjilu[:200])
