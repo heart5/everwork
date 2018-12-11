@@ -12,10 +12,10 @@ from threading import Timer
 from bs4 import BeautifulSoup
 
 import pathmagic
-from func.first import dbpathworkplan
-# from func.pdtools import descdb
 
 with pathmagic.context():
+    from func.first import dbpathworkplan
+    from func.pdtools import descdb
     from func.logme import log
     from func.configpr import cfp, cfpworkplan, iniworkplanpath
     from func.mailsfunc import getmail
@@ -232,4 +232,5 @@ if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     # filegmailevernote2datacenter(60 * 53)
     fetchworkfile_from_gmail('')
-    print('Done')
+    fetchattendance_from_evernote()
+    log.info(f'文件{__file__}运行结束！')
