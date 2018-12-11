@@ -19,7 +19,7 @@ with pathmagic.context():
 
 @timethis
 @ift2phone()
-def log2notetimer(jiangemiao):
+def log2note():
     print(getdirmain())
     pathlog = getdirmain() / 'log'
     files = os.listdir(str(pathlog))
@@ -56,9 +56,13 @@ def log2notetimer(jiangemiao):
                          'everwork日志严重错误信息', loglinestr)
             cfp.set('evernote', 'everlogc', '%d' % len(loglines))
             cfp.write(open(cfppath, 'w', encoding='utf-8'))
-            log.info('新的log错误信息成功更新入笔记，将于%d秒后再次自动检查并更新' % jiangemiao)
+            log.info('新的log错误信息成功更新入笔记')
         except Exception as eeee:
             log.critical('处理新log错误信息到笔记时出现未名错误。%s' % (str(eeee)))
+
+
+def log2notetimer(jiangemiao):
+    log2note()
 
     global timer_log2note
     timer_log2note = Timer(jiangemiao, log2notetimer, [jiangemiao])
@@ -68,5 +72,5 @@ def log2notetimer(jiangemiao):
 if __name__ == '__main__':
     # global log
     print(f'运行文件\t{__file__}')
-    log2notetimer(60 * 37)
+    log2note()
     print('Done.')
