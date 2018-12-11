@@ -388,14 +388,7 @@ def isweatherupdate(weathertxtfilename):
         return False
 
 
-@timethis
-@ift2phone()
-def weatherstattimer(jiangemiao):
-    """
-    天气信息自动轮询并更新至笔记
-    :param jiangemiao:
-    :return:
-    """
+def weatherstatdo():
     weathertxtfilename = str(dirmainpath / 'data' / 'ifttt' / 'weather.txt')
     print(weathertxtfilename)
     try:
@@ -417,7 +410,7 @@ def weatherstattimer(jiangemiao):
         try:
             items = readfromweathertxt(weathertxtfilename)
             weatherstat(items, '296f57a3-c660-4dd5-885a-56492deb2cee')
-            log.info('天气信息成功更新入天气信息统计笔记，将于%d秒后再次自动检查并更新' % jiangemiao)
+            log.info('天气信息成功更新入天气信息统计笔记')
             cfplife.set('天气', '统计天数', '%d' % len(items))
             cfplife.set('天气', '笔记最新日期', '%s' % today)
             cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
@@ -430,6 +423,17 @@ def weatherstattimer(jiangemiao):
     else:
         log.info('时间的花儿静悄悄！')
 
+
+@timethis
+@ift2phone()
+def weatherstattimer(jiangemiao):
+    """
+    天气信息自动轮询并更新至笔记
+    :param jiangemiao:
+    :return:
+    """
+    weatherstatdo()
+
     global timer_weather
     timer_weather = Timer(jiangemiao, weatherstattimer, [jiangemiao])
     # print(timer_weather)
@@ -438,9 +442,10 @@ def weatherstattimer(jiangemiao):
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    weatherstattimer(60 * 60 + 60 * 28)
+    # weatherstattimer(60 * 60 + 60 * 28)
+    weatherstatdo()
     # weathertxtfilename = "data\\ifttt\\weather.txt"
     # usn = isweatherupdate(weathertxtfilename)
     # weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')
     # # print(getweatherfromgmail())
-    log.info('Done！')
+    log.info(f'文件\t{__file__}执行结束。Done！')
