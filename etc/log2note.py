@@ -38,8 +38,8 @@ def log2note():
     if len(loglines) == everlogc:  # <=调整为==，用来应对log文件崩溃重建的情况
         log.info('暂无新记录，不更新everworklog笔记。')
     else:
-        loglines = loglines[(-1 * loglimit):]
-        loglinestr = '\n'.join(loglines[::-1])
+        loglinesloglimit = loglines[(-1 * loglimit):]
+        loglinestr = '\n'.join(loglinesloglimit[::-1])
         loglinestr = loglinestr.replace('<', '《')
         loglinestr = loglinestr.replace('>', '》')
         loglinestr = loglinestr.replace('&', '并符')
