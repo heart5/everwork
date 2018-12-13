@@ -84,7 +84,7 @@ def get_notestore():
         # print("Is my Evernote API version up to date? ", str(version_ok))
         note_store = client.get_note_store()
         evernoteapijiayi()
-        log.critical(f'成功连接Evernote服务器！构建notestore：{note_store}')
+        log.info(f'成功连接Evernote服务器！构建notestore：{note_store}')
         return note_store
 
     return getnotestore()
