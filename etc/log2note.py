@@ -62,6 +62,7 @@ def log2note():
 
 
 def log2notetimer(jiangemiao):
+
     log2note()
 
     global timer_log2note
