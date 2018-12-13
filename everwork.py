@@ -15,7 +15,7 @@ with pathmagic.context():
     from life.notejinchujilu import jinchustattimer
     from life.peoplelog2note import peoplestattimer
     from work.fetchdata import filegmailevernote2datacenter
-    from work.notesaledetails import pinpaifenxi_timer
+    from work.notesaledetails import pinpaifenxi_timer, pinpaifenxido
     from work.dutyon import duty_timer
     from work.bankcard import financetimer
     from etc.zip2onedrive import zipdata2one_timer
@@ -33,13 +33,14 @@ log.debug('自动线程任务启动……')
 # filegmailevernote2datacenter(60 * 55)
 showorderstat2note(60 * 60 * 1 + 60 * 8)
 # log2notetimer(60 * 45)
-weatherstattimer(60 * 60 * 1 + 60 * 5)
-jinchustattimer(60 * 60)
+# weatherstattimer(60 * 60 * 1 + 60 * 5)
+# jinchustattimer(60 * 60)
 peoplestattimer(60 * 25)
-planfenxi(60 * 65 * 2)
+# planfenxi(60 * 65 * 2)
 # duty_timer(60 * 60 * 24)
 # financetimer(60 * 60 * 3 + 60 * 33)
-pinpaifenxi_timer(60 * 60 * 4)
+# pinpaifenxi_timer(60 * 60 * 4)
+pinpaifenxido()
 # zipdata2one_timer(60 * 60 * 12 + 60 * 35)
 
 # print(vars())
