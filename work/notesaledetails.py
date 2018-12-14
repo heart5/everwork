@@ -227,6 +227,7 @@ def pinpaifenxido():
 
 
 def pinpaifenxi_timer(jiangemiao):
+
     pinpaifenxido()
 
     global timer_pinpai2note
