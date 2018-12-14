@@ -29,9 +29,9 @@ def touchfilepath2depth(filepath: Path):
 def getdirmain():
     fdmodir = fdmo.__file__
     dirmainin = os.path.split(fdmodir)[0]
-    dirmainin = os.path.split(dirmainin)[0]
+    dirmaininoutput = os.path.split(dirmainin)[0]
 
-    return Path(dirmainin)
+    return Path(dirmaininoutput)
 
 
 dirmainpath = getdirmain()
