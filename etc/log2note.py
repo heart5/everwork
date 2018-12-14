@@ -76,9 +76,9 @@ def log2note():
                          f'everwork{levelstr4title}日志信息', loglinestr)
             cfp.set(namestr, 'everlogc', f'{len(loglines)}')
             cfp.write(open(cfppath, 'w', encoding='utf-8'))
-            log.info('新的log错误信息成功更新入笔记')
+            log.info(f'新的log{levelstr4title}信息成功更新入笔记')
         except Exception as eeee:
-            log.critical('处理新log错误信息到笔记时出现未名错误。%s' % (str(eeee)))
+            log.critical(f'处理新的log{levelstr4title}信息到笔记时出现未名错误。{eeee}')
 
 
 def log2notetimer(jiangemiao):
