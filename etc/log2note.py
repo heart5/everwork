@@ -20,6 +20,21 @@ with pathmagic.context():
 @timethis
 @ift2phone()
 def log2note():
+    namestr = 'everlog'
+    cfp, cfppath = getcfp(namestr)
+    if not cfp.has_section(namestr):
+        cfp.add_section(namestr)
+        cfp.write(open(cfppath, 'w', encoding='utf-8'))
+    if cfp.has_option(namestr, 'critical') and (cfp.getboolean(namestr, 'critical') == True):
+        levelstr = 'CRITICAL'
+    else:
+        levelstr = ''
+
+    if levelstr == 'CRITICAL':
+        levelstr4title = '严重错误'
+    else:
+        levelstr4title = ''
+
     print(getdirmain())
     pathlog = getdirmain() / 'log'
     files = os.listdir(str(pathlog))
@@ -27,16 +42,21 @@ def log2note():
     for fname in files[::-1]:
         with open(pathlog / fname, 'r', encoding='utf-8') as flog:
             loglines = loglines + [line.strip()
-                                   for line in flog if line.find('CRITICAL') >= 0]
+                                   for line in flog if line.find(levelstr) >= 0]
 
-    loglimit = 500
-    print(f'严重的日志共有{len(loglines)}条记录，只取最新的{loglimit}条')
+    if cfp.has_option(namestr, 'loglimit'):
+        loglimit = cfp.getint(namestr, 'loglimit')
+    else:
+        loglimit = 500
+    log.info(f'日志的{levelstr4title}记录共有{len(loglines)}条，只取时间最近的{loglimit}条')
     # print()
     # global cfp, inifilepath
-    cfp, cfppath = getcfp('everwork')
-    everlogc = cfp.getint('evernote', 'everlogc')
+    if cfp.has_option(namestr, 'everlogc'):
+        everlogc = cfp.getint(namestr, 'everlogc')
+    else:
+        everlogc = 0
     if len(loglines) == everlogc:  # <=调整为==，用来应对log文件崩溃重建的情况
-        log.info('暂无新记录，不更新everworklog笔记。')
+        log.info(f'暂无新{levelstr4title}记录，不更新everworklog笔记。')
     else:
         loglinesloglimit = loglines[(-1 * loglimit):]
         loglinestr = '\n'.join(loglinesloglimit[::-1])
@@ -53,8 +73,8 @@ def log2note():
         try:
             nstore = get_notestore()
             imglist2note(nstore, [], noteguid_lognote,
-                         'everwork日志严重错误信息', loglinestr)
-            cfp.set('evernote', 'everlogc', '%d' % len(loglines))
+                         f'everwork{levelstr4title}日志信息', loglinestr)
+            cfp.set(namestr, 'everlogc', f'{len(loglines)}')
             cfp.write(open(cfppath, 'w', encoding='utf-8'))
             log.info('新的log错误信息成功更新入笔记')
         except Exception as eeee:
@@ -71,7 +91,6 @@ def log2notetimer(jiangemiao):
 
 
 if __name__ == '__main__':
-    # global log
-    print(f'运行文件\t{__file__}')
+    log.info(f'开始运行文件\t{__file__}')
     log2note()
-    print('Done.')
+    log.info(f'Done.结束执行文件\t{__file__}')
