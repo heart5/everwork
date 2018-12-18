@@ -7,18 +7,18 @@
 import pathmagic
 
 with pathmagic.context():
-    from life.noteweather import weatherstattimer  # 调用同目录下其他文件（py）中的函数
-    from etc.log2note import log2notetimer
-    from work.order import showorderstat2note
-    from work.workplan import planfenxi
+    # from life.noteweather import weatherstattimer  # 调用同目录下其他文件（py）中的函数
+    # from etc.log2note import log2notetimer
+    # from work.order import showorderstat2note
+    # from work.workplan import planfenxi
     # from func.pdtools import dataokay
-    from life.notejinchujilu import jinchustattimer
-    from life.peoplelog2note import peoplestattimer
-    from work.fetchdata import filegmailevernote2datacenter
-    from work.notesaledetails import pinpaifenxi_timer, pinpaifenxido
-    from work.dutyon import duty_timer
-    from work.bankcard import financetimer
-    from etc.zip2onedrive import zipdata2one_timer
+    # from life.notejinchujilu import jinchustattimer
+    # from life.peoplelog2note import peoplestattimer
+    # from work.fetchdata import filegmailevernote2datacenter
+    from work.notesaledetails import pinpaifenxido
+    # from work.dutyon import duty_timer
+    # from work.bankcard import financetimer
+    # from etc.zip2onedrive import zipdata2one_timer
     # from func.evernt import get_notestore
     # from func.first import dbpathquandan
     from func.logme import log
