@@ -222,7 +222,7 @@ def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
 def pinpaifenxido():
     cnx = lite.connect(dbpathquandan)
     dataokay(cnx)
-    pinpaifenxi(cnx, daysbefore=30, brandnum=20)
+    pinpaifenxi(cnx, daysbefore=5, brandnum=10)
     cnx.close()
 
 
