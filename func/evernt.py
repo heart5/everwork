@@ -310,8 +310,8 @@ def getapitimesfromlog():
     """
     # global dirlog, log
     df = pd.read_csv(dirlog, sep='\t',  # index_col= False,
-                     header=None, usecols=[0, 1, 2, 3, 4],
-                     names=['asctime', 'name', 'filenamefuncName', 'threadNamethreadprocess', 'levelnamemessage'],
+                     header=None, usecols=[0, 1, 2],
+                     names=['asctime', 'filenamefuncName', 'levelnamemessage'],
                      na_filter=True, parse_dates=[0],
                      skip_blank_lines=True, skipinitialspace=True)
     # print(df.describe())
