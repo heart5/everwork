@@ -1,6 +1,7 @@
 # encoding:utf-8
 
 import sys
+import calendar as cal
 
 sys.path.insert(0, 'work')
 sys.path.insert(0, 'life')

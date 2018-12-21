@@ -10,6 +10,7 @@ import re
 import time
 import numpy as np
 import pandas as pd
+from bs4 import BeautifulSoup
 from evernote.api.client import EvernoteClient
 from evernote.edam.error.ttypes import EDAMNotFoundException, EDAMSystemException, EDAMUserException, EDAMErrorCode
 from evernote.edam.notestore.NoteStore import NoteFilter, NotesMetadataResultSpec
@@ -65,7 +66,7 @@ def get_notestore():
 
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
-    @trycounttimes2('evernote服务器', maxtimes = 60, maxsecs = 60)
+    @trycounttimes2('evernote服务器', maxtimes=60, maxsecs=60)
     def getnotestore():
         global note_store
         if note_store is not None:
@@ -323,7 +324,7 @@ def getapitimesfromlog():
     if dfapi2.shape[0] == 0:
         log.info('日志文件中还没有API的调用记录')
         return False
-    dfapi2['asctime'] = dfapi2['asctime'].apply(lambda x : pd.to_datetime(x))
+    dfapi2['asctime'] = dfapi2['asctime'].apply(lambda x: pd.to_datetime(x))
     dfapi2['counts'] = dfapi2['levelnamemessage'].apply(lambda x: int(re.findall('(?P<counts>\d+)', x)[0]))
     # del dfapi2['levelnamemessage']
     # print(dfapi2.tail())
@@ -382,7 +383,7 @@ def evernoteapijiayi():
         nexthour = now + datetime.timedelta(hours=1)
         # zhengdian = pd.to_datetime(
         #     '%04d-%02d-%02d %02d:00:00' % (nexthour.year, nexthour.month, nexthour.day, nexthour.hour))
-        zhengdian = nexthour.replace(minute=0, second=0,microsecond=0)
+        zhengdian = nexthour.replace(minute=0, second=0, microsecond=0)
         secondsaferzhengdian = np.random.randint(0, 50)
         sleep_seconds = (zhengdian - now).seconds + secondsaferzhengdian
         starttimeafterzhengdian = pd.to_datetime(zhengdian + datetime.timedelta(seconds=secondsaferzhengdian))
@@ -399,6 +400,94 @@ def evernoteapijiayi():
             log.info(f'构建新的evernote服务器连接：{note_store}')
             ENtimes = 0
             writeini()
+
+
+# @use_logging()
+def p_notebookattributeundertoken(notebook):
+    """
+    测试笔记本（notebook）数据结构每个属性的返回值,开发口令（token）的方式调用返回如下
+    :param notebook:
+    :return:
+    """
+    print('名称：' + notebook.name, end='\t')  # phone
+    print('guid：' + notebook.guid, end='\t')  # f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
+    print('更新序列号：' + str(notebook.updateSequenceNum), end='\t')  # 8285
+    print('默认笔记本：' + str(notebook.defaultNotebook), end='\t')  # False
+    print('创建时间：' + timestamp2str(int(notebook.serviceCreated / 1000)), end='\t')  # 2010-09-15 11:37:43
+    print('更新时间：' + timestamp2str(int(notebook.serviceUpdated / 1000)), end='\t')  # 2016-08-29 19:38:24
+    # print '发布中\t', notebook.publishing  #这种权限的调用返回None
+    # print '发布过\t', notebook.published  #这种权限的调用返回None
+    print('笔记本组：' + str(notebook.stack))  # 手机平板
+    # print '共享笔记本id\t', notebook.sharedNotebookIds  #这种权限的调用返回None
+    # print '共享笔记本\t', notebook.sharedNotebooks  #这种权限的调用返回None
+    # print '商务笔记本\t', notebook.businessNotebook  #这种权限的调用返回None
+    # print '联系人\t', notebook.contact  #这种权限的调用返回None
+    # print '限定\t', notebook.restrictions  #NotebookRestrictions(noSetDefaultNotebook=None,
+    # noPublishToBusinessLibrary=True, noCreateTags=None, noUpdateNotes=None,
+    # expungeWhichSharedNotebookRestrictions=None,
+    # noExpungeTags=None, noSetNotebookStack=None, noCreateSharedNotebooks=None, noExpungeNotebook=None,
+    # noUpdateTags=None, noPublishToPublic=None, noUpdateNotebook=None, updateWhichSharedNotebookRestrictions=None,
+    # noSetParentTag=None, noCreateNotes=None, noEmailNotes=True, noReadNotes=None, noExpungeNotes=None,
+    # noShareNotes=None, noSendMessageToRecipients=None)
+    # print '接受人设定\t', notebook.recipientSettings  #这种权限的调用没有返回这个值，报错
+
+
+def p_noteattributeundertoken(note):
+    """
+    测试笔记（note）数据结构每个属性的返回值,通过findNotesMetadata函数获取，开发口令（token）的方式调用返回如下:
+    :param note:
+    :return:
+    """
+    print('guid\t%s' % note.guid)  #
+    print('标题\t%s' % note.title)  #
+    print('内容长度\t%d' % note.contentLength)  # 762
+    print('内容\t' + note.content)  # 这种权限的调用没有返回这个值，报错；NoteStore.getNoteContent()也无法解析
+    print('内容哈希值\t%s' % note.contentHash)  # 8285
+    print('创建时间\t%s' % timestamp2str(int(note.created / 1000)))  # 2017-09-04 22:39:51
+    print('更新时间\t%s' % timestamp2str(int(note.updated / 1000)))  # 2017-09-07 06:38:47
+    print('删除时间\t%s' % note.deleted)  # 这种权限的调用返回None
+    print('活跃\t%s' % note.active)  # True
+    print('更新序列号\t%d' % note.updateSequenceNum)  # 173514
+    print('所在笔记本的guid\t%s' % note.notebookGuid)  # 2c8e97b5-421f-461c-8e35-0f0b1a33e91c
+    print('标签的guid表\t%s' % note.tagGuids)  # 这种权限的调用返回None
+    print('资源表\t%s' % note.resources)  # 这种权限的调用返回None
+    print('属性\t%s' % note.attributes)
+    # NoteAttributes(lastEditorId=139947593, placeName=None, sourceURL=None, classifications=None,
+    # creatorId=139947593, author=None, reminderTime=None, altitude=0.0, reminderOrder=None, shareDate=None,
+    # reminderDoneTime=None, longitude=114.293, lastEditedBy='\xe5\x91\xa8\xe8\x8e\x89 <305664756@qq.com>',
+    # source='mobile.android', applicationData=None, sourceApplication=None, latitude=30.4722, contentClass=None,
+    # subjectDate=None)
+    print('标签名称表\t%s' % note.tagNames)  # 这种权限的调用返回None
+    # print ('共享的笔记表\t%s' % note.sharedNotes)
+    # 这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'sharedNotes'
+    # print ('限定\t%s' % note.restrictions)
+    # 这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'restrictions'
+    # print ('范围\t%s' % note.limits) #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'limits'
+
+
+def findnotebookfromevernote():
+    # 列出账户中的全部笔记本
+    global note_store
+    note_store = get_notestore()
+    notebooks = note_store.listNotebooks()
+    # p_notebookattributeundertoken(notebooks[-1])
+
+    for x in notebooks:
+        p_notebookattributeundertoken(x)
+
+
+def readinifromnote():
+    noteguid_inifromnote = 'e0565861-db9e-4efd-be00-cbce06d0cf98'
+    global note_store
+    note_store = get_notestore()
+    soup = BeautifulSoup(note_store.getNoteContent(
+        noteguid_inifromnote), "html.parser")
+    print(soup)
+    print(soup.get_text())
+
+
+def writeini2note():
+    pass
 
 
 # print('我是evernt啊')
@@ -427,5 +516,9 @@ if __name__ == '__main__':
     print(f'开始测试文件\t{__file__}')
     nost = get_notestore()
     print(nost)
-    writeini()
+    readinifromnote()
+    # writeini()
+    # findnotebookfromevernote()
+    # notefind = findnotefromnotebook(token, '18d654a1-db4a-4434-a676-ea443aadc809', '配置')
+    # print(notefind)
     print('Done.')
