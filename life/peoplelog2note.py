@@ -223,8 +223,7 @@ def callsms2df(itemstr):
         log.critical('更新人脉记录笔记时出现错误。%s' % str(eee))
     return dfout
 
-
-def peoplestattimer(jiangemiao):
+def peoplestatdo():
     strjilunotifi = jilugmail('Ifttt/Notification', 'notification', 'all')
     if strjilunotifi:
         # dfnoti = notification2df(strjilunotifi)
@@ -236,13 +235,17 @@ def peoplestattimer(jiangemiao):
         # dfcs = callsms2df(strjilucallsms)
         callsms2df(strjilucallsms)
 
+
+def peoplestattimer(jiangemiao):
+    peoplestatdo()
+
     global timer_jinchu
     timer_jinchu = Timer(jiangemiao, peoplestattimer, [jiangemiao])
     timer_jinchu.start()
 
 
 if __name__ == '__main__':
-    peoplestattimer(60 * 25)
+    peoplestatdo()
 
     # rn = '\r\n'
     # print(len(rn))
