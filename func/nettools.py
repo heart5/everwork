@@ -10,6 +10,7 @@ import platform
 import os
 import re
 # from requests.packages.urllib3 import HTTPConnectionPool
+from evernote.edam.error.ttypes import EDAMSystemException
 from requests.packages.urllib3.exceptions import NewConnectionError
 import requests
 from bs4 import BeautifulSoup
@@ -92,7 +93,8 @@ def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务�
                     log.critical(f'连接失败。{eee.errno}\t{eee}')
             else:
                 log.critical(f'连接失败。{eee}')
-            log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
+            log.critical(
+                f"第{i+1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
             # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
             if i == (trytimes - 1):
                 log.critical(f'“{servname}”连接失败，只好无功而返。')
@@ -100,7 +102,7 @@ def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务�
             time.sleep(sleeptime)
 
 
-def trycounttimes2(servname='服务器', maxtimes=3, maxsecs=15):
+def trycounttimes2(servname='服务器', maxtimes=5, maxsecs=30):
     def decorate(jutifunc):
 
         @wraps(jutifunc)
@@ -111,8 +113,12 @@ def trycounttimes2(servname='服务器', maxtimes=3, maxsecs=15):
                 try:
                     result = jutifunc(*args, **kwargs)
                     return result
-                except (OSError, ConnectionRefusedError, ConnectionResetError,
-                        NewConnectionError, ConnectionError, struct.error, ssl.SSLError) as eee:
+                except (
+                        OSError, ConnectionRefusedError, ConnectionResetError,
+                        NewConnectionError, ConnectionError, struct.error,
+                        ssl.SSLError, EDAMSystemException
+                ) as eee:
+
                     if hasattr(eee, 'errno'):
                         if eee.errno == 11001:
                             log.critical(f'寻址失败，貌似网络不通。{eee}')
@@ -126,11 +132,14 @@ def trycounttimes2(servname='服务器', maxtimes=3, maxsecs=15):
                             log.critical(f'主机发脾气，强行断线了。{eee}')
                         elif eee.errno == 8:
                             log.critical(f'和{servname}握手失败。{eee}')
+                        elif eee.errno == 4:
+                            log.critical(f'和{servname}连接异常，被中断。{eee}')
                         else:
                             log.critical(f'连接失败。{eee.errno}\t{eee}')
                     else:
                         log.critical(f'连接失败。{eee}')
-                    log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
+                    log.critical(
+                        f"第{i+1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接服务器时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
                     if i == (trytimes - 1):
@@ -157,7 +166,6 @@ if __name__ == '__main__':
         r = requests.get(addressin)
         html = r.content
         return html
-
 
     # html2 = trycounttimes2(fetchfromnet, '', True, 'xmu.edu.cn网站服务器')
     address = 'http://www.wise.xmu.edu.cn/people/faculty'
