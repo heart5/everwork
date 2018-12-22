@@ -12,7 +12,7 @@ import pathmagic
 with pathmagic.context():
     from func.first import getdirmain
     from func.configpr import getcfp
-    from func.evernt import get_notestore, imglist2note
+    from func.evernt import get_notestore, imglist2note, readinifromnote
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
 
@@ -20,12 +20,14 @@ with pathmagic.context():
 @timethis
 @ift2phone()
 def log2note():
+    readinifromnote()
     namestr = 'everlog'
     cfp, cfppath = getcfp(namestr)
+    cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
     if not cfp.has_section(namestr):
         cfp.add_section(namestr)
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
-    if cfp.has_option(namestr, 'critical') and (cfp.getboolean(namestr, 'critical') == True):
+    if cfpfromnote.has_option(namestr, 'critical') and (cfpfromnote.getboolean(namestr, 'critical') == True):
         levelstr = 'CRITICAL'
     else:
         levelstr = ''
@@ -44,8 +46,8 @@ def log2note():
             loglines = loglines + [line.strip()
                                    for line in flog if line.find(levelstr) >= 0]
 
-    if cfp.has_option(namestr, 'loglimit'):
-        loglimit = cfp.getint(namestr, 'loglimit')
+    if cfpfromnote.has_option(namestr, 'loglimit'):
+        loglimit = cfpfromnote.getint(namestr, 'loglimit')
     else:
         loglimit = 500
     log.info(f'日志的{levelstr4title}记录共有{len(loglines)}条，只取时间最近的{loglimit}条')
