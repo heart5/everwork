@@ -8,6 +8,7 @@ import hashlib
 import os
 import re
 import time
+# import nltk
 import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -21,7 +22,7 @@ import pathmagic
 
 with pathmagic.context():
     from func.configpr import cfp, inifilepath
-    from func.first import dirlog
+    from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.nettools import trycounttimes2
 
@@ -66,7 +67,7 @@ def get_notestore():
 
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
-    @trycounttimes2('evernote服务器', maxtimes=60, maxsecs=60)
+    @trycounttimes2('evernote服务器', maxtimes=10, maxsecs=30)
     def getnotestore():
         global note_store
         if note_store is not None:
@@ -158,7 +159,8 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
                 # print (str1)
                 str1 = str1[2:-1]  # cd34b4b6c8d9279217b03c396ca913df
                 # print (str1)
-                nbody += "<en-media type=\"%s\" hash=\"%s\" align=\"center\" /><br />" % (resource.mime, str1)
+                nbody += "<en-media type=\"%s\" hash=\"%s\" align=\"center\" /><br />" % (
+                    resource.mime, str1)
     nbody += neirong
     nbody += "</en-note>"
 
@@ -172,7 +174,8 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     def updatenote(notesrc):
         updated_note = get_notestore().updateNote(notesrc)
         evernoteapijiayi()
-        log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
+        log.info('成功更新了笔记《%s》，guid：%s。' %
+                 (updated_note.title, updated_note.guid))
 
     updatenote(note)
     # trytimes = 3
@@ -200,7 +203,8 @@ def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True):
     pd.set_option('max_colwidth', 200)
     df = pd.DataFrame(dataframe)
     outstr = df.to_html(justify='center', index=withindex).replace('class="dataframe">', 'align="center">'). \
-        replace('<table', '\n<h3 align="center">%s</h3>\n<table' % tabeltitle).replace('<th></th>', '<th>&nbsp;</th>')
+        replace('<table', '\n<h3 align="center">%s</h3>\n<table' %
+                tabeltitle).replace('<th></th>', '<th>&nbsp;</th>')
     # print(outstr)
     return outstr
 
@@ -227,7 +231,8 @@ def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000)
 
     @trycounttimes2('evernote服务器')
     def findnote():
-        notelist = note_store.findNotesMetadata(tokenfnfn, notefilter, 0, notecount, notemetaspec)
+        notelist = note_store.findNotesMetadata(
+            tokenfnfn, notefilter, 0, notecount, notemetaspec)
         evernoteapijiayi()
         return notelist
 
@@ -281,7 +286,8 @@ def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲�
     try:
         note = notestore.createNote(tokenmn, ournote)
         evernoteapijiayi()
-        log.info('笔记《' + notetitle + '》在笔记本《' + parentnotebook.name + '》中创建成功。')
+        log.info('笔记《' + notetitle + '》在笔记本《' +
+                 parentnotebook.name + '》中创建成功。')
         return note
     except EDAMUserException as usere:
         # Something was wrong with the note data
@@ -318,14 +324,16 @@ def getapitimesfromlog():
     # print(df.describe())
     # print(df.shape[0])
     # dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API')][['asctime', 'levelnamemessage']]
-    dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API').values == True][['asctime', 'levelnamemessage']]
+    dfapi2 = df[df.levelnamemessage.str.contains('动用了Evernote API').values == True][[
+        'asctime', 'levelnamemessage']]
     # print(dfapi2.shape[0])
     # print(dfapi2.head(50))
     if dfapi2.shape[0] == 0:
         log.info('日志文件中还没有API的调用记录')
         return False
     dfapi2['asctime'] = dfapi2['asctime'].apply(lambda x: pd.to_datetime(x))
-    dfapi2['counts'] = dfapi2['levelnamemessage'].apply(lambda x: int(re.findall('(?P<counts>\d+)', x)[0]))
+    dfapi2['counts'] = dfapi2['levelnamemessage'].apply(
+        lambda x: int(re.findall('(?P<counts>\d+)', x)[0]))
     # del dfapi2['levelnamemessage']
     # print(dfapi2.tail())
     jj = dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['counts'].iloc[-1]
@@ -346,9 +354,11 @@ def writeini():
     # print(ENtimes)
     # print(str(datetime.datetime.now()))
     cfp.set('evernote', 'apicount', '%d' % ENtimes)
-    cfp.set('evernote', 'apilasttime', '%s' % datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    cfp.set('evernote', 'apilasttime', '%s' %
+            datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     cfp.write(open(inifilepath, 'w', encoding='utf-8'))
-    log.info('Evernote API调用次数：%d，写入配置文件%s' % (ENtimes, os.path.split(inifilepath)[1]))
+    log.info('Evernote API调用次数：%d，写入配置文件%s' %
+             (ENtimes, os.path.split(inifilepath)[1]))
 
 
 def evernoteapiclearatzero():
@@ -386,7 +396,8 @@ def evernoteapijiayi():
         zhengdian = nexthour.replace(minute=0, second=0, microsecond=0)
         secondsaferzhengdian = np.random.randint(0, 50)
         sleep_seconds = (zhengdian - now).seconds + secondsaferzhengdian
-        starttimeafterzhengdian = pd.to_datetime(zhengdian + datetime.timedelta(seconds=secondsaferzhengdian))
+        starttimeafterzhengdian = pd.to_datetime(
+            zhengdian + datetime.timedelta(seconds=secondsaferzhengdian))
         print(f'{sleep_seconds}\t{starttimeafterzhengdian}')
         # note_store = None
         log.info(f'Evernote API{note_store} 调用已达{ENtimes:d}次，'
@@ -410,11 +421,14 @@ def p_notebookattributeundertoken(notebook):
     :return:
     """
     print('名称：' + notebook.name, end='\t')  # phone
-    print('guid：' + notebook.guid, end='\t')  # f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
+    # f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
+    print('guid：' + notebook.guid, end='\t')
     print('更新序列号：' + str(notebook.updateSequenceNum), end='\t')  # 8285
     print('默认笔记本：' + str(notebook.defaultNotebook), end='\t')  # False
-    print('创建时间：' + timestamp2str(int(notebook.serviceCreated / 1000)), end='\t')  # 2010-09-15 11:37:43
-    print('更新时间：' + timestamp2str(int(notebook.serviceUpdated / 1000)), end='\t')  # 2016-08-29 19:38:24
+    print('创建时间：' + timestamp2str(int(notebook.serviceCreated / 1000)),
+          end='\t')  # 2010-09-15 11:37:43
+    print('更新时间：' + timestamp2str(int(notebook.serviceUpdated / 1000)),
+          end='\t')  # 2016-08-29 19:38:24
     # print '发布中\t', notebook.publishing  #这种权限的调用返回None
     # print '发布过\t', notebook.published  #这种权限的调用返回None
     print('笔记本组：' + str(notebook.stack))  # 手机平板
@@ -441,14 +455,18 @@ def p_noteattributeundertoken(note):
     print('guid\t%s' % note.guid)  #
     print('标题\t%s' % note.title)  #
     print('内容长度\t%d' % note.contentLength)  # 762
-    print('内容\t' + note.content)  # 这种权限的调用没有返回这个值，报错；NoteStore.getNoteContent()也无法解析
+    # 这种权限的调用没有返回这个值，报错；NoteStore.getNoteContent()也无法解析
+    print('内容\t' + note.content)
     print('内容哈希值\t%s' % note.contentHash)  # 8285
-    print('创建时间\t%s' % timestamp2str(int(note.created / 1000)))  # 2017-09-04 22:39:51
-    print('更新时间\t%s' % timestamp2str(int(note.updated / 1000)))  # 2017-09-07 06:38:47
+    # 2017-09-04 22:39:51
+    print('创建时间\t%s' % timestamp2str(int(note.created / 1000)))
+    # 2017-09-07 06:38:47
+    print('更新时间\t%s' % timestamp2str(int(note.updated / 1000)))
     print('删除时间\t%s' % note.deleted)  # 这种权限的调用返回None
     print('活跃\t%s' % note.active)  # True
     print('更新序列号\t%d' % note.updateSequenceNum)  # 173514
-    print('所在笔记本的guid\t%s' % note.notebookGuid)  # 2c8e97b5-421f-461c-8e35-0f0b1a33e91c
+    # 2c8e97b5-421f-461c-8e35-0f0b1a33e91c
+    print('所在笔记本的guid\t%s' % note.notebookGuid)
     print('标签的guid表\t%s' % note.tagGuids)  # 这种权限的调用返回None
     print('资源表\t%s' % note.resources)  # 这种权限的调用返回None
     print('属性\t%s' % note.attributes)
@@ -482,8 +500,16 @@ def readinifromnote():
     note_store = get_notestore()
     soup = BeautifulSoup(note_store.getNoteContent(
         noteguid_inifromnote), "html.parser")
-    print(soup)
-    print(soup.get_text())
+    # print(soup)
+    ptn = u'<div>(.*?)</div>'
+    # ptn = u'<div>'
+    items = re.findall(ptn, str(soup))
+    print(items)
+    fileobj = open(str(dirmainpath / 'data' / 'everinifromnote.ini'), 'w',
+                   encoding='utf-8')
+    for item in items:
+        fileobj.write(item + '\n')
+    fileobj.close()
 
 
 def writeini2note():
@@ -505,7 +531,8 @@ if apitime:
         diff = ENAPIlasttime - apitime[0]
     # print(diff.seconds)
     if diff.seconds > 60:
-        log.info('程序上次异常退出，调用log中的API数据[%s,%d]' % (str(apitime[0]), apitime[1]))
+        log.info('程序上次异常退出，调用log中的API数据[%s,%d]' %
+                 (str(apitime[0]), apitime[1]))
         ENAPIlasttime = apitime[0]
         ENtimes = apitime[1] + 1
 evernoteapiclearatzero()
