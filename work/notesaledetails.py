@@ -11,8 +11,8 @@ from threading import Timer
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfpdata, inidatanotefilepath
-    from func.evernt import imglist2note, get_notestore, token
+    from func.configpr import cfpdata, inidatanotefilepath, getcfp
+    from func.evernt import imglist2note, get_notestore, token, readinifromnote
     from func.first import dbpathquandan, dbpathdingdanmingxi
     from func.pdtools import dataokay, dfin2imglist, updatesection, readinisection2df
     from func.wrapfuncs import timethis
@@ -222,7 +222,14 @@ def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
 def pinpaifenxido():
     cnx = lite.connect(dbpathquandan)
     dataokay(cnx)
-    pinpaifenxi(cnx, daysbefore=5, brandnum=4)
+    readinifromnote()
+    namestr = 'brand'
+    cfpininote, cfpininotepath = getcfp('everinifromnote')
+    if cfpininote.has_option(namestr, 'brandcount'):
+        brandcount = cfpininote.getint(namestr, 'brandcount')
+    else:
+        brandcount = 5
+    pinpaifenxi(cnx, daysbefore=5, brandnum=brandcount)
     cnx.close()
 
 
