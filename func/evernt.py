@@ -503,7 +503,9 @@ def readinifromnote():
     # print(soup)
     ptn = u'<div>(.*?)</div>'
     # ptn = u'<div>'
-    items = re.findall(ptn, str(soup))
+    itemsource = re.findall(ptn, str(soup))
+    print(itemsource)
+    items = [x for x in itemsource if not re.search('<.*?>', x)]
     print(items)
     fileobj = open(str(dirmainpath / 'data' / 'everinifromnote.ini'), 'w',
                    encoding='utf-8')
