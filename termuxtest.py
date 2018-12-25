@@ -19,18 +19,14 @@
 #     version: 3.6.6
 # ---
 
+import pathmagic
 import sys
 sys.path.append('termux_python')
-import pathmagic
 with pathmagic.context():
     import termux_python.termux as tm
 
 # print('开工啊')
-# print(sys.path)
+print(sys.path)
 print(tm.battery_status())
 print(tm.camera_info())
 # tm.termux_sms_list()
-
-
-
-
