@@ -21,7 +21,7 @@ from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_M
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfp, inifilepath
+    from func.configpr import cfp, inifilepath, getcfp
     from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.nettools import trycounttimes2
@@ -370,7 +370,9 @@ def evernoteapiclearatzero():
     global ENAPIlasttime, ENtimes
     apilasttimehouzhengdian = pd.to_datetime(
         (ENAPIlasttime + datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:00:00'))
+    print(apilasttimehouzhengdian)
     now = datetime.datetime.now()
+    print(now)
     if now > apilasttimehouzhengdian:
         ENAPIlasttime = now
         # time.sleep(60)
@@ -495,7 +497,9 @@ def findnotebookfromevernote():
 
 
 def readinifromnote():
-    noteguid_inifromnote = 'e0565861-db9e-4efd-be00-cbce06d0cf98'
+    cfpeverwork, cfpeverworkpath = getcfp('everwork')
+    noteguid_inifromnote = cfpeverwork.get('evernote', 'ininoteguid')
+    # noteguid_inifromnote = 'e0565861-db9e-4efd-be00-cbce06d0cf98'
     global note_store
     note_store = get_notestore()
     soup = BeautifulSoup(note_store.getNoteContent(
@@ -548,6 +552,7 @@ if __name__ == '__main__':
     readinifromnote()
     # writeini()
     # findnotebookfromevernote()
-    # notefind = findnotefromnotebook(token, '18d654a1-db4a-4434-a676-ea443aadc809', '配置')
+    # notefind = findnotefromnotebook(
+        # token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', '日志')
     # print(notefind)
     print('Done.')
