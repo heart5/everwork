@@ -37,7 +37,7 @@ with pathmagic.context():
     from func.logme import log
     from func.first import dirmainpath, dbpathworkplan, dbpathquandan, dbpathdingdanmingxi
     from func.pdtools import dftotal2top, dfin2imglist
-    from work.orderdetails import jiaoyanchanpinkehu
+    # from work.orderdetails import jiaoyanchanpinkehu
 
 
 def fixerrodata4db():
@@ -590,7 +590,7 @@ def showorderstat():
 def showorderstat2note(jiangemiao):
     try:
         showorderstat()
-        jiaoyanchanpinkehu()
+        # jiaoyanchanpinkehu()
     except NameError as nee:
         log.critical(f'处理订单核对统计笔记时出现错误。{nee}')
 
