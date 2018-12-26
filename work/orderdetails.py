@@ -29,12 +29,15 @@ with pathmagic.context():
     from func.first import dirmainpath, dbpathquandan, dbpathdingdanmingxi
     # from func.pdtools import dftotal2top, dataokay
     from func.pdtools import dataokay
+    from work.notesaledetails import pinpaifenxido
 
 
 def chulixls_orderdetails(orderfile: Path):
     try:
-        content = xlrd.open_workbook(filename=orderfile, encoding_override='gb18030')
-        df = pd.read_excel(content, index_col=0, parse_dates=True, engine='xlrd')
+        content = xlrd.open_workbook(
+            filename=orderfile, encoding_override='gb18030')
+        df = pd.read_excel(content, index_col=0,
+                           parse_dates=True, engine='xlrd')
         log.info(f'读取{orderfile}')
         # print(list(df.columns))
     except UnicodeDecodeError as ude:
@@ -42,7 +45,8 @@ def chulixls_orderdetails(orderfile: Path):
         return
     # ['日期', '单据编号', '摘要', '单位全名', '仓库全名', '商品编号', '商品全名', '规格', '型号', '产地', '单位', '数量', '单价', '金额', '数量1', '单价1',
     # '金额1', '数量2', '单价2', '金额2']
-    totalin = ['%.2f' % df.loc[df.index.max()]['数量'], '%.2f' % df.loc[df.index.max()]['金额']]  # 从最后一行获取数量合计和金额合计，以备比较
+    totalin = ['%.2f' % df.loc[df.index.max()]['数量'], '%.2f' %
+               df.loc[df.index.max()]['金额']]  # 从最后一行获取数量合计和金额合计，以备比较
     print(df['日期'].iloc[1], end='\t')
     print(totalin, end='\t')
     # df[xiangmu[0]] = None
@@ -95,8 +99,10 @@ def chulidataindir_orderdetails(pathorder: Path):
     tablexists = pd.read_sql_query(sqlstr, cnxp).iloc[0, 0] > 0
     if tablexists:
         # dfresult = pd.DataFrame()
-        dfresult = pd.read_sql('select * from \'%s\'' % tablename_order, cnxp, parse_dates=['日期'])
-        log.info('%s数据表%s已存在， 从中读取%d条数据记录。' % (notestr, tablename_order, dfresult.shape[0]))
+        dfresult = pd.read_sql('select * from \'%s\'' %
+                               tablename_order, cnxp, parse_dates=['日期'])
+        log.info('%s数据表%s已存在， 从中读取%d条数据记录。' %
+                 (notestr, tablename_order, dfresult.shape[0]))
     else:
         log.info('%s数据表%s不存在，将创建之。' % (notestr, tablename_order))
         dfresult = pd.DataFrame()
@@ -141,19 +147,20 @@ def chulidataindir_orderdetails(pathorder: Path):
         cfpzysm.set(notestr, '记录数', '%d' % dfttt.shape[0])
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
         log.info('增加有效%s数据%d条。' % (notestr, dfttt.shape[0] - jilucont))
+        hasnewrecords = True
     else:
-        cnxp.close()
         log.info(f'{notestr}数据无新增数据')
-        return False
+        hasnewrecords = False
 
-    return dfttt
+    cnxp.close()
+    return dfttt, hasnewrecords
 
 
 def orderdetails_check4product_customer():
     targetpath = dirmainpath / 'data' / 'work' / '订单明细'
     # chulixls_order(targetpath / '订单明细20180614.xls.xls')
-    dforder = chulidataindir_orderdetails(targetpath)
-    if not dforder:
+    dforder, hasnew = chulidataindir_orderdetails(targetpath)
+    if (not hasnew): #  and False:
         log.info(f'订单明细数据无新增数据，本次产品和客户校验跳过。')
         return
 
@@ -168,7 +175,8 @@ def orderdetails_check4product_customer():
     # dforder = pd.read_sql(f'select 商品全名, 商品编号, 单价, 金额 from xiaoshoumingxi', cnxp)
     print(dforder.columns)
     dict_mapping = {'单价': 'max', '金额': 'sum'}
-    dfordergrp = dforder.groupby(['商品全名', '商品编号'], as_index=False).agg(dict_mapping)
+    dfordergrp = dforder.groupby(
+        ['商品全名', '商品编号'], as_index=False).agg(dict_mapping)
     dfordergrp.index = dfordergrp['商品全名']
     print(dfordergrp.shape[0])
     dfall = dfordergrp.join(dfchanpingrp, how='outer')
@@ -201,6 +209,8 @@ def orderdetails_check4product_customer():
         return False
 
     cnxp.close()
+
+    # pinpaifenxido()
 
 
 def showorderstat2note(jiangemiao):
