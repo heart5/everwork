@@ -21,7 +21,8 @@ with pathmagic.context():
 
 def getgroupdf(dfs, xiangmus, period='month'):
     # global log
-    dfmobans = dfs.groupby('日期')[xiangmus].sum()  # 日期唯一，就是求个框架，值其实随意，这里随意取了当天的sum（对数值有效）
+    # 日期唯一，就是求个框架，值其实随意，这里随意取了当天的sum（对数值有效）
+    dfmobans = dfs.groupby('日期')[xiangmus].sum()
     dfout = pd.DataFrame()
     for xiangmu in xiangmus:
         if xiangmu in list(dfmobans.columns):
@@ -37,10 +38,12 @@ def getgroupdf(dfs, xiangmus, period='month'):
         dfman = dfmoban.reindex(dates)
         for ix in dfman.index:
             if period == 'year':
-                yuandiandate = pd.to_datetime('%4d-01-01' % ix.year)  # MonthEnd()好坑，处理不好月头月尾的数据
+                yuandiandate = pd.to_datetime(
+                    '%4d-01-01' % ix.year)  # MonthEnd()好坑，处理不好月头月尾的数据
                 # yuandiandate = ix + YearBegin(-1)  # MonthEnd()好坑，处理不好月头月尾的数据
             else:
-                yuandiandate = pd.to_datetime('%4d-%2d-01' % (ix.year, ix.month))
+                yuandiandate = pd.to_datetime(
+                    '%4d-%2d-01' % (ix.year, ix.month))
                 # yuandiandate = ix + MonthBegin(-1)
             dftmp = ((dfs[(dfs.日期 >= yuandiandate) & (dfs.日期 <= ix) & (dfs[xiangmu].isnull().values == False)])
                      .groupby('客户编码'))[
@@ -68,7 +71,8 @@ def fenxiyueduibi(sqlstr, xiangmu, notefenbudf, noteleixingdf, cnxf, pinpai='', 
     sqlznew = sqlz.replace('xiaoshoumingxi', 'C.orderdetails')
     log.info(sqlznew)
     dfznew = pd.read_sql_query(sqlznew, cnxf, parse_dates=['日期'])
-    dfznew = dfznew[dfznew.日期 >= pd.to_datetime('2018-11-1')]  # 实际销售数据和订单品项数据的交界线
+    dfznew = dfznew[dfznew.日期 >= pd.to_datetime(
+        '2018-11-1')]  # 实际销售数据和订单品项数据的交界线
     # print(dfznew)
 
     xmclause = xiangmu[1]
@@ -79,7 +83,8 @@ def fenxiyueduibi(sqlstr, xiangmu, notefenbudf, noteleixingdf, cnxf, pinpai='', 
     sqlfnew = sqlf.replace('xiaoshoumingxi', 'C.orderdetails')
     log.info(sqlznew)
     dffnew = pd.read_sql_query(sqlfnew, cnxf, parse_dates=['日期'])
-    dffnew = dffnew[dffnew.日期 >= pd.to_datetime('2018-10-1')]  # 实际销售数据和订单品项数据的交界线
+    dffnew = dffnew[dffnew.日期 >= pd.to_datetime(
+        '2018-10-1')]  # 实际销售数据和订单品项数据的交界线
     # print(dffnew)
     cursor.execute('detach database \'C\'')
     cursor.close()
@@ -120,16 +125,20 @@ def kuangjiachutu(notefenbudf, noteleixingdf, df, xiangmu, cnxk, pinpai, cum=Fal
                 else:
                     fenbu = tuple((dfquyu[dfquyu['分部'] == fenbuset])['区域'])
 
-                log.debug(str(df['日期'].max()) + '\t：\t' + leixingset + '\t，\t' + fenbuset)
-                dfs = df[(df.类型.isin(leixing).values == True) & (df.区域.isin(fenbu).values == True)]
+                log.debug(str(df['日期'].max()) + '\t：\t' +
+                          leixingset + '\t，\t' + fenbuset)
+                dfs = df[(df.类型.isin(leixing).values == True)
+                         & (df.区域.isin(fenbu).values == True)]
                 if dfs.shape[0] == 0:
-                    log.info('在客户类型为“' + str(leixingset) + '”且所在位置为“' + fenbuset + '”时无数据！')
+                    log.info('在客户类型为“' + str(leixingset) +
+                             '”且所在位置为“' + fenbuset + '”时无数据！')
                     continue  # 对应fenbuset
                 if cum:
                     dfin = dfs.groupby('日期').sum()
                 else:
                     dfin = getgroupdf(dfs, xiangmu)
-                imglist = dfin2imglist(dfin, cum=cum, leixingset=leixingset, fenbuset=fenbuset, pinpai=pinpai)
+                imglist = dfin2imglist(
+                    dfin, cum=cum, leixingset=leixingset, fenbuset=fenbuset, pinpai=pinpai)
                 htable = dfin[dfin.index > (dfin.index.max() + pd.Timedelta(days=-365))].sort_index(
                     ascending=False).to_html().replace('class="dataframe"', '')
                 imglist2note(get_notestore(), imglist, notefenbudf.loc[fenbuset]['guid'],
@@ -146,7 +155,8 @@ def kuangjiachutu(notefenbudf, noteleixingdf, df, xiangmu, cnxk, pinpai, cum=Fal
                 dfin = pd.DataFrame(dfin, index=pd.to_datetime(dfin.index))
             else:
                 dfin = getgroupdf(dfs, xiangmu)
-            imglist = dfin2imglist(dfin, cum=cum, leixingset=leixingset, pinpai=pinpai)
+            imglist = dfin2imglist(
+                dfin, cum=cum, leixingset=leixingset, pinpai=pinpai)
             targetlist = list(noteleixingdf.index)
             if leixingset in targetlist:
                 htable = dfin[dfin.index > (dfin.index.max() + pd.Timedelta(days=-365))].sort_index(
@@ -166,7 +176,8 @@ def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
     cursor.execute('detach database \'C\'')
     cursor.close()
     # print(dff)
-    brandlist = list(dff[dff.最近日期 >= (dff.最近日期.max() + pd.Timedelta(days=daysbefore * (-1)))]['品牌'])
+    brandlist = list(
+        dff[dff.最近日期 >= (dff.最近日期.max() + pd.Timedelta(days=daysbefore * (-1)))]['品牌'])
     print(brandlist)
     # dfbrand = pd.read_sql_query('select 品牌名称, max(推广等级) as 等级 from product group by 品牌名称 order by 等级 desc', cnxp)
     # # print(dfbrand)
@@ -179,7 +190,8 @@ def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
     print(brandlist)
     note_store = get_notestore()
     for br in brandlist:
-        log.info('第%d个品牌：%s，共有%d个品牌' % (brandlist.index(br) + 1, br, len(brandlist)))
+        log.info('第%d个品牌：%s，共有%d个品牌' %
+                 (brandlist.index(br) + 1, br, len(brandlist)))
         updatesection(cfpdata, 'guid%snb' % fenbu, br + 'kehuguid%s' % fenbu, inidatanotefilepath, token, note_store,
                       br + '客户开发图表')
         updatesection(cfpdata, 'guid%snb' % fenbu, br + 'saleguid%s' % fenbu, inidatanotefilepath, token, note_store,
@@ -190,8 +202,10 @@ def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
                       br + '销售业绩图表')
 
         # notelxxsdf = ['']
-        notelxxsdf = readinisection2df(cfpdata, br + 'saleguidleixing', br + '销售图表')
-        notefbxsdf = readinisection2df(cfpdata, br + 'saleguid%s' % fenbu, br + '销售图表')
+        notelxxsdf = readinisection2df(
+            cfpdata, br + 'saleguidleixing', br + '销售图表')
+        notefbxsdf = readinisection2df(
+            cfpdata, br + 'saleguid%s' % fenbu, br + '销售图表')
         # print(notefbxsdf)
 
         qrystr = "select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码," + \
@@ -200,12 +214,15 @@ def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
                  'where (customer.往来单位 = xiaoshoumingxi.单位全名) and (product.商品全名 = xiaoshoumingxi.商品全名) ' \
                  '%s %s group by 日期,客户编码 order by 日期'  # % (xmclause,jineclause, brclause)
         xiangmu = ['销售金额', '退货金额']
-        fenxiyueduibi(qrystr, xiangmu, notefbxsdf, notelxxsdf, cnxp, pinpai=br, cum=True)
+        fenxiyueduibi(qrystr, xiangmu, notefbxsdf,
+                      notelxxsdf, cnxp, pinpai=br, cum=True)
         # fenximonthduibi(token, note_store, cnxp, notefbxsdf, notelxxsdf, '金额', pinpai=br, cum=True)
 
         # notelxkhdf = ['']
-        notelxkhdf = readinisection2df(cfpdata, br + 'kehuguidleixing', br + '客户图表')
-        notefbkhdf = readinisection2df(cfpdata, br + 'kehuguid%s' % fenbu, br + '客户图表')
+        notelxkhdf = readinisection2df(
+            cfpdata, br + 'kehuguidleixing', br + '客户图表')
+        notefbkhdf = readinisection2df(
+            cfpdata, br + 'kehuguid%s' % fenbu, br + '客户图表')
         # print(notefbkhdf)
         qrystr = "select 日期,strftime('%%Y%%m',日期) as 年月,customer.往来单位编号 as 客户编码," + \
                  'count(*) as %s, substr(customer.往来单位编号,1,2) as 区域 ,' \
@@ -216,7 +233,6 @@ def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
         xiangmu = ['销售客户数', '退货客户数']
         fenxiyueduibi(qrystr, xiangmu, notefbkhdf, notelxkhdf, cnxp, pinpai=br)
         # fenximonthduibi(token, note_store, '退货客户数', notefbkhdf, notelxkhdf, cnxp, pinpai=br)
-
 
 
 def pinpaifenxido():
