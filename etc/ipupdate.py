@@ -18,22 +18,31 @@ with pathmagic.context():
     from func.evernt import get_notestore, imglist2note
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
+    from func.termuxtools import termux_telephony_deviceinfo
 
 
-output = subprocess.check_output('termux-telephony-deviceinfo',
-                                 shell=True).decode('utf-8').replace('false',
-                                                                     'False').replace('true',
-                                                                                      'True')
-print(type(output))
-print(output)
-outputdict = eval(output)
-print(outputdict)
-device_id = outputdict["device_id"]
-print(device_id)
+# output = subprocess.check_output('termux-telephony-deviceinfo',
+    # shell=True).decode('utf-8').replace('false',
+    # 'False').replace('true',
+    # 'True')
+# print(type(output))
+# print(output)
+# outputdict = eval(output)
+# print(outputdict)
+# device_id = outputdict["device_id"]
+# print(device_id)
 
 
 if __name__ == '__main__':
     # global log
     print(f'运行文件\t{__file__}')
+    output = termux_telephony_deviceinfo().replace('false',
+                                                   'False').replace('true',
+                                                                    'True')
+    # print(output)
+    outputdict = eval(output)
+    print(outputdict)
+    device_id = outputdict["device_id"]
+    print(device_id)
     print(get_ip('wlan0'))
     print('Done.')
