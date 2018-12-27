@@ -190,7 +190,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
     print(f'数据集最新日期：{zuijinchengjiaori}')
     if cfpdata.has_option('ordersaleguidquyu', '数据最新日期'):
         daterec = pd.to_datetime(cfpdata.get('ordersaleguidquyu', '数据最新日期'))
-        if daterec >= zuijinchengjiaori:  # and False:
+        if daterec >= zuijinchengjiaori and False:
             log.info(f'订单数据集无更新，返回')
             return
     zuiyuanriqi = zuijinchengjiaori + datetime.timedelta(days=-365)
@@ -293,7 +293,10 @@ def dingdanxiaoshouyuedufenxi(dforder):
     # descdb(dfshow)
     cnx.close()
 
+    writer = pd.ExcelWriter(str(dirmainpath / 'data' / '客户销售总表.xlsx'))
     dfzhongduan = dfshow[dfshow.类型大类 == '终端客户']
+    pd.DataFrame(dfzhongduan).to_excel(writer, sheet_name='客户销售全单')
+    writer.close()
     # descdb(dfzhongduan)
 
     targetlist = list()
@@ -586,6 +589,7 @@ def showorderstat():
             log.critical('更新笔记%s——%s（%s）时出现严重错误。%s' % (notestr, person, orderdatestr, str(eeee)))
     else:
         log.info('下列人员的销售金额分析图表正常处置完毕：%s' % persons)
+
 
 def showorderstat2note(jiangemiao):
     try:
