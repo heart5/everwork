@@ -190,7 +190,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
     print(f'数据集最新日期：{zuijinchengjiaori}')
     if cfpdata.has_option('ordersaleguidquyu', '数据最新日期'):
         daterec = pd.to_datetime(cfpdata.get('ordersaleguidquyu', '数据最新日期'))
-        if daterec >= zuijinchengjiaori and False:
+        if daterec >= zuijinchengjiaori: #  and False:
             log.info(f'订单数据集无更新，返回')
             return
     zuiyuanriqi = zuijinchengjiaori + datetime.timedelta(days=-365)
@@ -296,6 +296,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
     writer = pd.ExcelWriter(str(dirmainpath / 'data' / '客户销售总表.xlsx'))
     dfzhongduan = dfshow[dfshow.类型大类 == '终端客户']
     pd.DataFrame(dfzhongduan).to_excel(writer, sheet_name='客户销售全单')
+    log.info('成功输出《客户销售全单》')
     writer.close()
     # descdb(dfzhongduan)
 
