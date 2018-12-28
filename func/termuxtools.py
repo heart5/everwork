@@ -163,10 +163,14 @@ def termux_sms_list():
     return out
 
 
-def termux_sms_send():
-    out, rc, err = utils.execute('termux-sms-send')
+def termux_sms_send(msg='hi'):
+    cmdlist = ['termux-sms-send', '-n', '15387182166', f'{msg}']
+    out, rc, err = utils.execute(cmdlist)
     if rc:
+        log.Warning(f"发送短信时出现错误：{msg}")
         raise Exception(err)
+    else:
+        log.info(f"成功发送短信。")
     return out
 
 
