@@ -1,6 +1,6 @@
 # encoding:utf-8
 """
-装饰器函数集，ift2phone、timethis
+装饰器函数集，ift2phone、timethis, logit
 """
 import time
 import platform
@@ -12,7 +12,7 @@ import pathmagic
 
 with pathmagic.context():
     from func.logme import log
-    from func.nettools import trycounttimes2
+    from func.nettools import trycounttimes2, ifttt_notify
 
 
 def logit(func):
@@ -31,17 +31,14 @@ def ift2phone(msg=None):
     """
     def decorate(func):
 
-        @trycounttimes2("ifttt服务器")
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
-            pu = platform.uname()
-            ifttt = IFTTT('0sa6Pl_UJ9a_w6UQlYuDJ', 'everwork')
             if msg is None:
                 msginner = func.__doc__
             else:
                 msginner = msg
-            ifttt.notify(f'{pu.machine}_{pu.node}', f'{msginner}_{args}', f'{func.__name__}')
+            ifttt_notify(f'{msginner}_{args}', f'{func.__name__}')
             return result
 
         return wrapper
