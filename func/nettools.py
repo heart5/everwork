@@ -16,11 +16,13 @@ import requests
 from bs4 import BeautifulSoup
 import struct
 from functools import wraps
+from py2ifttt import IFTTT
 
 import pathmagic
 
 with pathmagic.context():
     from func.logme import log
+    from func.termuxtools import termux_sms_send
 
 
 def get_ip(*args):
@@ -143,7 +145,8 @@ def trycounttimes2(servname='服务器', maxtimes=5, maxsecs=30):
                     # log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接服务器时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
                     if i == (trytimes - 1):
-                        log.critical(f'“{servname}”连接失败，只好无功而返。')
+                        log.critical(f'\"{servname}\"连接失败，只好无功而返。')
+                        termux_sms_send(f'\"{servname}\"连接失败，只好无功而返。')
                         # log.critical(f'服务器连接失败，只好无功而返。')
                         # raise eee
                     time.sleep(sleeptime)
@@ -153,8 +156,20 @@ def trycounttimes2(servname='服务器', maxtimes=5, maxsecs=30):
     return decorate
 
 
+@trycounttimes2("ifttt服务器")
+def ifttt_notify(content="content", funcname="funcname"):
+    ifttt = IFTTT('0sa6Pl_UJ9a_w6UQlYuDJ', 'everwork')
+    pu = platform.uname()
+    ifttt.notify(f'{pu.machine}_{pu.node}', content, funcname)
+    log.info(f'{pu.machine}_{pu.node}\t{content}\t{funcname}')
+
+
 if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
+
+    # print(get_ip())
+
+    ifttt_notify("test for ifttt notify", f"{__file__}")
 
     @trycounttimes2('xmu.edu.cn网站服务器')
     def fetchfromnet(addressin: object):
@@ -180,7 +195,5 @@ if __name__ == '__main__':
         url = a['href']
         name = a.get_text()
         print(f'{name},{url}')
-
-    print(get_ip())
 
     print('Done.测试完毕。')
