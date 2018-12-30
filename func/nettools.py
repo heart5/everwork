@@ -2,6 +2,7 @@
 """
 功能描述
 """
+import sys
 import ssl
 import socket
 import time
@@ -104,7 +105,7 @@ def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务�
             time.sleep(sleeptime)
 
 
-def trycounttimes2(servname='服务器', maxtimes=5, maxsecs=30):
+def trycounttimes2(servname='服务器', maxtimes=8, maxsecs=30):
     def decorate(jutifunc):
 
         @wraps(jutifunc)
@@ -125,29 +126,29 @@ def trycounttimes2(servname='服务器', maxtimes=5, maxsecs=30):
                         if eee.errno == 11001:
                             log.critical(f'寻址失败，貌似网络不通。{eee}')
                         elif eee.errno == 10061:
-                            log.warn(f'被主动拒绝，好没面啊！{eee}')
+                            log.warning(f'被主动拒绝，好没面啊！{eee}')
                         elif eee.errno == 10060:
-                            log.warn(f'够不着啊，是不是在墙外？！{eee}')
+                            log.warning(f'够不着啊，是不是在墙外？！{eee}')
                         elif eee.errno == 10048:
-                            log.warn(f'多次强行连接，被拒了！{eee}')
+                            log.warning(f'多次强行连接，被拒了！{eee}')
                         elif eee.errno == 10054:
-                            log.warn(f'主机发脾气，强行断线了。{eee}')
+                            log.warning(f'主机发脾气，强行断线了。{eee}')
                         elif eee.errno == 8:
-                            log.warn(f'和{servname}握手失败。{eee}')
+                            log.warning(f'和{servname}握手失败。{eee}')
                         elif eee.errno == 4:
-                            log.warn(f'和{servname}连接异常，被中断。{eee}')
+                            log.warning(f'和{servname}连接异常，被中断。{eee}')
                         else:
-                            log.warn(f'连接失败。{eee.errno}\t{eee}')
+                            log.warning(f'连接失败。{eee.errno}\t{eee}')
                     else:
-                        log.warn(f'连接失败。{eee}')
-                    log.warn(
+                        log.warning(f'连接失败。{eee}')
+                    log.warning(
                         f"第{i+1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接服务器时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
                     if i == (trytimes - 1):
-                        log.critical(f'\"{servname}\"连接失败，只好无功而返。')
-                        termux_sms_send(f'\"{servname}\"连接失败，只好无功而返。')
-                        # log.critical(f'服务器连接失败，只好无功而返。')
+                        badnews = f'\"{servname}\"连接尝试了{trytimes}后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
+                        log.critical(badnews)
+                        termux_sms_send(badnews)
                         # raise eee
                     time.sleep(sleeptime)
 
