@@ -71,7 +71,7 @@ def get_notestore():
     def getnotestore():
         global note_store
         if note_store is not None:
-            # log.info(f'note_store健壮存在：{note_store}')
+            log.info(f'note_store已健壮存在：{note_store}')
             return note_store
         userstore = client.get_user_store()
         # evernoteapijiayi()
@@ -105,7 +105,6 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     :param neirong:object
     :return:
     """
-    # global log
     note = Note()
     # print(type(note))
     note.guid = noteguid
@@ -178,25 +177,6 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
                  (updated_note.title, updated_note.guid))
 
     updatenote(note)
-    # trytimes = 3
-    # sleeptime = 20
-    # for i in range(trytimes):
-    #     try:
-    #         if notestore is None:
-    #             log.info(f'notestore失效，重新构建evernote服务器连接以便进行笔记《{note.title}》的内容更新操作。')
-    #             updated_note = get_notestore().updateNote(note)
-    #         else:
-    #             updated_note = notestore.updateNote(note)
-    #         evernoteapijiayi()
-    #         log.info('成功更新了笔记《%s》，guid：%s。' % (updated_note.title, updated_note.guid))
-    #         break
-    #     except Exception as eee:
-    #         log.critical("第%d次（最多尝试%d次）更新笔记《%s》时失败，将于%d秒后重试。%s"
-    #                      % (i + 1, trytimes, note.title, sleeptime, eee))
-    #         if i == (trytimes - 1):
-    #             log.critical(f'更新笔记《{note.title}》失败，只好无功而返。')
-    #             raise eee
-    #         time.sleep(sleeptime)
 
 
 def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True):
@@ -496,6 +476,7 @@ def findnotebookfromevernote():
         p_notebookattributeundertoken(x)
 
 
+@trycounttimes2('evernote服务器')
 def readinifromnote():
     cfpeverwork, cfpeverworkpath = getcfp('everwork')
     noteguid_inifromnote = cfpeverwork.get('evernote', 'ininoteguid')
@@ -553,6 +534,6 @@ if __name__ == '__main__':
     # writeini()
     # findnotebookfromevernote()
     # notefind = findnotefromnotebook(
-        # token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', '日志')
+    # token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', '日志')
     # print(notefind)
     print('Done.')
