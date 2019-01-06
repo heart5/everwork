@@ -34,6 +34,7 @@ with pathmagic.context():
     from func.logme import log
     from func.mailsfunc import getmail
     from func.wrapfuncs import timethis, ift2phone
+    from func.datatools import readfromtxt, write2txt
 
 
 # plot中显示中文
@@ -321,21 +322,6 @@ def weatherstat(items, destguid=None):
     imglist2note(get_notestore(), imglist, destguid, '武汉天气图')
 
 
-def readfromweathertxt(weathertxtfilename):
-    with open(weathertxtfilename, 'r', encoding='utf-8') as ftxt:
-        items = [line.strip() for line in ftxt]  # strip()，去除行首行尾的空格
-    return items
-
-
-def write2weathertxt(weathertxtfilename, inputitemlist):
-    # print(inputitemlist)
-    fileobject = open(weathertxtfilename, 'w', encoding='utf-8')
-    for item in inputitemlist:
-        # print(item)
-        fileobject.write(str(item) + '\n')
-    fileobject.close()
-
-
 def fetchweatherinfo_from_gmail(weathertxtfilename):
     if cfplife.has_option('天气', '存储数据最新日期'):
         weathertxtlastestday = cfplife.get('天气', '存储数据最新日期')
@@ -371,12 +357,12 @@ def isweatherupdate(weathertxtfilename):
         items = getweatherfromgmail()
         if items:
             log.info('通过邮件轮询，读取天气信息%d条。' % len(items))
-            itemfromtxt = readfromweathertxt(weathertxtfilename)
+            itemfromtxt = readfromtxt(weathertxtfilename)
             for itemg in itemfromtxt:
                 items.append(str(itemg))
-            write2weathertxt(weathertxtfilename, items)
+            write2txt(weathertxtfilename, items)
 
-    items = readfromweathertxt(weathertxtfilename)
+    items = readfromtxt(weathertxtfilename)
     print(len(items))
     if cfplife.has_option('天气', '统计天数'):
         dycountini = cfplife.getint('天气', '统计天数')
@@ -404,9 +390,9 @@ def weatherstatdo():
         cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
     today = datetime.datetime.now().strftime('%F')
     weathertxtlastestday = cfplife.get('天气', '存储数据最新日期')
-    if today == weathernotelastestday: #  and False:
+    if today == weathernotelastestday:  # and False:
         print('今天的天气信息统计笔记已刷新，本次轮询跳过')
-    elif today == weathertxtlastestday: #  or True:
+    elif today == weathertxtlastestday:  # or True:
         try:
             items = readfromweathertxt(weathertxtfilename)
             weatherstat(items, '296f57a3-c660-4dd5-885a-56492deb2cee')
