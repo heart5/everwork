@@ -42,6 +42,10 @@ def log2note(noteguid, loglimit, levelstr=''):
     files = os.listdir(str(pathlog))
     loglines = []
     for fname in files[::-1]:
+        # print(fname)
+        if not fname.startswith('everwork.log'):
+            log.warning(f'文件《{fname}》不是合法的日志文件，跳过。')
+            continue
         with open(pathlog / fname, 'r', encoding='utf-8') as flog:
             loglines = loglines + [line.strip()
                                    for line in flog if line.find(levelstrinner) >= 0]
