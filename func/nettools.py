@@ -146,9 +146,10 @@ def trycounttimes2(servname='服务器', maxtimes=8, maxsecs=30):
                     # log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接服务器时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
                     if i == (trytimes - 1):
-                        badnews = f'\"{servname}\"连接尝试了{trytimes}后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
+                        badnews = f'\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
                         log.critical(badnews)
                         termux_sms_send(badnews)
+                        exit(1)
                         # raise eee
                     time.sleep(sleeptime)
 
