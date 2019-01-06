@@ -71,7 +71,7 @@ def get_notestore():
     def getnotestore():
         global note_store
         if note_store is not None:
-            log.info(f'note_store已健壮存在：{note_store}')
+            # log.info(f'note_store已健壮存在：{note_store}')
             return note_store
         userstore = client.get_user_store()
         # evernoteapijiayi()
