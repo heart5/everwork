@@ -39,7 +39,10 @@ def iprecord():
         wifi = wifiinfo['ssid']
         wifiid = wifiinfo['bssid']
     else:
-        ip = get_ip('rmnet_data1')
+        ip = get_ip('rmnet_data0')
+        if ip is None:
+            ip = get_ip('rmnet_data1')
+
         wifi = "None"
         wifiid = "None"
     tun = get_ip('tun0')
