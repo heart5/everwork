@@ -16,18 +16,28 @@ with pathmagic.context():
 """
 
 
+def evaloutput(output):
+    if (output is None) or (output == 'null'):
+        return False
+    # 转换成字典输出
+    out = output.replace('false', 'False').replace('true',
+            'True').replace('null', 'None')
+    # print(out)
+    return eval(out)
+
+
 def battery_status():
     out, rc, err = utils.execute('termux-battery-status')
     if rc:
         raise Exception(err)
-    return out
+    return evaloutput(out)
 
 
 def camera_info():
     out, rc, err = utils.execute('termux-camera-info')
     if rc:
         raise Exception(err)
-    return out
+    return evaloutput(out)
 
 
 def termux_camera_photo():
@@ -104,7 +114,7 @@ def termux_location():
     out, rc, err = utils.execute('termux-location')
     if rc:
         raise Exception(err)
-    return out
+    return evaloutput(out)
 
 
 def termux_notification():
@@ -192,14 +202,14 @@ def termux_telephony_cellinfo():
     out, rc, err = utils.execute('termux-telephony-cellinfo')
     if rc:
         raise Exception(err)
-    return out
+    return evaloutput(out)
 
 
 def termux_telephony_deviceinfo():
     out, rc, err = utils.execute('termux-telephony-deviceinfo')
     if rc:
         raise Exception(err)
-    return out
+    return evaloutput(out)
 
 
 def termux_toast():
@@ -248,14 +258,14 @@ def termux_wifi_connectioninfo():
     out, rc, err = utils.execute('termux-wifi-connectioninfo')
     if rc:
         raise Exception(err)
-    return out
+    return evaloutput(out)
 
 
 def termux_wifi_scaninfo():
     out, rc, err = utils.execute('termux-wifi-scaninfo')
     if rc:
         raise Exception(err)
-    return out
+    return evaloutput(out)
 
 
 if __name__ == '__main__':
