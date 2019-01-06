@@ -4,12 +4,31 @@ txt数据文件操作函数
 """
 
 import os
+import sqlite3 as lite
 import pathmagic
 
 with pathmagic.context():
     from func.logme import log
     from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi
     from func.wrapfuncs import timethis
+
+
+def write2txt(weathertxtfilename, inputitemlist):
+    # print(inputitemlist)
+    fileobject = open(weathertxtfilename, 'w', encoding='utf-8')
+    if inputitemlist is not None:
+        for item in inputitemlist:
+            # print(item)
+            fileobject.write(str(item) + '\n')
+    fileobject.close()
+
+
+def readfromtxt(weathertxtfilename):
+    if not os.path.exists(weathertxtfilename):
+        write2txt(weathertxtfilename, None)
+    with open(weathertxtfilename, 'r', encoding='utf-8') as ftxt:
+        items = [line.strip() for line in ftxt]  # strip()，去除行首行尾的空格
+    return items
 
 
 def get_filesize(filepath):
