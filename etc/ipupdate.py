@@ -42,10 +42,16 @@ def iprecord():
         ip = get_ip('rmnet_data0')
         if ip is None:
             ip = get_ip('rmnet_data1')
+        if ip is None:
+            ip = get_ip('rmnet0')
+        if ip is None:
+            ip = "None"
 
         wifi = "None"
         wifiid = "None"
     tun = get_ip('tun0')
+    if tun is None:
+        tun = 'None'
     return ip, wifi, wifiid, tun, device_id
 
 
