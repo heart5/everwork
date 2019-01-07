@@ -41,11 +41,12 @@ def get_ip(*args):
         # print(my_addr)
         ipfind = re.search(r'(?<![\.\d])(?:25[0-5]\.|2[0-4]\d\.|[01]?\d\d?\.)'
                        r'{3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?![\.\d])', my_addr)
-        if (ipfind != None) and (re.match(r'0\.0\.0\.0', ipfind.group()) != None):
+        print(ipfind)
+        ip = None
+        if (ipfind != None):
+            # if re.match(r'0\.0\.0\.0', ipfind.group()) != None:
             ip = ipfind.group()
-        else:
-            ip = None
-        # print(ip)
+        print(ip)
         return ip
 
 
