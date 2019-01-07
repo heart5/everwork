@@ -38,14 +38,14 @@ def get_ip(*args):
 
         my_addr = os.popen(
             "ifconfig | grep -A 1 %s|tail -1| awk '{print $2}'" % args[0]).read()
-        # print(my_addr)
+        print(my_addr)
         ipfind = re.search(r'(?<![\.\d])(?:25[0-5]\.|2[0-4]\d\.|[01]?\d\d?\.)'
                        r'{3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?![\.\d])', my_addr)
         print(ipfind)
         ip = None
         if (ipfind != None):
-            # if re.match(r'0\.0\.0\.0', ipfind.group()) != None:
-            ip = ipfind.group()
+            if re.match(r'0\.0\.0\.0', ipfind.group()) == None:
+                ip = ipfind.group()
         print(ip)
         return ip
 
