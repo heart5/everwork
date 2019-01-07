@@ -72,14 +72,14 @@ def get_ip4alleth(*args):
             # print(my_addr)
             ipfind = re.search(r'(?<![\.\d])(?:25[0-5]\.|2[0-4]\d\.|[01]?\d\d?\.)'
                            r'{3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?![\.\d])', my_addr)
-            print(ipfind)
+            #  print(ipfind)
             ip = None
             if ipfind is not None:
                 if re.match(r'0\.0\.0\.0', ipfind.group()) == None:
                     ip = ipfind.group()
                     resultiplst.append([ethitem, ip])
-            print(ip)
-    print(resultiplst)
+            #  print(ip)
+    #  print(resultiplst)
     return resultiplst
 
 
