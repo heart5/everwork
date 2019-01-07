@@ -34,6 +34,7 @@ def iprecord():
     # print(
     # f"WIFI名称：{wifi['ssid']}\ttimestamp:{wifi['timestamp']}\t连接时间：{timestamp2str(wifi['timestamp']/10)}")
     wifiinfo = termux_wifi_connectioninfo()
+    print(wifiinfo)
     if wifiinfo['bssid'] != None:
         ip = wifiinfo['ip']
         wifi = wifiinfo['ssid']
