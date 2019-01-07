@@ -51,6 +51,7 @@ def get_ip(*args):
 
 
 def get_ip4alleth(*args):
+    resultiplst = []
     if platform.system() == 'Windows':
         my_name = socket.getfqdn(socket.gethostbyname('localhost'))
         print(my_name)
@@ -60,20 +61,26 @@ def get_ip4alleth(*args):
         return ip
     else:
 
-        ethinfo = os.popen("ifconfig -a | grep -A 0 'Link encap'")
-         ptn = re.compile(r"^(?P<name>\w+)\W+", re.M)
-         my_addr = os.popen(
-            "ifconfig | grep -A 1 %s|tail -1| awk '{print $2}'" % args[0]).read()
-         print(my_addr)
-         ipfind = re.search(r'(?<![\.\d])(?:25[0-5]\.|2[0-4]\d\.|[01]?\d\d?\.)'
-                       r'{3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?![\.\d])', my_addr)
-         print(ipfind)
-         ip = None
-         if (ipfind != None):
-            if re.match(r'0\.0\.0\.0', ipfind.group()) == None:
-                ip = ipfind.group()
-         print(ip)
-    return ip
+        ethinfo = os.popen("ifconfig -a | grep -A 0 'Link encap'").read()
+        ptn = re.compile(r"^(?P<name>\w+)\W+", re.M)
+        ethlst = re.findall(ptn, ethinfo)
+        print(ethlst)
+        ethlst2test = [x for x in ethlst if x != "lo"]
+        for ethitem in ethlst2test:
+            my_addr = os.popen(
+                "ifconfig | grep -A 1 %s|tail -1| awk '{print $2}'" % ethitem).read()
+            # print(my_addr)
+            ipfind = re.search(r'(?<![\.\d])(?:25[0-5]\.|2[0-4]\d\.|[01]?\d\d?\.)'
+                           r'{3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?![\.\d])', my_addr)
+            print(ipfind)
+            ip = None
+            if ipfind is not None:
+                if re.match(r'0\.0\.0\.0', ipfind.group()) == None:
+                    ip = ipfind.group()
+                    resultiplst.append([ethitem, ip])
+            print(ip)
+    print(resultiplst)
+    return resultiplst
 
 
 def get_host_ip():
