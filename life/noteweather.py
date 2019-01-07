@@ -394,7 +394,7 @@ def weatherstatdo():
         print('今天的天气信息统计笔记已刷新，本次轮询跳过')
     elif today == weathertxtlastestday:  # or True:
         try:
-            items = readfromweathertxt(weathertxtfilename)
+            items = readfromtxt(weathertxtfilename)
             weatherstat(items, '296f57a3-c660-4dd5-885a-56492deb2cee')
             log.info('天气信息成功更新入天气信息统计笔记')
             cfplife.set('天气', '统计天数', '%d' % len(items))
