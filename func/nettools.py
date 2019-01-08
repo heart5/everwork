@@ -44,7 +44,7 @@ def get_ip(*args):
         print(ipfind)
         ip = None
         if (ipfind != None):
-            if re.match(r'0\.0\.0\.0', ipfind.group()) == None:
+            if re.search(r'0\.0\.0\.0', ipfind.group()) == None:
                 ip = ipfind.group()
         print(ip)
         return ip
