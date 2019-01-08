@@ -29,20 +29,22 @@ def iprecord():
     outputdict = termux_telephony_deviceinfo()
     # print(outputdict)
     device_id = outputdict["device_id"].strip()
-    ip, wifi, wifiid, tun = None
+    ip = wifi = wifiid = tun = None
     ethlst = get_ip4alleth()
     print(ethlst)
     for ethinfo in ethlst:
-        if ethinfo[0].startwith('tun'):
-            tun = ethinfo[1]
+        name, ipinner = ethinfo
+        if name.startswith('tun'):
+            tun = ipinner
             continue
-        if eethinfo[0].startwith('wlan'):
-            wifiinfo  = termux_wifi_connectioninfo()
-            wififi = wifiinfo['ssid']
-            w wifiid = wifiinfo['bssid']
-         ip = ethinfo[1]
+        if name.startswith('wlan'):
+            wifiinfo = termux_wifi_connectioninfo()
+            print(wifiinfo)
+            wifi = wifiinfo['ssid']
+            wifiid = wifiinfo['bssid']
+        ip = ipinner
 
-   return ip, wifi, wifiid, tun, device_id
+    return ip, wifi, wifiid, tun, device_id
 
 
 def showiprecords():
