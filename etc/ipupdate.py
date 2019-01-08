@@ -17,7 +17,7 @@ import evernote.edam.type.ttypes as ttypes
 with pathmagic.context():
     from func.first import getdirmain, dirmainpath
     from func.configpr import getcfp
-    from func.nettools import get_host_ip, get_ip
+    from func.nettools import get_host_ip, get_ip, get_ip4alleth
     from func.datatools import readfromtxt, write2txt
     from func.evernt import get_notestore, imglist2note, timestamp2str, makenote, token, evernoteapijiayi
     from func.logme import log
@@ -29,31 +29,20 @@ def iprecord():
     outputdict = termux_telephony_deviceinfo()
     # print(outputdict)
     device_id = outputdict["device_id"].strip()
-    # wifilist = termux_wifi_scaninfo()
-    # for wifi in wifilist:
-    # print(
-    # f"WIFI名称：{wifi['ssid']}\ttimestamp:{wifi['timestamp']}\t连接时间：{timestamp2str(wifi['timestamp']/10)}")
-    wifiinfo = termux_wifi_connectioninfo()
-    print(wifiinfo)
-    if wifiinfo['bssid'] != None:
-        ip = wifiinfo['ip']
-        wifi = wifiinfo['ssid']
-        wifiid = wifiinfo['bssid']
-    else:
-        ip = get_ip('rmnet_data0')
-        if ip is None:
-            ip = get_ip('rmnet_data1')
-        if ip is None:
-            ip = get_ip('rmnet0')
-        if ip is None:
-            ip = "None"
+    ip, wifi, wifiid, tun = None
+    ethlst = get_ip4alleth()
+    print(ethlst)
+    for ethinfo in ethlst:
+        if ethinfo[0].startwith('tun'):
+            tun = ethinfo[1]
+            continue
+        if eethinfo[0].startwith('wlan'):
+            wifiinfo  = termux_wifi_connectioninfo()
+            wififi = wifiinfo['ssid']
+            w wifiid = wifiinfo['bssid']
+         ip = ethinfo[1]
 
-        wifi = "None"
-        wifiid = "None"
-    tun = get_ip('tun0')
-    if tun is None:
-        tun = 'None'
-    return ip, wifi, wifiid, tun, device_id
+   return ip, wifi, wifiid, tun, device_id
 
 
 def showiprecords():
