@@ -114,9 +114,9 @@ def showiprecords():
         imglist2note(get_notestore(), [], guid,
                      f'服务器_{device_id}_ip更新记录', "<br></br>".join(itemnew))
         cfp.set(device_id, 'ipr', ip)
-        cfp.set(device_id, 'wifir', wifi)
-        cfp.set(device_id, 'wifiidr', wifiid)
-        cfp.set(device_id, 'tunr', tun)
+        cfp.set(device_id, 'wifir', str(wifi))
+        cfp.set(device_id, 'wifiidr', str(wifiid))
+        cfp.set(device_id, 'tunr', str(tun))
         start = datetime.datetime.now().strftime('%F %T')
         cfp.set(device_id, 'start', start)
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
