@@ -111,8 +111,15 @@ def showiprecords():
             f'{ip}\t{wifi}\t{wifiid}\t{tun}\t{nowstr}']
         itemnew.extend(itemnewr)
         print(itemnew)
+        readinifromnote()
+        cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
+        namestr = 'ip'
+        if cfpfromnote.has_option(namestr, device_id):
+            device_name = cfpfromnote.get(namestr, device_id)
+        else:
+            device_name = device_id
         imglist2note(get_notestore(), [], guid,
-                     f'服务器_{device_id}_ip更新记录', "<br></br>".join(itemnew))
+                     f'手机_{device_name}_ip更新记录', "<br></br>".join(itemnew))
         cfp.set(device_id, 'ipr', ip)
         cfp.set(device_id, 'wifir', str(wifi))
         cfp.set(device_id, 'wifiidr', str(wifiid))
