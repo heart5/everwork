@@ -51,6 +51,9 @@ def showiprecords():
     namestr = 'everip'
     cfp, cfppath = getcfp(namestr)
     ip, wifi, wifiid, tun, device_id = iprecord()
+    if ip is None:
+        log.Warning('无效ip，可能是没有处于联网状态')
+        exit(1)
     print(f'{ip}\t{wifi}\t{wifiid}\t{tun}\t{device_id}')
     if not cfp.has_section(device_id):
         cfp.add_section(device_id)
@@ -81,11 +84,11 @@ def showiprecords():
     else:
         cfp.set(device_id, 'ipr', ip)
         ipr = ip
-        cfp.set(device_id, 'wifir', wifi)
+        cfp.set(device_id, 'wifir', str(wifi))
         wifir = wifi
-        cfp.set(device_id, 'wifiidr', wifiid)
+        cfp.set(device_id, 'wifiidr', str(wifiid))
         wifiir = wifiid
-        cfp.set(device_id, 'tunr', tun)
+        cfp.set(device_id, 'tunr', str(tun))
         tunr = tun
         start = datetime.datetime.now().strftime('%F %T')
         startr = start
