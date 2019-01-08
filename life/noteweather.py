@@ -335,10 +335,10 @@ def fetchweatherinfo_from_gmail(weathertxtfilename):
         items = getweatherfromgmail()
         if items:
             log.info('通过邮件轮询，读取天气信息%d条。' % len(items))
-            itemfromtxt = readfromweathertxt(weathertxtfilename)
+            itemfromtxt = readfromtxt(weathertxtfilename)
             for itemg in itemfromtxt:
                 items.append(str(itemg))
-            write2weathertxt(weathertxtfilename, items)
+            write2txt(weathertxtfilename, items)
             weathertxtlastestday = time.strftime('%F', time.strptime(
                 items[0].split(' ：')[0], '%B %d, %Y at %I:%M%p'))
             cfplife.set('天气', '存储数据最新日期', '%s' % weathertxtlastestday)
