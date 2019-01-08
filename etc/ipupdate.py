@@ -19,7 +19,7 @@ with pathmagic.context():
     from func.configpr import getcfp
     from func.nettools import get_host_ip, get_ip, get_ip4alleth
     from func.datatools import readfromtxt, write2txt
-    from func.evernt import get_notestore, imglist2note, timestamp2str, makenote, token, evernoteapijiayi
+    from func.evernttest import get_notestore, imglist2note, timestamp2str, makenote, token, evernoteapijiayi, readinifromnote
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_telephony_deviceinfo, termux_telephony_cellinfo, termux_wifi_connectioninfo, termux_wifi_scaninfo
