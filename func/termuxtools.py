@@ -17,11 +17,12 @@ with pathmagic.context():
 
 
 def evaloutput(output):
-    if (output is None) or (output == 'null'):
+    if (output is None) or (output == 'null') or (len(output) == 0):
+        # print(f"output\'s content:\n{output}")
         return False
     # 转换成字典输出
     out = output.replace('false', 'False').replace('true',
-            'True').replace('null', 'None')
+                                                   'True').replace('null', 'None')
     # print(out)
     return eval(out)
 
@@ -271,4 +272,5 @@ def termux_wifi_scaninfo():
 if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
     print(termux_info())
+    print(termux_location())
     print('Done.测试完毕。')
