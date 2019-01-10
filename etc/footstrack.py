@@ -54,12 +54,14 @@ def foot2record():
     nowstr = datetime.datetime.now().strftime('%F %T')
     itemread = readfromtxt(txtfilename)
     print(itemread)
+    tlst = ['datetime', 'latitude', 'longitude', 'altitude', 'accuracy',
+            'bearing', 'speed', 'elapsedMs', 'provider']
     locinfo = termux_location()
     print(locinfo)
     if locinfo == False:
         itemnewr = [f"{nowstr}\t{str(locinfo)}"]
     else:
-        itemnewr = [f"{nowstr}\t{locinfo['latitude']}\t{locinfo['longitude']}\t{locinfo['altitude']}'\t{locinfo['accuracy']}\t{locinfo['bearing']}\t{locinfo['speed']}\t{locinfo['elapsedMs']}\t{locinfo['provider']}"]
+        itemnewr = [f"{nowstr}\t{locinfo[tlst[1]]}\t{locinfo[tlst[2]]}\t{locinfo[tlst[3]]}'\t{locinfo[tlst[4]]}\t{locinfo[tlst[5]]}\t{locinfo[tlst[6]]}\t{locinfo[tlst[7]]}\t{locinfo[tlst[8]]}"]
     itemnewr.extend(itemread)
     print(itemnewr)
     write2txt(txtfilename, itemnewr)
@@ -70,19 +72,21 @@ def foot2record():
         device_name = cfpfromnote.get(namestr, device_id)
     else:
         device_name = device_id
+    tlstitem = ["\t".join(tlst)]
+    tlstitem.extend(itemnewr)
     imglist2note(get_notestore(), [], guid,
                  f'手机_{device_name}_location更新记录',
-                 "<br></br>".join(itemnewr))
+                 "<br></br>".join(tlstitem))
 
 
 if __name__ == '__main__':
     # global log
     print(f'运行文件\t{__file__}')
-    output = termux_telephony_deviceinfo()
+    # output = termux_telephony_deviceinfo()
     # print(output)
-    device_id = output["device_id"]
-    print(device_id)
-    output = termux_location()
-    print(output)
+    # device_id = output["device_id"]
+    # print(device_id)
+    # output = termux_location()
+    # print(output)
     foot2record()
     print('Done.')
