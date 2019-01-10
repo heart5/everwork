@@ -1,3 +1,4 @@
+#! /data/data/com.termux/files/usr/bin/python
 # -*- coding: utf-8 -*-
 """
 获取服务器ip并定期更新至相关笔记
