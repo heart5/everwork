@@ -59,7 +59,7 @@ def foot2record():
     if locinfo == False:
         itemnewr = [f"{nowstr}\t{str(locinfo)}"]
     else:
-        itemnewr = [f"{nowstr}}\t{locinfo['latitude']}\t{locinfo['longitude']}\t{locinfo['altitude']}'\t{locinfo['accuracy']}\t{locinfo['bearing']}\t{locinfo['speed']}\t{locinfo['elapsedMs']}\t{locinfo['provider']}"]
+        itemnewr = [f"{nowstr}\t{locinfo['latitude']}\t{locinfo['longitude']}\t{locinfo['altitude']}'\t{locinfo['accuracy']}\t{locinfo['bearing']}\t{locinfo['speed']}\t{locinfo['elapsedMs']}\t{locinfo['provider']}"]
     itemnewr.extend(itemread)
     print(itemnewr)
     write2txt(txtfilename, itemnewr)
