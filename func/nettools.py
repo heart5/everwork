@@ -40,7 +40,7 @@ def get_ip(*args):
             "ifconfig | grep -A 1 %s|tail -1| awk '{print $2}'" % args[0]).read()
         print(my_addr)
         ipfind = re.search(r'(?<![\.\d])(?:25[0-5]\.|2[0-4]\d\.|[01]?\d\d?\.)'
-                       r'{3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?![\.\d])', my_addr)
+                           r'{3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?![\.\d])', my_addr)
         print(ipfind)
         ip = None
         if (ipfind != None):
@@ -71,7 +71,7 @@ def get_ip4alleth(*args):
                 "ifconfig | grep -A 1 %s|tail -1| awk '{print $2}'" % ethitem).read()
             # print(my_addr)
             ipfind = re.search(r'(?<![\.\d])(?:25[0-5]\.|2[0-4]\d\.|[01]?\d\d?\.)'
-                           r'{3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?![\.\d])', my_addr)
+                               r'{3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?![\.\d])', my_addr)
             #  print(ipfind)
             ip = None
             if ipfind is not None:
@@ -203,6 +203,7 @@ def ifttt_notify(content="content", funcname="funcname"):
     pu = platform.uname()
     ifttt.notify(f'{pu.machine}_{pu.node}', content, funcname)
     log.info(f'{pu.machine}_{pu.node}\t{content}\t{funcname}')
+
 
 def test4trycounttimes2():
     ifttt_notify("test for ifttt notify", f"{__file__}")
