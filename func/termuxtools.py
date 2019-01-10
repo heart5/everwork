@@ -115,6 +115,14 @@ def termux_location():
     out, rc, err = utils.execute('termux-location')
     if rc:
         raise Exception(err)
+    if len(out) == 0:
+        out, rc, err = utils.execute(['termux-location', '-p', 'network'])
+        if rc:
+            raise Exception(err)
+    if len(out) == 0:
+        out, rc, err = utils.execute(['termux-location', '-p', 'passive'])
+        if rc:
+            raise Exception(err)
     return evaloutput(out)
 
 
