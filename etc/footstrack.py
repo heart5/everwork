@@ -26,7 +26,18 @@ with pathmagic.context():
 def foot2record():
     namestr = 'everloc'
     cfp, cfppath = getcfp(namestr)
-    device_id = termux_telephony_deviceinfo()['device_id']
+    if not cfp.has_section(namestr):
+        cfp.add_section(namestr)
+        cfp.write(open(cfppath, 'w', encoding='utf-8'))
+    if cfp.has_option(namestr, 'device_id'):
+        device_id = cfp.get(namestr, 'device_id')
+    else:
+        outputdict = termux_telephony_deviceinfo()
+        # print(outputdict)
+        device_id = outputdict["device_id"].strip()
+        cfp.set(namestr, 'device_id', device_id)
+        cfp.write(open(cfppath, 'w', encoding='utf-8'))
+        log.info(f'获取device_id:\t{device_id}，并写入ini文件:\t{cfppath}')
     if not cfp.has_section(device_id):
         cfp.add_section(device_id)
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
@@ -53,7 +64,8 @@ def foot2record():
     print(txtfilename)
     nowstr = datetime.datetime.now().strftime('%F %T')
     itemread = readfromtxt(txtfilename)
-    print(itemread)
+    numlimit = 5    # 显示项目数
+    print(itemread[:numlimit])
     tlst = ['datetime', 'latitude', 'longitude', 'altitude', 'accuracy',
             'bearing', 'speed', 'elapsedMs', 'provider']
     locinfo = termux_location()
@@ -63,7 +75,7 @@ def foot2record():
     else:
         itemnewr = [f"{nowstr}\t{locinfo[tlst[1]]}\t{locinfo[tlst[2]]}\t{locinfo[tlst[3]]}'\t{locinfo[tlst[4]]}\t{locinfo[tlst[5]]}\t{locinfo[tlst[6]]}\t{locinfo[tlst[7]]}\t{locinfo[tlst[8]]}"]
     itemnewr.extend(itemread)
-    print(itemnewr)
+    print(itemnewr[:numlimit])
     write2txt(txtfilename, itemnewr)
     readinifromnote()
     cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
@@ -82,11 +94,5 @@ def foot2record():
 if __name__ == '__main__':
     # global log
     print(f'运行文件\t{__file__}')
-    # output = termux_telephony_deviceinfo()
-    # print(output)
-    # device_id = output["device_id"]
-    # print(device_id)
-    # output = termux_location()
-    # print(output)
     foot2record()
     print('Done.')
