@@ -27,9 +27,20 @@ with pathmagic.context():
 
 
 def iprecord():
-    outputdict = termux_telephony_deviceinfo()
-    # print(outputdict)
-    device_id = outputdict["device_id"].strip()
+    namestr = 'everip'
+    cfp, cfppath = getcfp(namestr)
+    if not cfp.has_section(namestr):
+        cfp.add_section(namestr)
+        cfp.write(open(cfppath, 'w', encoding='utf-8'))
+    if cfp.has_option(namestr, 'device_id'):
+        device_id = cfp.get(namestr, 'device_id')
+    else:
+        outputdict = termux_telephony_deviceinfo()
+        # print(outputdict)
+        device_id = outputdict["device_id"].strip()
+        cfp.set(namestr, 'device_id', device_id)
+        cfp.write(open(cfppath, 'w', encoding='utf-8'))
+        log.info(f'获取device_id:\t{device_id}，并写入ini文件:\t{cfppath}')
     ip = wifi = wifiid = tun = None
     ethlst = get_ip4alleth()
     print(ethlst)
@@ -53,6 +64,7 @@ def evalnone(input):
         return eval(input)
     else:
         return input
+
 
 def showiprecords():
     namestr = 'everip'
