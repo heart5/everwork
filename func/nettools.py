@@ -64,7 +64,7 @@ def get_ip4alleth(*args):
         ethinfo = os.popen("ifconfig -a | grep -A 0 'Link encap'").read()
         ptn = re.compile(r"^(?P<name>\w+)\W+", re.M)
         ethlst = re.findall(ptn, ethinfo)
-        print(ethlst)
+        # print(ethlst)
         ethlst2test = [x for x in ethlst if x != "lo"]
         for ethitem in ethlst2test:
             my_addr = os.popen(
