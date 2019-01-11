@@ -57,7 +57,7 @@ def notification2df(items):
             print('%d\t%s\t%s' % (dfxm.shape[0], ready2update, biaoti))
             if ready2update:
                 imglist2note(notestore, [], cfplife.get('notesguid', xm), biaoti,
-                             tablehtml2evernote(dfxm, biaoti))
+                        tablehtml2evernote(dfxm[:1000], biaoti))
                 cfplife.set('lifenotecount', xm, '%d' % dfxm.shape[0])
                 cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
 
