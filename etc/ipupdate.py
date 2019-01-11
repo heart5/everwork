@@ -96,7 +96,7 @@ def showiprecords():
         cfp.set(device_id, 'start', start)
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
 
-    if (ip != ipr) and (wifiid != wifiidr):
+    if (ip != ipr) or (wifiid != wifiidr):
         txtfilename = str(dirmainpath / 'data' / 'ifttt' /
                           f'ip_{device_id}.txt')
         print(txtfilename)
