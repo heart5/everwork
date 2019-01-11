@@ -48,6 +48,12 @@ def iprecord():
     return ip, wifi, wifiid, tun, device_id
 
 
+def evalnone(input):
+    if input == 'None':
+        return eval(input)
+    else:
+        return input
+
 def showiprecords():
     namestr = 'everip'
     cfp, cfppath = getcfp(namestr)
@@ -77,10 +83,10 @@ def showiprecords():
         cfp.set(device_id, 'guid', guid)
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
     if cfp.has_option(device_id, 'ipr'):
-        ipr = cfp.get(device_id, 'ipr')
-        wifir = cfp.get(device_id, 'wifir')
-        wifiidr = cfp.get(device_id, 'wifiidr')
-        tunr = cfp.get(device_id, 'tunr')
+        ipr = evalnone(cfp.get(device_id, 'ipr'))
+        wifir = evalnone(cfp.get(device_id, 'wifir'))
+        wifiidr = evalnone(cfp.get(device_id, 'wifiidr'))
+        tunr = evalnone(cfp.get(device_id, 'tunr'))
         startr = cfp.get(device_id, 'start')
     else:
         cfp.set(device_id, 'ipr', ip)
