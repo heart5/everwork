@@ -16,7 +16,7 @@ with pathmagic.context():
     from func.configpr import getcfp
     from func.first import getdirmain, dirmainpath
     from func.datatools import readfromtxt, write2txt
-    from func.evernt import token, get_notestore, imglist2note, evernoteapijiayi, makenote, readinifromnote
+    from func.evernttest import token, get_notestore, imglist2note, evernoteapijiayi, makenote, readinifromnote
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_telephony_deviceinfo, termux_telephony_cellinfo, termux_location
