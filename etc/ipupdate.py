@@ -137,8 +137,6 @@ def showiprecords():
             device_name = cfpfromnote.get(namestr, device_id)
         else:
             device_name = device_id
-        imglist2note(get_notestore(), [], guid,
-                     f'手机_{device_name}_ip更新记录', "<br></br>".join(itemnew))
         cfp.set(device_id, 'ipr', ip)
         cfp.set(device_id, 'wifir', str(wifi))
         cfp.set(device_id, 'wifiidr', str(wifiid))
@@ -146,6 +144,9 @@ def showiprecords():
         start = datetime.datetime.now().strftime('%F %T')
         cfp.set(device_id, 'start', start)
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
+        # 把笔记输出放到最后，避免更新不成功退出影响数据逻辑
+        imglist2note(get_notestore(), [], guid,
+                     f'手机_{device_name}_ip更新记录', "<br></br>".join(itemnew))
 
 
 if __name__ == '__main__':
