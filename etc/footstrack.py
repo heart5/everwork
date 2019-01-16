@@ -112,7 +112,7 @@ def foot2record():
     imglst = []
     ds = pd.Series(dissr, index=timesr)
     today = datetime.datetime.now().strftime('%F')
-    dstoday = ds[today]
+    dstoday = ds[today].sort_index().cumsum()
     print(dstoday)
     if dstoday.shape[0] > 1:
         dstoday.plot()
@@ -142,64 +142,6 @@ def foot2record():
     imglist2note(get_notestore(), imglst, guid,
                  f'手机_{device_name}_location更新记录',
                  "<br></br>".join(tlstitem))
-
-
-def showdis():
-    namestr = 'everloc'
-    cfp, cfppath = getcfp(namestr)
-    if not cfp.has_section(namestr):
-        cfp.add_section(namestr)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
-    if cfp.has_option(namestr, 'device_id'):
-        device_id = cfp.get(namestr, 'device_id')
-    else:
-        outputdict = termux_telephony_deviceinfo()
-        # print(outputdict)
-        device_id = outputdict["device_id"].strip()
-        cfp.set(namestr, 'device_id', device_id)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
-        log.info(f'获取device_id:\t{device_id}，并写入ini文件:\t{cfppath}')
-    txtfilename = str(dirmainpath / 'data' / 'ifttt' /
-                      f'location_{device_id}.txt')
-    print(txtfilename)
-    nowstr = datetime.datetime.now().strftime('%F %T')
-    itemread = readfromtxt(txtfilename)
-    itemfine = [x.split('\t') for x in itemread if not 'False' in x]
-    # print(itemfine)
-    if len(itemfine) < 2:
-        print('gps数据量不足，暂时无法输出移动距离信息')
-        return
-    timesr = list()
-    dissr = list()
-    for i in range(len(itemfine) - 1):
-        time1, lng1, lat1, *others = itemfine[i]
-        time2, lng2, lat2, *others = itemfine[i + 1]
-        # print(f'{lng1}\t{lat1}\t\t{lng2}\t{lat2}')
-        dis = geodistance(eval(lng1), eval(lat1), eval(lng2), eval(lat2))
-        itemtime = pd.to_datetime(time1)
-        timesr.append(itemtime)
-        dissr.append(round(dis, 1))
-    imglst = []
-    ds = pd.Series(dissr, index=timesr)
-    today = datetime.datetime.now().strftime('%F')
-    dstoday = ds[today]
-    print(dstoday)
-    if dstoday.shape[0] > 1:
-        dstoday.plot()
-        imgpathtoday = dirmainpath / 'img' / 'gpstoday.png'
-        touchfilepath2depth(imgpathtoday)
-        plt.savefig(str(imgpathtoday))
-        plt.close()
-        imglst.append(str(imgpathtoday))
-    dsdays = ds.resample('D').sum()
-    print(dsdays)
-    dsdays.plot()
-    imgpathdays = dirmainpath / 'img' / 'gpsdays.png'
-    touchfilepath2depth(imgpathdays)
-    plt.savefig(str(imgpathdays))
-    plt.close()
-    imglst.append(str(imgpathdays))
-    print(imglst)
 
 
 if __name__ == '__main__':
