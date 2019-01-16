@@ -141,7 +141,7 @@ def foot2record():
     tlstitem.extend(itemnewr)
     imglist2note(get_notestore(), imglst, guid,
                  f'手机_{device_name}_location更新记录',
-                 "<br></br>".join(tlstitem))
+                 "<br></br>".join(tlstitem[:50]))
 
 
 if __name__ == '__main__':
