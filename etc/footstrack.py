@@ -10,16 +10,21 @@ import subprocess
 import datetime
 from threading import Timer
 from math import radians, cos, sin, asin, sqrt
+import pandas as pd
+import numpy as np
+from pylab import *
 
 import pathmagic
 with pathmagic.context():
     from func.configpr import getcfp
-    from func.first import getdirmain, dirmainpath
+    from func.first import getdirmain, dirmainpath, touchfilepath2depth
     from func.datatools import readfromtxt, write2txt
-    from func.evernttest import token, get_notestore, imglist2note, evernoteapijiayi, makenote, readinifromnote
+    from func.evernttest import token, get_notestore, imglist2note, \
+        evernoteapijiayi, makenote, readinifromnote
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
-    from func.termuxtools import termux_telephony_deviceinfo, termux_telephony_cellinfo, termux_location
+    from func.termuxtools import termux_telephony_deviceinfo, \
+        termux_telephony_cellinfo, termux_location
 
 
 def geodistance(lng1, lat1, lng2, lat2):
@@ -82,10 +87,49 @@ def foot2record():
     if locinfo == False:
         itemnewr = [f"{nowstr}\t{str(locinfo)}"]
     else:
-        itemnewr = [f"{nowstr}\t{locinfo[tlst[1]]}\t{locinfo[tlst[2]]}\t{locinfo[tlst[3]]}'\t{locinfo[tlst[4]]}\t{locinfo[tlst[5]]}\t{locinfo[tlst[6]]}\t{locinfo[tlst[7]]}\t{locinfo[tlst[8]]}"]
+        itemnewr = [f"{nowstr}\t{locinfo[tlst[1]]}\t{locinfo[tlst[2]]}"
+                    f"\t{locinfo[tlst[3]]}\t{locinfo[tlst[4]]}"
+                    f"\t{locinfo[tlst[5]]}\t{locinfo[tlst[6]]}"
+                    f"\t{locinfo[tlst[7]]}\t{locinfo[tlst[8]]}"]
     itemnewr.extend(itemread)
     print(itemnewr[:numlimit])
     write2txt(txtfilename, itemnewr)
+    itemfine = [x.split('\t') for x in itemnewr if not 'False' in x]
+    # print(itemfine)
+    if len(itemfine) < 2:
+        print('gps数据量不足，暂时无法输出移动距离信息')
+        return
+    timesr = list()
+    dissr = list()
+    for i in range(len(itemfine) - 1):
+        time1, lng1, lat1, *others = itemfine[i]
+        time2, lng2, lat2, *others = itemfine[i + 1]
+        # print(f'{lng1}\t{lat1}\t\t{lng2}\t{lat2}')
+        dis = geodistance(eval(lng1), eval(lat1), eval(lng2), eval(lat2))
+        itemtime = pd.to_datetime(time1)
+        timesr.append(itemtime)
+        dissr.append(round(dis, 1))
+    imglst = []
+    ds = pd.Series(dissr, index=timesr)
+    today = datetime.datetime.now().strftime('%F')
+    dstoday = ds[today]
+    print(dstoday)
+    if dstoday.shape[0] > 1:
+        dstoday.plot()
+        imgpathtoday = dirmainpath / 'img' / 'gpstoday.png'
+        touchfilepath2depth(imgpathtoday)
+        plt.savefig(str(imgpathtoday))
+        plt.close()
+        imglst.append(str(imgpathtoday))
+    dsdays = ds.resample('D').sum()
+    print(dsdays)
+    dsdays.plot()
+    imgpathdays = dirmainpath / 'img' / 'gpsdays.png'
+    touchfilepath2depth(imgpathdays)
+    plt.savefig(str(imgpathdays))
+    plt.close()
+    imglst.append(str(imgpathdays))
+    print(imglst)
     readinifromnote()
     cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
     namestr = 'ip'
@@ -95,7 +139,7 @@ def foot2record():
         device_name = device_id
     tlstitem = ["\t".join(tlst)]
     tlstitem.extend(itemnewr)
-    imglist2note(get_notestore(), [], guid,
+    imglist2note(get_notestore(), imglst, guid,
                  f'手机_{device_name}_location更新记录',
                  "<br></br>".join(tlstitem))
 
@@ -125,17 +169,42 @@ def showdis():
     if len(itemfine) < 2:
         print('gps数据量不足，暂时无法输出移动距离信息')
         return
+    timesr = list()
+    dissr = list()
     for i in range(len(itemfine) - 1):
         time1, lng1, lat1, *others = itemfine[i]
         time2, lng2, lat2, *others = itemfine[i + 1]
         # print(f'{lng1}\t{lat1}\t\t{lng2}\t{lat2}')
         dis = geodistance(eval(lng1), eval(lat1), eval(lng2), eval(lat2))
-        print(f"{time1}\t{dis}")
+        itemtime = pd.to_datetime(time1)
+        timesr.append(itemtime)
+        dissr.append(round(dis, 1))
+    imglst = []
+    ds = pd.Series(dissr, index=timesr)
+    today = datetime.datetime.now().strftime('%F')
+    dstoday = ds[today]
+    print(dstoday)
+    if dstoday.shape[0] > 1:
+        dstoday.plot()
+        imgpathtoday = dirmainpath / 'img' / 'gpstoday.png'
+        touchfilepath2depth(imgpathtoday)
+        plt.savefig(str(imgpathtoday))
+        plt.close()
+        imglst.append(str(imgpathtoday))
+    dsdays = ds.resample('D').sum()
+    print(dsdays)
+    dsdays.plot()
+    imgpathdays = dirmainpath / 'img' / 'gpsdays.png'
+    touchfilepath2depth(imgpathdays)
+    plt.savefig(str(imgpathdays))
+    plt.close()
+    imglst.append(str(imgpathdays))
+    print(imglst)
 
 
 if __name__ == '__main__':
     # global log
     print(f'运行文件\t{__file__}')
     foot2record()
-    showdis()
+    # showdis()
     print('Done.')
