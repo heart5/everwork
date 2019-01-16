@@ -1,4 +1,3 @@
-
 """
 记录足迹
 """
@@ -10,6 +9,7 @@ import socket
 import subprocess
 import datetime
 from threading import Timer
+from math import radians, cos, sin, asin, sqrt
 
 import pathmagic
 with pathmagic.context():
@@ -20,6 +20,15 @@ with pathmagic.context():
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_telephony_deviceinfo, termux_telephony_cellinfo, termux_location
+
+
+def geodistance(lng1, lat1, lng2, lat2):
+    lng1, lat1, lng2, lat2 = map(radians, [lng1, lat1, lng2, lat2])
+    dlon = lng2 - lng1
+    dlat = lat2 - lat1
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2) ** 2
+    dis = 2 * asin(sqrt(a)) * 6371 * 1000
+    return dis
 
 
 @timethis
@@ -91,8 +100,42 @@ def foot2record():
                  "<br></br>".join(tlstitem))
 
 
+def showdis():
+    namestr = 'everloc'
+    cfp, cfppath = getcfp(namestr)
+    if not cfp.has_section(namestr):
+        cfp.add_section(namestr)
+        cfp.write(open(cfppath, 'w', encoding='utf-8'))
+    if cfp.has_option(namestr, 'device_id'):
+        device_id = cfp.get(namestr, 'device_id')
+    else:
+        outputdict = termux_telephony_deviceinfo()
+        # print(outputdict)
+        device_id = outputdict["device_id"].strip()
+        cfp.set(namestr, 'device_id', device_id)
+        cfp.write(open(cfppath, 'w', encoding='utf-8'))
+        log.info(f'获取device_id:\t{device_id}，并写入ini文件:\t{cfppath}')
+    txtfilename = str(dirmainpath / 'data' / 'ifttt' /
+                      f'location_{device_id}.txt')
+    print(txtfilename)
+    nowstr = datetime.datetime.now().strftime('%F %T')
+    itemread = readfromtxt(txtfilename)
+    itemfine = [x.split('\t') for x in itemread if not 'False' in x]
+    # print(itemfine)
+    if len(itemfine) < 2:
+        print('gps数据量不足，暂时无法输出移动距离信息')
+        return
+    for i in range(len(itemfine) - 1):
+        time1, lng1, lat1, *others = itemfine[i]
+        time2, lng2, lat2, *others = itemfine[i + 1]
+        # print(f'{lng1}\t{lat1}\t\t{lng2}\t{lat2}')
+        dis = geodistance(eval(lng1), eval(lat1), eval(lng2), eval(lat2))
+        print(f"{time1}\t{dis}")
+
+
 if __name__ == '__main__':
     # global log
     print(f'运行文件\t{__file__}')
     foot2record()
+    showdis()
     print('Done.')
