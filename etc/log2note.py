@@ -8,6 +8,8 @@ log目录
 import os
 from threading import Timer
 import pathmagic
+import re
+import pandas as pd
 
 with pathmagic.context():
     from func.first import getdirmain
@@ -50,6 +52,15 @@ def log2note(noteguid, loglimit, levelstr=''):
             loglines = loglines + [line.strip()
                                    for line in flog if line.find(levelstrinner) >= 0]
 
+    ptn = re.compile('\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}')
+    tmlst = [pd.to_datetime(re.match(ptn, x).group()) for x in loglines if
+             re.match(ptn, x) is not None]
+    loglines = [x for x in loglines if re.match(ptn, x) is not None]
+    logsr = pd.Series(loglines, index=tmlst)
+    logsr = logsr.sort_index()
+    # print(logsr.index)
+    # print(logsr)
+    loglines = list(logsr)
     # print(loglines[:20])
     # print(len(loglines))
     print(f'日志的{levelstr4title}记录共有{len(loglines)}条，只取时间最近的{loglimit}条')
@@ -80,15 +91,6 @@ def log2note(noteguid, loglimit, levelstr=''):
             errmsg = f'处理新的log{levelstr4title}信息到笔记时出现未名错误。{eeee}'
             log.critical(errmsg)
             ifttt_notify(errmsg, 'log2note')
-
-
-def log2notetimer(jiangemiao):
-
-    log2note()
-
-    global timer_log2note
-    timer_log2note = Timer(jiangemiao, log2notetimer, [jiangemiao])
-    timer_log2note.start()
 
 
 if __name__ == '__main__':
