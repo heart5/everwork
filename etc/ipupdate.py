@@ -53,6 +53,9 @@ def iprecord():
             wifiinfo = termux_wifi_connectioninfo()
             print(wifiinfo)
             wifi = wifiinfo['ssid']
+            if wifi.find('unknown ssid') >= 0:
+                log.warning(f'WIFI处于假连状态：{wifi}\t{ipinner}')
+                continue
             wifiid = wifiinfo['bssid']
         ip = ipinner
 
@@ -71,7 +74,7 @@ def showiprecords():
     cfp, cfppath = getcfp(namestr)
     ip, wifi, wifiid, tun, device_id = iprecord()
     if ip is None:
-        log.Warning('无效ip，可能是没有处于联网状态')
+        log.critical('无效ip，可能是没有处于联网状态')
         exit(1)
     print(f'{ip}\t{wifi}\t{wifiid}\t{tun}\t{device_id}')
     if not cfp.has_section(device_id):
