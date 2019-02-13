@@ -109,7 +109,7 @@ def showiprecords():
         cfp.set(device_id, 'wifir', str(wifi))
         wifir = wifi
         cfp.set(device_id, 'wifiidr', str(wifiid))
-        wifiir = wifiid
+        wifiidr = wifiid
         cfp.set(device_id, 'tunr', str(tun))
         tunr = tun
         start = datetime.datetime.now().strftime('%F %T')
