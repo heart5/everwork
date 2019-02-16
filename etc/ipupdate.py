@@ -135,7 +135,7 @@ def showiprecords():
         print(itemnew)
         readinifromnote()
         cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
-        namestr = 'ip'
+        namestr = 'device'
         if cfpfromnote.has_option(namestr, device_id):
             device_name = cfpfromnote.get(namestr, device_id)
         else:
