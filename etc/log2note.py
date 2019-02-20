@@ -103,9 +103,9 @@ def log2notes():
     if cfplog.has_option(namestr, 'device_id'):
         device_id = cfplog.get(namestr, 'device_id')
     else:
-        # outputdict = termux_telephony_deviceinfo()
-        # device_id = outputdict["device_id"].strip()
-        device_id =getdeviceid()
+        outputdict = termux_telephony_deviceinfo()
+        device_id = outputdict["device_id"].strip()
+        # device_id =getdeviceid()
         cfplog.set(namestr, 'device_id', device_id)
         cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
         log.info(f'获取device_id:\t{device_id}，并写入ini文件：\t{cfplogpath}')
