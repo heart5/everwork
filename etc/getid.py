@@ -3,11 +3,10 @@
 功能描述
 """
 
-import pathmagic
-from func.logme import log
 import os, sys, platform
 import wmi
 
+import pathmagic
 with pathmagic.context():
     from func.first import getdirmain
     from func.configpr import getcfp
