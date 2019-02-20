@@ -19,7 +19,7 @@ with pathmagic.context():
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_location, termux_telephony_deviceinfo
     from func.nettools import ifttt_notify
-    from etc.getid import getdeviceid
+    # from etc.getid import getdeviceid
     import evernote.edam.type.ttypes as ttypes
 
 
