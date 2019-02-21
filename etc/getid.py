@@ -5,6 +5,7 @@
 
 import os, sys, platform
 import wmi
+# import wmi_client_wrapper as wmi
 
 import pathmagic
 with pathmagic.context():
