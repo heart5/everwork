@@ -19,7 +19,7 @@ with pathmagic.context():
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_location, termux_telephony_deviceinfo
     from func.nettools import ifttt_notify
-    # from etc.getid import getdeviceid
+    from etc.getid import getdeviceid
     import evernote.edam.type.ttypes as ttypes
 
 
@@ -104,8 +104,8 @@ def log2notes():
         device_id = cfplog.get(namestr, 'device_id')
     else:
         outputdict = termux_telephony_deviceinfo()
-        device_id = outputdict["device_id"].strip()
-        # device_id =getdeviceid()
+        # device_id = outputdict["device_id"].strip()
+        device_id =getdeviceid()
         cfplog.set(namestr, 'device_id', device_id)
         cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
         log.info(f'获取device_id:\t{device_id}，并写入ini文件：\t{cfplogpath}')
