@@ -4,7 +4,6 @@
 """
 
 import os, sys, platform
-import wmi
 # import wmi_client_wrapper as wmi
 
 import pathmagic
@@ -12,6 +11,10 @@ with pathmagic.context():
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_location, termux_telephony_deviceinfo
+    try:
+        import wmi
+    except ImportError:
+        log.warn('wmi库未安装或者是在linux系统下无法成功import而已。')
 
 # c = wmi.WMI()
 #
