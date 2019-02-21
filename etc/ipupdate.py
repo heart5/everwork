@@ -24,6 +24,7 @@ with pathmagic.context():
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_telephony_deviceinfo, termux_telephony_cellinfo, termux_wifi_connectioninfo, termux_wifi_scaninfo
+    from etc.getid import getdeviceid
 
 
 def iprecord():
@@ -35,9 +36,9 @@ def iprecord():
     if cfp.has_option(namestr, 'device_id'):
         device_id = cfp.get(namestr, 'device_id')
     else:
-        outputdict = termux_telephony_deviceinfo()
-        # print(outputdict)
-        device_id = outputdict["device_id"].strip()
+        # outputdict = termux_telephony_deviceinfo()
+        # device_id = outputdict["device_id"].strip()
+        device_id = getdeviceid()
         cfp.set(namestr, 'device_id', device_id)
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
         log.info(f'获取device_id:\t{device_id}，并写入ini文件:\t{cfppath}')

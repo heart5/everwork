@@ -2,29 +2,17 @@
 记录足迹
 """
 
-import os
-# import urllib2
-import re
-import socket
-import subprocess
-import datetime
-from threading import Timer
-from math import radians, cos, sin, asin, sqrt
-import pandas as pd
-import numpy as np
 from pylab import *
 
 import pathmagic
 with pathmagic.context():
     from func.configpr import getcfp
-    from func.first import getdirmain, dirmainpath, touchfilepath2depth
+    from func.first import dirmainpath
     from func.datatools import readfromtxt, write2txt
-    from func.evernttest import token, get_notestore, imglist2note, \
-        evernoteapijiayi, makenote, readinifromnote
     from func.logme import log
-    from func.wrapfuncs import timethis, ift2phone
-    from func.termuxtools import termux_telephony_deviceinfo, \
-        termux_telephony_cellinfo, termux_location
+    from func.wrapfuncs import timethis
+    from func.termuxtools import termux_location
+    from etc.getid import getdeviceid
 
 
 @timethis
@@ -37,9 +25,9 @@ def foot2record():
     if cfp.has_option(namestr, 'device_id'):
         device_id = cfp.get(namestr, 'device_id')
     else:
-        outputdict = termux_telephony_deviceinfo()
-        # print(outputdict)
-        device_id = outputdict["device_id"].strip()
+        # outputdict = termux_telephony_deviceinfo()
+        # device_id = outputdict["device_id"].strip()
+        device_id = getdeviceid()
         cfp.set(namestr, 'device_id', device_id)
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
         log.info(f'获取device_id:\t{device_id}，并写入ini文件:\t{cfppath}')
