@@ -150,6 +150,9 @@ def getdeviceid():
     print(sysstr)
     if sysstr == "Windows":
         c = wmi.WMI()
+        bios_id = c.Win32_BIOS()[0]
+        biosidc = bios_id.BiosCharacteristics  # BIOS特征码
+        print(biosidc)
         memorys = []
         for mem in c.Win32_PhysicalMemory():
             tmpmsg = {}
