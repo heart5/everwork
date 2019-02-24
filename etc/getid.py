@@ -3,7 +3,10 @@
 功能描述
 """
 
-import os, sys, platform
+import os
+import sys
+import platform
+import uuid
 # import wmi_client_wrapper as wmi
 
 import pathmagic
@@ -150,20 +153,30 @@ def getdeviceid():
     print(sysstr)
     if sysstr == "Windows":
         c = wmi.WMI()
-        bios_id = c.Win32_BIOS()[0]
-        biosidc = bios_id.BiosCharacteristics  # BIOS特征码
-        print(biosidc)
-        memorys = []
-        for mem in c.Win32_PhysicalMemory():
-            tmpmsg = {}
-            tmpmsg['UUID'] = mem.qualifiers['UUID'][1:-1]
-            tmpmsg['BankLabel'] = mem.BankLabel
-            tmpmsg['SerialNumber'] = mem.SerialNumber.strip()
-            tmpmsg['ConfiguredClockSpeed'] = mem.ConfiguredClockSpeed
-            tmpmsg['Capacity'] = mem.Capacity
-            tmpmsg['ConfiguredVoltage'] = mem.ConfiguredVoltage
-            memorys.append(tmpmsg)
-        id = memorys[0]['UUID']
+        bios_id = c.Win32_BIOS()
+        # biosidc = bios_id.BiosCharacteristics  # BIOS特征码
+        bioss = bios_id[0].SerialNumber.strip()
+        # for bios in bios_id:
+        #     print(bios)
+        cpu_id = c.Win32_Processor()
+        cpus = cpu_id[0].SerialNumber.strip()
+        cpus = cpu_id[0].ProcessorId.strip()
+        # for cpu in cpu_id:
+        #     print(cpu)
+        board_id = c.Win32_BaseBoard()
+        boards = board_id[0].SerialNumber.strip()
+        # boards = board_id[0].Product.strip()
+        # for board in board_id:
+        #     print(board)
+        disk_id = c.Win32_DiskDrive()
+        disks = disk_id[0].SerialNumber.strip()
+        # for disk in disk_id:
+        #     print(disk)
+        idstr = f'{bioss}\t{cpus}\t{boards}\t{disks}'
+        uid = uuid.uuid3(uuid.NAMESPACE_URL, idstr)
+        print(uid)
+        print(hex(hash(uid)))
+        id = hex(hash(uid))
     elif sysstr == 'Linux':
         outputdict = termux_telephony_deviceinfo()
         id = outputdict["device_id"].strip()
