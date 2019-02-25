@@ -483,6 +483,18 @@ def readinifromnote():
     # noteguid_inifromnote = 'e0565861-db9e-4efd-be00-cbce06d0cf98'
     global note_store
     note_store = get_notestore()
+    if cfpeverwork.has_option('evernote', 'ininoteupdatenum'):
+        ininoteupdatenum = cfpeverwork.getint('evernote', 'ininoteupdatenum')
+    else:
+        ininoteupdatenum = 0
+    note = note_store.getNote(noteguid_inifromnote, True, True, False, False)
+    if note.updateSequenceNum == ininoteupdatenum:
+        print(f'配置笔记无变化，不对本地化的ini配置文件做更新。')
+        return
+    else:
+        cfpeverwork.set('evernote', 'ininoteupdatenum', str(note.updateSequenceNum))
+        cfpeverwork.write(open(cfpeverworkpath, 'w', encoding='utf-8'))
+        log.info(f'配置笔记内容有变化，更新本地化的ini配置文件。')
     soup = BeautifulSoup(note_store.getNoteContent(
         noteguid_inifromnote), "html.parser")
     # print(soup)
