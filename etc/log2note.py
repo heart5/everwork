@@ -103,7 +103,7 @@ def log2notes():
     if cfplog.has_option(namestr, 'device_id'):
         device_id = cfplog.get(namestr, 'device_id')
     else:
-        outputdict = termux_telephony_deviceinfo()
+        # outputdict = termux_telephony_deviceinfo()
         # device_id = outputdict["device_id"].strip()
         device_id =getdeviceid()
         cfplog.set(namestr, 'device_id', device_id)
