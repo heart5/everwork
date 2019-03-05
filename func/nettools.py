@@ -50,15 +50,28 @@ def get_ip(*args):
         return ip
 
 
+def get_host_ip():
+    """
+    在windows下查询本机ip地址,对多个网卡可以得到wlan0那个,亲测有效
+    :return: ip
+    """
+    s = None
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        sn = s.getsockname()
+        # print(sn)
+        ip = sn[0]
+    finally:
+        s.close()
+    return ip
+
+
 def get_ip4alleth(*args):
     resultiplst = []
     if platform.system() == 'Windows':
-        my_name = socket.getfqdn(socket.gethostbyname('localhost'))
-        print(my_name)
-        my_addr = socket.gethostbyname(my_name)
-        print(my_addr)
-        ip = my_addr.split('\n')[0]
-        return ip
+        ip = get_host_ip()
+        return [['wlan', ip]]
     else:
 
         ethinfo = os.popen("ifconfig -a | grep -A 0 'Link encap'").read()
@@ -81,23 +94,6 @@ def get_ip4alleth(*args):
             #  print(ip)
     #  print(resultiplst)
     return resultiplst
-
-
-def get_host_ip():
-    """
-    查询本机ip地址
-    :return: ip
-    """
-    s = None
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('8.8.8.8', 80))
-        sn = s.getsockname()
-        # print(sn)
-        ip = sn[0]
-    finally:
-        s.close()
-    return ip
 
 
 def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务器'):
@@ -205,7 +201,7 @@ def ifttt_notify(content="content", funcname="funcname"):
     log.info(f'{pu.machine}_{pu.node}\t{content}\t{funcname}')
 
 
-def test4trycounttimes2():
+def tst4trycounttimes2():
     ifttt_notify("test for ifttt notify", f"{__file__}")
 
     @trycounttimes2('xmu.edu.cn网站服务器')
@@ -238,6 +234,7 @@ if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
 
     print(get_ip4alleth('wlan0'))
+    print(get_host_ip())
     #  test4trycounttimes2()
 
     print('Done.测试完毕。')
