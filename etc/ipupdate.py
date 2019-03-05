@@ -169,7 +169,6 @@ def showiprecords():
 
 
 if __name__ == '__main__':
-    # global log
-    print(f'运行文件\t{__file__}')
+    log.info(f'开始运行文件\t{__file__}')
     showiprecords()
-    print('Done.')
+    log.info(f'文件\t{__file__}\t执行完毕。Done.')

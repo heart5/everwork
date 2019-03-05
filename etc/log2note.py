@@ -167,6 +167,6 @@ def log2notes():
  
 
 if __name__ == '__main__':
-    print(f'开始运行文件\t{__file__}')
+    log.info(f'开始运行文件\t{__file__}')
     log2notes()
-    print(f'Done.结束执行文件\t{__file__}')
+    log.info(f'Done.结束执行文件\t{__file__}')
