@@ -6,6 +6,7 @@
 
 import os
 import datetime
+import platform
 import subprocess
 import socket
 import requests
@@ -45,6 +46,20 @@ def iprecord():
     ip = wifi = wifiid = tun = None
     ethlst = get_ip4alleth()
     print(ethlst)
+    if platform.system() == 'Windows':
+        ip = ethlst[0][1]
+        cmd = 'netsh wlan show interfaces'
+        rrr = os.popen(cmd)
+        rrrinfo = rrr.readlines()
+        print(rrrinfo)
+        for line in rrrinfo:
+            if line.find('BSSID') >= 0:
+                wifi = line.split(':', 1)[1].strip()
+                continue
+            if line.find('SSID') >= 0:
+                wifiid = line.split(':', 1)[1].strip()
+                continue
+        return ip, wifi, wifiid, tun, device_id
     for ethinfo in ethlst:
         name, ipinner = ethinfo
         if name.startswith('tun'):
@@ -150,7 +165,7 @@ def showiprecords():
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
         # 把笔记输出放到最后，避免更新不成功退出影响数据逻辑
         imglist2note(get_notestore(), [], guid,
-                     f'手机_{device_name}_ip更新记录', "<br></br>".join(itemnew))
+                     f'服务器_{device_name}_ip更新记录', "<br></br>".join(itemnew))
 
 
 if __name__ == '__main__':
