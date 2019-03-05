@@ -17,7 +17,8 @@ with pathmagic.context():
     try:
         import wmi
     except ImportError:
-        log.warning('wmi库未安装或者是在linux系统下无法成功import而已。')
+        # log.warning('wmi库未安装或者是在linux系统下无法成功import而已。')
+        print('wmi库未安装或者是在linux系统下无法成功import而已。')
 
 # c = wmi.WMI()
 #
