@@ -153,6 +153,7 @@ def trycounttimes2(servname='服务器', maxtimes=8, maxsecs=30):
                     return result
                 except (
                         OSError, ConnectionRefusedError, ConnectionResetError,
+                        requests.exceptions.ConnectionError,
                         NewConnectionError, ConnectionError, struct.error,
                         ssl.SSLError, EDAMSystemException
                 ) as eee:
