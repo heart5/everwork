@@ -152,10 +152,12 @@ def trycounttimes2(servname='服务器', maxtimes=8, maxsecs=30):
                     result = jutifunc(*args, **kwargs)
                     return result
                 except (
-                        OSError, ConnectionRefusedError, ConnectionResetError,
-                        requests.exceptions.ConnectionError,
-                        NewConnectionError, ConnectionError, struct.error,
-                        ssl.SSLError, EDAMSystemException
+                        ConnectionRefusedError, ConnectionResetError,
+                        ConnectionAbortedError, NewConnectionError,
+                        ConnectionError,
+                        struct.error,socket.gaierror,
+                        ssl.SSLError, EDAMSystemException,
+                        OSError, IndexError, Exception
                 ) as eee:
 
                     if hasattr(eee, 'errno'):
