@@ -1,8 +1,12 @@
 # coding=utf8
+"""
+微信大观园，工作优先，娱乐生活
+"""
 import time
 import datetime
 import requests
 import itchat
+import re
 from pathlib import Path
 from itchat.content import *
 
@@ -11,8 +15,19 @@ with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain
     from func.logme import log
     from func.nettools import trycounttimes2
-"""
-"""
+    from func.evernttest import token, get_notestore, makenote, imglist2note, evernoteapijiayi
+    import evernote.edam.type.ttypes as ttypes
+
+def newchatnote():
+    global note_store
+    parentnotebook = note_store.getNotebook('4524187f-c131-4d7d-b6cc-a1af20474a7f')
+    evernoteapijiayi()
+    note = ttypes.Note()
+    note.title = f"微信记录:{time.strftime('%Y-%m-%d_%H:%M:%S',time.localtime(time.time()))}"
+    print(note.title)
+    notechat= makenote(token, note_store, note.title, notebody='', parentnotebook=parentnotebook)
+
+    return notechat
 
 
 def get_response(msg):
@@ -26,6 +41,7 @@ def get_response(msg):
         # 将会返回一个None
         return
 
+
 def showmsg(msg):
     # print(msg)
     for item in msg:
@@ -33,13 +49,15 @@ def showmsg(msg):
         # if item.lower().find('name') < 0:
             # continue
         print(f'{item}\t{type(msg[item])}', end='\t')
-        if type(msg[item]) in [dict, itchat.storage.templates.Chatroom,
+        if type(msg[item]) in [dict,
+                itchat.storage.templates.Chatroom,
                 itchat.storage.templates.User]:
             print(len(msg[item]))
             for child in msg[item]:
                 childmsg = msg[item][child]
                 print(f'\t{child}\t{type(childmsg)}', end='\t')
-                if type(childmsg) in [dict, itchat.storage.templates.User,
+                if type(childmsg) in [dict,
+                        itchat.storage.templates.User,
                         itchat.storage.templates.ContactList]:
                     lenchildmsg = len(childmsg)
                     print(lenchildmsg)
@@ -51,74 +69,114 @@ def showmsg(msg):
             print(msg[item])
 
 
-# 这里是我们在“1. 实现微信消息的获取”中已经用到过的同样的注册方法
-# @itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING, PICTURE, RECORDING,
-    # ATTACHMENT, VIDEO, FRIENDS, SYSTEM])
-@itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING, PICTURE, RECORDING,
-    ATTACHMENT, VIDEO, FRIENDS], isFriendChat=True, isGroupChat=True,
-    isMpChat=True)
-def tuling_reply(msg):
-    if msg['Type'].upper() in [
-            # 'TEXT', 
-            'MAP',
-            'CARD',
-            'NOTE',
-            'SHARING',
-            # 'PICTURE',
-            # 'RECORDING',
-            # 'ATTACHMENT', 
-            # 'VIDEO',
-            'FRIENDS'
-            ]:
-        showmsg(msg)
+def formatmsg(msg):
     timetuple = time.localtime(msg['CreateTime'])
     # print(timetuple)
     timestr = time.strftime("%m-%d %H:%M:%S", timetuple)
     owner = itchat.web_init()
     send = (msg['FromUserName'] == owner['User']['UserName'])
-    showname = msg['User']['NickName']
-    if len(msg['User']['RemarkName']) > 0:
-        showname = msg['User']['RemarkName']
-    print(f"{timestr}\t{showname}", end='')
+    if 'NickName' in msg["User"].keys():
+        showname = msg['User']['NickName']
+        if len(msg['User']['RemarkName']) > 0:
+            showname = msg['User']['RemarkName']       
+    else:
+        showname = ""
+        log.Warning(f"NickName键值不存在哦")
+        showmsg(msg)
+
+    # print(f"{timestr}\t{showname}", end='')
     # if type(msg['User']) == itchat.storage.templates.Chatroom:
     if msg['FromUserName'].startswith('@@'):
-        print(f"（群)\t{msg['ActualNickName']}", end='')
-        showname += f"_{msg['ActualNickName']}"
+        # print(f"（群)\t{msg['ActualNickName']}", end='')
+        showname += f"(群){msg['ActualNickName']}"
     elif msg['ToUserName'].startswith('@@'):
-        print(f"（群）\t{msg['User']['Self']['NickName']}", end='')
-        showname += f"_{msg['User']['Self']['NickName']}"
+        # print(f"（群）\t{msg['User']['Self']['NickName']}", end='')
+        showname += f"(群){msg['User']['Self']['NickName']}"
     # print(f"\t{msg['Type']}\t{msg['MsgType']}\t{msg['Text']}")
-    print(f"\t{send}\t{msg['Type']}\t{msg['Text']}")
-    if msg['Type'].upper() in ['PICTURE', 'RECORDING', 'VIDEO', 'ATTACHMENT']:
-        if send:
-            showname = owner['User']['NickName']
-        filepath = getdirmain() / "img" / "webchat" / time.strftime("%Y%m%d",
-            timetuple) / f"{showname}_{msg['FileName']}"
-        touchfilepath2depth(filepath)
-        log.info(f"保存{msg['Type']}类型文件：\t{str(filepath)}")
-        msg['Text'](str(filepath))
-    # 为了保证在图灵Key出现问题的时候仍旧可以回复，这里设置一个默认回复
-    # defaultReply = 'I received: ' + msg['Text']
-    # if msg['User']['NickName'] == '小元宝':
-        # print(f'收到小元宝的信息:\t{msg["Text"]}')
-    reply = get_response(msg['Text'])
-    # a or b的意思是，如果a有内容，那么返回a，否则返回b
-    # 有内容一般就是指非空或者非None，你可以用`if a: print('True')`来测试
-    # return reply or defaultReply
-    return
+    # print(f"\t{send}\t{msg['Type']}\t{msg['Text']}")
+    fmtext = msg['Text']
 
-# @itchat.msg_register([PICTURE, RECORDING, VIDEO, ATTACHMENT], isFriendChat=True, isGroupChat=True,
-    # isMpChat=True)
-# def download_files(msg):
-    # msg['Text'](msg['FileName'])
+    formatMsg = {'fmId': msg['MsgId'], 'fmTime': timestr, 'fmSend': send, 'fmSender': showname,
+                 'fmType': msg['Type'], 'fmText': fmtext}
 
-# 为了让实验过程更加方便（修改程序不用多次扫码），我们使用热启动
-itchat.auto_login(hotReload=True)
+    return formatMsg
+
+
+def showfmmsg(formatmsg):
+    # msgid = formatmsg["fmId"]
+    msgcontent = ""
+    for item in formatmsg:
+        if item == "fmId":
+            continue
+        msgcontent += f"{formatmsg[item]}\t"
+    msgcontent = msgcontent[:-1]
+    # chatmsg = {"id":msgid, "content":msgcontent}
+    print(f"{msgcontent}")
+
+    global webchats, notechat, note_store
+    # webchats.append(chatmsg)
+    webchats.insert(0, msgcontent)
+    imglist2note(note_store, [], notechat.guid, notechat.title,
+            "<br></br>".join(webchats) )
+    # print(webchats)
+
+@itchat.msg_register([CARD, FRIENDS],
+        isFriendChat=True, isGroupChat=True, isMpChat=True)
+def tuling_reply(msg):
+    showmsg(msg)
+    showfmmsg(formatmsg(msg))
+
+@itchat.msg_register([NOTE], isFriendChat=True, isGroupChat=True, isMpChat=True)
+def tuling_reply(msg):
+    # showmsg(msg)
+    innermsg = formatmsg(msg)
+    if msg["FileName"] == "微信转账":
+        ptn = re.compile("<pay_memo><!\[CDATA\[(.*)\]\]></pay_memo>")
+        pay = re.search(ptn, msg["Content"])[1]
+        innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+    else:
+        showmsg(msg)
+    showfmmsg(innermsg)
+
+
+
+@itchat.msg_register([MAP], isFriendChat=True, isGroupChat=True, isMpChat=True)
+def tuling_reply(msg):
+    # showmsg(msg)
+    innermsg = formatmsg(msg)
+    gps = msg['Url'].split('=')[1]
+    # print(f"[{gps}]")
+    innermsg['fmText'] = innermsg['fmText']+f"[{gps}]"
+    showfmmsg(innermsg)
+
+
+@itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO],
+        isFriendChat=True, isGroupChat=True, isMpChat=True)
+def tuling_reply(msg):
+    innermsg = formatmsg(msg)
+    owner = itchat.web_init()
+    # if innermsg['fmSend']:
+    # innermsg['fmSender'] = owner['User']['NickName']
+    filepath = getdirmain() / "img" / "webchat" / time.strftime("%Y%m%d", time.localtime(msg['CreateTime'])) / f"{innermsg['fmSender']}_{msg['FileName']}"
+    touchfilepath2depth(filepath)
+    log.info(f"保存{innermsg['fmType']}类型文件：\t{str(filepath)}")
+    msg['Text'](str(filepath))
+    innermsg['fmText'] = str(filepath)
+
+    showfmmsg(innermsg)
+
+
+@itchat.msg_register([TEXT, SHARING],
+        isFriendChat=True, isGroupChat=True, isMpChat=True)
+def tuling_reply(msg):
+    showfmmsg(formatmsg(msg))
+
 
 def listfriends(num=-10):
     friends = itchat.get_friends(update=True)
     for fr in friends[num:]:
         print(fr)
+
 
 def listchatrooms():
     chatrooms = itchat.get_chatrooms(update=True)
@@ -129,13 +187,34 @@ def listchatrooms():
 def getowner():
     owner = itchat.web_init()
     showmsg(owner)
+    return owner
+
+
+def after_login():
+    log.info(f"登入《{itchat.web_init()['User']['NickName']}》的微信服务")
+
+
+def after_logout():
+    log.info(f'退出微信登录')
+
 
 @trycounttimes2('微信服务器')
 def keepliverun():
-    log.info("启动微信信息处理服务")
+    # 为了让实验过程更加方便（修改程序不用多次扫码），我们使用热启动
+    status4login = itchat.check_login()
+    if status4login == '200':
+        log.info(f'已成功登录，自动退出避免重复登录')
+        itchat.logout()
+    itchat.auto_login(enableCmdQR=True, hotReload=True,
+                      loginCallback=after_login, exitCallback=after_logout)
     # getowner()
     itchat.run()
+    # raise Exception
+
 
 # listchatrooms()
 # listfriends()
+note_store = get_notestore()
+notechat = newchatnote()
+webchats = []
 keepliverun()
