@@ -160,6 +160,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
                 # print (str1)
                 nbody += "<en-media type=\"%s\" hash=\"%s\" align=\"center\" /><br />" % (
                     resource.mime, str1)
+    # neirongplaintxt = "<pre>" + neirong + "</pre>"
     nbody += neirong
     nbody += "</en-note>"
 
