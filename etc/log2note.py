@@ -76,11 +76,8 @@ def log2note(noteguid, loglimit, levelstr='', notetitle='everwork日志信息'):
     else:
         loglinesloglimit = loglines[(-1 * loglimit):]
         loglinestr = '\n'.join(loglinesloglimit[::-1])
-        loglinestr = loglinestr.replace('<', '《')
-        loglinestr = loglinestr.replace('>', '》')
-        loglinestr = loglinestr.replace('&', '并符')
-        loglinestr = loglinestr.replace('=', '等于')
-        loglinestr = '<pre>' + str(loglinestr) + '</pre>'
+        loglinestr = loglinestr.replace('<', '《').replace('>',
+            '》').replace('=', '等于').replace('&', '并或')        
         # print(loglinestr)
         try:
             nstore = get_notestore()
