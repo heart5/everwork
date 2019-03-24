@@ -9,7 +9,7 @@ import pathmagic
 
 with pathmagic.context():
     from func.logme import log
-    from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi
+    from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi, touchfilepath2depth
     from func.wrapfuncs import timethis
 
 
@@ -25,6 +25,7 @@ def write2txt(weathertxtfilename, inputitemlist):
 
 def readfromtxt(weathertxtfilename):
     if not os.path.exists(weathertxtfilename):
+        touchfilepath2depth(weathertxtfilename)
         write2txt(weathertxtfilename, None)
     with open(weathertxtfilename, 'r', encoding='utf-8') as ftxt:
         items = [line.strip() for line in ftxt]  # strip()，去除行首行尾的空格
