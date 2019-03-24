@@ -13,9 +13,11 @@ from itchat.content import *
 import pathmagic
 with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain
+    from func.configpr import getcfp
     from func.logme import log
     from func.nettools import trycounttimes2
-    from func.evernttest import token, get_notestore, makenote, imglist2note, evernoteapijiayi
+    from func.evernttest import token, get_notestore, makenote, imglist2note, evernoteapijiayi, readinifromnote
+    from func.datatools import readfromtxt, write2txt
     import evernote.edam.type.ttypes as ttypes
 
 def newchatnote():
@@ -61,7 +63,8 @@ def showmsg(msg):
                         itchat.storage.templates.ContactList]:
                     lenchildmsg = len(childmsg)
                     print(lenchildmsg)
-                    print(f'\t\t{childmsg[:10]}')
+                    # print(f'\t\t{childmsg[:10]}')
+                    print(f'\t\t{childmsg}')
                 else:
                     print(f'\t\t{childmsg}')
 
@@ -79,9 +82,11 @@ def formatmsg(msg):
         showname = msg['User']['NickName']
         if len(msg['User']['RemarkName']) > 0:
             showname = msg['User']['RemarkName']       
+    elif 'UserName' in msg['User'].keys():
+        showname = msg['User']['UserName']
     else:
         showname = ""
-        log.Warning(f"NickName键值不存在哦")
+        log.warning(f"NickName键值不存在哦")
         showmsg(msg)
 
     # print(f"{timestr}\t{showname}", end='')
@@ -91,6 +96,7 @@ def formatmsg(msg):
         showname += f"(群){msg['ActualNickName']}"
     elif msg['ToUserName'].startswith('@@'):
         # print(f"（群）\t{msg['User']['Self']['NickName']}", end='')
+        # showmsg(msg)
         showname += f"(群){msg['User']['Self']['NickName']}"
     # print(f"\t{msg['Type']}\t{msg['MsgType']}\t{msg['Text']}")
     # print(f"\t{send}\t{msg['Type']}\t{msg['Text']}")
@@ -103,21 +109,28 @@ def formatmsg(msg):
 
 
 def showfmmsg(formatmsg):
-    # msgid = formatmsg["fmId"]
     msgcontent = ""
     for item in formatmsg:
         if item == "fmId":
             continue
         msgcontent += f"{formatmsg[item]}\t"
     msgcontent = msgcontent[:-1]
-    # chatmsg = {"id":msgid, "content":msgcontent}
     print(f"{msgcontent}")
 
-    global webchats, notechat, note_store
+    chattxtfilename = str(getdirmain() / 'data' / 'webchat' / 'chatitems.txt')
+    chatitems = readfromtxt(chattxtfilename)
+    global note_store
     # webchats.append(chatmsg)
-    webchats.insert(0, msgcontent)
-    imglist2note(note_store, [], notechat.guid, notechat.title,
-            "<br></br>".join(webchats) )
+    chatitems.insert(0, msgcontent)
+    write2txt(chattxtfilename, chatitems)
+    readinifromnote()
+    cfpfromnote, cfpfromnotepath = getcfp('everinifromnote') 
+    chatnoteguid = cfpfromnote.get('webchat', 'noteguid').lower()
+    updatefre = cfpfromnote.getint('webchat', 'updatefre')
+    showitemscount= cfpfromnote.getint('webchat', 'showitems')
+    if (len(chatitems) % updatefre) == 0:
+        imglist2note(note_store, [], chatnoteguid, "微信记录更新笔记",
+                "\n".join(chatitems[:showitemscount]) )
     # print(webchats)
 
 @itchat.msg_register([CARD, FRIENDS],
@@ -205,7 +218,7 @@ def keepliverun():
     if status4login == '200':
         log.info(f'已成功登录，自动退出避免重复登录')
         itchat.logout()
-    itchat.auto_login(enableCmdQR=True, hotReload=True,
+    itchat.auto_login(hotReload=True,
                       loginCallback=after_login, exitCallback=after_logout)
     # getowner()
     itchat.run()
@@ -215,6 +228,5 @@ def keepliverun():
 # listchatrooms()
 # listfriends()
 note_store = get_notestore()
-notechat = newchatnote()
-webchats = []
+# notechat = newchatnote()
 keepliverun()
