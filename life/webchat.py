@@ -128,9 +128,12 @@ def showfmmsg(formatmsg):
     chatnoteguid = cfpfromnote.get('webchat', 'noteguid').lower()
     updatefre = cfpfromnote.getint('webchat', 'updatefre')
     showitemscount= cfpfromnote.getint('webchat', 'showitems')
+    neirong = "\n".join(chatitems[:showitemscount])
+    neirongplain = neirong.replace('<', '《').replace('>',
+        '》').replace('=', '等于').replace('&', '并或')                
     if (len(chatitems) % updatefre) == 0:
         imglist2note(note_store, [], chatnoteguid, "微信记录更新笔记",
-                "\n".join(chatitems[:showitemscount]) )
+                neirongplain)
     # print(webchats)
 
 @itchat.msg_register([CARD, FRIENDS],
@@ -179,8 +182,13 @@ def tuling_reply(msg):
     showfmmsg(innermsg)
 
 
-@itchat.msg_register([TEXT, SHARING],
-        isFriendChat=True, isGroupChat=True, isMpChat=True)
+@itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True, isMpChat=True)
+def tuling_reply(msg):
+    showmsg(msg)
+    innermsg = formatmsg(msg)
+    showfmmsg(innermsg)
+
+@itchat.msg_register([TEXT], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def tuling_reply(msg):
     showfmmsg(formatmsg(msg))
 
