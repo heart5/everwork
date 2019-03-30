@@ -2,12 +2,11 @@
 """
 微信大观园，工作优先，娱乐生活
 """
+
 import time
-import datetime
-import requests
 import itchat
+import itchat.storage
 import re
-from pathlib import Path
 from itchat.content import *
 
 import pathmagic
@@ -16,32 +15,32 @@ with pathmagic.context():
     from func.configpr import getcfp
     from func.logme import log
     from func.nettools import trycounttimes2
-    from func.evernttest import token, get_notestore, makenote, imglist2note, evernoteapijiayi, readinifromnote
+    from func.evernttest import token, get_notestore, makenote, imglist2note, \
+        evernoteapijiayi, readinifromnote
     from func.datatools import readfromtxt, write2txt
     import evernote.edam.type.ttypes as ttypes
 
+
 def newchatnote():
     global note_store
-    parentnotebook = note_store.getNotebook('4524187f-c131-4d7d-b6cc-a1af20474a7f')
+    parentnotebook = \
+        note_store.getNotebook('4524187f-c131-4d7d-b6cc-a1af20474a7f')
     evernoteapijiayi()
     note = ttypes.Note()
-    note.title = f"微信记录:{time.strftime('%Y-%m-%d_%H:%M:%S',time.localtime(time.time()))}"
+    note.title = f"微信记录:" \
+        f"{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}"
     print(note.title)
-    notechat= makenote(token, note_store, note.title, notebody='', parentnotebook=parentnotebook)
+    notechat = makenote(token, note_store, note.title, notebody='',
+                        parentnotebook=parentnotebook)
 
     return notechat
 
 
+@trycounttimes2('微信服务器')
 def get_response(msg):
-    try:
-        txt = msg['Text']
-        # print(msg)
-        return txt
-    # 为了防止服务器没有正常响应导致程序异常退出，这里用try-except捕获了异常
-    # 如果服务器没能正常交互（返回非json或无法连接），那么就会进入下面的return
-    except:
-        # 将会返回一个None
-        return
+    txt = msg['Text']
+    # print(msg)
+    return txt
 
 
 def showmsg(msg):
@@ -51,16 +50,14 @@ def showmsg(msg):
         # if item.lower().find('name') < 0:
             # continue
         print(f'{item}\t{type(msg[item])}', end='\t')
-        if type(msg[item]) in [dict,
-                itchat.storage.templates.Chatroom,
-                itchat.storage.templates.User]:
+        if type(msg[item]) in [dict, itchat.storage.templates.Chatroom,
+                               itchat.storage.templates.User]:
             print(len(msg[item]))
             for child in msg[item]:
                 childmsg = msg[item][child]
                 print(f'\t{child}\t{type(childmsg)}', end='\t')
-                if type(childmsg) in [dict,
-                        itchat.storage.templates.User,
-                        itchat.storage.templates.ContactList]:
+                if type(childmsg) in [dict, itchat.storage.templates.User,
+                                      itchat.storage.templates.ContactList]:
                     lenchildmsg = len(childmsg)
                     print(lenchildmsg)
                     # print(f'\t\t{childmsg[:10]}')
@@ -102,18 +99,18 @@ def formatmsg(msg):
     # print(f"\t{send}\t{msg['Type']}\t{msg['Text']}")
     fmtext = msg['Text']
 
-    formatMsg = {'fmId': msg['MsgId'], 'fmTime': timestr, 'fmSend': send, 'fmSender': showname,
-                 'fmType': msg['Type'], 'fmText': fmtext}
+    finnalmsg = {'fmId': msg['MsgId'], 'fmTime': timestr, 'fmSend': send,
+                 'fmSender': showname, 'fmType': msg['Type'], 'fmText': fmtext}
 
-    return formatMsg
+    return finnalmsg
 
 
-def showfmmsg(formatmsg):
+def showfmmsg(inputformatmsg):
     msgcontent = ""
-    for item in formatmsg:
+    for item in inputformatmsg:
         if item == "fmId":
             continue
-        msgcontent += f"{formatmsg[item]}\t"
+        msgcontent += f"{inputformatmsg[item]}\t"
     msgcontent = msgcontent[:-1]
     print(f"{msgcontent}")
 
@@ -127,33 +124,34 @@ def showfmmsg(formatmsg):
     cfpfromnote, cfpfromnotepath = getcfp('everinifromnote') 
     chatnoteguid = cfpfromnote.get('webchat', 'noteguid').lower()
     updatefre = cfpfromnote.getint('webchat', 'updatefre')
-    showitemscount= cfpfromnote.getint('webchat', 'showitems')
+    showitemscount = cfpfromnote.getint('webchat', 'showitems')
     neirong = "\n".join(chatitems[:showitemscount])
-    neirongplain = neirong.replace('<', '《').replace('>',
-        '》').replace('=', '等于').replace('&', '并或')                
+    neirongplain = neirong.replace('<', '《').replace('>', '》') \
+        .replace('=', '等于').replace('&', '并或')
     if (len(chatitems) % updatefre) == 0:
         imglist2note(note_store, [], chatnoteguid, "微信记录更新笔记",
-                neirongplain)
+                     neirongplain)
     # print(webchats)
 
-@itchat.msg_register([CARD, FRIENDS],
-        isFriendChat=True, isGroupChat=True, isMpChat=True)
+
+@itchat.msg_register([CARD, FRIENDS], isFriendChat=True, isGroupChat=True,
+                     isMpChat=True)
 def tuling_reply(msg):
     showmsg(msg)
     showfmmsg(formatmsg(msg))
+
 
 @itchat.msg_register([NOTE], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def tuling_reply(msg):
     # showmsg(msg)
     innermsg = formatmsg(msg)
     if msg["FileName"] == "微信转账":
-        ptn = re.compile("<pay_memo><!\[CDATA\[(.*)\]\]></pay_memo>")
+        ptn = re.compile("<pay_memo><!\\[CDATA\\[(.*)\\]\\]></pay_memo>")
         pay = re.search(ptn, msg["Content"])[1]
         innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
     else:
         showmsg(msg)
     showfmmsg(innermsg)
-
 
 
 @itchat.msg_register([MAP], isFriendChat=True, isGroupChat=True, isMpChat=True)
@@ -167,13 +165,15 @@ def tuling_reply(msg):
 
 
 @itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO],
-        isFriendChat=True, isGroupChat=True, isMpChat=True)
+                     isFriendChat=True, isGroupChat=True, isMpChat=True)
 def tuling_reply(msg):
     innermsg = formatmsg(msg)
-    owner = itchat.web_init()
+    # owner = itchat.web_init()
     # if innermsg['fmSend']:
     # innermsg['fmSender'] = owner['User']['NickName']
-    filepath = getdirmain() / "img" / "webchat" / time.strftime("%Y%m%d", time.localtime(msg['CreateTime'])) / f"{innermsg['fmSender']}_{msg['FileName']}"
+    createtimestr = time.strftime("%Y%m%d", time.localtime(msg['CreateTime']))
+    filepath = getdirmain() / "img" / "webchat" / createtimestr
+    filepath = filepath / "{innermsg['fmSender']}_{msg['FileName']}"
     touchfilepath2depth(filepath)
     log.info(f"保存{innermsg['fmType']}类型文件：\t{str(filepath)}")
     msg['Text'](str(filepath))
@@ -182,11 +182,13 @@ def tuling_reply(msg):
     showfmmsg(innermsg)
 
 
-@itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True, isMpChat=True)
+@itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True,
+                     isMpChat=True)
 def tuling_reply(msg):
     showmsg(msg)
     innermsg = formatmsg(msg)
     showfmmsg(innermsg)
+
 
 @itchat.msg_register([TEXT], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def tuling_reply(msg):
