@@ -173,7 +173,7 @@ def tuling_reply(msg):
     # innermsg['fmSender'] = owner['User']['NickName']
     createtimestr = time.strftime("%Y%m%d", time.localtime(msg['CreateTime']))
     filepath = getdirmain() / "img" / "webchat" / createtimestr
-    filepath = filepath / "{innermsg['fmSender']}_{msg['FileName']}"
+    filepath = filepath / f"{innermsg['fmSender']}_{msg['FileName']}"
     touchfilepath2depth(filepath)
     log.info(f"保存{innermsg['fmType']}类型文件：\t{str(filepath)}")
     msg['Text'](str(filepath))
@@ -184,9 +184,26 @@ def tuling_reply(msg):
 
 @itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True,
                      isMpChat=True)
-def tuling_reply(msg):
-    showmsg(msg)
+def sharing_reply(msg):
+    readinifromnote()
+    cfpfromnote, cfpfromnotepath = getcfp('everinifromnote') 
+    ignoredmplist = cfpfromnote.get('webchat', 'ignoredmplist')
+    imlst = re.split('[，,]', ignoredmplist)
+    # showmsg(msg)
     innermsg = formatmsg(msg)
+    cleansender = re.split("\\(群\\)", innermsg['fmSender'])[0]
+    if (cleansender == "创米科技") and (innermsg["fmText"] == "监控被触发提醒"):
+        # print(f"小米监控发现情况")
+        ptn = re.compile("<des><!\\[CDATA\\[(.*)\\]\\]></des>", re.DOTALL)
+        pay = re.search(ptn, msg["Content"])[1]
+        innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+    elif (cleansender == "微信运动") and innermsg["fmText"].endswith("刚刚赞了你"):
+        ptn = re.compile("<rankid><!\\[CDATA\\[(.*)\\]\\]></rankid>", re.DOTALL)
+        pay = re.search(ptn, msg["Content"])[1]
+        innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+    elif cleansender not in imlst:
+        showmsg(msg)
+        print(f"{cleansender}\t{innermsg['fmSender']}\t{imlst}")
     showfmmsg(innermsg)
 
 
