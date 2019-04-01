@@ -491,7 +491,7 @@ def readinifromnote():
         ininoteupdatenum = 0
     note = note_store.getNote(noteguid_inifromnote, True, True, False, False)
     if note.updateSequenceNum == ininoteupdatenum:
-        print(f'配置笔记无变化，不对本地化的ini配置文件做更新。')
+        # print(f'配置笔记无变化，不对本地化的ini配置文件做更新。')
         return
     else:
         cfpeverwork.set('evernote', 'ininoteupdatenum', str(note.updateSequenceNum))
