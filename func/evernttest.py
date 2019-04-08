@@ -513,6 +513,32 @@ def readinifromnote():
     fileobj.close()
 
 
+def getinivaluefromnote(section, option):
+    readinifromnote()
+    cfpfromnote, cfpfromnotepath = getcfp('everinifromnote') 
+    targetvalue = cfpfromnote.get(section, option)
+
+    # 处理整数
+    ptn = re.compile(r"^[+-]?[0-9]+$")
+    result = ptn.match(targetvalue)
+    if result:
+        targetvalue = int(result.group())
+        return targetvalue
+    
+    # 处理小数
+    ptn = re.compile(r"^[+-]?[0-9]+\.[0-9]+$")
+    result = ptn.match(targetvalue)
+    if result:
+        targetvalue = float(result.group())
+        return targetvalue
+    # if isinstance(targetvalue, int):
+        # targetvalue = int(targetvalue)
+    # elif isinstance(targetvalue, float):
+        # targetvalue = float(targetvalue)
+
+    return targetvalue
+
+
 def writeini2note():
     pass
 
