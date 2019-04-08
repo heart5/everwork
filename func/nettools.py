@@ -187,8 +187,8 @@ def trycounttimes2(servname='服务器', maxtimes=8, maxsecs=30):
                         badnews = f'\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
                         log.critical(badnews)
                         termux_sms_send(badnews)
-                        exit(1)
-                        # raise eee
+                        # exit(1)
+                        raise eee
                     time.sleep(sleeptime)
 
         return wrapper
