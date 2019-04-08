@@ -8,6 +8,7 @@ import itchat
 import itchat.storage
 import re
 from itchat.content import *
+from bs4 import BeautifulSoup
 
 import pathmagic
 with pathmagic.context():
@@ -16,15 +17,18 @@ with pathmagic.context():
     from func.logme import log
     from func.nettools import trycounttimes2
     from func.evernttest import token, get_notestore, makenote, imglist2note, \
-        evernoteapijiayi, readinifromnote
+        evernoteapijiayi, getinivaluefromnote
     from func.datatools import readfromtxt, write2txt
+    from func.termuxtools import termux_sms_send
     import evernote.edam.type.ttypes as ttypes
 
 
 def newchatnote():
     global note_store
+    # parentnotebook = \
+        # note_store.getNotebook('4524187f-c131-4d7d-b6cc-a1af20474a7f')
     parentnotebook = \
-        note_store.getNotebook('4524187f-c131-4d7d-b6cc-a1af20474a7f')
+        note_store.getNotebook(getinivaluefromnote('notebookguid', 'notification'))
     evernoteapijiayi()
     note = ttypes.Note()
     note.title = f"微信记录:" \
@@ -86,14 +90,21 @@ def formatmsg(msg):
         log.warning(f"NickName键值不存在哦")
         showmsg(msg)
 
-    # print(f"{timestr}\t{showname}", end='')
+    # 过滤掉已经研究过属性的群或公众号信息，对于尚未研究过的显示详细信息
+    ignoredmplist = getinivaluefromnote('webchat', 'ignoredmplist')
+    imlst = re.split('[，,]', ignoredmplist)
+    isfromqun = msg['FromUserName'].startswith('@@')
+    istoqun = msg['ToUserName'].startswith('@@')
+    if (isfromqun or istoqun) and (showname not in imlst):
+        showmsg(msg)
+        print(f"{showname}\t{imlst}")
+
     # if type(msg['User']) == itchat.storage.templates.Chatroom:
-    if msg['FromUserName'].startswith('@@'):
+    if isfromqun:
         # print(f"（群)\t{msg['ActualNickName']}", end='')
         showname += f"(群){msg['ActualNickName']}"
-    elif msg['ToUserName'].startswith('@@'):
+    elif istoqun:
         # print(f"（群）\t{msg['User']['Self']['NickName']}", end='')
-        # showmsg(msg)
         showname += f"(群){msg['User']['Self']['NickName']}"
     # print(f"\t{msg['Type']}\t{msg['MsgType']}\t{msg['Text']}")
     # print(f"\t{send}\t{msg['Type']}\t{msg['Text']}")
@@ -120,11 +131,12 @@ def showfmmsg(inputformatmsg):
     # webchats.append(chatmsg)
     chatitems.insert(0, msgcontent)
     write2txt(chattxtfilename, chatitems)
-    readinifromnote()
-    cfpfromnote, cfpfromnotepath = getcfp('everinifromnote') 
-    chatnoteguid = cfpfromnote.get('webchat', 'noteguid').lower()
-    updatefre = cfpfromnote.getint('webchat', 'updatefre')
-    showitemscount = cfpfromnote.getint('webchat', 'showitems')
+    # readinifromnote()
+    # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote') 
+    chatnoteguid = getinivaluefromnote('webchat', 'noteguid').lower()
+    updatefre = getinivaluefromnote('webchat', 'updatefre')
+    showitemscount = getinivaluefromnote('webchat', 'showitems')
+    # print(f"{type(showitemscount)}\t{showitemscount}")
     neirong = "\n".join(chatitems[:showitemscount])
     neirongplain = neirong.replace('<', '《').replace('>', '》') \
         .replace('=', '等于').replace('&', '并或')
@@ -137,7 +149,7 @@ def showfmmsg(inputformatmsg):
 @itchat.msg_register([CARD, FRIENDS], isFriendChat=True, isGroupChat=True,
                      isMpChat=True)
 def tuling_reply(msg):
-    showmsg(msg)
+    # showmsg(msg)
     showfmmsg(formatmsg(msg))
 
 
@@ -149,8 +161,6 @@ def tuling_reply(msg):
         ptn = re.compile("<pay_memo><!\\[CDATA\\[(.*)\\]\\]></pay_memo>")
         pay = re.search(ptn, msg["Content"])[1]
         innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
-    else:
-        showmsg(msg)
     showfmmsg(innermsg)
 
 
@@ -185,14 +195,26 @@ def tuling_reply(msg):
 @itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True,
                      isMpChat=True)
 def sharing_reply(msg):
-    readinifromnote()
-    cfpfromnote, cfpfromnotepath = getcfp('everinifromnote') 
-    ignoredmplist = cfpfromnote.get('webchat', 'ignoredmplist')
-    imlst = re.split('[，,]', ignoredmplist)
+    # readinifromnote()
+    # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote') 
     # showmsg(msg)
     innermsg = formatmsg(msg)
+    rpcontent = msg['Content'].replace('<![CDATA[', '').replace(']]>', '')
+    soup = BeautifulSoup(rpcontent, 'lxml')
+    category = soup.category
+    if category:
+        items = category.find_all('item')
+        if not items:
+            items = []
+    else:
+        items = []
     cleansender = re.split("\\(群\\)", innermsg['fmSender'])[0]
     if (cleansender == "创米科技") and (innermsg["fmText"] == "监控被触发提醒"):
+        # print(f"小米监控发现情况")
+        ptn = re.compile("<des><!\\[CDATA\\[(.*)\\]\\]></des>", re.DOTALL)
+        pay = re.search(ptn, msg["Content"])[1]
+        innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+    elif (cleansender == "腾讯理财通") and (innermsg["fmText"] == "取出到账通知"):
         # print(f"小米监控发现情况")
         ptn = re.compile("<des><!\\[CDATA\\[(.*)\\]\\]></des>", re.DOTALL)
         pay = re.search(ptn, msg["Content"])[1]
@@ -201,9 +223,26 @@ def sharing_reply(msg):
         ptn = re.compile("<rankid><!\\[CDATA\\[(.*)\\]\\]></rankid>", re.DOTALL)
         pay = re.search(ptn, msg["Content"])[1]
         innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
-    elif cleansender not in imlst:
-        showmsg(msg)
-        print(f"{cleansender}\t{innermsg['fmSender']}\t{imlst}")
+    elif (cleansender == "微信运动") and innermsg["fmText"].endswith("排行榜冠军"):
+        ydlst = []
+        mni = soup.messagenodeinfo
+        minestr = f"heart57479\t{mni.rankinfo.rankid.string}\t{mni.rankinfo.rank.rankdisplay.string}"
+        ydlst.append(minestr)
+        ril = soup.rankinfolist.find_all('rankinfo')
+        for item in ril:
+            istr = f"{item.username.string}\t{item.rank.rankdisplay.string}\t{item.score.scoredisplay.string}"
+            ydlst.append(istr)
+
+        pay = "\n".join(ydlst)
+        innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+    elif len(items) > 0:
+        itemstr = '\n'
+        for item in items:
+            itemstr += item.title.string + '\n'
+        innermsg['fmText'] = innermsg['fmText']+itemstr
+    # else:
+        # showmsg(msg)
+
     showfmmsg(innermsg)
 
 
@@ -235,6 +274,7 @@ def after_login():
 
 
 def after_logout():
+    termux_sms_send(f"微信登录已退出，如有必要请重新启动")
     log.info(f'退出微信登录')
 
 
