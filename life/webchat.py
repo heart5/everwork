@@ -64,8 +64,10 @@ def showmsg(msg):
                                       itchat.storage.templates.ContactList]:
                     lenchildmsg = len(childmsg)
                     print(lenchildmsg)
-                    # print(f'\t\t{childmsg[:10]}')
-                    print(f'\t\t{childmsg}')
+                    lmt = getinivaluefromnote('webchat', 'itemshowinmsg')
+                    shownum = lmt if lenchildmsg > lmt else lenchildmsg
+                    print(f'\t\t{childmsg[:shownum]}')
+                    # print(f'\t\t{childmsg}')
                 else:
                     print(f'\t\t{childmsg}')
 
@@ -90,24 +92,27 @@ def formatmsg(msg):
         log.warning(f"NickName键值不存在哦")
         showmsg(msg)
 
-    # 过滤掉已经研究过属性的群或公众号信息，对于尚未研究过的显示详细信息
+    # 过滤掉已经研究过属性公众号信息，对于尚未研究过的显示详细信息
     ignoredmplist = getinivaluefromnote('webchat', 'ignoredmplist')
     imlst = re.split('[，,]', ignoredmplist)
-    isfromqun = msg['FromUserName'].startswith('@@')
-    istoqun = msg['ToUserName'].startswith('@@')
-    if (isfromqun or istoqun) and (showname not in imlst):
+    ismp = type(msg['User']) == itchat.storage.MassivePlatform
+    if ismp and (showname not in imlst):
         showmsg(msg)
         print(f"{showname}\t{imlst}")
 
-    # if type(msg['User']) == itchat.storage.templates.Chatroom:
-    if isfromqun:
-        # print(f"（群)\t{msg['ActualNickName']}", end='')
-        showname += f"(群){msg['ActualNickName']}"
-    elif istoqun:
-        # print(f"（群）\t{msg['User']['Self']['NickName']}", end='')
-        showname += f"(群){msg['User']['Self']['NickName']}"
-    # print(f"\t{msg['Type']}\t{msg['MsgType']}\t{msg['Text']}")
-    # print(f"\t{send}\t{msg['Type']}\t{msg['Text']}")
+    if type(msg['User']) == itchat.storage.templates.Chatroom:
+        isfrom = msg['FromUserName'].startswith('@@')
+        isto = msg['ToUserName'].startswith('@@')
+        # qunmp = isfrom or isto
+        # showmsg(msg)
+        if isfrom:
+            # print(f"（群)\t{msg['ActualNickName']}", end='')
+            showname += f"(群){msg['ActualNickName']}"
+        elif isto:
+            # print(f"（群）\t{msg['User']['Self']['NickName']}", end='')
+            showname += f"(群){msg['User']['Self']['NickName']}"
+        # print(f"\t{msg['Type']}\t{msg['MsgType']}\t{msg['Text']}")
+        # print(f"\t{send}\t{msg['Type']}\t{msg['Text']}")
     fmtext = msg['Text']
 
     finnalmsg = {'fmId': msg['MsgId'], 'fmTime': timestr, 'fmSend': send,
@@ -161,6 +166,8 @@ def tuling_reply(msg):
         ptn = re.compile("<pay_memo><!\\[CDATA\\[(.*)\\]\\]></pay_memo>")
         pay = re.search(ptn, msg["Content"])[1]
         innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+    if msg["FileName"].find('红包') >= 0:
+        showmsg(msg)
     showfmmsg(innermsg)
 
 
