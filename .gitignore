@@ -5,6 +5,6 @@
 #.gitignore
 *.ipynb_checkpoints*
 *__pycache__*
-itchat.pkl
+*itchat.pkl
 *tags*
 *QR*
