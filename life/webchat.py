@@ -26,9 +26,10 @@ with pathmagic.context():
 def newchatnote():
     global note_store
     # parentnotebook = \
-        # note_store.getNotebook('4524187f-c131-4d7d-b6cc-a1af20474a7f')
+    # note_store.getNotebook('4524187f-c131-4d7d-b6cc-a1af20474a7f')
     parentnotebook = \
-        note_store.getNotebook(getinivaluefromnote('notebookguid', 'notification'))
+        note_store.getNotebook(getinivaluefromnote(
+            'notebookguid', 'notification'))
     evernoteapijiayi()
     note = ttypes.Note()
     note.title = f"微信记录:" \
@@ -84,12 +85,14 @@ def formatmsg(msg):
     if 'NickName' in msg["User"].keys():
         showname = msg['User']['NickName']
         if len(msg['User']['RemarkName']) > 0:
-            showname = msg['User']['RemarkName']       
+            showname = msg['User']['RemarkName']
     elif 'UserName' in msg['User'].keys():
+        showname = msg['User']['UserName']
+    elif 'userName' in msg['User'].keys():
         showname = msg['User']['UserName']
     else:
         showname = ""
-        log.warning(f"NickName键值不存在哦")
+        log.warning(f"NickName或者UserName或者userName键值不存在哦")
         showmsg(msg)
 
     # 过滤掉已经研究过属性公众号信息，对于尚未研究过的显示详细信息
@@ -137,7 +140,7 @@ def showfmmsg(inputformatmsg):
     chatitems.insert(0, msgcontent)
     write2txt(chattxtfilename, chatitems)
     # readinifromnote()
-    # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote') 
+    # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
     chatnoteguid = getinivaluefromnote('webchat', 'noteguid').lower()
     updatefre = getinivaluefromnote('webchat', 'updatefre')
     showitemscount = getinivaluefromnote('webchat', 'showitems')
@@ -203,7 +206,7 @@ def tuling_reply(msg):
                      isMpChat=True)
 def sharing_reply(msg):
     # readinifromnote()
-    # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote') 
+    # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
     # showmsg(msg)
     innermsg = formatmsg(msg)
     rpcontent = msg['Content'].replace('<![CDATA[', '').replace(']]>', '')
@@ -217,38 +220,57 @@ def sharing_reply(msg):
         items = []
     cleansender = re.split("\\(群\\)", innermsg['fmSender'])[0]
     if (cleansender == "创米科技") and (innermsg["fmText"] == "监控被触发提醒"):
-        # print(f"小米监控发现情况")
         ptn = re.compile("<des><!\\[CDATA\\[(.*)\\]\\]></des>", re.DOTALL)
         pay = re.search(ptn, msg["Content"])[1]
         innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
     elif (cleansender == "腾讯理财通") and (innermsg["fmText"] == "取出到账通知"):
-        # print(f"小米监控发现情况")
         ptn = re.compile("<des><!\\[CDATA\\[(.*)\\]\\]></des>", re.DOTALL)
         pay = re.search(ptn, msg["Content"])[1]
         innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
-    elif (cleansender == "微信运动") and innermsg["fmText"].endswith("刚刚赞了你"):
-        ptn = re.compile("<rankid><!\\[CDATA\\[(.*)\\]\\]></rankid>", re.DOTALL)
-        pay = re.search(ptn, msg["Content"])[1]
-        innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
-    elif (cleansender == "微信运动") and innermsg["fmText"].endswith("排行榜冠军"):
-        ydlst = []
-        mni = soup.messagenodeinfo
-        minestr = f"heart57479\t{mni.rankinfo.rankid.string}\t{mni.rankinfo.rank.rankdisplay.string}"
-        ydlst.append(minestr)
-        ril = soup.rankinfolist.find_all('rankinfo')
-        for item in ril:
-            istr = f"{item.username.string}\t{item.rank.rankdisplay.string}\t{item.score.scoredisplay.string}"
-            ydlst.append(istr)
+    elif cleansender == "微信运动":
+        if innermsg["fmText"].endswith("刚刚赞了你"):
+            innermsg['fmText'] = innermsg['fmText'] + \
+                f"[{soup.rankid.string}\t{soup.displayusername.string}]"
+        elif innermsg["fmText"].endswith("排行榜冠军"):
+            ydlst = []
+            mni = soup.messagenodeinfo
+            minestr = f"heart57479\t{mni.rankinfo.rankid.string}\t{mni.rankinfo.rank.rankdisplay.string}"
+            ydlst.append(minestr)
+            ril = soup.rankinfolist.find_all('rankinfo')
+            for item in ril:
+                istr = f"{item.username.string}\t{item.rank.rankdisplay.string}\t{item.score.scoredisplay.string}"
+                ydlst.append(istr)
 
-        pay = "\n".join(ydlst)
-        innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+            pay = "\n".join(ydlst)
+            innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+        else:
+            showmsg(msg)
+    elif cleansender == "京东白条":
+        if innermsg["fmText"].endswith("还款成功通知"):
+            innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
+        else:
+            showmsg(msg)
+    elif cleansender == "招商银行信用卡":
+        if innermsg["fmText"].endswith("交易提醒"):
+            innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
+        else:
+            showmsg(msg)
+    elif cleansender == "微信支付":
+        if innermsg["fmText"].endswith("转账收款汇总通知"):
+            itms = soup.opitems.find_all('opitem')
+            userfre = [f'{x.weapp_username.string}\t{x.hint_word.string}' for x in itms if x.word.string.find(
+                '收款记录') >= 0][0]
+            innermsg['fmText'] = innermsg['fmText'] + \
+                f"[{soup.des.string}\n[{userfre}]]"
+        else:
+            showmsg(msg)
     elif len(items) > 0:
         itemstr = '\n'
         for item in items:
             itemstr += item.title.string + '\n'
         innermsg['fmText'] = innermsg['fmText']+itemstr
-    # else:
-        # showmsg(msg)
+    elif type(msg['User']) == itchat.storage.MassivePlatform:
+        showmsg(msg)
 
     showfmmsg(innermsg)
 
