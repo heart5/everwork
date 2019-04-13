@@ -31,9 +31,12 @@ zh_fonts = set(f.split(',', 1)[0]
 available = mat_fonts & zhfs    # matplotlib字体和操作系统字体取交集
 
 
-# @profile
-print('*' * 10, '可用的中文字体（取交集）', '*' * 10)
-for f in available:
-    print(f)
-#     print(len(mat_fonts))
-print("All thing done.")
+@profile
+def showfont():
+    print(f"{'*' * 10}可用的中文字体（取交集）{'*' * 10}")
+    for f in available:
+        print(f)
+    #     print(len(mat_fonts))
+    print("All thing done.")
+
+showfont()
