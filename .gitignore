@@ -6,5 +6,6 @@
 *.ipynb_checkpoints*
 *__pycache__*
 *itchat.pkl
+*.lprof
 *tags*
 *QR*
