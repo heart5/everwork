@@ -85,6 +85,7 @@ def evalnone(input):
         return input
 
 
+# @profile
 def showiprecords():
     namestr = 'everip'
     cfp, cfppath = getcfp(namestr)
