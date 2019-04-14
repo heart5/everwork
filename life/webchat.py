@@ -162,7 +162,7 @@ def tuling_reply(msg):
 
 
 @itchat.msg_register([NOTE], isFriendChat=True, isGroupChat=True, isMpChat=True)
-def tuling_reply(msg):
+def note_reply(msg):
     # showmsg(msg)
     innermsg = formatmsg(msg)
     if msg["FileName"] == "微信转账":
@@ -175,7 +175,7 @@ def tuling_reply(msg):
 
 
 @itchat.msg_register([MAP], isFriendChat=True, isGroupChat=True, isMpChat=True)
-def tuling_reply(msg):
+def map_reply(msg):
     # showmsg(msg)
     innermsg = formatmsg(msg)
     gps = msg['Url'].split('=')[1]
@@ -186,7 +186,7 @@ def tuling_reply(msg):
 
 @itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO],
                      isFriendChat=True, isGroupChat=True, isMpChat=True)
-def tuling_reply(msg):
+def fileetc_reply(msg):
     innermsg = formatmsg(msg)
     # owner = itchat.web_init()
     # if innermsg['fmSend']:
@@ -205,9 +205,6 @@ def tuling_reply(msg):
 @itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True,
                      isMpChat=True)
 def sharing_reply(msg):
-    # readinifromnote()
-    # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
-    # showmsg(msg)
     innermsg = formatmsg(msg)
     rpcontent = msg['Content'].replace('<![CDATA[', '').replace(']]>', '')
     soup = BeautifulSoup(rpcontent, 'lxml')
@@ -240,7 +237,6 @@ def sharing_reply(msg):
             for item in ril:
                 istr = f"{item.username.string}\t{item.rank.rankdisplay.string}\t{item.score.scoredisplay.string}"
                 ydlst.append(istr)
-
             pay = "\n".join(ydlst)
             innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
         else:
@@ -275,6 +271,7 @@ def sharing_reply(msg):
         itemstr = '\n'
         for item in items:
             itemstr += item.title.string + '\n'
+        # 去掉尾行的回车
         itemstr = itemstr[:-1]
         innermsg['fmText'] = innermsg['fmText']+itemstr
     elif type(msg['User']) == itchat.storage.MassivePlatform:
