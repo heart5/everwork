@@ -245,6 +245,11 @@ def sharing_reply(msg):
             innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
         else:
             showmsg(msg)
+    elif cleansender == "微信收款助手":
+        if innermsg["fmText"].startswith("微信支付收款"):
+            innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
+        else:
+            showmsg(msg)
     elif cleansender == "京东白条":
         if innermsg["fmText"].endswith("还款成功通知"):
             innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
@@ -262,12 +267,15 @@ def sharing_reply(msg):
                 '收款记录') >= 0][0]
             innermsg['fmText'] = innermsg['fmText'] + \
                 f"[{soup.des.string}\n[{userfre}]]"
+        elif innermsg["fmText"].endswith("微信支付凭证"):
+            innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
         else:
             showmsg(msg)
     elif len(items) > 0:
         itemstr = '\n'
         for item in items:
             itemstr += item.title.string + '\n'
+        itemstr = itemstr[:-1]
         innermsg['fmText'] = innermsg['fmText']+itemstr
     elif type(msg['User']) == itchat.storage.MassivePlatform:
         showmsg(msg)
