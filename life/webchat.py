@@ -89,7 +89,7 @@ def formatmsg(msg):
     elif 'UserName' in msg['User'].keys():
         showname = msg['User']['UserName']
     elif 'userName' in msg['User'].keys():
-        showname = msg['User']['UserName']
+        showname = msg['User']['userName']
     else:
         showname = ""
         log.warning(f"NickName或者UserName或者userName键值不存在哦")
@@ -215,20 +215,76 @@ def sharing_reply(msg):
             items = []
     else:
         items = []
+
+    # 过滤掉已经研究过属性公众号信息，对于尚未研究过的显示详细信息
+    impmpliststr = getinivaluefromnote('webchat', 'impmplist')
+    impimlst = re.split('[，,]', impmpliststr)
+
     cleansender = re.split("\\(群\\)", innermsg['fmSender'])[0]
-    if (cleansender == "创米科技") and (innermsg["fmText"] == "监控被触发提醒"):
-        ptn = re.compile("<des><!\\[CDATA\\[(.*)\\]\\]></des>", re.DOTALL)
-        pay = re.search(ptn, msg["Content"])[1]
-        innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
-    elif (cleansender == "腾讯理财通") and (innermsg["fmText"] == "取出到账通知"):
-        ptn = re.compile("<des><!\\[CDATA\\[(.*)\\]\\]></des>", re.DOTALL)
-        pay = re.search(ptn, msg["Content"])[1]
-        innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
-    elif cleansender == "微信运动":
-        if innermsg["fmText"].endswith("刚刚赞了你"):
+
+    # if (cleansender == "创米科技") and (innermsg["fmText"] == "监控被触发提醒"):
+        # ptn = re.compile("<des><!\\[CDATA\\[(.*)\\]\\]></des>", re.DOTALL)
+        # pay = re.search(ptn, msg["Content"])[1]
+        # innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+    # elif (cleansender == "腾讯理财通") and (innermsg["fmText"] == "取出到账通知"):
+        # ptn = re.compile("<des><!\\[CDATA\\[(.*)\\]\\]></des>", re.DOTALL)
+        # pay = re.search(ptn, msg["Content"])[1]
+        # innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+    # if cleansender == "微信运动":
+        # if innermsg["fmText"].endswith("刚刚赞了你"):
+            # innermsg['fmText'] = innermsg['fmText'] + \
+                # f"[{soup.rankid.string}\t{soup.displayusername.string}]"
+        # elif innermsg["fmText"].endswith("排行榜冠军"):
+            # ydlst = []
+            # mni = soup.messagenodeinfo
+            # minestr = f"heart57479\t{mni.rankinfo.rankid.string}\t{mni.rankinfo.rank.rankdisplay.string}"
+            # ydlst.append(minestr)
+            # ril = soup.rankinfolist.find_all('rankinfo')
+            # for item in ril:
+                # istr = f"{item.username.string}\t{item.rank.rankdisplay.string}\t{item.score.scoredisplay.string}"
+                # ydlst.append(istr)
+            # pay = "\n".join(ydlst)
+            # innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+        # else:
+            # showmsg(msg)
+    # elif cleansender == "微信收款助手":
+        # if innermsg["fmText"].startswith("微信支付收款"):
+            # innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
+        # else:
+            # showmsg(msg)
+    # elif cleansender == "中国银行微银行":
+        # if innermsg["fmText"].endswith("交易提醒"):
+            # innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
+        # else:
+            # showmsg(msg)
+    # elif cleansender == "京东白条":
+        # if innermsg["fmText"].endswith("还款成功通知"):
+            # innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
+        # else:
+            # showmsg(msg)
+    # elif cleansender == "广发信用卡":
+        # if innermsg["fmText"].endswith("交易成功提醒"):
+            # innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
+        # else:
+            # showmsg(msg)
+    # elif cleansender == "招商银行信用卡":
+        # if innermsg["fmText"].endswith("交易提醒"):
+            # innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
+        # else:
+            # showmsg(msg)
+    if cleansender in impimlst:
+        if cleansender == '微信支付' and innermsg["fmText"].endswith("转账收款汇总通知"):
+            itms = soup.opitems.find_all('opitem')
+            userfre = [f'{x.weapp_username.string}\t{x.hint_word.string}' for x in itms if x.word.string.find(
+                '收款记录') >= 0][0]
+            innermsg['fmText'] = innermsg['fmText'] + \
+                f"[{soup.des.string}\n[{userfre}]]"
+        # elif innermsg["fmText"].endswith("微信支付凭证"):
+            # innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
+        elif cleansender == '微信运动' and innermsg["fmText"].endswith("刚刚赞了你"):
             innermsg['fmText'] = innermsg['fmText'] + \
                 f"[{soup.rankid.string}\t{soup.displayusername.string}]"
-        elif innermsg["fmText"].endswith("排行榜冠军"):
+        elif cleansender == '微信运动' and innermsg["fmText"].endswith("排行榜冠军"):
             ydlst = []
             mni = soup.messagenodeinfo
             minestr = f"heart57479\t{mni.rankinfo.rankid.string}\t{mni.rankinfo.rank.rankdisplay.string}"
@@ -239,32 +295,9 @@ def sharing_reply(msg):
                 ydlst.append(istr)
             pay = "\n".join(ydlst)
             innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
-        else:
-            showmsg(msg)
-    elif cleansender == "微信收款助手":
-        if innermsg["fmText"].startswith("微信支付收款"):
-            innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
-        else:
-            showmsg(msg)
-    elif cleansender == "京东白条":
-        if innermsg["fmText"].endswith("还款成功通知"):
-            innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
-        else:
-            showmsg(msg)
-    elif cleansender == "招商银行信用卡":
-        if innermsg["fmText"].endswith("交易提醒"):
-            innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
-        else:
-            showmsg(msg)
-    elif cleansender == "微信支付":
-        if innermsg["fmText"].endswith("转账收款汇总通知"):
-            itms = soup.opitems.find_all('opitem')
-            userfre = [f'{x.weapp_username.string}\t{x.hint_word.string}' for x in itms if x.word.string.find(
-                '收款记录') >= 0][0]
-            innermsg['fmText'] = innermsg['fmText'] + \
-                f"[{soup.des.string}\n[{userfre}]]"
-        elif innermsg["fmText"].endswith("微信支付凭证"):
-            innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
+        elif soup.des or soup.digest:
+            valuepart = soup.des or soup.digest
+            innermsg['fmText'] = innermsg['fmText']+f"[{valuepart.string}]"
         else:
             showmsg(msg)
     elif len(items) > 0:
