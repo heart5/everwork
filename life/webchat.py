@@ -4,10 +4,12 @@
 """
 
 import time
+import datetime
 import itchat
 import itchat.storage
 import re
 import os
+import math
 from itchat.content import *
 from bs4 import BeautifulSoup
 
@@ -22,7 +24,7 @@ with pathmagic.context():
     from func.datatools import readfromtxt, write2txt
     from func.termuxtools import termux_sms_send
     import evernote.edam.type.ttypes as ttypes
-    from work.zymessage import searchcustomer
+    from work.zymessage import searchcustomer, searchqiankuan
 
 
 def newchatnote():
@@ -81,7 +83,7 @@ def showmsg(msg):
 def formatmsg(msg):
     timetuple = time.localtime(msg['CreateTime'])
     # print(timetuple)
-    timestr = time.strftime("%m-%d %H:%M:%S", timetuple)
+    timestr = time.strftime("%Y-%m-%d %H:%M:%S", timetuple)
     owner = itchat.web_init()
     send = (msg['FromUserName'] == owner['User']['UserName'])
     if 'NickName' in msg["User"].keys():
@@ -271,14 +273,46 @@ def tuling_reply(msg):
     showfmmsg(innermsg)
     if msg['Text'].find('真元信使') >= 0:
         qrylst = msg['Text'].split('\n')
-        if qrylst[0].strip() == '真元信使':
-            qrystr = qrylst[1].strip()
-            rstfile, rst = searchcustomer(qrystr.split())
-            print(rst)
-            print(rstfile)
+        qrylst = [x.strip() for x in qrylst]
+        diyihang = qrylst[0].split()
+        if diyihang[0].strip() == '真元信使':
+            if len(diyihang) == 1:
+                if (len(qrylst) == 1) or (qrylst[1].strip == ''):
+                    rstfile , rst = searchcustomer()
+                else:
+                    qrystr = qrylst[1].strip()
+                    rstfile, rst = searchcustomer(qrystr.split())
+            elif diyihang[1] == '欠款':
+                qrystr = qrylst[1].strip()
+                rstfile, rst = searchqiankuan(qrystr.split())
+
             itchat.send_msg(rst, toUserName=msg['FromUserName'])
+            nowtuple = time.time()
+            nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
+            finnalmsg = {'fmId': math.floor(nowtuple),
+                         'fmTime': nowdatetime.strftime("%Y-%m-%d %H:%M:%S"),
+                         'fmSend': True, 'fmSender': innermsg['fmSender'],
+                         'fmType': 'Text',
+                         # 'fmText': os.path.split(rstfile)[1]
+                         'fmText': rst
+                        }
+            showfmmsg(finnalmsg)
+
             if rstfile:
+                # rstfile必须是绝对路径，并且不能包含中文字符
                 itchat.send_file(rstfile, toUserName=msg['FromUserName'])
+                # 发给自己一份存档
+                nowtuple = time.time()
+                nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
+                finnalmsg = {'fmId': math.floor(nowtuple),
+                             'fmTime': nowdatetime.strftime("%Y-%m-%d %H:%M:%S"),
+                             'fmSend': True, 'fmSender': innermsg['fmSender'],
+                             'fmType': 'File',
+                             # 'fmText': os.path.split(rstfile)[1]
+                             'fmText':
+                             rstfile.replace(os.path.abspath(dirmainpath), '')[1:]
+                            }
+                showfmmsg(finnalmsg)
                 itchat.send_file(rstfile)
                 infostr = f"成功发送查询结果文件：{os.path.split(rstfile)[1]}给{innermsg['fmSender']}"
                 itchat.send_msg(infostr)
