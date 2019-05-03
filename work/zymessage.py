@@ -132,25 +132,29 @@ def getbianmalst(args):
         dfs = df.iloc[random.sample(range(0, len(df)), itemnunber2show), :]
         resultlst = list(dfs['往来单位编号'])
     else:
-        print(args[0])
+        print(f"输入参数：{args[0]}")
         # 拆分出客户名称和区域等有效信息
-        cnamelst = [x for x in args[0] if not x.endswith('区')]
-        cquyulst = [x for x in args[0] if x.endswith('区')]
+        quyudaxielst = getinivaluefromnote('datasource',
+                                           'quyudaxielst').split('[,，]')
+        # print(f"{quyudaxielst}")
+        cnamelst = [x for x in args[0] if not (x in quyudaxielst)]
+        cquyulst = [x for x in args[0] if x in quyudaxielst]
         if len(cnamelst) == 0:
             cnamelst.append('.')
-        print(cnamelst)
-        print(cquyulst)
+        print(f"客户名称拆解：{cnamelst}")
+        print(f"区域名称拆解：{cquyulst}")
         cquyutlst = []
-        if len(cquyulst) == 0:
-            cquyutlst.append('.')
-        else:
-            # 转换区域为数字格式方便查询
-            for qy in cquyulst:
-                dfquyu = pd.read_sql(f"select * from quyu where 区域名称='{qy}'", con=cnx,
-                                     index_col='index')
-                # print(dfquyu)
+        # 转换区域为数字格式方便查询
+        for qy in cquyulst:
+            dfquyu = pd.read_sql(f"select * from quyu where 区域名称='{qy}'", con=cnx,
+                                 index_col='index')
+            # print(dfquyu)
+            if dfquyu.shape[0] > 0:
                 cquyutlst.append(dfquyu.iloc[0, 0])
-        print(cquyutlst)
+        # 如果没有区域信息或者没有查找到有效区域信息，则添加任意适配符.
+        if len(cquyutlst) == 0:
+            cquyutlst.append('.')
+        print(f"区域列表（数字）：{cquyutlst}")
         dfs = df
         for name in cnamelst:
             # 增加对客户编码的识别判断，最高优先级别
@@ -167,10 +171,12 @@ def getbianmalst(args):
             if dfqy.shape[0] != 0:
                 resultdf = resultdf.append(dfqy)
         resultlst = list(resultdf['往来单位编号'])
-        resultlst = [x[:7] for x in resultlst]
+        # resultlst = [x[:7] for x in resultlst]
+        # resultlst = [x[:7] for x in resultlst]
     cnx.close()
 
-    print(resultlst)
+    # print(f"{resultdf}")
+    print(f"客户编码查询结果：{resultlst}")
 
     return resultlst
 
@@ -210,9 +216,16 @@ def searchcustomer(*args, **kw):
     targetbmlst = getbianmalst(args)
 
     cnx = lite.connect(dbpathquandan)
-    df = pd.read_sql('select 往来单位全名, substr(往来单位编号, 1, 7) as 往来单位编号, 联系人, 地址  from customeruid', con=cnx, index_col='往来单位全名')
+    # df = pd.read_sql('select 往来单位全名, substr(往来单位编号, 1, 7) as 往来单位编号, 联系人, 地址  from customeruid', con=cnx, index_col='往来单位全名')
+    df = pd.read_sql('select 往来单位全名 as 名称, 往来单位编号 as 编码, 联系人, 地址  from customeruid', con=cnx, index_col='名称')
     cnx.close()
-    resultdf = df[df.往来单位编号.isin(targetbmlst)]
+    resultdf = df[df.编码.isin(targetbmlst)]
+    # resultdf['客户编码'] = resultdf['往来单位编号'].str.slice(0,7)
+    resultdf['编码'] = resultdf['编码'].str.slice(0,7)
+    # resultdf['拼接'] = resultdf['编码'].map(lambda x: x+'号')
+    # resultdf['拼接'] = resultdf['编码'] + resultdf['编码']
+    # resultdf['拼接'] = resultdf['编码'].str.cat(resultdf['编码'], sep='-')
+    # resultdf = resultdf.loc[:,['往来单位编号', '联系人', '地址']]
     rdffile, rdfstr = getresult(resultdf, 'kfqd', args)
 
     return rdffile, rdfstr
@@ -224,10 +237,12 @@ def searchqiankuan(*args, **kw):
     targetbmlst = getbianmalst(args)
 
     cnx = lite.connect(dbpathquandan)
-    df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, substr(终端编码, 1, 7) as 终端编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
+    # df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, substr(终端编码, 1, 7) as 终端编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
+    df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, 终端编码 as 编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
     cnx.close()
-    filterdf = df[df.终端编码.isin(targetbmlst)]
+    filterdf = df[df.编码.isin(targetbmlst)]
     resultdf = filterdf[(filterdf.收款日期.isnull()) & (filterdf.送达日期.notna())]
+    resultdf['编码'] = resultdf['编码'].str.slice(0,7)
 
     rdffile, rdfstr = getresult(resultdf, 'khqk', args)
 
@@ -239,18 +254,25 @@ if __name__ == '__main__':
     log.info(f'文件\t{__file__}\t启动运行……')
     # cnxp = lite.connect(dbpathquandan)
     # dataokay(cnxp)
-    qrylst = ['百佳 瑞安街 捌区', '0810012', '阿里之门 叁拾叁区 捌区', '零区',
-             '千佛手']
+    qrylst = ['百佳 瑞安街 捌区'
+              # , '0810012'
+              # , '阿里之门 叁拾叁区 捌区'
+              # , '零区'
+              # , '千佛手'
+              , '翼社区'
+              ,
+             ]
 
     # searchqiankuan()
+    for qry in qrylst:
+        rfile, rstr =  searchqiankuan(qry.split())
+        print(rstr)
+        
     # for qry in qrylst:
-        # rfile, rstr =  searchqiankuan(qry.split())
+        # rfile, rstr =  searchcustomer(qry.split())
         # print(rstr)
 
-    searchcustomer()
-    for qry in qrylst:
-        rfile, rstr = searchcustomer(qry.split())
-        print(rstr)
+    # searchcut(rstr)
     # fl, flstr = searchcustomer(qry1.split())
     # print(fl, flstr)
     # fl, flstr = searchcustomer(qry2.split())
