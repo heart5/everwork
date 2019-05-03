@@ -67,7 +67,7 @@ def get_notestore():
 
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
-    @trycounttimes2('evernote服务器', maxtimes=10, maxsecs=30)
+    @trycounttimes2('evernote服务器')
     def getnotestore():
         global note_store
         if note_store is not None:
