@@ -140,13 +140,13 @@ def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务�
             time.sleep(sleeptime)
 
 
-def trycounttimes2(servname='服务器', maxtimes=8, maxsecs=30):
+def trycounttimes2(servname='服务器', maxtimes=20, maxsecs=30):
     def decorate(jutifunc):
 
         @wraps(jutifunc)
         def wrapper(*args, **kwargs):
             trytimes = maxtimes
-            for i in range(trytimes):
+            for i in range(1, trytimes + 1):
                 sleeptime = random.randint(2, maxsecs)
                 try:
                     result = jutifunc(*args, **kwargs)
@@ -160,31 +160,34 @@ def trycounttimes2(servname='服务器', maxtimes=8, maxsecs=30):
                         OSError, IndexError, Exception
                 ) as eee:
 
-                    if hasattr(eee, 'errno'):
-                        if eee.errno == 11001:
-                            log.critical(f'寻址失败，貌似网络不通。{eee}')
-                        elif eee.errno == 10061:
-                            log.warning(f'被主动拒绝，好没面啊！{eee}')
-                        elif eee.errno == 10060:
-                            log.warning(f'够不着啊，是不是在墙外？！{eee}')
-                        elif eee.errno == 10048:
-                            log.warning(f'多次强行连接，被拒了！{eee}')
-                        elif eee.errno == 10054:
-                            log.warning(f'主机发脾气，强行断线了。{eee}')
-                        elif eee.errno == 8:
-                            log.warning(f'和{servname}握手失败。{eee}')
-                        elif eee.errno == 4:
-                            log.warning(f'和{servname}连接异常，被中断。{eee}')
+                    # 5的倍数次尝试输出log，避免网络不佳时的log冗余
+                    if i % 5 == 0:
+                        if hasattr(eee, 'errno'):
+                            if eee.errno == 11001:
+                                log.critical(f'寻址失败，貌似网络不通。{eee}')
+                            elif eee.errno == 10061:
+                                log.warning(f'被主动拒绝，好没面啊！{eee}')
+                            elif eee.errno == 10060:
+                                log.warning(f'够不着啊，是不是在墙外？！{eee}')
+                            elif eee.errno == 10048:
+                                log.warning(f'多次强行连接，被拒了！{eee}')
+                            elif eee.errno == 10054:
+                                log.warning(f'主机发脾气，强行断线了。{eee}')
+                            elif eee.errno == 8:
+                                log.warning(f'和{servname}握手失败。{eee}')
+                            elif eee.errno == 4:
+                                log.warning(f'和{servname}连接异常，被中断。{eee}')
+                            else:
+                                log.warning(f'连接失败。{eee.errno}\t{eee}')
                         else:
-                            log.warning(f'连接失败。{eee.errno}\t{eee}')
-                    else:
-                        log.warning(f'连接失败。{eee}')
-                    log.warning(
-                        f"第{i+1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
+                            log.warning(f'连接失败。{eee}')
+                        log.warning(
+                            f"第{i}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接服务器时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
                     if i == (trytimes - 1):
-                        badnews = f'\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
+                        # badnews = f'{__file__}\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
+                        badnews = f'{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co__filename}\t\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
                         log.critical(badnews)
                         termux_sms_send(badnews)
                         # exit(1)
