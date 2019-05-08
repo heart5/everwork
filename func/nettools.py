@@ -24,6 +24,7 @@ import pathmagic
 with pathmagic.context():
     from func.logme import log
     from func.termuxtools import termux_sms_send
+    # from func.evernttest import getinivaluefromnote
 
 
 def get_ip(*args):
@@ -146,6 +147,8 @@ def trycounttimes2(servname='服务器', maxtimes=20, maxsecs=30):
         @wraps(jutifunc)
         def wrapper(*args, **kwargs):
             trytimes = maxtimes
+            # showfreq = getinivaluefromnote('everlog', 'showfreq')
+            showfreq = 3
             for i in range(1, trytimes + 1):
                 sleeptime = random.randint(2, maxsecs)
                 try:
@@ -161,7 +164,7 @@ def trycounttimes2(servname='服务器', maxtimes=20, maxsecs=30):
                 ) as eee:
 
                     # 5的倍数次尝试输出log，避免网络不佳时的log冗余
-                    if i % 5 == 0:
+                    if i % showfreq == 0:
                         if hasattr(eee, 'errno'):
                             if eee.errno == 11001:
                                 log.critical(f'寻址失败，貌似网络不通。{eee}')
@@ -239,8 +242,8 @@ def tst4trycounttimes2():
 if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
 
-    print(get_ip4alleth('wlan0'))
-    print(get_host_ip())
-    #  test4trycounttimes2()
+    # print(get_ip4alleth('wlan0'))
+    # print(get_host_ip())
+    tst4trycounttimes2()
 
     print('Done.测试完毕。')
