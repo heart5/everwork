@@ -183,14 +183,14 @@ def trycounttimes2(servname='服务器', maxtimes=20, maxsecs=30):
                             else:
                                 log.warning(f'连接失败。{eee.errno}\t{eee}')
                         else:
-                            log.warning(f'连接失败。{eee}')
-                        log.warning(
+                            log.critical(f'连接失败。{eee}')
+                        log.critical(
                             f"第{i}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接服务器时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
                     if i == (trytimes - 1):
-                        # badnews = f'{__file__}\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
-                        badnews = f'{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co__filename}\t\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
+                        badnews = f'{__file__}\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
+                        # badnews = f'{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co__filename}\t\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
                         log.critical(badnews)
                         termux_sms_send(badnews)
                         # exit(1)
@@ -225,7 +225,7 @@ def tst4trycounttimes2():
         return html
 
     # html2 = trycounttimes2(fetchfromnet, '', True, 'xmu.edu.cn网站服务器')
-    address = 'http://www.wise.xmu.edu.cn/people/faculty'
+    address = 'http://www.wise.xmu1.edu.cn/people/faculty'
     print(fetchfromnet.__doc__)
     html2 = fetchfromnet(address)
     if html2 is None:
