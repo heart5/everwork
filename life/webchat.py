@@ -36,7 +36,7 @@ def newchatnote():
             'notebookguid', 'notification'))
     evernoteapijiayi()
     note = ttypes.Note()
-    note.title = f"微信记录:" \
+    note.title = f"微信（{getowner()['User']['NickName']}）记录:" \
         f"{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}"
     print(note.title)
     notechat = makenote(token, note_store, note.title, notebody='',
@@ -145,7 +145,8 @@ def showfmmsg(inputformatmsg):
     write2txt(chattxtfilename, chatitems)
     # readinifromnote()
     # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
-    chatnoteguid = getinivaluefromnote('webchat', 'noteguid').lower()
+    me = getowner()['User']['NickName']
+    chatnoteguid = getinivaluefromnote('webchat', me).lower()
     updatefre = getinivaluefromnote('webchat', 'updatefre')
     showitemscount = getinivaluefromnote('webchat', 'showitems')
     # print(f"{type(showitemscount)}\t{showitemscount}")
@@ -153,7 +154,7 @@ def showfmmsg(inputformatmsg):
     neirongplain = neirong.replace('<', '《').replace('>', '》') \
         .replace('=', '等于').replace('&', '并或')
     if (len(chatitems) % updatefre) == 0:
-        imglist2note(note_store, [], chatnoteguid, "微信记录更新笔记",
+        imglist2note(note_store, [], chatnoteguid, f"微信（{me}）记录更新笔记",
                      neirongplain)
     # print(webchats)
 
@@ -334,7 +335,7 @@ def listchatrooms():
 
 def getowner():
     owner = itchat.web_init()
-    showmsg(owner)
+    # showmsg(owner)
     return owner
 
 
@@ -350,19 +351,19 @@ def after_logout():
 @trycounttimes2('微信服务器')
 def keepliverun():
     # 为了让实验过程更加方便（修改程序不用多次扫码），我们使用热启动
-    status4login = itchat.check_login()
-    if status4login == '200':
-        log.info(f'已成功登录，自动退出避免重复登录')
-        itchat.logout()
+    # status4login = itchat.check_login()
+    # if status4login == '200':
+        # log.info(f'已成功登录，自动退出避免重复登录')
+        # itchat.logout()
     itchat.auto_login(hotReload=True,
                       loginCallback=after_login, exitCallback=after_logout)
     # getowner()
+    # notechat = newchatnote()
+    # listchatrooms()
+    # listfriends()
     itchat.run()
     # raise Exception
 
 
-# listchatrooms()
-# listfriends()
 note_store = get_notestore()
-# notechat = newchatnote()
 keepliverun()
