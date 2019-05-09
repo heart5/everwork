@@ -137,7 +137,8 @@ def showfmmsg(inputformatmsg):
     msgcontent = msgcontent[:-1]
     print(f"{msgcontent}")
 
-    chattxtfilename = str(getdirmain() / 'data' / 'webchat' / 'chatitems.txt')
+    me = getowner()['User']['NickName']
+    chattxtfilename = str(getdirmain() / 'data' / 'webchat' / f'chatitems({me}).txt')
     chatitems = readfromtxt(chattxtfilename)
     global note_store
     # webchats.append(chatmsg)
@@ -145,7 +146,6 @@ def showfmmsg(inputformatmsg):
     write2txt(chattxtfilename, chatitems)
     # readinifromnote()
     # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
-    me = getowner()['User']['NickName']
     chatnoteguid = getinivaluefromnote('webchat', me).lower()
     updatefre = getinivaluefromnote('webchat', 'updatefre')
     showitemscount = getinivaluefromnote('webchat', 'showitems')
