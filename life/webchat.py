@@ -146,6 +146,9 @@ def showfmmsg(inputformatmsg):
     write2txt(chattxtfilename, chatitems)
     # readinifromnote()
     # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
+    # print(f"{me}")
+    if len(me) ==0 :
+        log.critical(f"登录名为空！！！")
     chatnoteguid = getinivaluefromnote('webchat', me).lower()
     updatefre = getinivaluefromnote('webchat', 'updatefre')
     showitemscount = getinivaluefromnote('webchat', 'showitems')
@@ -351,10 +354,10 @@ def after_logout():
 @trycounttimes2('微信服务器')
 def keepliverun():
     # 为了让实验过程更加方便（修改程序不用多次扫码），我们使用热启动
-    # status4login = itchat.check_login()
-    # if status4login == '200':
-        # log.info(f'已成功登录，自动退出避免重复登录')
-        # itchat.logout()
+    status4login = itchat.check_login()
+    if status4login == '200':
+        log.info(f'已成功登录，自动退出避免重复登录')
+        itchat.logout()
     itchat.auto_login(hotReload=True,
                       loginCallback=after_login, exitCallback=after_logout)
     # getowner()
