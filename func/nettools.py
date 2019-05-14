@@ -148,7 +148,7 @@ def trycounttimes2(servname='服务器', maxtimes=20, maxsecs=30):
         def wrapper(*args, **kwargs):
             trytimes = maxtimes
             # showfreq = getinivaluefromnote('everlog', 'showfreq')
-            showfreq = 3
+            showfreq = 5
             for i in range(1, trytimes + 1):
                 sleeptime = random.randint(2, maxsecs)
                 try:
@@ -189,7 +189,7 @@ def trycounttimes2(servname='服务器', maxtimes=20, maxsecs=30):
                     # log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接服务器时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
                     if i == (trytimes - 1):
-                        badnews = f'{__file__}\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
+                        badnews = f'{__file__}\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}\t{eee}'
                         # badnews = f'{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co__filename}\t\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
                         log.critical(badnews)
                         termux_sms_send(badnews)
