@@ -162,16 +162,24 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
                     resource.mime, str1)
     neirong= "<pre>" + neirong + "</pre>"
 
+    # 去除控制符
+    neirong = re.sub('[\x00-\x08|\x0b-\x0c|\x0e-\x1f]', '', neirong)
+
     nbody += neirong
     nbody += "</en-note>"
 
+    # ！！！严重错误，过滤\x14时把回车等符号都杀了！！！
+    # nbodynotasciilst = [hex(ord(x)) for x in nbody if ord(x) < 32]
+    # print(f"存在不可显示字符串：{''.join(nbodynotasciilst)}")
+    # nbodylst = [x for x in nbody if ord(x) >= 32]
+    # nbody = ''.join(nbodylst)
     note.content = nbody
     # print (note.content)
 
     # Finally, send the new note to Evernote using the updateNote method
     # The new Note object that is returned will contain server-generated
     # attributes such as the new note's unique GUID.
-    @trycounttimes2('evernote服务器')
+    @trycounttimes2('evernote服务器。更新笔记。')
     def updatenote(notesrc):
         updated_note = get_notestore().updateNote(notesrc)
         evernoteapijiayi()
