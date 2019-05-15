@@ -21,6 +21,7 @@ with pathmagic.context():
     from func.logme import log
     from func.pdtools import gengxinfou
 
+print(f"{__file__} is loading now...")
 
 def chulikhqd():
     """
