@@ -10,7 +10,7 @@ import time
 from configparser import ConfigParser
 # from matplotlib.ticker import FuncFormatter
 from pandas.tseries.offsets import *
-# from numpy import *
+from numpy import float64, int64
 # from pylab import *
 
 
