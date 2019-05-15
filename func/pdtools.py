@@ -11,7 +11,8 @@ from configparser import ConfigParser
 # from matplotlib.ticker import FuncFormatter
 from pandas.tseries.offsets import *
 # from numpy import *
-from pylab import *
+# from pylab import *
+
 
 import pathmagic
 
@@ -21,6 +22,8 @@ with pathmagic.context():
     from func.logme import log
     from func.nettools import trycounttimes2
     from func.wrapfuncs import timethis
+
+print(f"{__file__} is loading now...")
 
 # plot中显示中文
 # mpl.rcParams['font.sans-serif'] = ['SimHei']

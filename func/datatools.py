@@ -12,6 +12,7 @@ with pathmagic.context():
     from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi, touchfilepath2depth
     from func.wrapfuncs import timethis
 
+print(f"{__file__} is loading now...")
 
 def write2txt(weathertxtfilename, inputitemlist):
     # print(inputitemlist)

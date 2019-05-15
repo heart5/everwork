@@ -26,6 +26,7 @@ with pathmagic.context():
     from func.logme import log
     from func.nettools import trycounttimes2
 
+print(f"{__file__} is loading now...")
 
 def get_notestore():
     # Real applications authenticate with Evernote using OAuth, but for the
