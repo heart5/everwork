@@ -18,7 +18,8 @@ with pathmagic.context():
         import wmi
     except ImportError:
         # log.warning('wmi库未安装或者是在linux系统下无法成功import而已。')
-        print('wmi库未安装或者是在linux系统下无法成功import而已。')
+        # print('wmi库未安装或者是在linux系统下无法成功import而已。')
+        pass
 
 # c = wmi.WMI()
 #
@@ -141,7 +142,7 @@ with pathmagic.context():
 #     return macs
 
 
-@timethis
+# @timethis
 def getdeviceid():
     # printCPU()
     # printMain_board()
@@ -151,7 +152,7 @@ def getdeviceid():
     # print(printBattery())
     id = None
     sysstr = platform.system()
-    print(sysstr)
+    # print(sysstr)
     if sysstr == "Windows":
         c = wmi.WMI()
         bios_id = c.Win32_BIOS()
@@ -175,7 +176,7 @@ def getdeviceid():
         #     print(disk)
         idstr = f'{bioss}\t{cpus}\t{boards}\t{disks}'
         uid = uuid.uuid3(uuid.NAMESPACE_URL, idstr)
-        print(uid)
+        # print(uid)
         print(hex(hash(uid)))
         id = hex(hash(uid))
     elif sysstr == 'Linux':
