@@ -277,6 +277,11 @@ def text_reply(msg):
     innermsg = formatmsg(msg)
     showfmmsg(innermsg)
 
+    # 特定指令则退出
+    if msg['Text'] == '退出小元宝系统':
+        log.info(f"根据指令退出小元宝系统")
+        itchat.logout()
+
     # 如何不是指定的数据分析中心，则不进行语义分析
     if getdeviceid() != getinivaluefromnote('webchat', 'datahouse'):
         return
