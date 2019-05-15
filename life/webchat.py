@@ -283,7 +283,12 @@ def text_reply(msg):
         itchat.logout()
 
     # 如何不是指定的数据分析中心，则不进行语义分析
-    if getdeviceid() != getinivaluefromnote('webchat', 'datahouse'):
+    thisid = getdeviceid()
+    # print(f"type:{type(thisid)}\t{thisid}")
+    houseid = getinivaluefromnote('webchat', 'datahouse')
+    # print(f"type:{type(houseid)}\t{houseid}")
+    if thisid != str(houseid) :
+        print(f"不是数据分析中心，咱不管哦")
         return
 
     if msg['Text'].find('真元信使') >= 0:
