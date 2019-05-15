@@ -4,14 +4,16 @@
 """
 import os
 import evernote.edam.type.ttypes as ttypes
+import numpy as np
 import pandas as pd
 import sqlite3 as lite
 import time
+import datetime
 from configparser import ConfigParser
 # from matplotlib.ticker import FuncFormatter
 from pandas.tseries.offsets import *
 from numpy import float64, int64
-# from pylab import *
+from pylab import plt, FuncFormatter
 
 
 import pathmagic
