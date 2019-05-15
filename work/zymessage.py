@@ -135,8 +135,8 @@ def getbianmalst(args):
     else:
         print(f"输入参数：{args[0]}")
         # 拆分出客户名称和区域等有效信息
-        quyudaxielst = getinivaluefromnote('datasource',
-                                           'quyudaxielst').split('[,，]')
+        quyudaxie = getinivaluefromnote('datasource', 'quyudaxielst')
+        quyudaxielst = re.split('[,，]', quyudaxie)
         # print(f"{quyudaxielst}")
         cnamelst = [x for x in args[0] if not (x in quyudaxielst)]
         cquyulst = [x for x in args[0] if x in quyudaxielst]
