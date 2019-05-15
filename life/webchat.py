@@ -25,6 +25,7 @@ with pathmagic.context():
     from func.termuxtools import termux_sms_send
     import evernote.edam.type.ttypes as ttypes
     from work.zymessage import searchcustomer, searchqiankuan
+    from etc.getid import getdeviceid
 
 
 def newchatnote():
@@ -272,9 +273,14 @@ def sharing_reply(msg):
 
 
 @itchat.msg_register([TEXT], isFriendChat=True, isGroupChat=True, isMpChat=True)
-def tuling_reply(msg):
+def text_reply(msg):
     innermsg = formatmsg(msg)
     showfmmsg(innermsg)
+
+    # 如何不是指定的数据分析中心，则不进行语义分析
+    if getdeviceid() != getinivaluefromnote('webchat', 'datahouse'):
+        return
+
     if msg['Text'].find('真元信使') >= 0:
         qrylst = msg['Text'].split('\n')
         qrylst = [x.strip() for x in qrylst]
