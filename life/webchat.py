@@ -85,8 +85,9 @@ def formatmsg(msg):
     timetuple = time.localtime(msg['CreateTime'])
     # print(timetuple)
     timestr = time.strftime("%Y-%m-%d %H:%M:%S", timetuple)
-    owner = itchat.web_init()
-    send = (msg['FromUserName'] == owner['User']['UserName'])
+    # owner = itchat.web_init()
+    global meu_wc
+    send = (msg['FromUserName'] == meu_wc)
     if 'NickName' in msg["User"].keys():
         showname = msg['User']['NickName']
         if len(msg['User']['RemarkName']) > 0:
@@ -138,8 +139,9 @@ def showfmmsg(inputformatmsg):
     msgcontent = msgcontent[:-1]
     print(f"{msgcontent}")
 
-    me = getowner()['User']['NickName']
-    chattxtfilename = str(getdirmain() / 'data' / 'webchat' / f'chatitems({me}).txt')
+    global men_wc
+    # me = getowner()['User']['NickName']
+    chattxtfilename = str(getdirmain() / 'data' / 'webchat' / f'chatitems({men_wc}).txt')
     chatitems = readfromtxt(chattxtfilename)
     global note_store
     # webchats.append(chatmsg)
@@ -147,10 +149,10 @@ def showfmmsg(inputformatmsg):
     write2txt(chattxtfilename, chatitems)
     # readinifromnote()
     # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
-    # print(f"{me}")
-    if len(me) ==0 :
+    # print(f"{men_wc}")
+    if len(men_wc) ==0 :
         log.critical(f"登录名为空！！！")
-    chatnoteguid = getinivaluefromnote('webchat', me).lower()
+    chatnoteguid = getinivaluefromnote('webchat', men_wc).lower()
     updatefre = getinivaluefromnote('webchat', 'updatefre')
     showitemscount = getinivaluefromnote('webchat', 'showitems')
     # print(f"{type(showitemscount)}\t{showitemscount}")
@@ -158,7 +160,7 @@ def showfmmsg(inputformatmsg):
     neirongplain = neirong.replace('<', '《').replace('>', '》') \
         .replace('=', '等于').replace('&', '并或')
     if (len(chatitems) % updatefre) == 0:
-        imglist2note(note_store, [], chatnoteguid, f"微信（{me}）记录更新笔记",
+        imglist2note(note_store, [], chatnoteguid, f"微信（{men_wc}）记录更新笔记",
                      neirongplain)
     # print(webchats)
 
@@ -197,9 +199,6 @@ def map_reply(msg):
                      isFriendChat=True, isGroupChat=True, isMpChat=True)
 def fileetc_reply(msg):
     innermsg = formatmsg(msg)
-    # owner = itchat.web_init()
-    # if innermsg['fmSend']:
-    # innermsg['fmSender'] = owner['User']['NickName']
     createtimestr = time.strftime("%Y%m%d", time.localtime(msg['CreateTime']))
     filepath = getdirmain() / "img" / "webchat" / createtimestr
     filepath = filepath / f"{innermsg['fmSender']}_{msg['FileName']}"
@@ -359,12 +358,14 @@ def getowner():
 
 
 def after_login():
-    log.info(f"登入《{itchat.web_init()['User']['NickName']}》的微信服务")
+    loginname = itchat.web_init()['User']['NickName']
+    log.info(f"登入《{loginname}》的微信服务")
 
 
 def after_logout():
-    termux_sms_send(f"微信登录已退出，如有必要请重新启动")
-    log.info(f'退出微信登录')
+    global men_wc
+    termux_sms_send(f"微信({men_wc})登录已退出，如有必要请重新启动")
+    log.info(f'退出微信({men_wc})登录')
 
 
 @trycounttimes2('微信服务器')
@@ -376,6 +377,12 @@ def keepliverun():
         itchat.logout()
     itchat.auto_login(hotReload=True,
                       loginCallback=after_login, exitCallback=after_logout)
+
+    global men_wc, meu_wc
+    owner = itchat.web_init()
+    showmsg(owner)
+    men_wc = owner['User']['NickName']
+    meu_wc = owner['User']['UserName']
     # getowner()
     # notechat = newchatnote()
     # listchatrooms()
@@ -385,4 +392,6 @@ def keepliverun():
 
 
 note_store = get_notestore()
+men_wc = ''
+meu_wc = ''
 keepliverun()
