@@ -12,7 +12,8 @@ with pathmagic.context():
     from func.configpr import cfp, inifilepath, getcfp
     from func.first import dirlog, dirmainpath
     from func.logme import log
-
+    from func.evernttest import get_notestore, imglist2note
+ 
 
 def fulltxt():
     dmpath = dirmainpath / "data" / "webchat"
@@ -90,19 +91,76 @@ def fulltxt():
     tdf = df[df.content.isnull().values != True]
     cdf = tdf.drop_duplicates(subset=['time', 'name', 'type', 'content'])
     print(cdf.shape[0])
-    rstdf = cdf.set_index('time')
+    # rstdf = cdf.set_index('time')
+    rstdf = cdf
 
     return rstdf
 
 
 def showjinzhang(indf):
     # dfgpc = indf.groupby(['name']).count()
-    sdzzdf = indf[indf.content.str.contains('^收到转账')].loc[:,['send', 'name',
+    sdzzdf = indf[indf.content.str.contains('^收到转账')].loc[:,['time', 'send', 'name',
                                                                   'content']]
-    # print(f"{sdzzdf}")
+    sdzzdf['namecontent'] = sdzzdf['name'] + sdzzdf['content']
+    zzdf = sdzzdf.loc[:, ['time', 'send', 'namecontent']]
+    zzdf.set_index('namecontent', inplace=True)
+    # print(f"{zzdf}")
+    ixlst = list(set(zzdf.index))
+    # print(f"{ixlst}")
+    rstlst = []
+    for ix in ixlst:
+        item = []
+        if type(zzdf.loc[ix]) == pd.core.series.Series:
+            item.append(ix)
+            item.append(zzdf.loc[ix]['time'])
+            item.append(zzdf.loc[ix]['send'])
+            rstlst.append(item)
+            # print(f"{item}")
+            continue
+        if type(zzdf.loc[ix]) == pd.core.frame.DataFrame:
+            mf = zzdf.loc[ix].sort_values(['time']).reset_index(drop=True)
+            # print(f"{ix}\t{mf.shape[0]}\t{mf}")
+            ii = 0
+            while ii < mf.shape[0]:
+                item = []
+                item.append(ix)
+                item.append(mf.loc[ii]['time'])
+                item.append(mf.loc[ii]['send'])
+                if ii+1 == mf.shape[0]:
+                    rstlst.append(item)
+                    # print(f"{item}")
+                    # print(f"循环到头了，添加走人")
+                    break
+                if mf.loc[ii,'send'] == mf.loc[ii+1,'send']:
+                    rstlst.append(item)
+                    # print(f"{item}")
+                    # print(f"没有配对的，添加继续循环")
+                    ii += 1
+                    break
+                else:
+                    item.append(mf.loc[ii+1]['time'])
+                    rstlst.append(item)
+                    # print(f"{item}")
+                    ii += 2
+
+    # print(f"{rstlst}")
+    dddf = pd.DataFrame(rstlst, columns=['namecontent', 'stime', 'send', 'etime'])
+    dddf.sort_values('stime', ascending=False, inplace=True)
+    dddf['name'] = dddf.namecontent.apply(lambda x : re.split('收到转账', x)[0])
+    dddf['amount'] = dddf.namecontent.apply(lambda x : re.findall('([0-9\.]{2,})', x)[0])
+    dddf['memo'] = dddf.namecontent.apply(lambda x : re.findall('\[(.*)\]', x)[0])
+    dddf.set_index('stime', inplace=True)
+    rstdf = dddf.loc[:, ['name', 'amount', 'send', 'memo', 'etime']]
+    print(f"{rstdf}")
+    
+    return rstdf
+
+# 0900a64c-9b25-4437-9eed-4121e78e53f0
+
+def otherszhang(indf):
     lqtxdf = indf[indf.content.str.contains('^零钱提现')].loc[:,['send', 'name',
                                                                   'content']]
-    print(f"{lqtxdf}")
+    # print(f"{lqtxdf}")
     wxzfpzdf = indf[indf.content.str.contains('^微信支付凭证')].loc[:,['send', 'name',
                                                                   'content']]
     wxzfskdf = indf[indf.content.str.contains('^微信支付收款')].loc[:,['send', 'name',
