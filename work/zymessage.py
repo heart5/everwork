@@ -124,14 +124,15 @@ def chuliquandan():
 
 def getbianmalst(args):
     cnx = lite.connect(dbpathquandan)
-    df = pd.read_sql('select 往来单位全名, 往来单位编号, 联系人, 地址  from customeruid', con=cnx, index_col='往来单位全名')
+    df = pd.read_sql('select 往来单位全名, 往来单位编号, 联系人, 地址  from customeruid', con=cnx, index_col='往来单位编号')
+    df['全息'] = df['往来单位全名'] + df['地址']
     dfs = df
     # 无参数则随机输出笔记配置文件指定的数量，有则相应处置
     if len(args) == 0:
         itemnumberfromnote = getinivaluefromnote('datasource', 'randomnumber4customer')
         itemnunber2show = len(df) if len(df) < itemnumberfromnote else itemnumberfromnote
         dfs = df.iloc[random.sample(range(0, len(df)), itemnunber2show), :]
-        resultlst = list(dfs['往来单位编号'])
+        resultlst = list(dfs.index)
     else:
         print(f"输入参数：{args[0]}")
         # 拆分出客户名称和区域等有效信息
@@ -162,16 +163,16 @@ def getbianmalst(args):
             ptnstr= "[0-3][0-9][0-6]0[0-9]{2}[1-9]"
             ptn = re.compile(f"^{ptnstr}")
             if re.match(ptn, name):
-                dfs = dfs[dfs.往来单位编号.str.contains(f"^{name}")]
+                dfs = dfs[dfs.index.str.contains(f"^{name}")]
                 break
-            dfs = dfs[dfs.index.str.contains(f"{name}")]
+            dfs = dfs[dfs.全息.str.contains(f"{name}")]
         # 依据df的数据结构创建空表
         resultdf = pd.DataFrame(columns=df.columns)
         for quyu in cquyutlst:
-            dfqy = dfs[dfs.往来单位编号.str.contains(f"^{quyu}")]
+            dfqy = dfs[dfs.index.str.contains(f"^{quyu}")]
             if dfqy.shape[0] != 0:
                 resultdf = resultdf.append(dfqy)
-        resultlst = list(resultdf['往来单位编号'])
+        resultlst = list(resultdf.index)
         # resultlst = [x[:7] for x in resultlst]
         # resultlst = [x[:7] for x in resultlst]
     cnx.close()
@@ -259,19 +260,21 @@ if __name__ == '__main__':
               # , '0810012'
               # , '阿里之门 叁拾叁区 捌区'
               # , '零区'
+              , '新益街'
+              , '天龙路'
               # , '千佛手'
               , '翼社区'
               ,
              ]
 
     # searchqiankuan()
-    for qry in qrylst:
-        rfile, rstr =  searchqiankuan(qry.split())
-        print(rstr)
-        
     # for qry in qrylst:
-        # rfile, rstr =  searchcustomer(qry.split())
+        # rfile, rstr =  searchqiankuan(qry.split())
         # print(rstr)
+        
+    for qry in qrylst:
+        rfile, rstr =  searchcustomer(qry.split())
+        print(rstr)
 
     # searchcut(rstr)
     # fl, flstr = searchcustomer(qry1.split())
