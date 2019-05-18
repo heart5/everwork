@@ -136,16 +136,29 @@ def getbianmalst(args):
     else:
         print(f"输入参数：{args[0]}")
         # 拆分出客户名称和区域等有效信息
+        fenbu = getinivaluefromnote('datasource', 'fenbulst')
+        fenbulst = re.split('[,，]', fenbu)
         quyudaxie = getinivaluefromnote('datasource', 'quyudaxielst')
         quyudaxielst = re.split('[,，]', quyudaxie)
         # print(f"{quyudaxielst}")
-        cnamelst = [x for x in args[0] if not (x in quyudaxielst)]
+        cnamelst = [x for x in args[0] if not (x in (quyudaxielst + fenbulst))]
+        cfenbulst = [x for x in args[0] if x in fenbulst]
         cquyulst = [x for x in args[0] if x in quyudaxielst]
         if len(cnamelst) == 0:
             cnamelst.append('.')
         print(f"客户名称拆解：{cnamelst}")
         print(f"区域名称拆解：{cquyulst}")
+        print(f"分部名称拆解：{cfenbulst}")
         cquyutlst = []
+        # 转换分部为区域的数字格式方便查询
+        for fb in cfenbulst:
+            dfquyu = pd.read_sql(f"select 区域 from quyu where 分部='{fb}'", con=cnx)
+            # print(f"{dfquyu}")
+            fbqylst = (list(dfquyu['区域']))
+            # print(f"{fbqylst}")
+            if len(fbqylst) > 0:
+                    for fbqy in fbqylst:
+                        cquyutlst.append(fbqy)
         # 转换区域为数字格式方便查询
         for qy in cquyulst:
             dfquyu = pd.read_sql(f"select * from quyu where 区域名称='{qy}'", con=cnx,
@@ -156,7 +169,9 @@ def getbianmalst(args):
         # 如果没有区域信息或者没有查找到有效区域信息，则添加任意适配符.
         if len(cquyutlst) == 0:
             cquyutlst.append('.')
-        print(f"区域列表（数字）：{cquyutlst}")
+        # print(f"区域列表（数字）：{cquyutlst}")
+        cquyutset = set(cquyutlst)
+        print(f"区域集合（数字）{cquyutset}")
         dfs = df
         for name in cnamelst:
             # 增加对客户编码的识别判断，最高优先级别
@@ -168,7 +183,7 @@ def getbianmalst(args):
             dfs = dfs[dfs.全息.str.contains(f"{name}")]
         # 依据df的数据结构创建空表
         resultdf = pd.DataFrame(columns=df.columns)
-        for quyu in cquyutlst:
+        for quyu in cquyutset:
             dfqy = dfs[dfs.index.str.contains(f"^{quyu}")]
             if dfqy.shape[0] != 0:
                 resultdf = resultdf.append(dfqy)
@@ -219,11 +234,13 @@ def searchcustomer(*args, **kw):
 
     cnx = lite.connect(dbpathquandan)
     # df = pd.read_sql('select 往来单位全名, substr(往来单位编号, 1, 7) as 往来单位编号, 联系人, 地址  from customeruid', con=cnx, index_col='往来单位全名')
-    df = pd.read_sql('select 往来单位全名 as 名称, 往来单位编号 as 编码, 联系人, 地址  from customeruid', con=cnx, index_col='名称')
+    # df = pd.read_sql('select 往来单位全名 as 名称, 往来单位编号 as 编码, 联系人, 地址  from customeruid', con=cnx, index_col='名称')
+    df = pd.read_sql('select 往来单位全名 as 名称, 往来单位编号 as 编码, 联系人, 地址  from customeruid', con=cnx)
     cnx.close()
     resultdf = df[df.编码.isin(targetbmlst)]
     # resultdf['客户编码'] = resultdf['往来单位编号'].str.slice(0,7)
     resultdf['编码'] = resultdf['编码'].str.slice(0,7)
+    resultdf.set_index('编码', inplace=True)
     # resultdf['拼接'] = resultdf['编码'].map(lambda x: x+'号')
     # resultdf['拼接'] = resultdf['编码'] + resultdf['编码']
     # resultdf['拼接'] = resultdf['编码'].str.cat(resultdf['编码'], sep='-')
@@ -233,7 +250,6 @@ def searchcustomer(*args, **kw):
     return rdffile, rdfstr
 
 
-# @profile
 def searchqiankuan(*args, **kw):
     chuliquandan()
     targetbmlst = getbianmalst(args)
@@ -259,12 +275,12 @@ if __name__ == '__main__':
     qrylst = ['百佳 瑞安街 捌区'
               # , '0810012'
               # , '阿里之门 叁拾叁区 捌区'
-              # , '零区'
-              , '新益街'
-              , '天龙路'
+              # , '零区 汉口'
+              , '联合 零区 贰拾贰区 汉口'
+              # , '新益街'
+              # , '天龙路'
               # , '千佛手'
               , '翼社区'
-              ,
              ]
 
     # searchqiankuan()
