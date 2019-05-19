@@ -23,6 +23,7 @@ with pathmagic.context():
         evernoteapijiayi, getinivaluefromnote
     from func.datatools import readfromtxt, write2txt
     from func.termuxtools import termux_sms_send
+    from func.splitwebchatmsgs import showjinzhang
     import evernote.edam.type.ttypes as ttypes
     from work.zymessage import searchcustomer, searchqiankuan
     from etc.getid import getdeviceid
@@ -147,11 +148,15 @@ def showfmmsg(inputformatmsg):
     # webchats.append(chatmsg)
     chatitems.insert(0, msgcontent)
     write2txt(chattxtfilename, chatitems)
+
+    if inputformatmsg['fmText'].startswith('收到转账'):
+        showjinzhang()
+
     # readinifromnote()
     # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
     # print(f"{men_wc}")
-    if len(men_wc) ==0 :
-        log.critical(f"登录名为空！！！")
+    # if len(men_wc) ==0 :
+        # log.critical(f"登录名为空！！！")
     chatnoteguid = getinivaluefromnote('webchat', men_wc).lower()
     updatefre = getinivaluefromnote('webchat', 'updatefre')
     showitemscount = getinivaluefromnote('webchat', 'showitems')
