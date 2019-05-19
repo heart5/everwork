@@ -165,8 +165,15 @@ def showjinzhang():
     else:
         count_zdzz = 0
 
+    rstdf.fillna('None', inplace=True)
     count_now = rstdf.shape[0]
-    notecontent = tablehtml2evernote(rstdf, '个人转账记录')
+    colstr = ' \t \t' + '\t'.join(list(rstdf.columns)) + '\n'
+    itemstr = colstr
+    for idx in rstdf.index:
+        itemstr += str(idx)+ '\t' + '\t'.join(rstdf.loc[idx]) + '\n'
+    print(f"{itemstr}")
+    notecontent = itemstr
+    # notecontent = tablehtml2evernote(rstdf, '个人转账记录')
     # print(f"{notecontent}")
     if count_now > count_zdzz:
         imglist2note(get_notestore(), [], noteguid, "微信个人转账收款记录",
