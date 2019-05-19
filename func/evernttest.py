@@ -277,8 +277,11 @@ def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲�
     try:
         note = notestore.createNote(tokenmn, ournote)
         evernoteapijiayi()
-        log.info('笔记《' + notetitle + '》在笔记本《' +
-                 parentnotebook.name + '》中创建成功。')
+        if parentnotebook and hasattr(parentnotebook, 'name'):
+            bkname = f"<{parentnotebook.name}>"
+        else:
+            bkname = '默认'
+        log.info('笔记《' + notetitle + '》在{bkname}笔记本中创建成功。')
         return note
     except EDAMUserException as usere:
         # Something was wrong with the note data
@@ -579,10 +582,15 @@ if __name__ == '__main__':
     print(f'开始测试文件\t{__file__}')
     nost = get_notestore()
     print(nost)
-    readinifromnote()
+    # readinifromnote()
     # writeini()
     # findnotebookfromevernote()
-    # notefind = findnotefromnotebook(
-    # token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', '日志')
-    # print(notefind)
+    # <notification>笔记本中查找笔记
+    # notefind = findnotefromnotebook( token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', '日志')
+    # <生活>笔记本中查找笔记
+    notefind = findnotefromnotebook( token,
+                                    '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b',
+                                    '转账')
+    print(notefind)
+    makenote(token, nost, '转账记录笔记guid', str(notefind))
     print('Done.')
