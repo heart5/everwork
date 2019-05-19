@@ -12,7 +12,7 @@ with pathmagic.context():
     from func.configpr import cfp, inifilepath, getcfp
     from func.first import dirlog, dirmainpath
     from func.logme import log
-    from func.evernttest import get_notestore, imglist2note
+    from func.evernttest import get_notestore, imglist2note, tablehtml2evernote, getinivaluefromnote
  
 
 def fulltxt():
@@ -97,7 +97,8 @@ def fulltxt():
     return rstdf
 
 
-def showjinzhang(indf):
+def showjinzhang():
+    indf = fulltxt()
     # dfgpc = indf.groupby(['name']).count()
     sdzzdf = indf[indf.content.str.contains('^收到转账')].loc[:,['time', 'send', 'name',
                                                                   'content']]
@@ -120,6 +121,7 @@ def showjinzhang(indf):
         if type(zzdf.loc[ix]) == pd.core.frame.DataFrame:
             mf = zzdf.loc[ix].sort_values(['time']).reset_index(drop=True)
             # print(f"{ix}\t{mf.shape[0]}\t{mf}")
+            # 指针滚动，处理项目相同的各条记录
             ii = 0
             while ii < mf.shape[0]:
                 item = []
@@ -151,7 +153,28 @@ def showjinzhang(indf):
     dddf['memo'] = dddf.namecontent.apply(lambda x : re.findall('\[(.*)\]', x)[0])
     dddf.set_index('stime', inplace=True)
     rstdf = dddf.loc[:, ['name', 'amount', 'send', 'memo', 'etime']]
-    print(f"{rstdf}")
+    # print(f"{rstdf}")
+
+    noteguid = getinivaluefromnote('webchat', '收到转账')
+    cfpcw, cfpcwpath = getcfp('everwebchat')
+    if not cfpcw.has_section('finance'):
+        cfpcw.add_section('finance')
+        cfpcw.write(open(cfpcwpath, 'w', encoding='utf-8'))
+    if cfpcw.has_option('finance', 'zdzz'):
+        count_zdzz = cfpcw.getint('finance', 'zdzz')
+    else:
+        count_zdzz = 0
+
+    count_now = rstdf.shape[0]
+    notecontent = tablehtml2evernote(rstdf, '个人转账记录')
+    # print(f"{notecontent}")
+    if count_now > count_zdzz:
+        imglist2note(get_notestore(), [], noteguid, "微信个人转账收款记录",
+                     notecontent)
+        cfpcw.set('finance', 'zdzz', f"{count_now}")
+        cfpcw.write(open(cfpcwpath, 'w', encoding='utf-8'))
+        log.info(f"成功更新《微信个人转账收款记录》，记录共有{rstdf.shape[0]}条")
+
     
     return rstdf
 
@@ -171,16 +194,16 @@ def otherszhang(indf):
 
 
 if __name__ == '__main__':
-    print(f'开始测试文件\t{__file__}')
+    log.info(f'开始测试文件\t{__file__}')
     # nost = get_notestore()
     # print(nost)
-    allitems = fulltxt()
+    # allitems = fulltxt()
     # print(allitems[-10:-1])
-    showjinzhang(allitems)
+    showjinzhang()
     # print(f"{allitems[:30]}")
     # writeini()
     # findnotebookfromevernote()
     # notefind = findnotefromnotebook(
     # token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', '日志')
     # print(notefind)
-    print('Done.')
+    log.info(f'对\t{__file__}\t的测试结束。')
