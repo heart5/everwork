@@ -15,6 +15,36 @@ with pathmagic.context():
     from func.evernttest import get_notestore, imglist2note, tablehtml2evernote, getinivaluefromnote
  
 
+def finance2note(rstdf, mingmu, mingmu4ini, title):
+    noteguid = getinivaluefromnote('webchat', mingmu)
+    cfpcw, cfpcwpath = getcfp('everwebchat')
+    if not cfpcw.has_section('finance'):
+        cfpcw.add_section('finance')
+        cfpcw.write(open(cfpcwpath, 'w', encoding='utf-8'))
+    if cfpcw.has_option('finance', mingmu4ini):
+        count_zdzz = cfpcw.getint('finance', mingmu4ini)
+    else:
+        count_zdzz = 0
+    # print(f"{count_zdzz}")
+
+    rstdf.fillna('None', inplace=True)
+    count_now = rstdf.shape[0]
+    # print(f"{count_now}")
+    colstr = ' \t \t' + '\t'.join(list(rstdf.columns)) + '\n'
+    itemstr = colstr
+    for idx in rstdf.index:
+        itemstr += str(idx)+ '\t' + '\t'.join(rstdf.loc[idx]) + '\n'
+    # print(f"{itemstr}")
+    notecontent = itemstr
+    # notecontent = tablehtml2evernote(rstdf, '个人转账记录')
+    # print(f"{notecontent}")
+    if count_now != count_zdzz:
+        imglist2note(get_notestore(), [], noteguid, title, notecontent)
+        cfpcw.set('finance', mingmu4ini, f"{count_now}")
+        cfpcw.write(open(cfpcwpath, 'w', encoding='utf-8'))
+        log.info(f"成功更新《{title}》，记录共有{rstdf.shape[0]}条")
+
+
 def fulltxt():
     dmpath = dirmainpath / "data" / "webchat"
     # print(f"{dmpath}")
@@ -154,38 +184,20 @@ def showjinzhang():
     dddf.set_index('stime', inplace=True)
     rstdf = dddf.loc[:, ['name', 'amount', 'send', 'memo', 'etime']]
     # print(f"{rstdf}")
-
-    noteguid = getinivaluefromnote('webchat', '收到转账')
-    cfpcw, cfpcwpath = getcfp('everwebchat')
-    if not cfpcw.has_section('finance'):
-        cfpcw.add_section('finance')
-        cfpcw.write(open(cfpcwpath, 'w', encoding='utf-8'))
-    if cfpcw.has_option('finance', 'zdzz'):
-        count_zdzz = cfpcw.getint('finance', 'zdzz')
-    else:
-        count_zdzz = 0
-
-    rstdf.fillna('None', inplace=True)
-    count_now = rstdf.shape[0]
-    colstr = ' \t \t' + '\t'.join(list(rstdf.columns)) + '\n'
-    itemstr = colstr
-    for idx in rstdf.index:
-        itemstr += str(idx)+ '\t' + '\t'.join(rstdf.loc[idx]) + '\n'
-    print(f"{itemstr}")
-    notecontent = itemstr
-    # notecontent = tablehtml2evernote(rstdf, '个人转账记录')
-    # print(f"{notecontent}")
-    if count_now > count_zdzz:
-        imglist2note(get_notestore(), [], noteguid, "微信个人转账收款记录",
-                     notecontent)
-        cfpcw.set('finance', 'zdzz', f"{count_now}")
-        cfpcw.write(open(cfpcwpath, 'w', encoding='utf-8'))
-        log.info(f"成功更新《微信个人转账收款记录》，记录共有{rstdf.shape[0]}条")
-
     
-    return rstdf
+    finance2note(rstdf, '收到转账全部', 'zdzz', '微信个人转账(全部)收款记录')
 
-# 0900a64c-9b25-4437-9eed-4121e78e53f0
+    secretstrfromini = getinivaluefromnote('webchat', 'secret')
+    # print(f"{secretstrfromini}")
+    secretlst = re.split('[,，]', secretstrfromini)
+    # print(f"{secretlst}")
+    rst4workdf = rstdf[~rstdf.name.isin(secretlst)]
+    # print(f"{rst4workdf}")
+    rstdf = rst4workdf.loc[:,:]
+    # print(f"{rstdf}")
+    finance2note(rstdf, '收到转账工作', 'zdzzwork', '微信个人转账收款记录')
+
+
 
 def otherszhang(indf):
     lqtxdf = indf[indf.content.str.contains('^零钱提现')].loc[:,['send', 'name',
