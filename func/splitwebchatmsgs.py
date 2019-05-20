@@ -198,6 +198,27 @@ def showjinzhang():
     finance2note(rstdf, '收到转账工作', 'zdzzwork', '微信个人转账收款记录')
 
 
+def showshoukuan():
+    indf = fulltxt()
+    # dfgpc = indf.groupby(['name']).count()
+    sdzzdf = indf[indf.content.str.contains('^微信支付收款')].loc[:,['time', 'send', 'name',
+                                                                  'content']]
+    sdzzdf['amount'] = sdzzdf['content'].apply(lambda x :
+                                               re.findall('([0-9]+\.[0-9]+)', x)[0])
+    sdzzdf['memo'] = sdzzdf['content'].apply(lambda x :
+                                               re.findall('付款方备注(.*)',
+                                                          x)[0] if
+                                             re.findall('付款方备注(.*)', x) else
+                                            None)
+    sdzzdf['friend'] = sdzzdf['content'].apply(lambda x :
+                                               '微信好友' if re.findall('朋友到店',
+                                                                  x) else None)
+    sdzzdf.set_index('time', inplace=True)
+    rstdf = sdzzdf.loc[:, ['friend', 'amount', 'memo' ]]
+    # print(f"{rstdf}")
+
+    finance2note(rstdf, '微信号收款', 'wxhsk', '微信号收账记录')
+
 
 def otherszhang(indf):
     lqtxdf = indf[indf.content.str.contains('^零钱提现')].loc[:,['send', 'name',
@@ -218,7 +239,8 @@ if __name__ == '__main__':
     # print(nost)
     # allitems = fulltxt()
     # print(allitems[-10:-1])
-    showjinzhang()
+    # showjinzhang()
+    showshoukuan()
     # print(f"{allitems[:30]}")
     # writeini()
     # findnotebookfromevernote()
