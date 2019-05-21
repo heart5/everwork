@@ -15,7 +15,7 @@ with pathmagic.context():
     from func.evernttest import get_notestore, imglist2note, tablehtml2evernote, getinivaluefromnote
  
 
-def finance2note(rstdf, mingmu, mingmu4ini, title):
+def finance2note(srccount, rstdf, mingmu, mingmu4ini, title):
     noteguid = getinivaluefromnote('webchat', mingmu)
     cfpcw, cfpcwpath = getcfp('everwebchat')
     if not cfpcw.has_section('finance'):
@@ -28,8 +28,6 @@ def finance2note(rstdf, mingmu, mingmu4ini, title):
     # print(f"{count_zdzz}")
 
     rstdf.fillna('None', inplace=True)
-    count_now = rstdf.shape[0]
-    # print(f"{count_now}")
     colstr = ' \t \t' + '\t'.join(list(rstdf.columns)) + '\n'
     itemstr = colstr
     for idx in rstdf.index:
@@ -38,9 +36,9 @@ def finance2note(rstdf, mingmu, mingmu4ini, title):
     notecontent = itemstr
     # notecontent = tablehtml2evernote(rstdf, '个人转账记录')
     # print(f"{notecontent}")
-    if count_now != count_zdzz:
+    if srccount != count_zdzz:
         imglist2note(get_notestore(), [], noteguid, title, notecontent)
-        cfpcw.set('finance', mingmu4ini, f"{count_now}")
+        cfpcw.set('finance', mingmu4ini, f"{srccount}")
         cfpcw.write(open(cfpcwpath, 'w', encoding='utf-8'))
         log.info(f"成功更新《{title}》，记录共有{rstdf.shape[0]}条")
 
@@ -185,7 +183,7 @@ def showjinzhang():
     rstdf = dddf.loc[:, ['name', 'amount', 'send', 'memo', 'etime']]
     # print(f"{rstdf}")
     
-    finance2note(rstdf, '收到转账全部', 'zdzz', '微信个人转账(全部)收款记录')
+    finance2note(sdzzdf.shape[0], rstdf, '收到转账全部', 'zdzz', '微信个人转账(全部)收款记录')
 
     secretstrfromini = getinivaluefromnote('webchat', 'secret')
     # print(f"{secretstrfromini}")
@@ -195,7 +193,7 @@ def showjinzhang():
     # print(f"{rst4workdf}")
     rstdf = rst4workdf.loc[:,:]
     # print(f"{rstdf}")
-    finance2note(rstdf, '收到转账工作', 'zdzzwork', '微信个人转账收款记录')
+    finance2note(sdzzdf.shape[0], rstdf, '收到转账工作', 'zdzzwork', '微信个人转账收款记录')
 
 
 def showshoukuan():
@@ -217,7 +215,7 @@ def showshoukuan():
     rstdf = sdzzdf.loc[:, ['friend', 'amount', 'memo' ]]
     # print(f"{rstdf}")
 
-    finance2note(rstdf, '微信号收款', 'wxhsk', '微信号收账记录')
+    finance2note(sdzzdf.shape[0], rstdf, '微信号收款', 'wxhsk', '微信号收账记录')
 
 
 def otherszhang(indf):
