@@ -28,15 +28,15 @@ def finance2note(srccount, rstdf, mingmu, mingmu4ini, title):
     # print(f"{count_zdzz}")
 
     rstdf.fillna('None', inplace=True)
-    colstr = ' \t \t' + '\t'.join(list(rstdf.columns)) + '\n'
+    colstr = 'index\t' + '\t'.join(list(rstdf.columns)) + '\n'
     itemstr = colstr
     for idx in rstdf.index:
         itemstr += str(idx)+ '\t' + '\t'.join(rstdf.loc[idx]) + '\n'
     # print(f"{itemstr}")
     notecontent = itemstr
-    # notecontent = tablehtml2evernote(rstdf, '个人转账记录')
-    # print(f"{notecontent}")
-    if srccount != count_zdzz:
+    finance2note4debug = getinivaluefromnote('webchat', 'finance2note4debug')
+    print(f"{type(finance2note4debug)}\t{finance2note4debug}")
+    if (srccount != count_zdzz) or finance2note4debug:
         imglist2note(get_notestore(), [], noteguid, title, notecontent)
         cfpcw.set('finance', mingmu4ini, f"{srccount}")
         cfpcw.write(open(cfpcwpath, 'w', encoding='utf-8'))
@@ -237,7 +237,7 @@ if __name__ == '__main__':
     # print(nost)
     # allitems = fulltxt()
     # print(allitems[-10:-1])
-    # showjinzhang()
+    showjinzhang()
     showshoukuan()
     # print(f"{allitems[:30]}")
     # writeini()
