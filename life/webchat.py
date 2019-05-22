@@ -149,11 +149,11 @@ def showfmmsg(inputformatmsg):
     chatitems.insert(0, msgcontent)
     write2txt(chattxtfilename, chatitems)
 
-    if inputformatmsg['fmText'].startswith('收到转账'):
-        showjinzhang()
+    # if inputformatmsg['fmText'].startswith('收到转账'):
+        # showjinzhang()
 
-    if inputformatmsg['fmText'].startswith('微信支付收款'):
-        showshoukuan()
+    # if inputformatmsg['fmText'].startswith('微信支付收款'):
+        # showshoukuan()
 
     # readinifromnote()
     # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
