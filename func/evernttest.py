@@ -530,6 +530,13 @@ def getinivaluefromnote(section, option):
     cfpfromnote, cfpfromnotepath = getcfp('everinifromnote') 
     targetvalue = cfpfromnote.get(section, option)
 
+    # 处理布尔值
+    if targetvalue.strip().lower() == 'true':
+        return True
+
+    if targetvalue.strip().lower() == 'false':
+        return False
+
     # 处理整数
     ptn = re.compile(r"^[+-]?[0-9]+$")
     result = ptn.match(targetvalue)
