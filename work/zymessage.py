@@ -16,10 +16,10 @@ import pathmagic
 
 with pathmagic.context():
     from func.evernttest import evernoteapijiayi, makenote, getinivaluefromnote
-    from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
+    from func.first import dbpathworkplan, dbpathquandan, dbpathdingdanmingxi, dirmainpath, ywananchor, touchfilepath2depth
     from func.configpr import getcfp
     from func.logme import log
-    from func.pdtools import gengxinfou
+    from func.pdtools import gengxinfou, desclitedb
 
 print(f"{__file__} is loading now...")
 
@@ -213,16 +213,31 @@ def validfilename(prefix, args):
 def getresult(resultdf, prefix, args):
     number2showinapp = getinivaluefromnote('datasource', 'number2showinapp')
     if resultdf.shape[0] > number2showinapp:
-        rdffile = validfilename(prefix, args)
-        resultdf.to_excel(rdffile)
-        rdffile = os.path.abspath(rdffile)
+        excelwriter = pd.ExcelWriter(validfilename(prefix, args))
+        ixmaxcount = 0
+        for ix in set(resultdf.index):
+            ixcount = resultdf.loc[ix].shape[0]
+            print(f"{ix}\t{ixcount}")
+            if ixcount > ixmaxcount:
+                ixmaxcount = ixcount
+        print(f"{ixmaxcount}")
+        maxcount2split = getinivaluefromnote('webchat', 'maxcount2split')
+        if ixmaxcount > maxcount2split:
+            for ix in set(resultdf.index):
+                resultdf.loc[ix].to_excel(excelwriter,
+                                          sheet_name=str(ix).replace('*',
+                                                                     '').strip(), index=False)
+        else:
+            resultdf.to_excel(excelwriter)
+        excelwriter.save()
+        rdffile = os.path.abspath(excelwriter)
         rdfstr = resultdf[:number2showinapp].to_string() + f"\n...\n共有{resultdf.shape[0]}条结果，更多信息请查看表格附件"
     else:
         rdffile = None
         if resultdf.shape[0] == 0:
             rdfstr = '没有符合条件的查询结果'
         else:
-            rdfstr = resultdf.to_string()
+            rdfstr = f"找到{resultdf.shape[0]}条记录\n" + resultdf.to_string()
 
     return rdffile, rdfstr
 
@@ -231,6 +246,9 @@ def getresult(resultdf, prefix, args):
 def searchcustomer(*args, **kw):
     chulikhqd()
     targetbmlst = getbianmalst(args)
+    if len(targetbmlst) == 0:
+        custsample = "“百佳 捌区”，勤丰 联城路“，”凯旋 汉阳“"
+        return None, f"没有找到符合条件的客户。\n请扩大查询范围重新查找，另外一定注意用空格分隔客户信息关键词，比如{custsample}"
 
     cnx = lite.connect(dbpathquandan)
     # df = pd.read_sql('select 往来单位全名, substr(往来单位编号, 1, 7) as 往来单位编号, 联系人, 地址  from customeruid', con=cnx, index_col='往来单位全名')
@@ -253,6 +271,9 @@ def searchcustomer(*args, **kw):
 def searchqiankuan(*args, **kw):
     chuliquandan()
     targetbmlst = getbianmalst(args)
+    if len(targetbmlst) == 0:
+        custsample = "“百佳 捌区”，勤丰 联城路“，”凯旋 汉阳“"
+        return None, f"没有找到符合条件的客户。\n请扩大查询范围重新查找，另外一定注意用空格分隔客户信息关键词，比如{custsample}"
 
     cnx = lite.connect(dbpathquandan)
     # df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, substr(终端编码, 1, 7) as 终端编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
@@ -266,31 +287,84 @@ def searchqiankuan(*args, **kw):
 
     return rdffile, rdfstr
 
+def strlst2sqltuple(lst):
+    targetbmlst_quote = ['\'' + x + '\'' for x in lst]
+    sqltuple = "(" + ','.join(targetbmlst_quote) + ')'
+    print(f"{sqltuple }")
+
+    return sqltuple
+
+
+def searchpinxiang(*args, **kw):
+    chuliquandan()
+    targetbmlst = getbianmalst(args)
+    if len(targetbmlst) == 0:
+        custsample = "“百佳 捌区”，勤丰 联城路“，”凯旋 汉阳“"
+        return None, f"没有找到符合条件的客户。\n请扩大查询范围重新查找，另外一定注意用空格分隔客户信息关键词，比如{custsample}"
+
+    cnx = lite.connect(dbpathquandan)
+    # desclitedb(cnx)
+    cnxmingxi = lite.connect(dbpathdingdanmingxi, detect_types=lite.PARSE_DECLTYPES|lite.PARSE_COLNAMES)
+    # desclitedb(cnxmingxi)
+    targetbmlst2str = strlst2sqltuple(targetbmlst)
+    dfcustomer = pd.read_sql(f"select * from customer where 往来单位编号 in {targetbmlst2str}", con=cnx)
+    ctlst = list(dfcustomer['往来单位'])
+    # print(f"{ctlst}")
+    customerstr4sql = strlst2sqltuple(ctlst)
+    dfpinxiang = pd.read_sql(f"select * from orderdetails where 单位全名 in {customerstr4sql}", parse_dates=True, con=cnxmingxi)
+    # print(f"{dfpinxiang.dtypes}")
+    being = pd.to_datetime(getinivaluefromnote('webchat', 'datafrom'))
+    df = dfpinxiang[dfpinxiang.日期 >= being]
+    dfpxjc = pd.read_sql(f"select 商品全名, 简称 from product where 简称 is not NULL", cnx, index_col=['商品全名'])
+    dfpxjc = dfpxjc['简称']
+    df['商品全名'] = df['商品全名'].apply(lambda x:
+                                                          dfpxjc.loc[x] if (x in list(dfpxjc.index)) else x)
+    dfpxsum = (df.groupby(['单位全名', '商品全名'], as_index=False)['金额', '数量'].sum())
+    # print(f"{dfpxsum}")
+    # dfsort = dfpxsum.sort_values('金额', ascending=False)
+    dfsort = dfpxsum.sort_values(['单位全名', '金额'], ascending=[True, False])
+    dfsort.set_index('单位全名', inplace=True)
+    # print(f"{dfsort}")
+    # df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, substr(终端编码, 1, 7) as 终端编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
+    # df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, 终端编码 as 编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
+    # cnx.close()
+    # filterdf = df[df.编码.isin(targetbmlst)]
+    # resultdf = filterdf[(filterdf.收款日期.isnull()) & (filterdf.送达日期.notna())]
+    # resultdf['编码'] = resultdf['编码'].str.slice(0,7)
+
+    rdffile, rdfstr = getresult(dfsort, 'khpx', args)
+
+    return rdffile, rdfstr
+
 
 if __name__ == '__main__':
     # global log
     log.info(f'文件\t{__file__}\t启动运行……')
     # cnxp = lite.connect(dbpathquandan)
     # dataokay(cnxp)
-    qrylst = ['百佳 瑞安街 捌区'
+    qrylst = ['联合 捌区'
               # , '0810012'
               # , '阿里之门 叁拾叁区 捌区'
               # , '零区 汉口'
-              , '联合 零区 贰拾贰区 汉口'
+              # , '联合 零区 贰拾贰区 汉口'
               # , '新益街'
               # , '天龙路'
               # , '千佛手'
-              , '翼社区'
+              # , '翼社区 汉口'
              ]
 
     # searchqiankuan()
+    for qry in qrylst:
+        rfile, rstr =  searchpinxiang(qry.split())
+        print(rstr)
+        
     # for qry in qrylst:
         # rfile, rstr =  searchqiankuan(qry.split())
         # print(rstr)
         
-    for qry in qrylst:
-        rfile, rstr =  searchcustomer(qry.split())
-        print(rstr)
+    # for qry in qrylst:
+        # rfile, rstr =  searchcustomer(qry.split())
+        # print(rstr)
 
     # searchcut(rstr)
     # fl, flstr = searchcustomer(qry1.split())
