@@ -25,7 +25,7 @@ with pathmagic.context():
     from func.termuxtools import termux_sms_send
     from func.splitwebchatmsgs import showjinzhang, showshoukuan
     import evernote.edam.type.ttypes as ttypes
-    from work.zymessage import searchcustomer, searchqiankuan
+    from work.zymessage import searchcustomer, searchqiankuan, searchpinxiang
     from etc.getid import getdeviceid
 
 
@@ -312,6 +312,9 @@ def text_reply(msg):
             elif diyihang[1] == '欠款':
                 qrystr = qrylst[1].strip()
                 rstfile, rst = searchqiankuan(qrystr.split())
+            elif diyihang[1] == '品项':
+                qrystr = qrylst[1].strip()
+                rstfile, rst = searchpinxiang(qrystr.split())
 
             itchat.send_msg(rst, toUserName=msg['FromUserName'])
             nowtuple = time.time()
