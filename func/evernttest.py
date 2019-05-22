@@ -599,5 +599,9 @@ if __name__ == '__main__':
                                     '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b',
                                     '转账')
     print(notefind)
-    makenote(token, nost, '转账记录笔记guid', str(notefind))
+    dffile = open(dirmainpath / 'data' / 'dbinfo.txt', 'r')
+    neirong = dffile.read()
+    dffile.close()
+    makenote(token, nost, '数据库信息', neirong)
+    # makenote(token, nost, '转账记录笔记guid', str(notefind))
     print('Done.')
