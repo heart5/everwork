@@ -55,16 +55,16 @@ def desclitedb(cnx):
     result = cur.execute("select name from sqlite_master where type = 'table' order by name")
     table_name_list = [tuple1[0] for tuple1 in result.fetchall()]
     print(table_name_list)
-    for table1 in table_name_list:
-        #        result = cur.execute("PRAGMA table_info(%s)" % table)
-        #        for jj in result.fetchall():
-        #            print(jj,end='\t')
-        print("%s" % table1, end='\t')
-        result = cur.execute("select * from %s" % table1)
-        print(len(result.fetchall()), end='\t')
-        # print(cur.description)
-        col_name_list = [tuple1[0] for tuple1 in cur.description]
-        print(col_name_list)
+    # for table1 in table_name_list:
+        # #        result = cur.execute("PRAGMA table_info(%s)" % table)
+        # #        for jj in result.fetchall():
+        # #            print(jj,end='\t')
+        # print("%s" % table1, end='\t')
+        # result = cur.execute("select * from %s" % table1)
+        # print(len(result.fetchall()), end='\t')
+        # # print(cur.description)
+        # col_name_list = [tuple1[0] for tuple1 in cur.description]
+        # print(col_name_list)
 
 
 def dftotal2top(df: pd.DataFrame):
