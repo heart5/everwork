@@ -124,15 +124,15 @@ def chuliquandan():
 
 def getbianmalst(args):
     cnx = lite.connect(dbpathquandan)
-    df = pd.read_sql('select 往来单位全名, 往来单位编号, 联系人, 地址  from customeruid', con=cnx, index_col='往来单位编号')
-    df['全息'] = df['往来单位全名'] + df['地址']
+    df = pd.read_sql('select 往来单位全名, 往来单位编号, 联系人, 地址  from customeruid', con=cnx, index_col='往来单位全名')
+    df['全息'] = df.index + df['地址']
     dfs = df
     # 无参数则随机输出笔记配置文件指定的数量，有则相应处置
     if len(args) == 0:
         itemnumberfromnote = getinivaluefromnote('datasource', 'randomnumber4customer')
         itemnunber2show = len(df) if len(df) < itemnumberfromnote else itemnumberfromnote
         dfs = df.iloc[random.sample(range(0, len(df)), itemnunber2show), :]
-        resultlst = list(dfs.index)
+        resultlst = list(dfs['往来单位编号'])
     else:
         print(f"输入参数：{args[0]}")
         # 拆分出客户名称和区域等有效信息
@@ -170,7 +170,7 @@ def getbianmalst(args):
         if len(cquyutlst) == 0:
             cquyutlst.append('.')
         # print(f"区域列表（数字）：{cquyutlst}")
-        cquyutset = set(cquyutlst)
+        cquyutset = list(set(cquyutlst))
         print(f"区域集合（数字）{cquyutset}")
         dfs = df
         for name in cnamelst:
@@ -184,10 +184,10 @@ def getbianmalst(args):
         # 依据df的数据结构创建空表
         resultdf = pd.DataFrame(columns=df.columns)
         for quyu in cquyutset:
-            dfqy = dfs[dfs.index.str.contains(f"^{quyu}")]
+            dfqy = dfs[dfs.往来单位编号.str.contains(f"^{quyu}")]
             if dfqy.shape[0] != 0:
                 resultdf = resultdf.append(dfqy)
-        resultlst = list(resultdf.index)
+        resultlst = list(resultdf.往来单位编号)
         # resultlst = [x[:7] for x in resultlst]
         # resultlst = [x[:7] for x in resultlst]
     cnx.close()
@@ -195,7 +195,8 @@ def getbianmalst(args):
     # print(f"{resultdf}")
     print(f"客户编码查询结果：{resultlst}")
 
-    return resultlst
+    # set一下确保单一不重复，上个保险
+    return list(set(resultlst))
 
 
 def validfilename(prefix, args):
@@ -217,7 +218,7 @@ def getresult(resultdf, prefix, args):
         ixmaxcount = 0
         for ix in set(resultdf.index):
             ixcount = resultdf.loc[ix].shape[0]
-            print(f"{ix}\t{ixcount}")
+            # print(f"{ix}\t{ixcount}")
             if ixcount > ixmaxcount:
                 ixmaxcount = ixcount
         print(f"{ixmaxcount}")
@@ -258,7 +259,7 @@ def searchcustomer(*args, **kw):
     resultdf = df[df.编码.isin(targetbmlst)]
     # resultdf['客户编码'] = resultdf['往来单位编号'].str.slice(0,7)
     resultdf['编码'] = resultdf['编码'].str.slice(0,7)
-    resultdf.set_index('编码', inplace=True)
+    resultdf.set_index('名称', inplace=True)
     # resultdf['拼接'] = resultdf['编码'].map(lambda x: x+'号')
     # resultdf['拼接'] = resultdf['编码'] + resultdf['编码']
     # resultdf['拼接'] = resultdf['编码'].str.cat(resultdf['编码'], sep='-')
@@ -288,6 +289,9 @@ def searchqiankuan(*args, **kw):
     return rdffile, rdfstr
 
 def strlst2sqltuple(lst):
+    """
+    list转换成适合sql使用的括号包括的set
+    """
     targetbmlst_quote = ['\'' + x + '\'' for x in lst]
     sqltuple = "(" + ','.join(targetbmlst_quote) + ')'
     print(f"{sqltuple }")
@@ -304,6 +308,7 @@ def searchpinxiang(*args, **kw):
 
     cnx = lite.connect(dbpathquandan)
     # desclitedb(cnx)
+    # 加参数探测特殊数据类型比如日期时间
     cnxmingxi = lite.connect(dbpathdingdanmingxi, detect_types=lite.PARSE_DECLTYPES|lite.PARSE_COLNAMES)
     # desclitedb(cnxmingxi)
     targetbmlst2str = strlst2sqltuple(targetbmlst)
@@ -343,6 +348,9 @@ if __name__ == '__main__':
     # cnxp = lite.connect(dbpathquandan)
     # dataokay(cnxp)
     qrylst = ['联合 捌区'
+              , '天猫 飞翔'
+              , '天猫 '
+              , '飞翔 '
               # , '0810012'
               # , '阿里之门 叁拾叁区 捌区'
               # , '零区 汉口'
@@ -354,17 +362,17 @@ if __name__ == '__main__':
              ]
 
     # searchqiankuan()
-    for qry in qrylst:
-        rfile, rstr =  searchpinxiang(qry.split())
-        print(rstr)
+    # for qry in qrylst:
+        # rfile, rstr =  searchpinxiang(qry.split())
+        # print(rstr)
         
     # for qry in qrylst:
         # rfile, rstr =  searchqiankuan(qry.split())
         # print(rstr)
         
-    # for qry in qrylst:
-        # rfile, rstr =  searchcustomer(qry.split())
-        # print(rstr)
+    for qry in qrylst:
+        rfile, rstr =  searchcustomer(qry.split())
+        print(rstr)
 
     # searchcut(rstr)
     # fl, flstr = searchcustomer(qry1.split())
