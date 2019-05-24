@@ -211,8 +211,16 @@ def showshoukuan():
     sdzzdf['friend'] = sdzzdf['content'].apply(lambda x :
                                                '微信好友' if re.findall('朋友到店',
                                                                   x) else None)
+    sdzzdf['daycount'] = sdzzdf['content'].apply(lambda x :
+                                               re.findall('今日第([0-9]+)笔',
+                                                         x)[0] if re.findall('今日第([0-9]+)笔',
+                                                                  x) else None)
+    sdzzdf['daysum'] = sdzzdf['content'].apply(lambda x :
+                                               re.findall('共计￥([0-9]+\.[0-9]{2})',
+                                                         x)[0] if re.findall('共计￥([0-9]+\.[0-9]{2})',
+                                                                  x) else None)
     sdzzdf.set_index('time', inplace=True)
-    rstdf = sdzzdf.loc[:, ['friend', 'amount', 'memo' ]]
+    rstdf = sdzzdf.loc[:, ['daycount', 'friend', 'amount', 'memo', 'daysum' ]]
     # print(f"{rstdf}")
 
     finance2note(sdzzdf.shape[0], rstdf, '微信号收款', 'wxhsk', '微信号收账记录')
