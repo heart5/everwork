@@ -1,4 +1,7 @@
 import yagmail
+import re
+import os
+from pathlib import Path
 
 import pathmagic
 with pathmagic.context():
@@ -6,8 +9,9 @@ with pathmagic.context():
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
     from func.configpr import getcfp
+    from func.evernttest import getinivaluefromnote
 
-def mailfun():
+def mailfun(txtfile):
     cfpew, cfpewpath = getcfp('everwork')
     host = cfpew.get('gmail', 'host')
     username = cfpew.get('gmail', 'username')
@@ -15,12 +19,24 @@ def mailfun():
     print(f"{username}")
     yag_imap_connecttion = yagmail.SMTP(user=username, password=password,
                                         host=host)
-    subject = "特斯盒yagmail from python"
-    contents = ['我是第一个，先来', str(dirmainpath / 'data' / 'everip.ini')]
-    yag_imap_connecttion.send('1613394006@qq.com', subject, contents)
+    subject = str(txtfile)
+    flhd = open(txtfile, 'r')
+    txtcontent = flhd.read()
+    flhd.close()
+    contents = [txtcontent, str(txtfile)]
+    mail2lst = re.split('[,，]', getinivaluefromnote('mail', 'mailto'))
+    # print(f"{mail2lst}")
+    yag_imap_connecttion.send(mail2lst, subject, contents)
+    yag_imap_connecttion.close()
 
+
+def mailtxtfileindir(dirfrom):
+    fls = [x for x in os.listdir(dirfrom) if x.endswith('.txt')]
+    print(f"{fls}")
+    for fl in fls:
+        mailfun(dirfrom / fl)
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    mailfun()
+    mailtxtfileindir(dirmainpath / '..')
     log.info(f'文件\t{__file__}\t测试完毕。')
