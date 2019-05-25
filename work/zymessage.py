@@ -178,7 +178,7 @@ def getbianmalst(args):
             ptnstr= "[0-3][0-9][0-6]0[0-9]{2}[1-9]"
             ptn = re.compile(f"^{ptnstr}")
             if re.match(ptn, name):
-                dfs = dfs[dfs.index.str.contains(f"^{name}")]
+                dfs = dfs[dfs.往来单位编号.str.contains(f"^{name}")]
                 break
             dfs = dfs[dfs.全息.str.contains(f"{name}")]
         # 依据df的数据结构创建空表
@@ -206,7 +206,7 @@ def validfilename(prefix, args):
         # 把中文字符转换为拼音
         py = Pinyin()
         tezhengstr4filename = '_'.join([py.get_pinyin(x, '') for x in args[0]])
-    rdffile = dirmainpath / 'data' / 'webchat' / f'{prefix}_{tezhengstr4filename}.xls'
+    rdffile = dirmainpath / 'data' / 'webchat' / f'{prefix}_{tezhengstr4filename}.xlsx'
         # print(rdffile)
     return rdffile
 
@@ -221,11 +221,17 @@ def getresult(resultdf, prefix, args):
             # print(f"{ix}\t{ixcount}")
             if ixcount > ixmaxcount:
                 ixmaxcount = ixcount
-        print(f"{ixmaxcount}")
+        print(f"最大条目数为：{ixmaxcount}")
         maxcount2split = getinivaluefromnote('webchat', 'maxcount2split')
         if ixmaxcount > maxcount2split:
             for ix in set(resultdf.index):
-                resultdf.loc[ix].to_excel(excelwriter,
+                df2sheet = resultdf.loc[ix]
+                if type(df2sheet) == pd.core.series.Series:
+                    # 复制结构相同的DataFrame，并追加数据（类型是Series）
+                    dftmp = pd.DataFrame(columns=resultdf.columns)
+                    df2sheet = dftmp.append(df2sheet)
+                    # print(f"{df2sheet}")
+                df2sheet.to_excel(excelwriter,
                                           sheet_name=str(ix).replace('*',
                                                                      '').strip(), index=False)
         else:
@@ -278,11 +284,12 @@ def searchqiankuan(*args, **kw):
 
     cnx = lite.connect(dbpathquandan)
     # df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, substr(终端编码, 1, 7) as 终端编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
-    df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, 终端编码 as 编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
+    df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, 终端编码 as 编码, 终端名称 as 单位全名, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
     cnx.close()
     filterdf = df[df.编码.isin(targetbmlst)]
     resultdf = filterdf[(filterdf.收款日期.isnull()) & (filterdf.送达日期.notna())]
     resultdf['编码'] = resultdf['编码'].str.slice(0,7)
+    resultdf.set_index('编码', inplace=True)
 
     rdffile, rdfstr = getresult(resultdf, 'khqk', args)
 
@@ -347,16 +354,17 @@ if __name__ == '__main__':
     log.info(f'文件\t{__file__}\t启动运行……')
     # cnxp = lite.connect(dbpathquandan)
     # dataokay(cnxp)
-    qrylst = ['联合 捌区'
-              , '天猫 飞翔'
-              , '天猫 '
-              , '飞翔 '
-              # , '0810012'
+    qrylst = [
+              '联合一百 捌区'
+              # , '天猫 飞翔'
+              # , '天猫 '
+              # , '飞翔 '
+              # , '1020082'
               # , '阿里之门 叁拾叁区 捌区'
               # , '零区 汉口'
               # , '联合 零区 贰拾贰区 汉口'
-              # , '新益街'
-              # , '天龙路'
+              # , '学三'
+              , '南苑'
               # , '千佛手'
               # , '翼社区 汉口'
              ]
@@ -366,13 +374,13 @@ if __name__ == '__main__':
         # rfile, rstr =  searchpinxiang(qry.split())
         # print(rstr)
         
-    # for qry in qrylst:
-        # rfile, rstr =  searchqiankuan(qry.split())
-        # print(rstr)
-        
     for qry in qrylst:
-        rfile, rstr =  searchcustomer(qry.split())
+        rfile, rstr =  searchqiankuan(qry.split())
         print(rstr)
+        
+    # for qry in qrylst:
+        # rfile, rstr =  searchcustomer(qry.split())
+        # print(rstr)
 
     # searchcut(rstr)
     # fl, flstr = searchcustomer(qry1.split())
