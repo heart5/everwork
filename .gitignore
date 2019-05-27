@@ -3,6 +3,7 @@
 /img
 /log
 #.gitignore
+*.log
 *.ipynb_checkpoints*
 *__pycache__*
 *itchat.pkl
