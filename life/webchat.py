@@ -300,7 +300,11 @@ def text_reply(msg):
 
     if msg['Text'].find('真元信使') >= 0:
         qrylst = msg['Text'].split('\n')
+        # 去除某行首位空格
         qrylst = [x.strip() for x in qrylst]
+        # 去掉空行
+        qrylst = [x.strip() for x in qrylst if len(x.strip()) != 0]
+        print(f"{qrylst}")
         diyihang = qrylst[0].split()
         if diyihang[0].strip() == '真元信使':
             if len(diyihang) == 1:
