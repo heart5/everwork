@@ -20,6 +20,27 @@ def getcfp(cfpfilename: str):
     return cfpson, inipathson
 
 
+def setcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str, optionvalue):
+    cfpin, cfpinpath = getcfp(cfpfilename)
+    if not cfpin.has_section(sectionname):
+        cfpin.add_section(sectionname)
+        cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
+    cfpin.set(sectionname, optionname, optionvalue)
+    cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
+
+
+def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
+    cfpin, cfpinpath = getcfp(cfpfilename)
+    if not cfpin.has_section(sectionname):
+        # cfpin.add_section(sectionname)
+        # cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
+        return
+    if not cfpin.has_option(sectionname, optionname):
+        return
+
+    return cfpin.get(sectionname, optionname)
+
+
 cfp, inifilepath = getcfp('everwork')
 cfpdata, inidatanotefilepath = getcfp('everdatanote')
 cfplife, inilifepath = getcfp('everlife')
