@@ -94,19 +94,11 @@ def log2note(noteguid, loglimit, levelstr='', notetitle='everwork日志信息'):
 
 def log2notes():
     namestr = 'everlog'
+    device_id =getdeviceid()
     cfplog, cfplogpath = getcfp(namestr)
     if not cfplog.has_section(namestr):
         cfplog.add_section(namestr)
         cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
-    if cfplog.has_option(namestr, 'device_id'):
-        device_id = cfplog.get(namestr, 'device_id')
-    else:
-        # outputdict = termux_telephony_deviceinfo()
-        # device_id = outputdict["device_id"].strip()
-        device_id =getdeviceid()
-        cfplog.set(namestr, 'device_id', device_id)
-        cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
-        log.info(f'获取device_id:\t{device_id}，并写入ini文件：\t{cfplogpath}')
     if not cfplog.has_section(device_id):
         cfplog.add_section(device_id)
         cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
