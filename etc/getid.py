@@ -12,6 +12,7 @@ import uuid
 import pathmagic
 with pathmagic.context():
     from func.logme import log
+    from func.configpr import getcfp, getcfpoptionvalue, setcfpoptionvalue
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_location, termux_telephony_deviceinfo
     try:
@@ -150,6 +151,9 @@ def getdeviceid():
     # printDisk()
     # printMacAddress()
     # print(printBattery())
+    d_id_from_ini = getcfpoptionvalue('everhard', 'everhard', 'device_id')
+    if d_id_from_ini:
+        return d_id_from_ini
     id = None
     sysstr = platform.system()
     # print(sysstr)
@@ -185,6 +189,9 @@ def getdeviceid():
     else:
         log.critical('既不是Windows也不是Linux，那是啥啊。不搞了，闪退！！！')
         exit(1)
+
+    setcfpoptionvalue('everhard', 'everhard', 'device_id', id)
+
     return id
 
 
