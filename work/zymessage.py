@@ -249,13 +249,16 @@ def getresult(resultdf, prefix, args):
     return rdffile, rdfstr
 
 
+def notfoundshow():
+    custsample = "“百佳 捌区”，勤丰 联城路“，”凯旋 汉阳“"
+    return f"没有找到符合条件的客户。\n请减少关键字或扩大查询区域范围重新查找，另外一定注意用空格分隔客户信息关键词，比如{custsample}"
+
 
 def searchcustomer(*args, **kw):
     chulikhqd()
     targetbmlst = getbianmalst(args)
     if len(targetbmlst) == 0:
-        custsample = "“百佳 捌区”，勤丰 联城路“，”凯旋 汉阳“"
-        return None, f"没有找到符合条件的客户。\n请扩大查询范围重新查找，另外一定注意用空格分隔客户信息关键词，比如{custsample}"
+        return None, notfoundshow()
 
     cnx = lite.connect(dbpathquandan)
     # df = pd.read_sql('select 往来单位全名, substr(往来单位编号, 1, 7) as 往来单位编号, 联系人, 地址  from customeruid', con=cnx, index_col='往来单位全名')
@@ -279,8 +282,7 @@ def searchqiankuan(*args, **kw):
     chuliquandan()
     targetbmlst = getbianmalst(args)
     if len(targetbmlst) == 0:
-        custsample = "“百佳 捌区”，勤丰 联城路“，”凯旋 汉阳“"
-        return None, f"没有找到符合条件的客户。\n请扩大查询范围重新查找，另外一定注意用空格分隔客户信息关键词，比如{custsample}"
+        return None, notfoundshow()
 
     cnx = lite.connect(dbpathquandan)
     # df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, substr(终端编码, 1, 7) as 终端编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
@@ -310,29 +312,32 @@ def searchpinxiang(*args, **kw):
     chuliquandan()
     targetbmlst = getbianmalst(args)
     if len(targetbmlst) == 0:
-        custsample = "“百佳 捌区”，勤丰 联城路“，”凯旋 汉阳“"
-        return None, f"没有找到符合条件的客户。\n请扩大查询范围重新查找，另外一定注意用空格分隔客户信息关键词，比如{custsample}"
+        return None, notfoundshow()
 
     cnx = lite.connect(dbpathquandan)
     # desclitedb(cnx)
-    # 加参数探测特殊数据类型比如日期时间
-    cnxmingxi = lite.connect(dbpathdingdanmingxi, detect_types=lite.PARSE_DECLTYPES|lite.PARSE_COLNAMES)
-    # desclitedb(cnxmingxi)
     targetbmlst2str = strlst2sqltuple(targetbmlst)
     dfcustomer = pd.read_sql(f"select * from customer where 往来单位编号 in {targetbmlst2str}", con=cnx)
     ctlst = list(dfcustomer['往来单位'])
     # print(f"{ctlst}")
     customerstr4sql = strlst2sqltuple(ctlst)
+    # 加参数探测特殊数据类型比如日期时间
+    cnxmingxi = lite.connect(dbpathdingdanmingxi, detect_types=lite.PARSE_DECLTYPES|lite.PARSE_COLNAMES)
+    # desclitedb(cnxmingxi)
     dfpinxiang = pd.read_sql(f"select * from orderdetails where 单位全名 in {customerstr4sql}", parse_dates=True, con=cnxmingxi)
+    cnxmingxi.close()
     # print(f"{dfpinxiang.dtypes}")
     being = pd.to_datetime(getinivaluefromnote('webchat', 'datafrom'))
     df = dfpinxiang[dfpinxiang.日期 >= being]
+    if df.shape[0] == 0:
+        return None, f"没有找到客户{targetbmlst}自{being.strftime('%F')}起的品项纪录"
     dfpxjc = pd.read_sql(f"select 商品全名, 简称 from product where 简称 is not NULL", cnx, index_col=['商品全名'])
+    cnx.close()
     dfpxjc = dfpxjc['简称']
     df['商品全名'] = df['商品全名'].apply(lambda x:
                                                           dfpxjc.loc[x] if (x in list(dfpxjc.index)) else x)
     dfpxsum = (df.groupby(['单位全名', '商品全名'], as_index=False)['金额', '数量'].sum())
-    # print(f"{dfpxsum}")
+    # print(f"{dfpxsum.dtypes}")
     # dfsort = dfpxsum.sort_values('金额', ascending=False)
     dfsort = dfpxsum.sort_values(['单位全名', '金额'], ascending=[True, False])
     dfsort.set_index('单位全名', inplace=True)
