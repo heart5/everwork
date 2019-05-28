@@ -586,7 +586,7 @@ evernoteapiclearatzero()
 # writeini()
 
 if __name__ == '__main__':
-    print(f'开始测试文件\t{__file__}')
+    log.info(f'开始测试文件\t{__file__}')
     nost = get_notestore()
     print(nost)
     # readinifromnote()
@@ -595,13 +595,15 @@ if __name__ == '__main__':
     # <notification>笔记本中查找笔记
     # notefind = findnotefromnotebook( token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', '日志')
     # <生活>笔记本中查找笔记
-    notefind = findnotefromnotebook( token,
-                                    '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b',
-                                    '转账')
-    print(notefind)
-    dffile = open(dirmainpath / 'data' / 'dbinfo.txt', 'r')
+    # notefind = findnotefromnotebook( token,
+                                    # '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b',
+                                    # '转账')
+    # print(notefind)
+    filetitle = '笔记本列表'
+    filepath = dirmainpath / 'notebooklst.txt'
+    dffile = open(filepath)
     neirong = dffile.read()
     dffile.close()
-    makenote(token, nost, '数据库信息', neirong)
-    # makenote(token, nost, '转账记录笔记guid', str(notefind))
-    print('Done.')
+    makenote(token, nost,filetitle, neirong)
+    # # makenote(token, nost, '转账记录笔记guid', str(notefind))
+    log.info(f"完成文件{__file__}\t的测试")
