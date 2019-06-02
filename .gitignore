@@ -4,6 +4,7 @@
 /log
 #.gitignore
 *.log
+*.swp
 *.ipynb_checkpoints*
 *__pycache__*
 *itchat.pkl
