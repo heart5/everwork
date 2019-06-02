@@ -135,7 +135,7 @@ def chulidataindir_orderdetails(pathorder: Path):
     # descdb(dfresult)
     dateqiyu = min(dfresult['日期'])
     datezhiyu = max(dfresult['日期'])
-    print(f'除重后有{dfresult.shape[0]}条记录；数据起于{dateqiyu}，止于{datezhiyu}')
+    log.info(f'除重后{notestr}数据有{dfresult.shape[0]}条记录；数据起于{dateqiyu.strftime("%F")}，止于{datezhiyu.strftime("%F")}')
     dfttt = dfresult.drop_duplicates()
     if cfpzysm.has_option(notestr, '记录数'):
         jilucont = cfpzysm.getint(notestr, '记录数')
