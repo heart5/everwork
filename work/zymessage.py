@@ -314,33 +314,45 @@ def searchpinxiang(*args, **kw):
     if len(targetbmlst) == 0:
         return None, notfoundshow()
 
-    cnx = lite.connect(dbpathquandan)
+    cnx = lite.connect(dbpathquandan, detect_types=lite.PARSE_DECLTYPES|lite.PARSE_COLNAMES)
     # desclitedb(cnx)
+    cursor = cnx.cursor()
+    cursor.execute(f'attach database \'{dbpathdingdanmingxi}\' as \'C\'')
     targetbmlst2str = strlst2sqltuple(targetbmlst)
-    dfcustomer = pd.read_sql(f"select * from customer where 往来单位编号 in {targetbmlst2str}", con=cnx)
-    ctlst = list(dfcustomer['往来单位'])
+    dfcustomer = pd.read_sql(f"select 往来单位编号, 往来单位全名 from customeruid where 往来单位编号 in {targetbmlst2str}", con=cnx, index_col=['往来单位编号'])
+    # print(f"{dfcustomer}")
+    # print(f"{dfcustomer.dtypes}")
+    ctlst = list(dfcustomer['往来单位全名'])
     # print(f"{ctlst}")
     customerstr4sql = strlst2sqltuple(ctlst)
     # 加参数探测特殊数据类型比如日期时间
-    cnxmingxi = lite.connect(dbpathdingdanmingxi, detect_types=lite.PARSE_DECLTYPES|lite.PARSE_COLNAMES)
-    # desclitedb(cnxmingxi)
-    dfpinxiang = pd.read_sql(f"select * from orderdetails where 单位全名 in {customerstr4sql}", parse_dates=True, con=cnxmingxi)
-    cnxmingxi.close()
+    # cnxmingxi = lite.connect(dbpathdingdanmingxi, detect_types=lite.PARSE_DECLTYPES|lite.PARSE_COLNAMES)
+    # # desclitedb(cnxmingxi)
+    # dfpinxiang = pd.read_sql(f"select * from orderdetails where 单位全名 in {customerstr4sql}", parse_dates=True, con=cnxmingxi)
+    # cnxmingxi.close()
+    # print(f"{dfpinxiang.dtypes}")
+    # dfpinxiang = pd.read_sql(f"select * from C.orderdetails where 单位全名 in {customerstr4sql}", parse_dates=True, con=cnx)
+    dfpinxiang = pd.read_sql(f"select 单位全名, customer.往来单位编号 as 单位编号, 日期, 商品全名, 数量, 金额 from C.orderdetails inner join customer on C.orderdetails.单位全名=customer.往来单位 where 单位编号 in {targetbmlst2str}", parse_dates=True, con=cnx)
     # print(f"{dfpinxiang.dtypes}")
     being = pd.to_datetime(getinivaluefromnote('webchat', 'datafrom'))
     df = dfpinxiang[dfpinxiang.日期 >= being]
     if df.shape[0] == 0:
         return None, f"没有找到客户{targetbmlst}自{being.strftime('%F')}起的品项纪录"
     dfpxjc = pd.read_sql(f"select 商品全名, 简称 from product where 简称 is not NULL", cnx, index_col=['商品全名'])
+    cursor.execute('detach database \'C\'')
+    cursor.close()
     cnx.close()
     dfpxjc = dfpxjc['简称']
     df['商品全名'] = df['商品全名'].apply(lambda x:
                                                           dfpxjc.loc[x] if (x in list(dfpxjc.index)) else x)
-    dfpxsum = (df.groupby(['单位全名', '商品全名'], as_index=False)['金额', '数量'].sum())
+    df['单位'] = df['单位编号'].apply(lambda x: dfcustomer.loc[x])
+    # print(f"{df.dtypes}")
+    # print(f"{df}")
+    dfpxsum = df.groupby(['单位', '商品全名'], as_index=False)['金额', '数量'].sum()
     # print(f"{dfpxsum.dtypes}")
     # dfsort = dfpxsum.sort_values('金额', ascending=False)
-    dfsort = dfpxsum.sort_values(['单位全名', '金额'], ascending=[True, False])
-    dfsort.set_index('单位全名', inplace=True)
+    dfsort = dfpxsum.sort_values(['单位', '金额'], ascending=[True, False])
+    dfsort.set_index('单位', inplace=True)
     # print(f"{dfsort}")
     # df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, substr(终端编码, 1, 7) as 终端编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
     # df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, 终端编码 as 编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
@@ -370,18 +382,19 @@ if __name__ == '__main__':
               # , '联合 零区 贰拾贰区 汉口'
               # , '学三'
               , '南苑'
+              , '七里'
               # , '千佛手'
               # , '翼社区 汉口'
              ]
 
     # searchqiankuan()
-    # for qry in qrylst:
-        # rfile, rstr =  searchpinxiang(qry.split())
-        # print(rstr)
-        
     for qry in qrylst:
-        rfile, rstr =  searchqiankuan(qry.split())
+        rfile, rstr =  searchpinxiang(qry.split())
         print(rstr)
+        
+    # for qry in qrylst:
+        # rfile, rstr =  searchqiankuan(qry.split())
+        # print(rstr)
         
     # for qry in qrylst:
         # rfile, rstr =  searchcustomer(qry.split())
