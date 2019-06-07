@@ -55,9 +55,8 @@ def log2note(noteguid, loglimit, levelstr='', notetitle='everwork日志信息'):
                                    for line in flog if line.find(levelstrinner) >= 0]
 
     ptn = re.compile('\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}')
-    tmlst = [pd.to_datetime(re.match(ptn, x).group()) for x in loglines if
-             re.match(ptn, x) is not None]
-    loglines = [x for x in loglines if re.match(ptn, x) is not None]
+    tmlst = [pd.to_datetime(re.match(ptn, x).group()) for x in loglines if re.match(ptn, x)]
+    loglines = [x for x in loglines if re.match(ptn, x)]
     logsr = pd.Series(loglines, index=tmlst)
     logsr = logsr.sort_index()
     # print(logsr.index)
