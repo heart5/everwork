@@ -327,7 +327,7 @@ def getapitimesfromlog():
         return False
     dfapi2['asctime'] = dfapi2['asctime'].apply(lambda x: pd.to_datetime(x))
     dfapi2['counts'] = dfapi2['levelnamemessage'].apply(
-        lambda x: int(re.findall('(?P<counts>\d+)', x)[0]))
+        lambda x: int(re.findall('(?P<counts>\d+)', x)[-1]))
     # del dfapi2['levelnamemessage']
     # print(dfapi2.tail())
     jj = dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['counts'].iloc[-1]
@@ -335,7 +335,7 @@ def getapitimesfromlog():
     # print(jj)
     result = [dfapi2.asctime.max(), int(jj)]
     # print(dfapi2[dfapi2.asctime == dfapi2.asctime.max()])
-    print(result)
+    # print(result)
     return result
 
 
@@ -351,8 +351,7 @@ def writeini():
     cfp.set('evernote', 'apilasttime', '%s' %
             datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     cfp.write(open(inifilepath, 'w', encoding='utf-8'))
-    log.info('Evernote API调用次数：%d，写入配置文件%s' %
-             (ENtimes, os.path.split(inifilepath)[1]))
+    # log.info('Evernote API调用次数：%d，写入配置文件%s' % (ENtimes, os.path.split(inifilepath)[1]))
 
 
 def evernoteapiclearatzero():
@@ -364,9 +363,9 @@ def evernoteapiclearatzero():
     global ENAPIlasttime, ENtimes
     apilasttimehouzhengdian = pd.to_datetime(
         (ENAPIlasttime + datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:00:00'))
-    print(apilasttimehouzhengdian)
+    # print(apilasttimehouzhengdian)
     now = datetime.datetime.now()
-    print(now)
+    # print(now)
     if now > apilasttimehouzhengdian:
         ENAPIlasttime = now
         # time.sleep(60)
@@ -382,6 +381,7 @@ def evernoteapijiayi():
     global ENtimes, note_store
     log.debug(f'动用了Evernote API({note_store}) {ENtimes} 次……')
     ENtimes += 1
+    writeini()
     evernoteapiclearatzero()
     if (ENtimes >= 290) or (note_store is None):
         now = datetime.datetime.now()
@@ -568,7 +568,7 @@ token = cfp.get('evernote', 'token')
 ENtimes = cfp.getint('evernote', 'apicount')
 ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
 apitime = getapitimesfromlog()
-# print(ENAPIlasttime, apitime)
+print(ENAPIlasttime, apitime)
 if apitime:
     # 比较ini和log中API存档的时间，解决异常退出时调用次数无法准确反映的问题
     if apitime[0] > ENAPIlasttime:
@@ -592,18 +592,23 @@ if __name__ == '__main__':
     # readinifromnote()
     # writeini()
     # findnotebookfromevernote()
+
     # <notification>笔记本中查找笔记
-    # notefind = findnotefromnotebook( token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', '日志')
+    notefind = findnotefromnotebook( token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', '日志')
+
     # <生活>笔记本中查找笔记
     # notefind = findnotefromnotebook( token,
                                     # '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b',
                                     # '转账')
-    # print(notefind)
-    filetitle = '笔记本列表'
-    filepath = dirmainpath / 'notebooklst.txt'
-    dffile = open(filepath)
-    neirong = dffile.read()
-    dffile.close()
-    makenote(token, nost,filetitle, neirong)
+    print(notefind)
+
+    # # 将notebooklst.txt内容更新至新建的笔记中
+    # filetitle = '笔记本列表'
+    # filepath = dirmainpath / 'notebooklst.txt'
+    # dffile = open(filepath)
+    # neirong = dffile.read()
+    # dffile.close()
+    # makenote(token, nost,filetitle, neirong)
+
     # # makenote(token, nost, '转账记录笔记guid', str(notefind))
     log.info(f"完成文件{__file__}\t的测试")
