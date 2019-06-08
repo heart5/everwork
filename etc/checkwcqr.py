@@ -17,8 +17,8 @@ def findnewqrthensendmail():
     fl = 'QR.png'
     qrfile = getdirmain() / fl
     if os.path.exists(qrfile):
-        print(qrfile)
-        print(os.path.abspath(qrfile))
+        # print(qrfile)
+        # print(os.path.abspath(qrfile))
         qrfiletimeini = getcfpoptionvalue('everwebchat', 'webchat', 'qrfiletime') 
         qrfiletimenew = str(os.stat(qrfile).st_mtime)
         print(f"{qrfiletimeini}\t{qrfiletimenew}")
@@ -37,6 +37,6 @@ def findnewqrthensendmail():
 
 
 if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
+    # log.info(f'运行文件\t{__file__}')
     findnewqrthensendmail()
-    log.info(f"文件\t{__file__}\t运行结束。")
+    # log.info(f"文件\t{__file__}\t运行结束。")
