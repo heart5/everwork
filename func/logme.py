@@ -22,7 +22,7 @@ def mylog():
     touchfilepath2depth(dirlog)
     loghandler = lgh.RotatingFileHandler(str(dirlog), encoding='utf-8',
                                          # 此处指定log文件的编码方式，否则可能乱码
-                                         maxBytes=2560 * 1024, backupCount=25)
+                                         maxBytes=2056 * 1024, backupCount=25)
     formats = lg.Formatter('%(asctime)s\t%(filename)s - [%(funcName)s]'
                            '\t%(levelname)s: %(message)s',
                            datefmt='%Y-%m-%d %H:%M:%S')
