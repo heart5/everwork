@@ -25,8 +25,10 @@ def judgeprocess(processcmdline):
 def test_judgepro():
     if judgeprocess('python life/webchat.py '):
         print('success')
+        exit(0)
     else:
         print(f"没有找到")
+        exit(1)
 
 
 def getproall():
