@@ -33,7 +33,7 @@ def mailfun(txtfile):
     yag_imap_connecttion.close()
 
 
-def mailtxtfileindir(dirfrom, extstr='.txt'):
+def mailfileindir(dirfrom, extstr='.txt'):
     fls = [x for x in os.listdir(dirfrom) if x.endswith(extstr)]
     print(f"{fls}")
     for fl in fls:
@@ -42,5 +42,5 @@ def mailtxtfileindir(dirfrom, extstr='.txt'):
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     # mailtxtfileindir(dirmainpath / '..')
-    mailtxtfileindir(dirmainpath, '.png')
+    mailfileindir(dirmainpath, '.png')
     log.info(f'文件\t{__file__}\t测试完毕。')
