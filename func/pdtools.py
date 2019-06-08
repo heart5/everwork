@@ -19,7 +19,7 @@ from pylab import plt, FuncFormatter
 import pathmagic
 
 with pathmagic.context():
-    from func.evernt import evernoteapijiayi, makenote
+    from func.evernttest import evernoteapijiayi, makenote
     from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
     from func.logme import log
     from func.nettools import trycounttimes2
