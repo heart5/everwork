@@ -66,7 +66,7 @@ def timethis(func):
             timelenstr = f'{int(timelen / 60)}分钟{timelen % 60:.2f}秒'
         else:
             timelenstr = f'{timelen % 60:.2f}秒'
-        print(func.__name__, timelenstr)
+        log.info(f"{func.__name__}\t{timelenstr}")
         return result
 
     return wrapper
