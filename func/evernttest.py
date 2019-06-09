@@ -281,7 +281,7 @@ def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲�
             bkname = f"<{parentnotebook.name}>"
         else:
             bkname = '默认'
-        log.info('笔记《' + notetitle + '》在{bkname}笔记本中创建成功。')
+        log.info(f'笔记《{notetitle}》在\t{bkname}\t笔记本中创建成功。')
         return note
     except EDAMUserException as usere:
         # Something was wrong with the note data
