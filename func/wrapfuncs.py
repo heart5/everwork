@@ -13,12 +13,17 @@ import pathmagic
 with pathmagic.context():
     from func.logme import log
     from func.nettools import trycounttimes2, ifttt_notify
+    from func.evernttest import getinivaluefromnote
 
 
 def logit(func):
     @wraps(func)
     def with_logging(*args, **kwargs):
-        log.info(f'{func.__name__}函数被调用，参数列表：{args}')
+        if getinivaluefromnote('everwork', 'logdetails'):
+            log.info(f'{func.__name__}函数被调用，参数列表：{args}')
+        else:
+            print(f'{func.__name__}函数被调用，参数列表：{args}')
+
         return func(*args, **kwargs)
     return with_logging
 
@@ -66,7 +71,11 @@ def timethis(func):
             timelenstr = f'{int(timelen / 60)}分钟{timelen % 60:.2f}秒'
         else:
             timelenstr = f'{timelen % 60:.2f}秒'
-        log.info(f"{func.__name__}\t{timelenstr}")
+        if getinivaluefromnote('everwork', 'logdetails'):
+            log.info(f"{func.__name__}\t{timelenstr}")
+        else:
+            print(f"{func.__name__}\t{timelenstr}")
+
         return result
 
     return wrapper
@@ -94,7 +103,7 @@ if __name__ == '__main__':
     print(f"函数名\t{countdown.__name__}")
     print(f"函数文档\t{countdown.__doc__}")
     print(f"函数参数注释\t{countdown.__annotations__}")
-    countdown(12234353)
+    # countdown(12234353)
     countdown(500)
     countdown.__wrapped__(500)
     print(f"函数参数签名\t{signature(countdown)}")
