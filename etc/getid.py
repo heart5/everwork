@@ -24,7 +24,7 @@ with pathmagic.context():
         pass
 
 
-@timethis
+# @timethis
 def getdeviceid():
     # printCPU()
     # printMain_board()
