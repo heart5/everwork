@@ -229,7 +229,7 @@ def soupclean2item(msgcontent):
     else:
         items = []
 
-    return items
+    return soup, items
 
 
 
@@ -237,7 +237,7 @@ def soupclean2item(msgcontent):
                      isMpChat=True)
 def sharing_reply(msg):
     innermsg = formatmsg(msg)
-    items = soupclean2item(msg['Content'])
+    soup, items = soupclean2item(msg['Content'])
 
     # 过滤掉已经研究过属性公众号信息，对于尚未研究过的显示详细信息
     impimlst = re.split('[，,]', getinivaluefromnote('webchat', 'impmplist'))
@@ -288,7 +288,7 @@ def sharing_reply(msg):
 @itchat.msg_register([TEXT], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def text_reply(msg):
     innermsg = formatmsg(msg)
-    items = soupclean2item(msg['Content'])
+    soup, items = soupclean2item(msg['Content'])
 
     # 是否在清单中
     mp4txtlist = re.split('[，,]', getinivaluefromnote('webchat', 'mp4txtlist'))
