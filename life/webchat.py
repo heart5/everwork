@@ -218,11 +218,8 @@ def fileetc_reply(msg):
     showfmmsg(innermsg)
 
 
-@itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True,
-                     isMpChat=True)
-def sharing_reply(msg):
-    innermsg = formatmsg(msg)
-    rpcontent = msg['Content'].replace('<![CDATA[', '').replace(']]>', '')
+def soupclean2item(msgcontent):
+    rpcontent = msgcontent.replace('<![CDATA[', '').replace(']]>', '')
     soup = BeautifulSoup(rpcontent, 'lxml')
     category = soup.category
     if category:
@@ -232,9 +229,18 @@ def sharing_reply(msg):
     else:
         items = []
 
+    return items
+
+
+
+@itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True,
+                     isMpChat=True)
+def sharing_reply(msg):
+    innermsg = formatmsg(msg)
+    items = soupclean2item(msg['Content'])
+
     # 过滤掉已经研究过属性公众号信息，对于尚未研究过的显示详细信息
-    impmpliststr = getinivaluefromnote('webchat', 'impmplist')
-    impimlst = re.split('[，,]', impmpliststr)
+    impimlst = re.split('[，,]', getinivaluefromnote('webchat', 'impmplist'))
 
     cleansender = re.split("\\(群\\)", innermsg['fmSender'])[0]
 
@@ -282,6 +288,19 @@ def sharing_reply(msg):
 @itchat.msg_register([TEXT], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def text_reply(msg):
     innermsg = formatmsg(msg)
+    items = soupclean2item(msg['Content'])
+
+    # 是否在清单中
+    mp4txtlist = re.split('[，,]', getinivaluefromnote('webchat', 'mp4txtlist'))
+    cleansender = re.split("\\(群\\)", innermsg['fmSender'])[0]
+    if cleansender in mp4txtlist:
+        itemstr = '\n'
+        for item in items:
+            itemstr += item.title.string + '\n'
+        # 去掉尾行的回车
+        itemstr = itemstr[:-1]
+        innermsg['fmText'] = itemstr
+
     showfmmsg(innermsg)
 
     # 特定指令则退出
