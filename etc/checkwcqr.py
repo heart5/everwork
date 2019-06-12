@@ -11,6 +11,8 @@ with pathmagic.context():
     from func.first import getdirmain
     from etc.mailfun import mailfileindir
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
+    from etc.getid import getdeviceid
+    from func.evernttest import timestamp2str
 
 
 def findnewqrthensendmail():
@@ -20,18 +22,17 @@ def findnewqrthensendmail():
         # print(qrfile)
         # print(os.path.abspath(qrfile))
         qrfiletimeini = getcfpoptionvalue('everwebchat', 'webchat', 'qrfiletime') 
-        qrfiletimenew = str(os.stat(qrfile).st_mtime)
-        print(f"{qrfiletimeini}\t{qrfiletimenew}")
+        qrfilesecsnew = os.stat(qrfile).st_mtime
+        qrfiletimenew = str(qrfilesecsnew)
+        print(f"{qrfiletimeini},{timestamp2str(float(qrfiletimeini))}\t{qrfiletimenew},{timestamp2str(float(qrfiletimenew))}")
         if qrfiletimeini:
             if qrfiletimenew > qrfiletimeini:
                 mailfileindir(getdirmain(), fl)
                 setcfpoptionvalue('everwebchat', 'webchat', 'qrfiletime',
                                   qrfiletimenew)
-            print(qrfiletimeini)
         else:
             mailfileindir(getdirmain(), fl)
-            setcfpoptionvalue('everwebchat', 'webchat',
-                              'qrfiletime',qrfiletimenew)
+            setcfpoptionvalue('everwebchat', 'webchat', 'qrfiletime',qrfiletimenew)
     else:
         print(f"{fl}不存在")
 
