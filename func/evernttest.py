@@ -594,7 +594,7 @@ if __name__ == '__main__':
     # findnotebookfromevernote()
 
     # <notification>笔记本中查找笔记
-    notefind = findnotefromnotebook( token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', '日志')
+    notefind = findnotefromnotebook( token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', 'txt')
 
     # <生活>笔记本中查找笔记
     # notefind = findnotefromnotebook( token,
