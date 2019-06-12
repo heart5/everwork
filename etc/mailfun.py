@@ -11,7 +11,7 @@ with pathmagic.context():
     from func.configpr import getcfp
     from func.evernttest import getinivaluefromnote
 
-def mailfun(txtfile):
+def mailfun(txtorfile):
     cfpew, cfpewpath = getcfp('everwork')
     host = cfpew.get('gmail', 'host')
     username = cfpew.get('gmail', 'username')
@@ -20,14 +20,18 @@ def mailfun(txtfile):
     yag_imap_connecttion = yagmail.SMTP(user=username, password=password,
                                         host=host)
     mail2lst = re.split('[,，]', getinivaluefromnote('mail', 'mailto'))
-    subject = str(txtfile)
-    if subject.endswith('.txt'):
-        flhd = open(txtfile, 'r')
-        txtcontent = flhd.read()
-        flhd.close()
+    subject = str(txtorfile)
+    if os.path.exists(subject):
+        if subject.endswith('.txt'):
+            flhd = open(txtorfile, 'r')
+            txtcontent = flhd.read()
+            flhd.close()
+        else:
+            txtcontent = subject
+        contents = [txtcontent, str(txtorfile)]
     else:
-        txtcontent = subject
-    contents = [txtcontent, str(txtfile)]
+        contents = [txtorfile]
+        subject = txtorfile[:30]
     # print(f"{mail2lst}")
     yag_imap_connecttion.send(mail2lst, subject, contents)
     yag_imap_connecttion.close()
@@ -41,6 +45,8 @@ def mailfileindir(dirfrom, extstr='.txt'):
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
+    notelststr = "[['8b83d72c-4497-4366-9ae1-f76ab7da9dae', '../newsapp.txt', 1007566], ['8fa57804-944d-471e-bb4b-15d13dda4d60', '../../guangfa.txt', 988335], ['0bdbf2ac-581b-4f12-890d-90163f602606', '../../weixinyundongpaihangbang.txt', 988333], ['ba164df1-af4d-4d17-a54c-bdd0c9106248', '../../weixinzhifuhuizong.txt', 988332], ['4b613fbd-7e79-4aa5-836c-c38a277514c5', '../../weixinzhifupingzheng.txt', 988331], ['1814a377-7dd4-4168-97a2-ed5e34ceb913', '../../zhuanzhang.txt', 988325], ['ed1335b3-7790-4f40-aa75-c6a6b4712fd1', '../../zixunxml.txt', 988323], ['a326a5c3-9168-4a35-b281-5c43441147b1', '../../didichuxing.txt', 987854], ['a02f87b4-abd8-40e4-bf1f-c8c7497e87a7', '../../ewlog.txt', 990549]"
+    mailfun(notelststr)
     # mailtxtfileindir(dirmainpath / '..')
-    mailfileindir(dirmainpath, '.png')
+    # mailfileindir(dirmainpath, '.png')
     log.info(f'文件\t{__file__}\t测试完毕。')
