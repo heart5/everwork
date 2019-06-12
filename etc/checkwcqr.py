@@ -12,7 +12,7 @@ with pathmagic.context():
     from etc.mailfun import mailfileindir
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from etc.getid import getdeviceid
-    from func.evernttest import timestamp2str
+    from func.evernttest import timestamp2str, imglist2note, note_store, getinivaluefromnote
 
 
 def findnewqrthensendmail():
@@ -24,12 +24,19 @@ def findnewqrthensendmail():
         qrfiletimeini = getcfpoptionvalue('everwebchat', 'webchat', 'qrfiletime') 
         qrfilesecsnew = os.stat(qrfile).st_mtime
         qrfiletimenew = str(qrfilesecsnew)
-        print(f"{qrfiletimeini},{timestamp2str(float(qrfiletimeini))}\t{qrfiletimenew},{timestamp2str(float(qrfiletimenew))}")
         if qrfiletimeini:
-            if qrfiletimenew > qrfiletimeini:
+            qrftlst = qrfiletimeini.split(',')
+            print(timestamp2str(float(qrftlst[0])))
+            if (qrfiletimenew > qrftlst[0]): # or True:
+                qrtstr = f"{qrfiletimenew},{qrfiletimeini}"
+                qrtstrlst = qrtstr.split(',')
+                qrtstrflst = [timestamp2str(float(x)) for x in qrtstrlst]
+                targetstr = '<pre>'+'\n'.join(qrtstrflst)+'</pre>'
+                qrnoteguid = getinivaluefromnote('webchat', f"qr{getdeviceid()}")
+                imglist2note(note_store, [qrfile], qrnoteguid,
+                             f"{getinivaluefromnote('device', getdeviceid())} QR微信二维码", targetstr)
                 mailfileindir(getdirmain(), fl)
-                setcfpoptionvalue('everwebchat', 'webchat', 'qrfiletime',
-                                  qrfiletimenew)
+                setcfpoptionvalue('everwebchat', 'webchat', 'qrfiletime', qrtstr)
         else:
             mailfileindir(getdirmain(), fl)
             setcfpoptionvalue('everwebchat', 'webchat', 'qrfiletime',qrfiletimenew)
