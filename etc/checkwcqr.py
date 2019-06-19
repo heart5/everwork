@@ -28,6 +28,6 @@ def findnewcronthenupdate():
 
 if __name__ == '__main__':
     # log.info(f'运行文件\t{__file__}')
-    # findnewqrthensendmail()
+    findnewqrthensendmail()
     findnewcronthenupdate()
     # log.info(f"文件\t{__file__}\t运行结束。")
