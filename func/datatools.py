@@ -1,6 +1,7 @@
 # encoding:utf-8
 """
 txt数据文件操作函数
+部分文件功能函数
 """
 
 import os
@@ -13,6 +14,15 @@ with pathmagic.context():
     from func.wrapfuncs import timethis
 
 print(f"{__file__} is loading now...")
+
+
+def getfilepathnameext(tfile):
+    tfile = os.path.abspath(tfile)
+    (filepath, tmpfilename) = os.path.split(tfile)
+    (shotename, fileext) = os.path.splitext(tmpfilename)
+
+    return filepath, tmpfilename, shotename, fileext
+
 
 def write2txt(weathertxtfilename, inputitemlist):
     # print(inputitemlist)
@@ -51,8 +61,10 @@ def compact_sqlite3_db(dbpath):
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     # print(get_filesize(dbpathquandan))
-    compact_sqlite3_db(dbpathquandan)
-    compact_sqlite3_db(dbpathworkplan)
-    compact_sqlite3_db(dbpathdingdanmingxi)
+    # compact_sqlite3_db(dbpathquandan)
+    # compact_sqlite3_db(dbpathworkplan)
+    # compact_sqlite3_db(dbpathdingdanmingxi)
+    (*aaa,ext) = getfilepathnameext(__file__)
+    print(ext)
 
-    print('Done.完毕。')
+    log.info(f"文件\t{__file__}\t运行结束。")
