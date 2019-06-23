@@ -74,6 +74,7 @@ def dftotal2top(df: pd.DataFrame):
     :return: pd.DataFrame
     """
     # print(df.dtypes)
+    # print(df)
     if df.shape[0] == 0:  # 传入DataFrame为空则直接返回
         return
     dfslicesingle = df.loc[:, :]
@@ -118,8 +119,16 @@ def dftotal2top(df: pd.DataFrame):
                     end = i
         # print(f'{first}\t{start}\t{end}')
         # print(list(dfslicesingle.loc['汇总'])[start:(end + 1)])
-        dfslicesingle.loc['汇总', '有效月均'] = int(sum(list(dfslicesingle.loc['汇总'])[start:(end + 1)]) / (end - start))
-        pass
+        # 除数出现了为零的可能，try包围之。所有错误，皆为逻辑。
+        # 此try包围在逻辑问题解决后有冗余之嫌，但工作需要，正常运转为第一要务，姑且存之。
+        try:
+            dfslicesingle.loc['汇总', '有效月均'] = int(sum(list(dfslicesingle.loc['汇总'])[start:(end + 1)]) / (end - start + 1))
+        except Exception as e:
+            print(dfslicesingle)
+            print(f"{start}\t{end}\t{first}")
+            print(f"{e}")
+            log.critical(f"给DataFrame添加汇总行时出现运算错误.\t有效数据起始位：{start},结束位：{end},首位：{first}.\t{e}")
+            raise
     idxnew = list(dfslicesingle.index)
     idxnew = [idxnew[-1]] + idxnew[:-1]
     dfout = dfslicesingle.loc[idxnew]
