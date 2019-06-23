@@ -161,7 +161,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
                 # print (str1)
                 nbody += "<en-media type=\"%s\" hash=\"%s\" align=\"center\" /><br />" % (
                     resource.mime, str1)
-    neirong= "<pre>" + neirong + "</pre>"
+    # neirong= "<pre>" + neirong + "</pre>"
 
     # 去除控制符
     neirong = re.sub('[\x00-\x08|\x0b-\x0c|\x0e-\x1f]', '', neirong)
@@ -190,13 +190,21 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     updatenote(note)
 
 
-def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True):
-    pd.set_option('max_colwidth', 200)
+def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True,
+                       setwidth=True):
+    colwidth = pd.get_option('max_colwidth')
+    if setwidth:
+        pd.set_option('max_colwidth', 200)
+    else:
+        # print(colwidth)
+        pass
     df = pd.DataFrame(dataframe)
     outstr = df.to_html(justify='center', index=withindex).replace('class="dataframe">', 'align="center">'). \
         replace('<table', '\n<h3 align="center">%s</h3>\n<table' %
                 tabeltitle).replace('<th></th>', '<th>&nbsp;</th>')
     # print(outstr)
+    if setwidth:
+        pd.set_option('max_colwidth', colwidth)
     return outstr
 
 
@@ -248,6 +256,13 @@ def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000)
 
     return items
 
+
+def getnotecontent(guid:str):
+    note_store = get_notestore()
+    soup = BeautifulSoup(note_store.getNoteContent(guid), "html.parser")
+    print(soup)
+    
+    return soup
 
 def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
     """
@@ -586,7 +601,7 @@ evernoteapiclearatzero()
 # writeini()
 
 if __name__ == '__main__':
-    log.info(f'开始测试文件\t{__file__}')
+    log.info(f'开始运行文件\t{__file__}')
     nost = get_notestore()
     print(nost)
     # readinifromnote()
@@ -602,6 +617,8 @@ if __name__ == '__main__':
                                     # '转账')
     print(notefind)
 
+    findnotecontent = getnotecontent('ce26a763-81cc-421f-8430-22dab21ba43e')
+    print(f"{findnotecontent}")
     # # 将notebooklst.txt内容更新至新建的笔记中
     # filetitle = '笔记本列表'
     # filepath = dirmainpath / 'notebooklst.txt'
@@ -611,4 +628,4 @@ if __name__ == '__main__':
     # makenote(token, nost,filetitle, neirong)
 
     # # makenote(token, nost, '转账记录笔记guid', str(notefind))
-    log.info(f"完成文件{__file__}\t的测试")
+    log.info(f"完成文件{__file__}\t的运行")
