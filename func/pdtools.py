@@ -74,7 +74,6 @@ def dftotal2top(df: pd.DataFrame):
     :return: pd.DataFrame
     """
     # print(df.dtypes)
-    # print(df)
     if df.shape[0] == 0:  # 传入DataFrame为空则直接返回
         return
     dfslicesingle = df.loc[:, :]
