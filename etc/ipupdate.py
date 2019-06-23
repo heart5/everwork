@@ -159,7 +159,7 @@ def showiprecords():
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
         # 把笔记输出放到最后，避免更新不成功退出影响数据逻辑
         imglist2note(get_notestore(), [], guid,
-                     f'服务器_{device_name}_ip更新记录', "\n".join(itemnew))
+                     f'服务器_{device_name}_ip更新记录', "<pre>" + "\n".join(itemnew) + "</pre>")
 
 
 if __name__ == '__main__':
