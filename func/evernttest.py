@@ -577,6 +577,16 @@ def writeini2note():
     pass
 
 
+def findsomenotest2showornote(nbguid, keyword, newnote=False):
+    global token
+    nost = get_notestore()
+    notesfind = findnotefromnotebook(token, nbguid, keyword)
+    if newnote:
+        makenote(token, nost, f"“{keyword}》”记列表", str(notesfind))
+    else:
+        print(notesfind)
+
+
 # print('我是evernt啊')
 # global cfp
 token = cfp.get('evernote', 'token')
@@ -608,17 +618,17 @@ if __name__ == '__main__':
     # writeini()
     # findnotebookfromevernote()
 
-    # <notification>笔记本中查找笔记
-    notefind = findnotefromnotebook( token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', 'txt')
+    # 查找主题包含关键词的笔记
+    notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
+    shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
+    # findsomenotest2showornote(notification_guid, '补')
 
-    # <生活>笔记本中查找笔记
-    # notefind = findnotefromnotebook( token,
-                                    # '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b',
-                                    # '转账')
-    print(notefind)
-
-    findnotecontent = getnotecontent('ce26a763-81cc-421f-8430-22dab21ba43e')
+    # 显示笔记内容，源码方式
+    # '39c0d815-df23-4fcc-928d-d9193d5fff93' 转账
+    # 'ba9dcaa7-9a8f-4ee8-86a6-fd788b71d411' 微信号
+    findnotecontent = getnotecontent('39c0d815-df23-4fcc-928d-d9193d5fff93' )
     print(f"{findnotecontent}")
+
     # # 将notebooklst.txt内容更新至新建的笔记中
     # filetitle = '笔记本列表'
     # filepath = dirmainpath / 'notebooklst.txt'
