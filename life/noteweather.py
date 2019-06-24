@@ -267,6 +267,7 @@ def weatherstat(df, destguid=None):
     img_wenshifeng_path = dirmainpath / "img" / 'weather' / 'wenshifeng.png'
     img_wenshifeng_path_str = str(img_wenshifeng_path)
     touchfilepath2depth(img_wenshifeng_path)
+    plt.legend(loc='lower left')
     plt.savefig(img_wenshifeng_path_str)
 
     imglist = list()
