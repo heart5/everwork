@@ -168,6 +168,7 @@ def showfmmsg(inputformatmsg):
     neirongplain = neirong.replace('<', '《').replace('>', '》') \
         .replace('=', '等于').replace('&', '并或')
     if (len(chatitems) % updatefre) == 0:
+        neirongplain = "<pre>" + neirongplain + "</pre>"
         imglist2note(note_store, [], chatnoteguid, f"微信（{men_wc}）记录更新笔记",
                      neirongplain)
     # print(webchats)
@@ -399,7 +400,7 @@ def after_login():
 def after_logout():
     global men_wc
     termux_sms_send(f"微信({men_wc})登录已退出，如有必要请重新启动")
-    log.info(f'退出微信({men_wc})登录')
+    log.critical(f'退出微信({men_wc})登录')
 
 
 @trycounttimes2('微信服务器')
