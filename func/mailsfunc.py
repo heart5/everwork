@@ -22,6 +22,7 @@ with pathmagic.context():
     from func.evernttest import timestamp2str, imglist2note, note_store, getinivaluefromnote
     from etc.getid import getdeviceid
     from etc.mailfun import mailfun
+    from func.termuxtools import termux_sms_send
 
 
 def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum=100000, dirtarget='Inbox',
@@ -386,7 +387,7 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
     return items
 
 
-def findnewthenupdatenote(qrfile, cfpfile, cfpsection, pre, desc):
+def findnewthenupdatenote(qrfile, cfpfile, cfpsection, pre, desc, sendsms=False):
     qrfile = os.path.abspath(qrfile)
     if os.path.exists(qrfile):
         # print(qrfile)
@@ -418,6 +419,8 @@ def findnewthenupdatenote(qrfile, cfpfile, cfpsection, pre, desc):
                 imglist2note(note_store, targetimglst, qrnoteguid,
                              f"{getinivaluefromnote('device', getdeviceid())} {desc}", targetstr)
                 mailfun(qrfile)
+                if sendsms:
+                    termux_sms_send(f"{desc}\t有新的更新，请尽快处置。")
                 setcfpoptionvalue(cfpfile, cfpsection, f'{pre}filetime', qrtstr)
         else:
             mailfun(qrfile, True)
