@@ -3,6 +3,7 @@
 """
 
 import os
+import re
 import time
 import pathmagic
 
@@ -16,7 +17,19 @@ def findnewcronthenupdate():
     r = os.popen('whoami')
     me = r.read()[:-1]
     cronfile = f'/data/data/com.termux/files/usr/var/spool/cron/crontabs/{me}'
-    findnewthenupdatenote(cronfile, 'eversys', 'everwork', 'cron', 'cron自动运行排期表')
+    cfl = open(cronfile, 'r').readlines()
+    cflen = [len(x.split()) for x in cfl if not x.startswith('#')]
+    clean = True
+    for it in cflen:
+        clean = clean and (it == 6)
+        if not clean:
+            break
+
+    if clean:
+        findnewthenupdatenote(cronfile, 'eversys', 'everwork', 'cron', 'cron自动运行排期表')
+    else:
+        log.critical(f"自动运行排表有误，请检查。{len(cflen)}\t{cflen}")
+
     
 
 if __name__ == '__main__':
