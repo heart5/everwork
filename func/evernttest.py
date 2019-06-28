@@ -260,7 +260,7 @@ def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000)
 def getnotecontent(guid:str):
     note_store = get_notestore()
     soup = BeautifulSoup(note_store.getNoteContent(guid), "html.parser")
-    print(soup)
+    # print(soup)
     
     return soup
 
