@@ -1,6 +1,6 @@
 # encoding:utf-8
 """
-构建日志，格式化日志输出内容，限定每个日志文件大小为2M，在25个日志文件内循环
+构建日志，格式化日志输出内容，限定每个日志文件大小为1M，在25个日志文件内循环
 """
 
 import logging as lg
@@ -8,7 +8,6 @@ import logging.handlers as lgh
 import os
 
 import pathmagic
-
 with pathmagic.context():
     from func.first import dirlog, touchfilepath2depth
 
@@ -22,7 +21,7 @@ def mylog():
     touchfilepath2depth(dirlog)
     loghandler = lgh.RotatingFileHandler(str(dirlog), encoding='utf-8',
                                          # 此处指定log文件的编码方式，否则可能乱码
-                                         maxBytes=2056 * 1024, backupCount=25)
+                                         maxBytes=1024 * 1024, backupCount=23)
     formats = lg.Formatter('%(asctime)s\t%(filename)s - [%(funcName)s]'
                            '\t%(levelname)s: %(message)s',
                            datefmt='%Y-%m-%d %H:%M:%S')
@@ -44,7 +43,6 @@ def mylog():
     return logew
 
 
-# global log
 log = mylog()
 
 if __name__ == '__main__':
