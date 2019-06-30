@@ -68,9 +68,6 @@ def getfix4finance(guid, clnames):
         ttt = [x for x in ttt if not re.match('\d{2}:\d{2}:\d{2}', x)]
         # print(ttt)
 
-        # ttt[0] = ' '.join(ttt[:2])
-        # ttt[-2] = ' '.join(ttt[-2:])
-        # ttt = [ttt[0]] + ttt[2:-1]
         if len(ttt) != len(clnames):
             log.critical(f"账务数据格式不符合标准。{ttt}")
             continue
@@ -200,7 +197,8 @@ def showshoukuan():
     rstdf = sdzzdf.loc[:, clnameswithindex[1:]]
     print(f"数据文本有效条目数：{rstdf.shape[0]}")
     # print(f"{rstdf}")
-    shoukuanfixguid = 'ba9dcaa7-9a8f-4ee8-86a6-fd788b71d411'
+    # shoukuanfixguid = 'ba9dcaa7-9a8f-4ee8-86a6-fd788b71d411'
+    shoukuanfixguid = getinivaluefromnote('webchat', '微信号收款补')
     fixdf = getfix4finance(shoukuanfixguid, clnameswithindex)
     print(f"修正笔记有效条目数：{fixdf.shape[0]}")
     alldf = rstdf.append(fixdf)
@@ -214,19 +212,21 @@ def showshoukuan():
     alldf['time'] = alldf.index
     alldf['date'] = alldf['time'].apply(lambda x :
                                         pd.to_datetime(x).strftime('%F'))
-    alldfcount = alldf.groupby(['date'], as_index=False).count()
-    alldfcount = alldfcount.loc[:, ['date', 'daycount', 'amount']]
-    alldfcount.columns = ['date', 'actualcount', 'another']
-    # print(alldfcount)
-    # print(alldfcount.dtypes)
+    alldf['amount'] = alldf['amount'].astype(float)
+    agg_map = {'daycount':'count', 'amount':'sum'}
+    alldfgrpagg = alldf.groupby('date', as_index=False).agg(agg_map)
+    # print(alldfgrpagg.dtypes)
+    # print(alldfgrpagg)
+    alldfgrpagg.columns = ['date', 'lcount', 'lsum']
     alldf.drop_duplicates(['date'], keep='first', inplace=True)
-    # alldf.set_index('date', inplace=True)
-    # print(alldf.dtypes)
-    finaldf = pd.merge(alldf, alldfcount, how='outer', on=['date'])
+    finaldf = pd.merge(alldf, alldfgrpagg, how='outer', on=['date'])
     # print(finaldf)
-    alldf = finaldf.loc[:,['date', 'actualcount', 'daycount', 'daysum']]
+    alldf = finaldf.loc[:,['date', 'lcount', 'daycount', 'daysum', 'lsum']]
+    alldf.columns = ['date', 'lc', 'lh', 'lacc', 'lsum']
     # print(alldf)
-    shoukuanrihuizongguid = '25b6e71d-5f43-4147-b45c-8147b35c8f00'
+    # shoukuanrihuizongguid = '25b6e71d-5f43-4147-b45c-8147b35c8f00'
+    shoukuanrihuizongguid = getinivaluefromnote('webchat',
+                                                '微信号收款日汇总手动')
     rhzdengjidf = getfix4finance(shoukuanrihuizongguid, ['date', 'count', 'sum'])
     # print(rhzdengjidf)
     duibidf = pd.merge(alldf, rhzdengjidf, how='outer', on=['date'])
@@ -235,11 +235,14 @@ def showshoukuan():
     col_names = list(duibidf.columns)
     col_names.append('check')
     duibidf = duibidf.reindex(columns=col_names)
-    duibidf['count'] = duibidf['count'].astype(float)
-    duibidf['check'] = duibidf['actualcount'] - duibidf['count']
+    duibidf['lacc'] = duibidf['lacc'].astype(float)
+    duibidf['sum'] = duibidf['sum'].astype(float)
+    duibidf['count'] = duibidf['count'].astype(int)
+    duibidf['check'] = duibidf['lc'] - duibidf['count']
     duibidf['check'] = duibidf['check'].apply(lambda x : '待修正' if (x!=0) or (x is None) else '')
-    print(duibidf)
-    duibiguid = 'b7ca3bb4-6cbd-4f5e-811f-403a902860cd'
+    # print(duibidf)
+    # duibiguid = 'b7ca3bb4-6cbd-4f5e-811f-403a902860cd'
+    duibiguid = getinivaluefromnote('webchat', '微信号收款核对')
     title = '微信收款核对'
     notecontent = tablehtml2evernote(duibidf, title)
     imglist2note(get_notestore(), [], duibiguid, title, notecontent)
@@ -267,6 +270,6 @@ if __name__ == '__main__':
     # skrhzdf = getfix4finance(shoukuanrihuizongguid, ['date', 'count', 'sum'])
     # print(skrhzdf)
     # showjinzhang()
-    # showshoukuan()
-    showfinance()
+    showshoukuan()
+    # showfinance()
     log.info(f'{__file__}\t文件运行结束。')
