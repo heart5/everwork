@@ -113,12 +113,11 @@ def fulltxt():
     df = pd.DataFrame(rstitems, columns=['time', 'send', 'qun', 'name',
                                             'type', 'content'])
     # 去空去重
-    print(df.shape[0])
     ndf = df[df.content.isnull().values == True]
     # print(f"{ndf}")
     tdf = df[df.content.isnull().values != True]
     cdf = tdf.drop_duplicates(subset=['time', 'name', 'type', 'content'])
-    print(cdf.shape[0])
+    print(df.shape[0], cdf.shape[0])
     # rstdf = cdf.set_index('time')
     rstdf = cdf
 
