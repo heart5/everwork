@@ -21,7 +21,7 @@ from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_M
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfp, inifilepath, getcfp
+    from func.configpr import cfp, inifilepath, getcfp, getcfpoptionvalue
     from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.nettools import trycounttimes2
@@ -524,8 +524,7 @@ def readinifromnote():
         cfpeverwork.set('evernote', 'ininoteupdatenum', str(note.updateSequenceNum))
         cfpeverwork.write(open(cfpeverworkpath, 'w', encoding='utf-8'))
         log.info(f'配置笔记内容有变化，更新本地化的ini配置文件。')
-    soup = BeautifulSoup(note_store.getNoteContent(
-        noteguid_inifromnote), "html.parser")
+    soup = BeautifulSoup(note_store.getNoteContent( noteguid_inifromnote), "html.parser")
     # print(soup)
     ptn = u'<div>(.*?)</div>'
     # ptn = u'<div>'
@@ -542,35 +541,8 @@ def readinifromnote():
 
 def getinivaluefromnote(section, option):
     readinifromnote()
-    cfpfromnote, cfpfromnotepath = getcfp('everinifromnote') 
-    targetvalue = cfpfromnote.get(section, option)
 
-    # 处理布尔值
-    if targetvalue.strip().lower() == 'true':
-        return True
-
-    if targetvalue.strip().lower() == 'false':
-        return False
-
-    # 处理整数
-    ptn = re.compile(r"^[+-]?[0-9]+$")
-    result = ptn.match(targetvalue)
-    if result:
-        targetvalue = int(result.group())
-        return targetvalue
-    
-    # 处理小数
-    ptn = re.compile(r"^[+-]?[0-9]+\.[0-9]+$")
-    result = ptn.match(targetvalue)
-    if result:
-        targetvalue = float(result.group())
-        return targetvalue
-    # if isinstance(targetvalue, int):
-        # targetvalue = int(targetvalue)
-    # elif isinstance(targetvalue, float):
-        # targetvalue = float(targetvalue)
-
-    return targetvalue
+    return getcfpoptionvalue('everinifromnote', section, option)
 
 
 def writeini2note():
