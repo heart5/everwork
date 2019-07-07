@@ -85,8 +85,7 @@ def getweatherfromgmail():
 def getweatherfromgoogledrive():
     # 验证登录
     # global dirmainpath
-    gc = pygsheets.authorize(service_file=str(
-        dirmainpath / 'data' / 'imp' / 'ewjinchu.json'))
+    gc = pygsheets.authorize(service_file=str( dirmainpath / 'data' / 'imp' / 'ewjinchu.json'))
     files = gc.list_ssheets()
     dffiles = pd.DataFrame(files)
     # print(dffiles.head())
