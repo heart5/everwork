@@ -34,7 +34,7 @@ def getdeviceid():
     # print(printBattery())
     d_id_from_ini = getcfpoptionvalue('everhard', 'everhard', 'device_id')
     if d_id_from_ini:
-        return d_id_from_ini
+        return str(d_id_from_ini)
     id = None
     sysstr = platform.system()
     # print(sysstr)
@@ -71,6 +71,7 @@ def getdeviceid():
         log.critical('既不是Windows也不是Linux，那是啥啊。不搞了，闪退！！！')
         exit(1)
 
+    id = str(id)
     setcfpoptionvalue('everhard', 'everhard', 'device_id', id)
 
     return id
