@@ -33,10 +33,10 @@ def setcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str, optio
 def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
     cfpin, cfpinpath = getcfp(cfpfilename)
     if not cfpin.has_section(sectionname):
-        print(f"seticon {sectionname} is not exsits.")
+        print(f"seticon {sectionname} is not exists.")
         return
     if not cfpin.has_option(sectionname, optionname):
-        print(f"option {optionname} is not exsits.")
+        print(f"option {optionname} is not exists.")
         return
 
     targetvalue = cfpin.get(sectionname, optionname)
