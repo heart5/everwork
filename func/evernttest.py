@@ -21,7 +21,7 @@ from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_M
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfp, inifilepath, getcfp, getcfpoptionvalue
+    from func.configpr import cfp, inifilepath, getcfp, getcfpoptionvalue, setcfpoptionvalue
     from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.nettools import trycounttimes2
@@ -507,29 +507,28 @@ def findnotebookfromevernote():
 
 @trycounttimes2('evernote服务器')
 def readinifromnote():
-    cfpeverwork, cfpeverworkpath = getcfp('everwork')
-    noteguid_inifromnote = cfpeverwork.get('evernote', 'ininoteguid')
-    # noteguid_inifromnote = 'e0565861-db9e-4efd-be00-cbce06d0cf98'
+    # cfpeverwork, cfpeverworkpath = getcfp('everwork')
+    # noteguid_inifromnote = cfpeverwork.get('evernote', 'ininoteguid')
+    ininoteupdatenum = getcfpoptionvalue('everwork', 'evernote', 'ininoteupdatenum')
+    # print(ininoteupdatenum)
+    if not ininoteupdatenum:
+        ininoteupdatenum = 0
     global note_store
     note_store = get_notestore()
-    if cfpeverwork.has_option('evernote', 'ininoteupdatenum'):
-        ininoteupdatenum = cfpeverwork.getint('evernote', 'ininoteupdatenum')
-    else:
-        ininoteupdatenum = 0
+    # noteguid_inifromnote = 'e0565861-db9e-4efd-be00-cbce06d0cf98'
+    noteguid_inifromnote = getcfpoptionvalue('everwork', 'evernote', 'ininoteguid')
+    # print(noteguid_inifromnote)
     note = note_store.getNote(noteguid_inifromnote, True, True, False, False)
-    if note.updateSequenceNum == ininoteupdatenum:
+    # print(note.updateSequenceNum)
+    if int(note.updateSequenceNum) == ininoteupdatenum:
         # print(f'配置笔记无变化，不对本地化的ini配置文件做更新。')
         return
-    else:
-        cfpeverwork.set('evernote', 'ininoteupdatenum', str(note.updateSequenceNum))
-        cfpeverwork.write(open(cfpeverworkpath, 'w', encoding='utf-8'))
-        log.info(f'配置笔记内容有变化，更新本地化的ini配置文件。')
     soup = BeautifulSoup(note_store.getNoteContent( noteguid_inifromnote), "html.parser")
     # print(soup)
     ptn = u'<div>(.*?)</div>'
     # ptn = u'<div>'
     itemsource = re.findall(ptn, str(soup))
-    print(itemsource)
+    # print(itemsource)
     items = [x for x in itemsource if not re.search('<.*?>', x)]
     print(items)
     fileobj = open(str(dirmainpath / 'data' / 'everinifromnote.ini'), 'w',
@@ -537,6 +536,9 @@ def readinifromnote():
     for item in items:
         fileobj.write(item + '\n')
     fileobj.close()
+
+    setcfpoptionvalue('everwork', 'evernote', 'ininoteupdatenum', str(note.updateSequenceNum))
+    log.info(f'配置笔记内容有变化，更新本地化的ini配置文件。')
 
 
 def getinivaluefromnote(section, option):
@@ -586,20 +588,20 @@ if __name__ == '__main__':
     log.info(f'开始运行文件\t{__file__}')
     nost = get_notestore()
     print(nost)
-    # readinifromnote()
+    readinifromnote()
     # writeini()
     # findnotebookfromevernote()
 
     # 查找主题包含关键词的笔记
-    notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
-    shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
+    # notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
+    # shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
     # findsomenotest2showornote(notification_guid, '补')
 
     # 显示笔记内容，源码方式
     # '39c0d815-df23-4fcc-928d-d9193d5fff93' 转账
     # 'ba9dcaa7-9a8f-4ee8-86a6-fd788b71d411' 微信号
-    findnotecontent = getnotecontent('39c0d815-df23-4fcc-928d-d9193d5fff93' )
-    print(f"{findnotecontent}")
+    # findnotecontent = getnotecontent('39c0d815-df23-4fcc-928d-d9193d5fff93' )
+    # print(f"{findnotecontent}")
 
     # # 将notebooklst.txt内容更新至新建的笔记中
     # filetitle = '笔记本列表'
