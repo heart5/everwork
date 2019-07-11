@@ -76,25 +76,6 @@ def getfix4finance(guid, clnames):
     return rstdf
 
 
-def pickupzhuanzhanghuizongfromdf():
-    indf = fulltxt()
-    # indf = indf[indf.name == '微信支付']
-    sdzzdf = indf[indf.content.str.contains('^转账收款汇总通知')].loc[:,['time', 'send', 'name', 'content']]
-    # print(f"{sdzzdf['content']}")
-    sdzzdf['amount'] = sdzzdf['content'].apply(lambda x : re.findall('向你转账([0-9]+\.[0-9]{2})元', x)[0])
-    # print(f"{sdzzdf['amount']}")
-    sdzzdf['memo'] = None
-    # sdzzdf['memo'] = sdzzdf['content'].apply(lambda x : re.findall('[付收]款方备注(.*)', x)[0] if re.findall('[付收]款方备注(.*)', x) else None)
-    sdzzdf['friend'] = sdzzdf['content'].apply(lambda x : re.findall('由(.*)向你', x)[0])
-    sdzzdf['daycount'] = sdzzdf['content'].apply(lambda x : re.findall('今日收款([0-9]+)笔', x)[0])
-    sdzzdf['daysum'] = sdzzdf['content'].apply(lambda x : re.findall('今日收款总额￥([0-9]+\.[0-9]{2})', x)[0])
-    sdzzdf.set_index('time', inplace=True)
-    clnameswithindex = ['time', 'daycount', 'friend', 'amount', 'daysum']
-    rstdf = sdzzdf.loc[:, clnameswithindex[1:]]
-
-    return rstdf, clnameswithindex
-
-
 def caiwu2note(itemname, itemnameini, rstdf, clnameswithindex):
     print(f"<{itemname}>数据文本有效条目数：{rstdf.shape[0]}")
     shoukuanfixguid = getinivaluefromnote('webchat', f'{itemname}补')
@@ -261,6 +242,26 @@ def showjinzhang():
     rsdf = jzdf.resample('D').agg(agg_map).sort_index(ascending=False)
     rsdf.columns = ['count', 'sum']
     # print(rsdf)
+
+
+def pickupzhuanzhanghuizongfromdf():
+    indf = fulltxt()
+    # indf = indf[indf.name == '微信支付']
+    sdzzdf = indf[indf.content.str.contains('^转账收款汇总通知')].loc[:,['time', 'send', 'name', 'content']]
+    # print(f"{sdzzdf['content']}")
+    sdzzdf['amount'] = sdzzdf['content'].apply(lambda x : re.findall('向你转账([0-9]+\.[0-9]{2})元', x)[0])
+    # print(f"{sdzzdf['amount']}")
+    sdzzdf['memo'] = None
+    # sdzzdf['memo'] = sdzzdf['content'].apply(lambda x : re.findall('[付收]款方备注(.*)', x)[0] if re.findall('[付收]款方备注(.*)', x) else None)
+    sdzzdf['friend'] = sdzzdf['content'].apply(lambda x : re.findall('由(.*?)向你', x)[0])
+    sdzzdf['daycount'] = sdzzdf['content'].apply(lambda x : re.findall('今日收款([0-9]+)笔', x)[0])
+    sdzzdf['daysum'] = sdzzdf['content'].apply(lambda x :
+                                               re.findall('今日收款总额：?￥([0-9]+\.[0-9]{2})', x)[0])
+    sdzzdf.set_index('time', inplace=True)
+    clnameswithindex = ['time', 'daycount', 'friend', 'amount', 'daysum']
+    rstdf = sdzzdf.loc[:, clnameswithindex[1:]]
+
+    return rstdf, clnameswithindex
 
 
 def pickupshoukuanfromdf():
