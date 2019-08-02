@@ -6,6 +6,8 @@ txt数据文件操作函数
 
 import os
 import sqlite3 as lite
+import binascii
+
 import pathmagic
 
 with pathmagic.context():
@@ -15,6 +17,11 @@ with pathmagic.context():
 
 print(f"{__file__} is loading now...")
 
+
+def str2hex(string):
+    str_bin = string.encode('utf-8')
+
+    return binascii.hexlify(str_bin).decode('utf-8')
 
 def getfilepathnameext(tfile):
     tfile = os.path.abspath(tfile)
@@ -67,4 +74,6 @@ if __name__ == '__main__':
     (*aaa,ext) = getfilepathnameext(__file__)
     print(ext)
 
+    outputstr = str2hex('天富 1  29')
+    print(outputstr)
     log.info(f"文件\t{__file__}\t运行结束。")
