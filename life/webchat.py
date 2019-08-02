@@ -393,7 +393,9 @@ def getowner():
 
 
 def after_login():
-    loginname = itchat.web_init()['User']['NickName']
+    owner = getowner()
+    # print(owner)
+    loginname = owner['User']['NickName']
     log.info(f"登入《{loginname}》的微信服务")
 
 
@@ -403,18 +405,19 @@ def after_logout():
     log.critical(f'退出微信({men_wc})登录')
 
 
-@trycounttimes2('微信服务器')
+@trycounttimes2('微信服务器', 200, 20)
 def keepliverun():
     # 为了让实验过程更加方便（修改程序不用多次扫码），我们使用热启动
     status4login = itchat.check_login()
+    print(status4login)
     if status4login == '200':
-        log.info(f'已成功登录，自动退出避免重复登录')
-        itchat.logout()
-    itchat.auto_login(hotReload=True,
-                      loginCallback=after_login, exitCallback=after_logout)
+        log.info(f'已处于成功登录状态')
+        return
+    itchat.auto_login(hotReload=True, loginCallback=after_login, exitCallback=after_logout)
+    # itchat.auto_login(hotReload=True)
 
     global men_wc, meu_wc
-    owner = itchat.web_init()
+    owner = getowner()
     showmsg(owner)
     men_wc = owner['User']['NickName']
     meu_wc = owner['User']['UserName']
