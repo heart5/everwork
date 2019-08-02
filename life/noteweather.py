@@ -84,7 +84,6 @@ def getweatherfromgmail():
 
 def getweatherfromgoogledrive():
     # 验证登录
-    # global dirmainpath
     gc = pygsheets.authorize(service_file=str( dirmainpath / 'data' / 'imp' / 'ewjinchu.json'))
     files = gc.list_ssheets()
     dffiles = pd.DataFrame(files)
@@ -114,11 +113,13 @@ def getweatherfromgoogledrive():
 
 def weatherstat(df, destguid=None):
     df.drop_duplicates(inplace=True)  # 去重，去除可能重复的天气数据记录，原因可能是邮件重复发送等
-    # print(len(df))
     # print(df.head(30))
     df['date'] = df['date'].apply(lambda x : pd.to_datetime(x))
+    # 日期做索引，去重并重新排序
     df.index = df['date']
+    df = df[~df.index.duplicated()]
     df.sort_index(inplace=True)
+    # print(df)
     df.dropna(how='all', inplace=True)  # 去掉空行，索引日期，后面索引值相同的行会被置空，需要去除
     # print(len(df))
     # df['gaowen'] = df['gaowen'].apply(lambda x: np.nan if str(x).isspace() else int(x))   #处理空字符串为空值的另外一骚
@@ -139,7 +140,8 @@ def weatherstat(df, destguid=None):
 
     # print(df.tail(30))
 
-    df_recent_year = df.iloc[-364:]
+    df_recent_year = df.iloc[-365:]
+    # print(df_recent_year)
     # print(df[df.gaowen == df.iloc[-364:]['gaowen'].max()])
     # df_before_year = df.iloc[:-364]
 
@@ -152,7 +154,7 @@ def weatherstat(df, destguid=None):
     ax1.plot(df['wendu'].resample('%dD' % quyangtianshu).mean(),
              'b', lw=1.2, label='日温度（每%d天平均）' % quyangtianshu)
     ax1.plot(df[df.fengsu > 5]['fengsu'], '*', label='风速（大于五级）')
-    plt.legend()
+    plt.legend(loc=2)
     #  起始统计日
     kedu = df.iloc[0]
     ax1.plot([kedu['date'], kedu['date']], [0, kedu['wendu']], 'c--', lw=0.4)
@@ -168,13 +170,13 @@ def weatherstat(df, destguid=None):
                  xytext=(-10, -20), textcoords='offset points', fontsize=8,
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
     # 去年今日，如果数据不足一年，取今日
-    if len(df) >= 365:
-        locqnjr = -364
+    if len(df) >= 366:
+        locqnjr = -365
     else:
         locqnjr = -1
     kedu = df.iloc[locqnjr]
     # kedu = df.iloc[-364]
-    # print(kedu)
+    print(kedu)
     ax1.plot([kedu['date'], kedu['date']], [0, kedu['wendu']], 'c--')
     ax1.scatter([kedu['date'], ], [kedu['wendu']], 50, color='Wheat')
     ax1.annotate(str(kedu['wendu']), xy=(kedu['date'], kedu['wendu']), xycoords='data',
@@ -182,7 +184,7 @@ def weatherstat(df, destguid=None):
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
     dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
     ax1.annotate(dates, xy=(kedu['date'], 0), xycoords='data',
-                 xytext=(-10, -20), textcoords='offset points', fontsize=8,
+                 xytext=(-10, -35), textcoords='offset points', fontsize=8,
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
     # 今日
     kedu = df.iloc[-1]
@@ -202,7 +204,7 @@ def weatherstat(df, destguid=None):
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
     dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
     ax1.annotate(dates, xy=(kedu['date'], 0), xycoords='data',
-                 xytext=(-10, -20), textcoords='offset points', fontsize=8,
+                 xytext=(-10, -35), textcoords='offset points', fontsize=8,
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
 
     # 最近一年最高温
@@ -425,7 +427,7 @@ def fetchweatherinfo_from_googledrive():
     weatherdatalastestday = getnewestdataday('存储数据')
     today = datetime.datetime.now().strftime('%F')
     hour = int(datetime.datetime.now().strftime('%H'))
-    if (today > weatherdatalastestday) and (hour > 6): # or True:
+    if (today > weatherdatalastestday): # or True:
         df = getweatherfromgoogledrive()
         if df is not None:
             log.info('通过读Google drive表格，获取天气信息%d条。' % df.shape[0])
