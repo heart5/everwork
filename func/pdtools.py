@@ -275,33 +275,33 @@ def dataokay(cnx):
     # global dirmainpath
     pathxitongbiaoxls = str(dirmainpath / 'data' / '系统表.xlsx')
     if gengxinfou(pathxitongbiaoxls, cnx, 'fileread'):  # or True:
-        df = pd.read_excel(pathxitongbiaoxls, sheetname='区域')
+        df = pd.read_excel(pathxitongbiaoxls, sheet_name='区域')
         df['区域'] = pd.DataFrame(df['区域']).apply(lambda r: '%02d' % r, axis=1)
         # print(df)
         df = df.loc[:, ['区域', '区域名称', '分部']]
         df.to_sql(name='quyu', con=cnx, if_exists='replace')
 
-        df = pd.read_excel(pathxitongbiaoxls, sheetname='小区')
+        df = pd.read_excel(pathxitongbiaoxls, sheet_name='小区')
         df['小区'] = pd.DataFrame(df['小区']).apply(lambda r: '%03d' % r, axis=1)
         # print(df)
         df.to_sql(name='xiaoqu', con=cnx, if_exists='replace')
 
-        df = pd.read_excel(pathxitongbiaoxls, sheetname='终端类型')
+        df = pd.read_excel(pathxitongbiaoxls, sheet_name='终端类型')
         # print(df)
         df.to_sql(name='leixing', con=cnx, if_exists='replace')
 
-        df = pd.read_excel(pathxitongbiaoxls, sheetname='产品档案', )
+        df = pd.read_excel(pathxitongbiaoxls, sheet_name='产品档案', )
         # print(df)
         df.to_sql(name='product', con=cnx, if_exists='replace')
 
-        df = pd.read_excel(pathxitongbiaoxls, sheetname='客户档案')
+        df = pd.read_excel(pathxitongbiaoxls, sheet_name='客户档案')
         df = df.loc[:, ['往来单位', '往来单位编号', '地址']]
         # print(df)
         df.to_sql(name='customer', con=cnx, if_exists='replace')
 
     pathquandantongjixls = str(dirmainpath / 'data' / '2018年全单统计管理.xlsm')
     if gengxinfou(pathquandantongjixls, cnx, 'fileread'):  # or True:
-        df = pd.read_excel(pathquandantongjixls, sheetname='全单统计管理', na_values=[0])
+        df = pd.read_excel(pathquandantongjixls, shee_tname='全单统计管理', na_values=[0])
         # descdb(df)
         df = df.loc[:, ['订单日期', '单号', '配货人', '配货准确', '业务主管', '终端编码', '终端名称', '积欠', '送货金额',
                         '实收金额', '收款方式', '优惠', '退货金额', '客户拒收', '无货金额', '少配金额', '配错未要',
