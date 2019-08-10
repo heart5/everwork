@@ -75,7 +75,8 @@ def get_ip4alleth(*args):
         return [['wlan', ip]]
     else:
 
-        ethinfo = os.popen("ifconfig -a | grep -A 0 'Link encap'").read()
+        # ethinfo = os.popen("ifconfig -a | grep -A 0 'Link encap'").read()
+        ethinfo = os.popen("ifconfig -a | grep -A 0 'flags'").read()
         ptn = re.compile(r"^(?P<name>\w+)\W+", re.M)
         ethlst = re.findall(ptn, ethinfo)
         # print(ethlst)
@@ -243,7 +244,8 @@ if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
 
     # print(get_ip4alleth('wlan0'))
+    print(get_ip4alleth())
     # print(get_host_ip())
-    tst4trycounttimes2()
+    # tst4trycounttimes2()
 
     print('Done.测试完毕。')
