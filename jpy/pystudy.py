@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -14,5 +15,6 @@
 # ---
 
 print('hello')
+print("哈喽")
 
 
