@@ -3,6 +3,7 @@
 /img
 /log
 #.gitignore
+.ttxfolder
 *.ipynb
 *.log
 *.swp
