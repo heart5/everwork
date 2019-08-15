@@ -3,6 +3,7 @@
 /img
 /log
 #.gitignore
+*.ipynb
 *.log
 *.swp
 *.ipynb_checkpoints*
