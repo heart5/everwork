@@ -31,23 +31,28 @@ def chengbenjiaupdatedf(dfsall, cnxxc):
     descdb(dfpros[dfpros.进货金额 == 0].to_pandas())
 
     # 按照月份汇总，生成成本单价并按照月份分组汇总，生成价格调整记录
-    dfpro = dfpros.groupby(['产品名称', '年月']).agg(进货金额=dfpros.进货金额.sum(), 进货数量=dfpros.进货数量.sum())
+    dfpro = dfpros.groupby(['产品名称', '年月']).agg(
+        进货金额=dfpros.进货金额.sum(), 进货数量=dfpros.进货数量.sum())
     dfpro = dfpro[dfpro, (dfpro.进货金额 / dfpro.进货数量).round(2).rename('单价')]
     descdb(dfpro.to_pandas())
-    dfpro = dfpro.groupby(['产品名称', '单价']).agg(年月=dfpro.年月.min(), 进货金额=dfpro.进货金额.sum()).sort(['产品名称', '年月'])
+    dfpro = dfpro.groupby(['产品名称', '单价']).agg(
+        年月=dfpro.年月.min(), 进货金额=dfpro.进货金额.sum()).sort(['产品名称', '年月'])
     descdb(dfpro.to_pandas())
     log.info('共有%d条产品价格记录，共有%d条产品价格记录（含调价）'
              % (dfpro.groupby('产品名称').agg(dfpro.单价.count()).to_pandas().shape[0], dfpro.to_pandas().shape[0]))
 
     log.info('共有%d条销售明细记录' % dfsall.shape[0])
-    dfsall['年月'] = dfsall['日期'].apply(lambda x: datetime.datetime.strftime(x, '%Y%m'))
+    dfsall['年月'] = dfsall['日期'].apply(
+        lambda x: datetime.datetime.strftime(x, '%Y%m'))
     dfprosall = dfsall.groupby('商品全名', as_index=False)['金额'].sum()
     dfprosall.rename(columns={'商品全名': '产品名称', '金额': '销售金额'}, inplace=True)
 
     # 连接进货产品目录和销售产品目录，查看各自的空记录
-    dfproall = pd.merge(dfpro.groupby(['产品名称']).agg(进货金额=dfpro.进货金额.sum()).to_pandas(), dfprosall, how='outer')
+    dfproall = pd.merge(dfpro.groupby(['产品名称']).agg(
+        进货金额=dfpro.进货金额.sum()).to_pandas(), dfprosall, how='outer')
     descdb(dfproall)
-    log.info('以下进货产品在本期无销售记录：%s' % list(dfproall[dfproall.销售金额.isnull().values == True]['产品名称']))
+    log.info('以下进货产品在本期无销售记录：%s' %
+             list(dfproall[dfproall.销售金额.isnull().values == True]['产品名称']))
 
     dfsall['成本单价'] = 0
     dfpro = dfpro.to_pandas()
@@ -65,13 +70,17 @@ def chengbenjiaupdatedf(dfsall, cnxxc):
 
 
 def chengbenjiaupdateall(cnxc):
-    dfsall = pd.read_sql_query('select * from xiaoshoumingxi order by 日期, 单据编号', cnxc, parse_dates=['日期'])
+    dfsall = pd.read_sql_query(
+        'select * from xiaoshoumingxi order by 日期, 单据编号', cnxc, parse_dates=['日期'])
     del dfsall['index']
     dfsall = chengbenjiaupdatedf(dfsall, cnxc)
-    dfsall.to_sql(name='xiaoshoumingxi', con=cnxc, if_exists='replace', chunksize=10000)
+    dfsall.to_sql(name='xiaoshoumingxi', con=cnxc,
+                  if_exists='replace', chunksize=10000)
     log.info('要更新%d记录中的成本价和毛利内容' % len(dfsall))
-    dfsall['年月'] = dfsall['日期'].apply(lambda x: datetime.datetime.strftime(x, '%Y%m'))
-    print(dfsall.groupby('年月', as_index=False)[['数量', '成本金额', '金额', '毛利']].sum())
+    dfsall['年月'] = dfsall['日期'].apply(
+        lambda x: datetime.datetime.strftime(x, '%Y%m'))
+    print(dfsall.groupby('年月', as_index=False)
+          [['数量', '成本金额', '金额', '毛利']].sum())
 
 
 def details2db(filename, sheetname, xiangmu, tablename):
@@ -83,13 +92,15 @@ def details2db(filename, sheetname, xiangmu, tablename):
     :param tablename:
     :return:
     """
-    df = pd.read_excel(str(dirmainpath / 'data' / filename), sheetname='%s' % sheetname, index_col=0, parse_dates=True)
+    df = pd.read_excel(str(dirmainpath / 'data' / filename),
+                       sheetname='%s' % sheetname, index_col=0, parse_dates=True)
     log.info('读取%s' % filename)
     print(list(df.columns))
     #  ['日期', '单据编号', '摘要', '单据类型', '备注', '商品备注', '商品编号', '商品全名',
     #  '规格', '型号', '产地', '单位', '数量', '单价', '金额', '含税单价', '价税合计', '成本金额', '毛利', '毛利率',
     # '单位全名', '仓库全名', '部门全名']
-    totalin = ['%.2f' % df.loc[df.index.max()]['数量'], '%.2f' % df.loc[df.index.max()]['金额']]  # 从最后一行获取数量合计和金额合计，以备比较
+    totalin = ['%.2f' % df.loc[df.index.max()]['数量'], '%.2f' %
+               df.loc[df.index.max()]['金额']]  # 从最后一行获取数量合计和金额合计，以备比较
     # print(totalin)
     df[xiangmu[0]] = None
     df = df.loc[:, ['日期', '单据编号', '单据类型', xiangmu[0], '摘要', '备注', '商品备注', xiangmu[1],
@@ -153,7 +164,8 @@ def details2db(filename, sheetname, xiangmu, tablename):
 
 def customerweihu2systable():
     """
-    处理客户档案维护记录，规整（填充日期、取有效数据集、板块排序、拆分内容后取有效信息并填充、抽取改编码客户、抽出重复录入纪录）后输出，对改编码客户进行条码更新，手工进入《系统表》
+    处理客户档案维护记录，规整（填充日期、取有效数据集、板块排序、拆分内容后取有效信息并填充、
+    抽取改编码客户、抽出重复录入纪录）后输出，对改编码客户进行条码更新，手工进入《系统表》
     :return:
     """
     writer = pd.ExcelWriter(str(dirmainpath / 'data' / '结果输出.xlsx'))
@@ -182,10 +194,12 @@ def customerweihu2systable():
 
     def riqistr2std(instr):
         riqiokay = ''
-        itempattern = re.compile('\s*(?P<year>\d{4})\s*年(?P<month>\d+)月/?(?P<day>\d+)日')
+        itempattern = re.compile(
+            '\s*(?P<year>\d{4})\s*年(?P<month>\d+)月/?(?P<day>\d+)日')
         for j in re.findall(itempattern, instr):  # 形如('2017','8','10')
             # print(j)
-            riqiokay = pd.to_datetime(str(j[0]) + '-' + str(j[1]) + '-' + str(j[2]))
+            riqiokay = pd.to_datetime(
+                str(j[0]) + '-' + str(j[1]) + '-' + str(j[2]))
 
         return riqiokay
 
@@ -211,7 +225,8 @@ def customerweihu2systable():
         # print(nrsp)
         if len(nrsp) == 3:
             # ['02300320000SXXD', '小七便利店 18636004123', '新店']
-            dfoutsort.loc[i, ['往来单位编号', '往来单位', '动作']] = [nrsp[0].strip(), nrsp[1].strip(), nrsp[2].strip()]
+            dfoutsort.loc[i, ['往来单位编号', '往来单位', '动作']] = [
+                nrsp[0].strip(), nrsp[1].strip(), nrsp[2].strip()]
         elif len(nrsp) == 5:
             if '编码' in (nrsp[4].strip()):
                 lsbianma.append(i)
@@ -236,7 +251,8 @@ def customerweihu2systable():
     # dfzh.info()
 
     # cnx = lite.connect('data\\quandan.db')
-    dfys = pd.read_excel(str(dirmainpath / 'data' / '系统表.xlsx'), sheetname='客户档案')
+    dfys = pd.read_excel(
+        str(dirmainpath / 'data' / '系统表.xlsx'), sheetname='客户档案')
     # dfys.info()
 
     dfzh = pd.concat([dfys, dfzh])
@@ -256,7 +272,8 @@ def customerweihu2systable():
     dfzh.info()
 
     for i in list(lsbianma):
-        print(dfoutsort.loc[i]['往来单位'] + '\t' + dfoutsort.loc[i]['往来单位编号'], end='\t')
+        print(dfoutsort.loc[i]['往来单位'] + '\t' +
+              dfoutsort.loc[i]['往来单位编号'], end='\t')
         idx = list(dfzh[dfzh.往来单位 == dfoutsort.loc[i]['往来单位']].index)
         print(idx, end='\t')
         print(dfzh.loc[idx, '往来单位编号'].values, end='\t')

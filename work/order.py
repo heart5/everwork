@@ -33,10 +33,11 @@ import pathmagic
 
 with pathmagic.context():
     from func.configpr import cfp, cfpzysm, inizysmpath, cfpdata, inidatanotefilepath
-    from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
+    from func.evernttest import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
     from func.logme import log
     from func.first import dirmainpath, dbpathworkplan, dbpathquandan, dbpathdingdanmingxi
     from func.pdtools import dftotal2top, dfin2imglist
+    from func.wrapfuncs import timethis
     # from work.orderdetails import jiaoyanchanpinkehu
 
 
@@ -150,7 +151,7 @@ def chulidataindir_order(pathorder):
     # descdb(dfresult)
     dateqiyu = min(dfresult['日期'])
     datezhiyu = max(dfresult['日期'])
-    print(f'除重后有{dfresult.shape[0]}条记录；数据起于{dateqiyu}，止于{datezhiyu}')
+    print(f'除重后有{dfresult.shape[0]}条记录；数据起于{dateqiyu.strftime("%F")}，止于{datezhiyu.strftime("%F")}')
     dfttt = dfresult.drop_duplicates()
     if cfpzysm.has_option('销售订单', '记录数'):
         jilucont = cfpzysm.getint('销售订单', '记录数')
@@ -182,20 +183,21 @@ def chulidataindir_order(pathorder):
     return dfout
 
 
+@timethis
 def dingdanxiaoshouyuedufenxi(dforder):
     dfall = dforder.loc[:, :]
     dfall['年月'] = dfall['日期'].apply(lambda x: x.strftime('%Y%m'))
     # descdb(dfall)
     zuijinchengjiaori = max(dfall['日期'])
-    print(f'数据集最新日期：{zuijinchengjiaori}')
+    print(f'数据集最新日期：{zuijinchengjiaori.strftime("%F")}')
     if cfpdata.has_option('ordersaleguidquyu', '数据最新日期'):
         daterec = pd.to_datetime(cfpdata.get('ordersaleguidquyu', '数据最新日期'))
-        if daterec >= zuijinchengjiaori: #  and False:
+        if daterec >= zuijinchengjiaori: # and False:
             log.info(f'订单数据集无更新，返回')
             return
     zuiyuanriqi = zuijinchengjiaori + datetime.timedelta(days=-365)
     zuiyuanyuechu = pd.to_datetime(f"{zuiyuanriqi.strftime('%Y-%m')}-01")
-    print(zuiyuanyuechu)
+    print(zuiyuanyuechu.strftime("%F"))
     dfkehu = dfall.groupby(['单位编号', '客户名称', '区域', '类型'], as_index=False).count()
     dfkehu.drop_duplicates(['单位编号'], keep='last', inplace=True)
     dfkehuzhengli = dfkehu[['单位编号', '客户名称', '区域', '类型']]
@@ -403,7 +405,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
                         f'本月成交客户：{dfslicesingle[dfslicesingle.尾交月数 == 1].shape[0]}'
             imglist2note(notestore, [], ntguid, qy + '订单金额年度分析',
                          tablehtml2evernote(dftotal2top(dfslicesingle.loc[:, dfzdclnamesnew]), stattitle,
-                                            withindex=False))
+                                            withindex=False, setwidth=False))
             cfpdata.set('ordersaleguidquyu', qy + 'count', f'{dfslicesingle.shape[0]}')
             cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
             log.info(f'{qy}数据项目成功更新')
@@ -415,6 +417,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
         cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
 
 
+@timethis
 def showorderstat():
     # xlsfile = 'data\\work\\销售订单\\销售订单20180606__20180607034848_480667.xls'
     # dforder = chulixls_order(xlsfile)
@@ -592,6 +595,7 @@ def showorderstat():
         log.info('下列人员的销售金额分析图表正常处置完毕：%s' % persons)
 
 
+@timethis
 def showorderstat2note(jiangemiao):
     try:
         showorderstat()

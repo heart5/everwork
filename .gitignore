@@ -3,7 +3,13 @@
 /img
 /log
 #.gitignore
+.ttxfolder
+*.ipynb
+*.log
+*.swp
 *.ipynb_checkpoints*
 *__pycache__*
-itchat.pkl
+*itchat.pkl
+*.lprof
 *tags*
+*QR.png

@@ -24,6 +24,7 @@ import pathmagic
 with pathmagic.context():
     from func.logme import log
     from func.termuxtools import termux_sms_send
+    # from func.evernttest import getinivaluefromnote
 
 
 def get_ip(*args):
@@ -50,18 +51,32 @@ def get_ip(*args):
         return ip
 
 
+def get_host_ip():
+    """
+    在windows下查询本机ip地址,对多个网卡可以得到wlan0那个,亲测有效
+    :return: ip
+    """
+    s = None
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        sn = s.getsockname()
+        # print(sn)
+        ip = sn[0]
+    finally:
+        s.close()
+    return ip
+
+
 def get_ip4alleth(*args):
     resultiplst = []
     if platform.system() == 'Windows':
-        my_name = socket.getfqdn(socket.gethostbyname('localhost'))
-        print(my_name)
-        my_addr = socket.gethostbyname(my_name)
-        print(my_addr)
-        ip = my_addr.split('\n')[0]
-        return ip
+        ip = get_host_ip()
+        return [['wlan', ip]]
     else:
 
-        ethinfo = os.popen("ifconfig -a | grep -A 0 'Link encap'").read()
+        # ethinfo = os.popen("ifconfig -a | grep -A 0 'Link encap'").read()
+        ethinfo = os.popen("ifconfig -a | grep -A 0 'flags'").read()
         ptn = re.compile(r"^(?P<name>\w+)\W+", re.M)
         ethlst = re.findall(ptn, ethinfo)
         # print(ethlst)
@@ -81,23 +96,6 @@ def get_ip4alleth(*args):
             #  print(ip)
     #  print(resultiplst)
     return resultiplst
-
-
-def get_host_ip():
-    """
-    查询本机ip地址
-    :return: ip
-    """
-    s = None
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('8.8.8.8', 80))
-        sn = s.getsockname()
-        # print(sn)
-        ip = sn[0]
-    finally:
-        s.close()
-    return ip
 
 
 def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务器'):
@@ -144,52 +142,60 @@ def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务�
             time.sleep(sleeptime)
 
 
-def trycounttimes2(servname='服务器', maxtimes=8, maxsecs=30):
+def trycounttimes2(servname='服务器', maxtimes=20, maxsecs=30):
     def decorate(jutifunc):
 
         @wraps(jutifunc)
         def wrapper(*args, **kwargs):
             trytimes = maxtimes
-            for i in range(trytimes):
+            # showfreq = getinivaluefromnote('everlog', 'showfreq')
+            showfreq = 5
+            for i in range(1, trytimes + 1):
                 sleeptime = random.randint(2, maxsecs)
                 try:
                     result = jutifunc(*args, **kwargs)
                     return result
                 except (
-                        OSError, ConnectionRefusedError, ConnectionResetError,
-                        NewConnectionError, ConnectionError, struct.error,
-                        ssl.SSLError, EDAMSystemException
+                        ConnectionRefusedError, ConnectionResetError,
+                        ConnectionAbortedError, NewConnectionError,
+                        ConnectionError,
+                        struct.error,socket.gaierror,
+                        ssl.SSLError, EDAMSystemException,
+                        OSError, IndexError, Exception
                 ) as eee:
 
-                    if hasattr(eee, 'errno'):
-                        if eee.errno == 11001:
-                            log.critical(f'寻址失败，貌似网络不通。{eee}')
-                        elif eee.errno == 10061:
-                            log.warning(f'被主动拒绝，好没面啊！{eee}')
-                        elif eee.errno == 10060:
-                            log.warning(f'够不着啊，是不是在墙外？！{eee}')
-                        elif eee.errno == 10048:
-                            log.warning(f'多次强行连接，被拒了！{eee}')
-                        elif eee.errno == 10054:
-                            log.warning(f'主机发脾气，强行断线了。{eee}')
-                        elif eee.errno == 8:
-                            log.warning(f'和{servname}握手失败。{eee}')
-                        elif eee.errno == 4:
-                            log.warning(f'和{servname}连接异常，被中断。{eee}')
+                    # 5的倍数次尝试输出log，避免网络不佳时的log冗余
+                    if i % showfreq == 0:
+                        if hasattr(eee, 'errno'):
+                            if eee.errno == 11001:
+                                log.critical(f'寻址失败，貌似网络不通。{eee}')
+                            elif eee.errno == 10061:
+                                log.warning(f'被主动拒绝，好没面啊！{eee}')
+                            elif eee.errno == 10060:
+                                log.warning(f'够不着啊，是不是在墙外？！{eee}')
+                            elif eee.errno == 10048:
+                                log.warning(f'多次强行连接，被拒了！{eee}')
+                            elif eee.errno == 10054:
+                                log.warning(f'主机发脾气，强行断线了。{eee}')
+                            elif eee.errno == 8:
+                                log.warning(f'和{servname}握手失败。{eee}')
+                            elif eee.errno == 4:
+                                log.warning(f'和{servname}连接异常，被中断。{eee}')
+                            else:
+                                log.warning(f'连接失败。{eee.errno}\t{eee}')
                         else:
-                            log.warning(f'连接失败。{eee.errno}\t{eee}')
-                    else:
-                        log.warning(f'连接失败。{eee}')
-                    log.warning(
-                        f"第{i+1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
+                            log.critical(f'连接失败。{eee}')
+                        log.critical(
+                            f"第{i}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接服务器时失败，将于{sleeptime}秒后重试。")
                     # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
                     if i == (trytimes - 1):
-                        badnews = f'\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
+                        badnews = f'{__file__}\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}\t{eee}'
+                        # badnews = f'{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co__filename}\t\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
                         log.critical(badnews)
                         termux_sms_send(badnews)
-                        exit(1)
-                        # raise eee
+                        # exit(1)
+                        raise eee
                     time.sleep(sleeptime)
 
         return wrapper
@@ -205,7 +211,7 @@ def ifttt_notify(content="content", funcname="funcname"):
     log.info(f'{pu.machine}_{pu.node}\t{content}\t{funcname}')
 
 
-def test4trycounttimes2():
+def tst4trycounttimes2():
     ifttt_notify("test for ifttt notify", f"{__file__}")
 
     @trycounttimes2('xmu.edu.cn网站服务器')
@@ -220,7 +226,7 @@ def test4trycounttimes2():
         return html
 
     # html2 = trycounttimes2(fetchfromnet, '', True, 'xmu.edu.cn网站服务器')
-    address = 'http://www.wise.xmu.edu.cn/people/faculty'
+    address = 'http://www.wise.xmu1.edu.cn/people/faculty'
     print(fetchfromnet.__doc__)
     html2 = fetchfromnet(address)
     if html2 is None:
@@ -237,7 +243,9 @@ def test4trycounttimes2():
 if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
 
-    print(get_ip4alleth('wlan0'))
-    #  test4trycounttimes2()
+    # print(get_ip4alleth('wlan0'))
+    print(get_ip4alleth())
+    # print(get_host_ip())
+    # tst4trycounttimes2()
 
     print('Done.测试完毕。')

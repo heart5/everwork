@@ -20,6 +20,7 @@ e5d81ffa-89e7-49ff-bd4c-a5a71ae14320 武汉雨天记录
 import pandas as pd
 import re
 import time
+import pygsheets
 from threading import Timer
 from bs4 import BeautifulSoup
 from pylab import *
@@ -59,6 +60,7 @@ def getweatherfromevernote():
     for i in range(1, len(weatherslice), 2):
         split_item.append(weatherslice[i] + " " + weatherslice[i + 1])
 
+    print(split_item)
     return split_item
 
 
@@ -80,54 +82,44 @@ def getweatherfromgmail():
     return split_items
 
 
-def weatherstat(items, destguid=None):
-    split_item = items
-    # print len(split_item)
-    # print split_item[-1]
-    # print split_item
-    # for t in split_item:
-    #     print t
+def getweatherfromgoogledrive():
+    # 验证登录
+    gc = pygsheets.authorize(service_file=str( dirmainpath / 'data' / 'imp' / 'ewjinchu.json'))
+    files = gc.list_ssheets()
+    dffiles = pd.DataFrame(files)
+    # print(dffiles.head())
 
-    itempattern = re.compile(
-        u'(?P<date>\w*\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)\s+：最高温度\s*(?P<gaowen>-?\d*)\s*℃，'
-        u'最低温度(?P<diwen>-?\d*)\s*℃；风速：\s*(?P<fengsu>\d*) \s*，风向：(?P<fengxiang>\w*)；'
-        u'(?:污染：*\s*Not Available；)*日出：\s*(?P<sunon>\w*\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)，'
-        u'日落：(?:Sunset:)*\s*(?P<sunoff>\w*\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)；湿度：(?P<shidu>\w*)%')
-    # print re.findall(itempattern, itemtext)
-    # timestr = 'August 12, 2017 at 06:00AM'
-    # itemtime = time.strptime(timestr, '%B %d, %Y at %I:%M%p')
-    # print itemtime
+    dfboot = dffiles[dffiles.name.str.contains('Today\'s weather report').values == True]
+    print(list(dfboot['name']))
 
-    data_list = []
-    for ii in split_item:
-        stritem = list()
-        for jj in re.findall(itempattern, ii):
-            stritem = [pd.Timestamp(jj[0]),
-                       jj[1], jj[2], jj[3], jj[4],
-                       # pd.Timestamp(jj[5]).strftime("%I%M"),
-                       int(pd.Timestamp(jj[5]).strftime("%H")) * \
-                       60 + int(pd.Timestamp(jj[5]).strftime("%M")),
-                       # pd.Timestamp(jj[6]),
-                       int(pd.Timestamp(jj[6]).strftime("%H")) * \
-                       60 + int(pd.Timestamp(jj[6]).strftime("%M")),
-                       jj[7]]
-            datei = stritem[0]
-            dates = "%04d-%02d-%02d" % (datei.year, datei.month, datei.day)
-            # print(str(datei)+'\t'+dates)
-            stritem[0] = pd.to_datetime(dates)
-        # print stritem
-        data_list.append(stritem)
+    dfboottrails = pd.DataFrame()
+    for ix in dfboot.index:
+        dts = gc.get_range(dfboot.loc[ix][0], 'A:H')
+        df = pd.DataFrame(dts)
+        dfboottrails = dfboottrails.append(df, True)
+        print(df.head())
+    dfboottrails.columns = ['date', 'gaowen', 'diwen', 'fengsu', 'fengxiang', 'sunon', 'sunoff', 'shidu']
+    dfboottrails['date'] = dfboottrails['date'].apply(lambda x: pd.Timestamp(x))
+    dfboottrails['date'] = dfboottrails['date'].apply(lambda x: "%04d-%02d-%02d" % (x.year, x.month, x.day))
+    dfboottrails['date'] = dfboottrails['date'].apply(lambda x: pd.to_datetime(x))
+    dfboottrails['sunon'] = dfboottrails['sunon'].apply(lambda x: pd.Timestamp(x))
+    dfboottrails['sunon'] = dfboottrails['sunon'].apply(lambda x: x.hour*60+x.minute)
+    dfboottrails['sunoff'] = dfboottrails['sunoff'].apply(lambda x: pd.Timestamp(x))
+    dfboottrails['sunoff'] = dfboottrails['sunoff'].apply(lambda x: x.hour*60+x.minute)
+    dfout = dfboottrails
+    print(dfout.tail())
+    return dfout
 
-    print(f'{len(data_list)}\t{data_list[0]}\t{data_list[-1]}')
 
-    df = pd.DataFrame(data_list,
-                      columns=['date', 'gaowen', 'diwen', 'fengsu', 'fengxiang', 'sunon', 'sunoff', 'shidu'])
-    # print(len(df))
+def weatherstat(df, destguid=None):
     df.drop_duplicates(inplace=True)  # 去重，去除可能重复的天气数据记录，原因可能是邮件重复发送等
-    # print(len(df))
     # print(df.head(30))
+    df['date'] = df['date'].apply(lambda x : pd.to_datetime(x))
+    # 日期做索引，去重并重新排序
     df.index = df['date']
+    df = df[~df.index.duplicated()]
     df.sort_index(inplace=True)
+    # print(df)
     df.dropna(how='all', inplace=True)  # 去掉空行，索引日期，后面索引值相同的行会被置空，需要去除
     # print(len(df))
     # df['gaowen'] = df['gaowen'].apply(lambda x: np.nan if str(x).isspace() else int(x))   #处理空字符串为空值的另外一骚
@@ -148,7 +140,8 @@ def weatherstat(items, destguid=None):
 
     # print(df.tail(30))
 
-    df_recent_year = df.iloc[-364:]
+    df_recent_year = df.iloc[-365:]
+    # print(df_recent_year)
     # print(df[df.gaowen == df.iloc[-364:]['gaowen'].max()])
     # df_before_year = df.iloc[:-364]
 
@@ -161,7 +154,7 @@ def weatherstat(items, destguid=None):
     ax1.plot(df['wendu'].resample('%dD' % quyangtianshu).mean(),
              'b', lw=1.2, label='日温度（每%d天平均）' % quyangtianshu)
     ax1.plot(df[df.fengsu > 5]['fengsu'], '*', label='风速（大于五级）')
-    plt.legend()
+    plt.legend(loc=2)
     #  起始统计日
     kedu = df.iloc[0]
     ax1.plot([kedu['date'], kedu['date']], [0, kedu['wendu']], 'c--', lw=0.4)
@@ -177,13 +170,13 @@ def weatherstat(items, destguid=None):
                  xytext=(-10, -20), textcoords='offset points', fontsize=8,
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
     # 去年今日，如果数据不足一年，取今日
-    if len(df) >= 365:
-        locqnjr = -364
+    if len(df) >= 366:
+        locqnjr = -365
     else:
         locqnjr = -1
     kedu = df.iloc[locqnjr]
     # kedu = df.iloc[-364]
-    # print(kedu)
+    print(kedu)
     ax1.plot([kedu['date'], kedu['date']], [0, kedu['wendu']], 'c--')
     ax1.scatter([kedu['date'], ], [kedu['wendu']], 50, color='Wheat')
     ax1.annotate(str(kedu['wendu']), xy=(kedu['date'], kedu['wendu']), xycoords='data',
@@ -191,7 +184,7 @@ def weatherstat(items, destguid=None):
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
     dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
     ax1.annotate(dates, xy=(kedu['date'], 0), xycoords='data',
-                 xytext=(-10, -20), textcoords='offset points', fontsize=8,
+                 xytext=(-10, -35), textcoords='offset points', fontsize=8,
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
     # 今日
     kedu = df.iloc[-1]
@@ -211,7 +204,7 @@ def weatherstat(items, destguid=None):
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
     dates = "%02d-%02d" % (kedu['date'].month, kedu['date'].day)
     ax1.annotate(dates, xy=(kedu['date'], 0), xycoords='data',
-                 xytext=(-10, -20), textcoords='offset points', fontsize=8,
+                 xytext=(-10, -35), textcoords='offset points', fontsize=8,
                  arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
 
     # 最近一年最高温
@@ -275,6 +268,7 @@ def weatherstat(items, destguid=None):
     img_wenshifeng_path = dirmainpath / "img" / 'weather' / 'wenshifeng.png'
     img_wenshifeng_path_str = str(img_wenshifeng_path)
     touchfilepath2depth(img_wenshifeng_path)
+    plt.legend(loc='lower left')
     plt.savefig(img_wenshifeng_path_str)
 
     imglist = list()
@@ -322,16 +316,22 @@ def weatherstat(items, destguid=None):
     imglist2note(get_notestore(), imglist, destguid, '武汉天气图')
 
 
-def fetchweatherinfo_from_gmail(weathertxtfilename):
-    if cfplife.has_option('天气', '存储数据最新日期'):
-        weathertxtlastestday = cfplife.get('天气', '存储数据最新日期')
+def getnewestdataday(item):
+    if cfplife.has_option('天气', f'{item}最新日期'):
+        weatherlastestday = cfplife.get('天气', f'{item}最新日期')
     else:
-        weathertxtlastestday = '2016-09-19'
-        cfplife.set('天气', '存储数据最新日期', '%s' % weathertxtlastestday)
+        weatherlastestday = '2016-09-19'
+        cfplife.set('天气', f'{item}最新日期', '%s' % weatherlastestday)
         cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
+    
+    return weatherlastestday
+
+
+def fetchweatherinfo_from_gmail(weathertxtfilename):
+    weatherdatalastestday = getnewestdataday('存储数据')
     today = datetime.datetime.now().strftime('%F')
     hour = int(datetime.datetime.now().strftime('%H'))
-    if (today > weathertxtlastestday) and (hour > 6):
+    if (today > weatherdatalastestday) and (hour > 6):
         items = getweatherfromgmail()
         if items:
             log.info('通过邮件轮询，读取天气信息%d条。' % len(items))
@@ -374,29 +374,98 @@ def isweatherupdate(weathertxtfilename):
         return False
 
 
+def items2df(items):
+    split_item = items
+    # print len(split_item)
+    # print split_item[-1]
+    # print split_item
+    # for t in split_item:
+    #     print t
+
+    itempattern = re.compile(
+        u'(?P<date>\w*\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)\s+：最高温度\s*(?P<gaowen>-?\d*)\s*℃，'
+        u'最低温度(?P<diwen>-?\d*)\s*℃；风速：\s*(?P<fengsu>\d*) \s*，风向：(?P<fengxiang>\w*)；'
+        u'(?:污染：*\s*Not Available；)*日出：\s*(?P<sunon>\w*\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)，'
+        u'日落：(?:Sunset:)*\s*(?P<sunoff>\w*\s*\d+,\s*\d{4}\s*at\s*\d{2}:\d{2}[AP]M)；湿度：(?P<shidu>\w*)%')
+    # print re.findall(itempattern, itemtext)
+    # timestr = 'August 12, 2017 at 06:00AM'
+    # itemtime = time.strptime(timestr, '%B %d, %Y at %I:%M%p')
+    # print itemtime
+
+    data_list = []
+    for ii in split_item:
+        stritem = list()
+        for jj in re.findall(itempattern, ii):
+            stritem = [pd.Timestamp(jj[0]),
+                       jj[1], jj[2], jj[3], jj[4],
+                       # pd.Timestamp(jj[5]).strftime("%I%M"),
+                       int(pd.Timestamp(jj[5]).strftime("%H")) * \
+                       60 + int(pd.Timestamp(jj[5]).strftime("%M")),
+                       # pd.Timestamp(jj[6]),
+                       int(pd.Timestamp(jj[6]).strftime("%H")) * \
+                       60 + int(pd.Timestamp(jj[6]).strftime("%M")),
+                       jj[7]]
+            datei = stritem[0]
+            dates = "%04d-%02d-%02d" % (datei.year, datei.month, datei.day)
+            # print(str(datei)+'\t'+dates)
+            stritem[0] = pd.to_datetime(dates)
+            # stritem[0] = dates
+        # print stritem
+        data_list.append(stritem)
+
+    print(f'{len(data_list)}\t{data_list[0]}\t{data_list[-1]}')
+
+    df = pd.DataFrame(data_list,
+                      columns=['date', 'gaowen', 'diwen', 'fengsu', 'fengxiang', 'sunon', 'sunoff', 'shidu'])
+    # print(df)
+    # print(len(df))
+
+    return df
+
+
+def fetchweatherinfo_from_googledrive():
+    weatherdatalastestday = getnewestdataday('存储数据')
+    today = datetime.datetime.now().strftime('%F')
+    hour = int(datetime.datetime.now().strftime('%H'))
+    if (today > weatherdatalastestday): # or True:
+        df = getweatherfromgoogledrive()
+        if df is not None:
+            log.info('通过读Google drive表格，获取天气信息%d条。' % df.shape[0])
+            print(df['date'].max())
+            weathertxtlastestday = df['date'].max().strftime('%F')
+            cfplife.set('天气', '存储数据最新日期', '%s' % weathertxtlastestday)
+            cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
+            # print(df)
+            return df
+
+
 def weatherstatdo():
     weathertxtfilename = str(dirmainpath / 'data' / 'ifttt' / 'weather.txt')
     print(weathertxtfilename)
+    dfgoogledrive = None
     try:
-        fetchweatherinfo_from_gmail(weathertxtfilename)
+        # fetchweatherinfo_from_gmail(weathertxtfilename)
+        dfgoogledrive = fetchweatherinfo_from_googledrive()
     except Exception as weathererror:
-        log.critical(f'从邮箱获取天气信息邮件时出现错误。{weathererror}')
+        log.critical(f'从邮箱或谷歌硬盘获取天气信息时出现错误。{weathererror}')
+        raise
 
-    if cfplife.has_option('天气', '笔记最新日期'):
-        weathernotelastestday = cfplife.get('天气', '笔记最新日期')
-    else:
-        weathernotelastestday = '2016-09-19'
-        cfplife.set('天气', '笔记最新日期', '%s' % weathernotelastestday)
-        cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
+    weathernotelastestday = getnewestdataday('笔记')
     today = datetime.datetime.now().strftime('%F')
-    weathertxtlastestday = cfplife.get('天气', '存储数据最新日期')
-    if today == weathernotelastestday:  # and False:
+    weathertxtlastestday = getnewestdataday('存储数据')
+    if today == weathernotelastestday: # and False:
         print('今天的天气信息统计笔记已刷新，本次轮询跳过')
-    elif today == weathertxtlastestday:  # or True:
+    elif today == weathertxtlastestday: # or True:
         try:
             items = readfromtxt(weathertxtfilename)
-            weatherstat(items, '296f57a3-c660-4dd5-885a-56492deb2cee')
-            log.info('天气信息成功更新入天气信息统计笔记')
+            dftxt = items2df(items)
+            # print(dftxt.dtypes)
+            dfall = dftxt.append(dfgoogledrive, True)
+            # print(dfall)
+            # print(dfgoogledrive.dtypes)
+            datenew = dfall['date'].max()
+            weatherstat(dfall, '296f57a3-c660-4dd5-885a-56492deb2cee')
+            log.info(f'天气信息({datenew})成功更新入天气信息统计笔记')
             cfplife.set('天气', '统计天数', '%d' % len(items))
             cfplife.set('天气', '笔记最新日期', '%s' % today)
             cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
@@ -404,6 +473,7 @@ def weatherstatdo():
             log.critical('读取天气信息并更新天气统计信息笔记时出现索引错误。%s' % (str(ixe)))
         except TypeError as te:
             log.critical('读取天气信息并更新天气统计信息笔记时出现类型错误。%s' % (str(te)))
+            raise
         except Exception as eeee:
             log.critical('读取天气信息笔记并更新天气统计信息笔记时出现未名错误。%s' % (str(eeee)))
     else:
@@ -430,6 +500,7 @@ if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     # weatherstattimer(60 * 60 + 60 * 28)
     weatherstatdo()
+    # getweatherfromgoogledrive()
     # weathertxtfilename = "data\\ifttt\\weather.txt"
     # usn = isweatherupdate(weathertxtfilename)
     # weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')

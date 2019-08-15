@@ -29,15 +29,14 @@ with pathmagic.context():
     from func.first import dirmainpath, dbpathquandan, dbpathdingdanmingxi
     # from func.pdtools import dftotal2top, dataokay
     from func.pdtools import dataokay
+    from func.datatools import str2hex
     from work.notesaledetails import pinpaifenxido
 
 
 def chulixls_orderdetails(orderfile: Path):
     try:
-        content = xlrd.open_workbook(
-            filename=orderfile, encoding_override='gb18030')
-        df = pd.read_excel(content, index_col=0,
-                           parse_dates=True, engine='xlrd')
+        content = xlrd.open_workbook( filename=orderfile, encoding_override='gb18030')
+        df = pd.read_excel(content, index_col=0, parse_dates=True, engine='xlrd')
         log.info(f'读取{orderfile}')
         # print(list(df.columns))
     except UnicodeDecodeError as ude:
@@ -135,7 +134,7 @@ def chulidataindir_orderdetails(pathorder: Path):
     # descdb(dfresult)
     dateqiyu = min(dfresult['日期'])
     datezhiyu = max(dfresult['日期'])
-    print(f'除重后有{dfresult.shape[0]}条记录；数据起于{dateqiyu}，止于{datezhiyu}')
+    log.info(f'除重后{notestr}数据有{dfresult.shape[0]}条记录；数据起于{dateqiyu.strftime("%F")}，止于{datezhiyu.strftime("%F")}')
     dfttt = dfresult.drop_duplicates()
     if cfpzysm.has_option(notestr, '记录数'):
         jilucont = cfpzysm.getint(notestr, '记录数')
@@ -160,7 +159,7 @@ def orderdetails_check4product_customer():
     targetpath = dirmainpath / 'data' / 'work' / '订单明细'
     # chulixls_order(targetpath / '订单明细20180614.xls.xls')
     dforder, hasnew = chulidataindir_orderdetails(targetpath)
-    if (not hasnew): #  and False:
+    if (not hasnew)  and False:
         log.info(f'订单明细数据无新增数据，本次产品和客户校验跳过。')
         return
 
@@ -205,6 +204,8 @@ def orderdetails_check4product_customer():
     dfduibikehu = dfall[np.isnan(dfall.往来单位编号)][['往来单位编号', '数量', '金额']]
     if dfduibikehu.shape[0] > 0:
         kehunotin = list(dfduibikehu.index)
+        for item in kehunotin:
+            print(f"{item}\t{str2hex(item)}")
         log.critical(f'客户档案需要更新，下列客户未包含：{kehunotin}')
         return False
 

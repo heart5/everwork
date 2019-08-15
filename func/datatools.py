@@ -1,16 +1,34 @@
 # encoding:utf-8
 """
 txt数据文件操作函数
+部分文件功能函数
 """
 
 import os
 import sqlite3 as lite
+import binascii
+
 import pathmagic
 
 with pathmagic.context():
     from func.logme import log
-    from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi
+    from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi, touchfilepath2depth
     from func.wrapfuncs import timethis
+
+print(f"{__file__} is loading now...")
+
+
+def str2hex(string):
+    str_bin = string.encode('utf-8')
+
+    return binascii.hexlify(str_bin).decode('utf-8')
+
+def getfilepathnameext(tfile):
+    tfile = os.path.abspath(tfile)
+    (filepath, tmpfilename) = os.path.split(tfile)
+    (shotename, fileext) = os.path.splitext(tmpfilename)
+
+    return filepath, tmpfilename, shotename, fileext
 
 
 def write2txt(weathertxtfilename, inputitemlist):
@@ -25,6 +43,7 @@ def write2txt(weathertxtfilename, inputitemlist):
 
 def readfromtxt(weathertxtfilename):
     if not os.path.exists(weathertxtfilename):
+        touchfilepath2depth(weathertxtfilename)
         write2txt(weathertxtfilename, None)
     with open(weathertxtfilename, 'r', encoding='utf-8') as ftxt:
         items = [line.strip() for line in ftxt]  # strip()，去除行首行尾的空格
@@ -49,8 +68,12 @@ def compact_sqlite3_db(dbpath):
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     # print(get_filesize(dbpathquandan))
-    compact_sqlite3_db(dbpathquandan)
-    compact_sqlite3_db(dbpathworkplan)
-    compact_sqlite3_db(dbpathdingdanmingxi)
+    # compact_sqlite3_db(dbpathquandan)
+    # compact_sqlite3_db(dbpathworkplan)
+    # compact_sqlite3_db(dbpathdingdanmingxi)
+    (*aaa,ext) = getfilepathnameext(__file__)
+    print(ext)
 
-    print('Done.完毕。')
+    outputstr = str2hex('天富 1  29')
+    print(outputstr)
+    log.info(f"文件\t{__file__}\t运行结束。")

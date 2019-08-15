@@ -14,11 +14,15 @@ from bs4 import BeautifulSoup
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfp
-    from func.first import dirmainpath
-    from func.first import getdirmain
+    from func.configpr import cfp, getcfpoptionvalue, setcfpoptionvalue
+    from func.first import dirmainpath, getdirmain
     from func.logme import log
+    from func.datatools import getfilepathnameext
     from func.nettools import trycounttimes2
+    from func.evernttest import timestamp2str, imglist2note, note_store, getinivaluefromnote
+    from etc.getid import getdeviceid
+    from etc.mailfun import mailfun
+    from func.termuxtools import termux_sms_send
 
 
 def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum=100000, dirtarget='Inbox',
@@ -381,3 +385,57 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
         items = readfromtxt(txtfilename)
     log.info("《%s-%s》共有%d条记录。" % (mingmu, fenleistr, len(items)))
     return items
+
+
+def findnewthenupdatenote(qrfile, cfpfile, cfpsection, pre, desc, sendsms=False):
+    qrfile = os.path.abspath(qrfile)
+    if os.path.exists(qrfile):
+        # print(qrfile)
+        # print(os.path.abspath(qrfile))
+        qrfiletimeini = getcfpoptionvalue(cfpfile, cfpsection, f'{pre}filetime') 
+        qrfilesecsnew = os.stat(qrfile).st_mtime
+        qrfiletimenew = str(qrfilesecsnew)
+        if qrfiletimeini: # or True:
+            qrftlst = qrfiletimeini.split(',')
+            print(f"{timestamp2str(float(qrftlst[0]))}\t{qrfile}")
+            if (qrfiletimenew > qrftlst[0]): # or True:
+                (*full, ext) = getfilepathnameext(qrfile)
+                # print(full)
+                # print(ext)
+                ext = ext.lower()
+                targetimglst = []
+                filecontent = str(qrfile)
+                if ext in ['.png', '.jpg', 'bmp', 'gif']:
+                    targetimglst = [qrfile]
+                else:
+                    filecontent = open(qrfile, 'r').read()
+                qrtstr = f"{qrfiletimenew},{qrfiletimeini}"
+                qrtstrlst = qrtstr.split(',')
+                qrtstrflst = [timestamp2str(float(x)) for x in qrtstrlst]
+                targetstr = f'<pre>{filecontent}</pre><pre>--------------\n'+'\n'.join(qrtstrflst)+'</pre>'
+                qrnoteguid = getinivaluefromnote(cfpsection, f"{pre}{getdeviceid()}")
+                # print(targetimglst)
+                # print(targetstr)
+                imglist2note(note_store, targetimglst, qrnoteguid,
+                             f"{getinivaluefromnote('device', getdeviceid())} {desc}", targetstr)
+                mailfun(qrfile)
+                if sendsms:
+                    termux_sms_send(f"{desc}\t有新的更新，请尽快处置。")
+                setcfpoptionvalue(cfpfile, cfpsection, f'{pre}filetime', qrtstr)
+        else:
+            mailfun(qrfile, True)
+            setcfpoptionvalue(cfpfile, cfpsection, f'{pre}filetime',qrfiletimenew)
+    else:
+        log.critical(f"{qrfile}不存在，请检查文件名称")
+
+
+if __name__ == '__main__':
+    # log.info(f'运行文件\t{__file__}')
+    # fl = 'QR.png'
+    # qrfile = getdirmain() / fl
+    # findnewthenupdatenote(qrfile, 'everwebchat', 'webchat', 'qr', 'QR微信二维码')
+
+    cronfile = '/data/data/com.termux/files/usr/var/spool/cron/crontabs/u0_a133'
+    findnewthenupdatenote(cronfile, 'everwork', 'everwork', 'cron',
+                          'cron自动运行排期表')
+    # log.info(f"文件\t{__file__}\t运行结束。")

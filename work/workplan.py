@@ -37,7 +37,7 @@ import pathmagic
 
 with pathmagic.context():
     from func.configpr import cfpworkplan, iniworkplanpath
-    from func.evernt import findnotefromnotebook, get_notestore, evernoteapijiayi, token, \
+    from func.evernttest import findnotefromnotebook, get_notestore, evernoteapijiayi, token, \
         timestamp2str, tablehtml2evernote, imglist2note
     from func.first import dbpathworkplan
     from func.logme import log

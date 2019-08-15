@@ -5,7 +5,7 @@ import pandas as pd
 import time
 
 # 验证登录
-gc = pygsheets.authorize(service_file='ewjinchu.json')
+gc = pygsheets.authorize(service_file='../data/imp/ewjinchu.json')
 files = gc.list_ssheets()
 dffiles = pd.DataFrame(files)
 # print(dffiles.head())

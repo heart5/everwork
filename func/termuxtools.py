@@ -15,6 +15,7 @@ with pathmagic.context():
     via subprocesses,
 """
 
+print(f"{__file__} is loading now...")
 
 def evaloutput(output):
     if (output is None) or (output == 'null') or (len(output) == 0):

@@ -5,7 +5,9 @@
 """
 
 import os
+import sys
 import datetime
+import platform
 import subprocess
 import socket
 import requests
@@ -24,6 +26,7 @@ with pathmagic.context():
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_telephony_deviceinfo, termux_telephony_cellinfo, termux_wifi_connectioninfo, termux_wifi_scaninfo
+    from etc.getid import getdeviceid
 
 
 def iprecord():
@@ -32,18 +35,24 @@ def iprecord():
     if not cfp.has_section(namestr):
         cfp.add_section(namestr)
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
-    if cfp.has_option(namestr, 'device_id'):
-        device_id = cfp.get(namestr, 'device_id')
-    else:
-        outputdict = termux_telephony_deviceinfo()
-        # print(outputdict)
-        device_id = outputdict["device_id"].strip()
-        cfp.set(namestr, 'device_id', device_id)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
-        log.info(f'获取device_id:\t{device_id}，并写入ini文件:\t{cfppath}')
+    device_id = getdeviceid()
     ip = wifi = wifiid = tun = None
     ethlst = get_ip4alleth()
     print(ethlst)
+    if platform.system() == 'Windows':
+        ip = ethlst[0][1]
+        cmd = 'netsh wlan show interfaces'
+        rrr = os.popen(cmd)
+        rrrinfo = rrr.readlines()
+        print(rrrinfo)
+        for line in rrrinfo:
+            if line.find('BSSID') >= 0:
+                wifi = line.split(':', 1)[1].strip()
+                continue
+            if line.find('SSID') >= 0:
+                wifiid = line.split(':', 1)[1].strip()
+                continue
+        return ip, wifi, wifiid, tun, device_id
     for ethinfo in ethlst:
         name, ipinner = ethinfo
         if name.startswith('tun'):
@@ -69,6 +78,7 @@ def evalnone(input):
         return input
 
 
+# @profile
 def showiprecords():
     namestr = 'everip'
     cfp, cfppath = getcfp(namestr)
@@ -135,7 +145,7 @@ def showiprecords():
         print(itemnew)
         readinifromnote()
         cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
-        namestr = 'ip'
+        namestr = 'device'
         if cfpfromnote.has_option(namestr, device_id):
             device_name = cfpfromnote.get(namestr, device_id)
         else:
@@ -149,11 +159,11 @@ def showiprecords():
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
         # 把笔记输出放到最后，避免更新不成功退出影响数据逻辑
         imglist2note(get_notestore(), [], guid,
-                     f'手机_{device_name}_ip更新记录', "<br></br>".join(itemnew))
+                     f'服务器_{device_name}_ip更新记录', "<pre>" + "\n".join(itemnew) + "</pre>")
 
 
 if __name__ == '__main__':
-    # global log
-    print(f'运行文件\t{__file__}')
+    log.info(f'开始运行文件\t{__file__}\t{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co_filename}')
     showiprecords()
-    print('Done.')
+    # print(f"{self.__class__.__name__}")
+    log.info(f'文件\t{__file__}\t执行完毕\t。Done.')

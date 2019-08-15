@@ -25,6 +25,7 @@ with pathmagic.context():
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_telephony_deviceinfo, \
         termux_telephony_cellinfo, termux_location
+    from etc.getid import getdeviceid
 
 
 def geodistance(lng1, lat1, lng2, lat2):
@@ -46,9 +47,9 @@ def foot2show():
     if cfp.has_option(namestr, 'device_id'):
         device_id = cfp.get(namestr, 'device_id')
     else:
-        outputdict = termux_telephony_deviceinfo()
-        # print(outputdict)
-        device_id = outputdict["device_id"].strip()
+        # outputdict = termux_telephony_deviceinfo()
+        # device_id = outputdict["device_id"].strip()
+        device_id = getdeviceid()
         cfp.set(namestr, 'device_id', device_id)
         cfp.write(open(cfppath, 'w', encoding='utf-8'))
         log.info(f'获取device_id:\t{device_id}，并写入ini文件:\t{cfppath}')
@@ -117,7 +118,7 @@ def foot2show():
     print(imglst)
     readinifromnote()
     cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
-    namestr = 'ip'
+    namestr = 'device'
     if cfpfromnote.has_option(namestr, device_id):
         device_name = cfpfromnote.get(namestr, device_id)
     else:

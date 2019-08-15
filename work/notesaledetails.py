@@ -12,7 +12,7 @@ import pathmagic
 
 with pathmagic.context():
     from func.configpr import cfpdata, inidatanotefilepath, getcfp
-    from func.evernt import imglist2note, get_notestore, token, readinifromnote
+    from func.evernttest import getinivaluefromnote, imglist2note, get_notestore, token, readinifromnote 
     from func.first import dbpathquandan, dbpathdingdanmingxi
     from func.pdtools import dataokay, dfin2imglist, updatesection, readinisection2df
     from func.wrapfuncs import timethis
@@ -245,7 +245,8 @@ def pinpaifenxido():
         brandcount = cfpininote.getint(namestr, 'brandcount')
     else:
         brandcount = 5
-    pinpaifenxi(cnx, daysbefore=5, brandnum=brandcount)
+    fenbuorquyu = getinivaluefromnote('brand', 'fenbuorquyu')
+    pinpaifenxi(cnx, daysbefore=5, brandnum=brandcount, fenbu=fenbuorquyu)
     cnx.close()
 
 

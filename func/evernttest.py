@@ -21,11 +21,13 @@ from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_M
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfp, inifilepath, getcfp
+    from func.configpr import cfp, inifilepath, getcfp, getcfpoptionvalue, setcfpoptionvalue
     from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.nettools import trycounttimes2
+    # from etc.getid import getid
 
+print(f"{__file__} is loading now...")
 
 def get_notestore():
     # Real applications authenticate with Evernote using OAuth, but for the
@@ -50,7 +52,7 @@ def get_notestore():
 
     if auth_token == "your developer token":
         print("Please fill in your developer token\nTo get a developer token, visit "
-              "https://sandbox.evernote.com/api/DeveloperToken.action")
+              "https://www.evernote.com/api/DeveloperToken.action")
         log.critical('请填入从evernote官方网站申请的有效token！程序终止并退出！！！')
         exit(1)
 
@@ -67,7 +69,7 @@ def get_notestore():
 
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
-    @trycounttimes2('evernote服务器', maxtimes=10, maxsecs=30)
+    @trycounttimes2('evernote服务器')
     def getnotestore():
         global note_store
         if note_store is not None:
@@ -160,16 +162,26 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
                 # print (str1)
                 nbody += "<en-media type=\"%s\" hash=\"%s\" align=\"center\" /><br />" % (
                     resource.mime, str1)
+    # neirong= "<pre>" + neirong + "</pre>"
+
+    # 去除控制符
+    neirong = re.sub('[\x00-\x08|\x0b-\x0c|\x0e-\x1f]', '', neirong)
+
     nbody += neirong
     nbody += "</en-note>"
 
+    # ！！！严重错误，过滤\x14时把回车等符号都杀了！！！
+    # nbodynotasciilst = [hex(ord(x)) for x in nbody if ord(x) < 32]
+    # print(f"存在不可显示字符串：{''.join(nbodynotasciilst)}")
+    # nbodylst = [x for x in nbody if ord(x) >= 32]
+    # nbody = ''.join(nbodylst)
     note.content = nbody
     # print (note.content)
 
     # Finally, send the new note to Evernote using the updateNote method
     # The new Note object that is returned will contain server-generated
     # attributes such as the new note's unique GUID.
-    @trycounttimes2('evernote服务器')
+    @trycounttimes2('evernote服务器。更新笔记。')
     def updatenote(notesrc):
         updated_note = get_notestore().updateNote(notesrc)
         evernoteapijiayi()
@@ -179,13 +191,21 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     updatenote(note)
 
 
-def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True):
-    pd.set_option('max_colwidth', 200)
+def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True,
+                       setwidth=True):
+    colwidth = pd.get_option('max_colwidth')
+    if setwidth:
+        pd.set_option('max_colwidth', 200)
+    else:
+        # print(colwidth)
+        pass
     df = pd.DataFrame(dataframe)
     outstr = df.to_html(justify='center', index=withindex).replace('class="dataframe">', 'align="center">'). \
         replace('<table', '\n<h3 align="center">%s</h3>\n<table' %
                 tabeltitle).replace('<th></th>', '<th>&nbsp;</th>')
     # print(outstr)
+    if setwidth:
+        pd.set_option('max_colwidth', colwidth)
     return outstr
 
 
@@ -238,6 +258,13 @@ def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000)
     return items
 
 
+def getnotecontent(guid:str):
+    note_store = get_notestore()
+    soup = BeautifulSoup(note_store.getNoteContent(guid), "html.parser")
+    # print(soup)
+    
+    return soup
+
 def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
     """
     创建一个note
@@ -266,8 +293,11 @@ def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲�
     try:
         note = notestore.createNote(tokenmn, ournote)
         evernoteapijiayi()
-        log.info('笔记《' + notetitle + '》在笔记本《' +
-                 parentnotebook.name + '》中创建成功。')
+        if parentnotebook and hasattr(parentnotebook, 'name'):
+            bkname = f"<{parentnotebook.name}>"
+        else:
+            bkname = '默认'
+        log.info(f'笔记《{notetitle}》在\t{bkname}\t笔记本中创建成功。')
         return note
     except EDAMUserException as usere:
         # Something was wrong with the note data
@@ -313,7 +343,7 @@ def getapitimesfromlog():
         return False
     dfapi2['asctime'] = dfapi2['asctime'].apply(lambda x: pd.to_datetime(x))
     dfapi2['counts'] = dfapi2['levelnamemessage'].apply(
-        lambda x: int(re.findall('(?P<counts>\d+)', x)[0]))
+        lambda x: int(re.findall('(?P<counts>\d+)', x)[-1]))
     # del dfapi2['levelnamemessage']
     # print(dfapi2.tail())
     jj = dfapi2[dfapi2.asctime == dfapi2.asctime.max()]['counts'].iloc[-1]
@@ -321,7 +351,7 @@ def getapitimesfromlog():
     # print(jj)
     result = [dfapi2.asctime.max(), int(jj)]
     # print(dfapi2[dfapi2.asctime == dfapi2.asctime.max()])
-    print(result)
+    # print(result)
     return result
 
 
@@ -337,8 +367,7 @@ def writeini():
     cfp.set('evernote', 'apilasttime', '%s' %
             datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     cfp.write(open(inifilepath, 'w', encoding='utf-8'))
-    log.info('Evernote API调用次数：%d，写入配置文件%s' %
-             (ENtimes, os.path.split(inifilepath)[1]))
+    # log.info('Evernote API调用次数：%d，写入配置文件%s' % (ENtimes, os.path.split(inifilepath)[1]))
 
 
 def evernoteapiclearatzero():
@@ -350,9 +379,9 @@ def evernoteapiclearatzero():
     global ENAPIlasttime, ENtimes
     apilasttimehouzhengdian = pd.to_datetime(
         (ENAPIlasttime + datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:00:00'))
-    print(apilasttimehouzhengdian)
+    # print(apilasttimehouzhengdian)
     now = datetime.datetime.now()
-    print(now)
+    # print(now)
     if now > apilasttimehouzhengdian:
         ENAPIlasttime = now
         # time.sleep(60)
@@ -368,6 +397,7 @@ def evernoteapijiayi():
     global ENtimes, note_store
     log.debug(f'动用了Evernote API({note_store}) {ENtimes} 次……')
     ENtimes += 1
+    writeini()
     evernoteapiclearatzero()
     if (ENtimes >= 290) or (note_store is None):
         now = datetime.datetime.now()
@@ -478,18 +508,28 @@ def findnotebookfromevernote():
 
 @trycounttimes2('evernote服务器')
 def readinifromnote():
-    cfpeverwork, cfpeverworkpath = getcfp('everwork')
-    noteguid_inifromnote = cfpeverwork.get('evernote', 'ininoteguid')
-    # noteguid_inifromnote = 'e0565861-db9e-4efd-be00-cbce06d0cf98'
+    # cfpeverwork, cfpeverworkpath = getcfp('everwork')
+    # noteguid_inifromnote = cfpeverwork.get('evernote', 'ininoteguid')
+    ininoteupdatenum = getcfpoptionvalue('everwork', 'evernote', 'ininoteupdatenum')
+    # print(ininoteupdatenum)
+    if not ininoteupdatenum:
+        ininoteupdatenum = 0
     global note_store
     note_store = get_notestore()
-    soup = BeautifulSoup(note_store.getNoteContent(
-        noteguid_inifromnote), "html.parser")
+    # noteguid_inifromnote = 'e0565861-db9e-4efd-be00-cbce06d0cf98'
+    noteguid_inifromnote = getcfpoptionvalue('everwork', 'evernote', 'ininoteguid')
+    # print(noteguid_inifromnote)
+    note = note_store.getNote(noteguid_inifromnote, True, True, False, False)
+    # print(note.updateSequenceNum)
+    if int(note.updateSequenceNum) == ininoteupdatenum:
+        # print(f'配置笔记无变化，不对本地化的ini配置文件做更新。')
+        return
+    soup = BeautifulSoup(note_store.getNoteContent( noteguid_inifromnote), "html.parser")
     # print(soup)
     ptn = u'<div>(.*?)</div>'
     # ptn = u'<div>'
     itemsource = re.findall(ptn, str(soup))
-    print(itemsource)
+    # print(itemsource)
     items = [x for x in itemsource if not re.search('<.*?>', x)]
     print(items)
     fileobj = open(str(dirmainpath / 'data' / 'everinifromnote.ini'), 'w',
@@ -498,42 +538,84 @@ def readinifromnote():
         fileobj.write(item + '\n')
     fileobj.close()
 
+    setcfpoptionvalue('everwork', 'evernote', 'ininoteupdatenum', str(note.updateSequenceNum))
+    log.info(f'配置笔记内容有变化，更新本地化的ini配置文件。')
+
+
+def getinivaluefromnote(section, option):
+    readinifromnote()
+
+    return getcfpoptionvalue('everinifromnote', section, option)
+
 
 def writeini2note():
     pass
 
 
-# print('我是evernt啊')
-# global cfp
-token = cfp.get('evernote', 'token')
-ENtimes = cfp.getint('evernote', 'apicount')
-ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
-apitime = getapitimesfromlog()
-# print(ENAPIlasttime, apitime)
-if apitime:
-    # 比较ini和log中API存档的时间，解决异常退出时调用次数无法准确反映的问题
-    if apitime[0] > ENAPIlasttime:
-        diff = apitime[0] - ENAPIlasttime
+def findsomenotest2showornote(nbguid, keyword, newnote=False):
+    global token
+    nost = get_notestore()
+    notesfind = findnotefromnotebook(token, nbguid, keyword)
+    if newnote:
+        makenote(token, nost, f"“{keyword}》”记列表", str(notesfind))
     else:
-        diff = ENAPIlasttime - apitime[0]
-    # print(diff.seconds)
-    if diff.seconds > 60:
-        log.info('程序上次异常退出，调用log中的API数据[%s,%d]' %
-                 (str(apitime[0]), apitime[1]))
-        ENAPIlasttime = apitime[0]
-        ENtimes = apitime[1] + 1
+        print(notesfind)
+
+
+def enapistartlog():
+    # print('我是evernt啊')
+    # global cfp
+    token = cfp.get('evernote', 'token')
+    ENtimes = cfp.getint('evernote', 'apicount')
+    ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
+    apitime = getapitimesfromlog()
+    print(ENAPIlasttime, apitime)
+    if apitime:
+        # 比较ini和log中API存档的时间，解决异常退出时调用次数无法准确反映的问题
+        if apitime[0] > ENAPIlasttime:
+            diff = apitime[0] - ENAPIlasttime
+        else:
+            diff = ENAPIlasttime - apitime[0]
+        # print(diff.seconds)
+        if diff.seconds > 60:
+            log.info('程序上次异常退出，调用log中的API数据[%s,%d]' %
+                     (str(apitime[0]), apitime[1]))
+            ENAPIlasttime = apitime[0]
+            ENtimes = apitime[1] + 1
+    # writeini()
+
+    return token, ENtimes, ENAPIlasttime
+
+
+token, ENtimes, ENAPIlasttime = enapistartlog()
 evernoteapiclearatzero()
 
-# writeini()
-
 if __name__ == '__main__':
-    print(f'开始测试文件\t{__file__}')
+    log.info(f'开始运行文件\t{__file__}')
     nost = get_notestore()
     print(nost)
     readinifromnote()
     # writeini()
     # findnotebookfromevernote()
-    # notefind = findnotefromnotebook(
-    # token, '4524187f-c131-4d7d-b6cc-a1af20474a7f', '日志')
-    # print(notefind)
-    print('Done.')
+
+    # 查找主题包含关键词的笔记
+    # notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
+    # shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
+    # findsomenotest2showornote(notification_guid, '补')
+
+    # 显示笔记内容，源码方式
+    # '39c0d815-df23-4fcc-928d-d9193d5fff93' 转账
+    # 'ba9dcaa7-9a8f-4ee8-86a6-fd788b71d411' 微信号
+    # findnotecontent = getnotecontent('39c0d815-df23-4fcc-928d-d9193d5fff93' )
+    # print(f"{findnotecontent}")
+
+    # # 将notebooklst.txt内容更新至新建的笔记中
+    # filetitle = '笔记本列表'
+    # filepath = dirmainpath / 'notebooklst.txt'
+    # dffile = open(filepath)
+    # neirong = dffile.read()
+    # dffile.close()
+    # makenote(token, nost,filetitle, neirong)
+
+    # # makenote(token, nost, '转账记录笔记guid', str(notefind))
+    log.info(f"完成文件{__file__}\t的运行")
