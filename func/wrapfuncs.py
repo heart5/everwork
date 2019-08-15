@@ -115,4 +115,4 @@ if __name__ == '__main__':
     print(f"函数默认值\t{countdown.__defaults__}")
     print(f"函数字典\t{countdown.__dict__}")
     print(f"函数内涵全集\t{countdown.__dir__()}")
-    print('Done.完毕。')
+    log.info(f"文件\t{__file__}\t结束运行")
