@@ -25,6 +25,7 @@ with pathmagic.context():
     from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.nettools import trycounttimes2
+    # from etc.getid import getid
 
 print(f"{__file__} is loading now...")
 
@@ -51,7 +52,7 @@ def get_notestore():
 
     if auth_token == "your developer token":
         print("Please fill in your developer token\nTo get a developer token, visit "
-              "https://sandbox.evernote.com/api/DeveloperToken.action")
+              "https://www.evernote.com/api/DeveloperToken.action")
         log.critical('请填入从evernote官方网站申请的有效token！程序终止并退出！！！')
         exit(1)
 
@@ -561,28 +562,33 @@ def findsomenotest2showornote(nbguid, keyword, newnote=False):
         print(notesfind)
 
 
-# print('我是evernt啊')
-# global cfp
-token = cfp.get('evernote', 'token')
-ENtimes = cfp.getint('evernote', 'apicount')
-ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
-apitime = getapitimesfromlog()
-print(ENAPIlasttime, apitime)
-if apitime:
-    # 比较ini和log中API存档的时间，解决异常退出时调用次数无法准确反映的问题
-    if apitime[0] > ENAPIlasttime:
-        diff = apitime[0] - ENAPIlasttime
-    else:
-        diff = ENAPIlasttime - apitime[0]
-    # print(diff.seconds)
-    if diff.seconds > 60:
-        log.info('程序上次异常退出，调用log中的API数据[%s,%d]' %
-                 (str(apitime[0]), apitime[1]))
-        ENAPIlasttime = apitime[0]
-        ENtimes = apitime[1] + 1
-evernoteapiclearatzero()
+def enapistartlog():
+    # print('我是evernt啊')
+    # global cfp
+    token = cfp.get('evernote', 'token')
+    ENtimes = cfp.getint('evernote', 'apicount')
+    ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
+    apitime = getapitimesfromlog()
+    print(ENAPIlasttime, apitime)
+    if apitime:
+        # 比较ini和log中API存档的时间，解决异常退出时调用次数无法准确反映的问题
+        if apitime[0] > ENAPIlasttime:
+            diff = apitime[0] - ENAPIlasttime
+        else:
+            diff = ENAPIlasttime - apitime[0]
+        # print(diff.seconds)
+        if diff.seconds > 60:
+            log.info('程序上次异常退出，调用log中的API数据[%s,%d]' %
+                     (str(apitime[0]), apitime[1]))
+            ENAPIlasttime = apitime[0]
+            ENtimes = apitime[1] + 1
+    # writeini()
 
-# writeini()
+    return token, ENtimes, ENAPIlasttime
+
+
+token, ENtimes, ENAPIlasttime = enapistartlog()
+evernoteapiclearatzero()
 
 if __name__ == '__main__':
     log.info(f'开始运行文件\t{__file__}')
