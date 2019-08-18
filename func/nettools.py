@@ -142,7 +142,7 @@ def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务�
             time.sleep(sleeptime)
 
 
-def trycounttimes2(servname='服务器', maxtimes=20, maxsecs=30):
+def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
     def decorate(jutifunc):
 
         @wraps(jutifunc)
