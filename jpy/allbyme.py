@@ -14,6 +14,23 @@
 #     name: python3
 # ---
 
+# +
+import sys
+
 print("红黄褐")
+print(sys)
+print(sys.api_version)
+# -
+print("This is another cell.")
+
+
+print("The third.")
+
+# +
+import pathmagic
+
+aaa = "120"
+print(f"The code is {aaa}")
+# -
 
 
