@@ -33,15 +33,24 @@ def allin():
     stopcount = 0
     fls = os.listdir(qdpath)
     print(len(fls))
+    targetlst = []
     for fl in fls:
         timestamp = re.findall(ptn, fl)
         if timestamp:
+            cld = []
             qddf = pd.read_excel(qdpath / fl, sheetname='全单统计管理')
             # print(qddf.tail(5))
-            print(f"{fl}\t{timestamp[0]}\t{qddf.shape[0]}")
+            cld.append(fl)
+            cld.append(timestamp[0])
+            cld.append(qddf.shape[0])
+            targetlst.append(cld)
+            # print(f"{fl}\t{timestamp[0]}\t{qddf.shape[0]}")
+            # print(targetlst)
             stopcount += 1
-        # if stopcount >= 20:
-        #     break
+        if stopcount >= 5:
+            break
 
+    return targetlst
 
-allin()
+qdlst = allin()
+print(qdlst)
