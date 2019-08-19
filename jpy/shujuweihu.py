@@ -8,16 +8,22 @@
 #       format_version: '1.4'
 #       jupytext_version: 1.2.1
 #   kernelspec:
-#     display_name: Python 2
+#     display_name: Python 3
 #     language: python
-#     name: python2
+#     name: python3
 # ---
 
-# +
-from imp4nb import *
+# + {"pycharm": {"is_executing": false}}
+# from imp4nb import *
+import os
+import sys
+import datetime
+import pandas as pd
+from datetime import datetime
+from pandas.tseries.offsets import *
 
-
-now =datetime.datetime.now()
+now =datetime.now()
+print(now)
 now = pd.to_datetime('2016-12-31')
 yuechu = now+MonthBegin(0)
 print(yuechu)
@@ -29,8 +35,11 @@ nianchu = now + YearBegin(-2)
 print(nianchu)
 print(nianchu <= pd.to_datetime('2015-01-01'))
 
-# +
-from imp4nb import *
+# + {"pycharm": {"is_executing": false}}
+import sqlite3 as lite
+import pathmagic
+with pathmagic.context():
+    from func.first import dbpathquandan
 
 cnx = lite.connect(dbpathquandan)
 br = ['柒柒湘']
@@ -40,9 +49,10 @@ qrystrz = "select 日期,strftime('%Y%m',日期) as 年月,customer.往来单位
          "where (customer.往来单位 = xiaoshoumingxi.单位全名) " \
          "and (product.商品全名 = xiaoshoumingxi.商品全名) " \
          "and (金额 >= 0)"
-if len(br) > 0:
-    qrystrz += ' and (品牌 = \'%s\')' %br
+for i in range(0, len(br)):
+    qrystrz += ' and (品牌 = \'%s\')' %br[i]
 qrystrz += ' group by 日期,客户编码 order by 日期'
+print(qrystrz)
 
 qrystrf = "select 日期,strftime('%Y%m',日期) as 年月,customer.往来单位编号 as 客户编码,sum(金额) as 退货金额," \
          "substr(customer.往来单位编号,1,2) as 区域 ,"  "substr(customer.往来单位编号,12,1) as 类型, " \
@@ -50,13 +60,16 @@ qrystrf = "select 日期,strftime('%Y%m',日期) as 年月,customer.往来单位
          "where (customer.往来单位 = xiaoshoumingxi.单位全名) " \
          "and (product.商品全名 = xiaoshoumingxi.商品全名) " \
          "and (金额 < 0)"
-if len(br) > 0:
-    qrystrf += ' and (品牌 = \'%s\')' %br
+for i in range(0, len(br)):
+    qrystrf += ' and (品牌 = \'%s\')' %br[i]
 qrystrf += ' group by 日期,客户编码 order by 日期'
+print(qrystrf)
 
-dfz =pd.read_sql(qrystrz,cnx,parse_dates='日期')
+# dfz =pd.read_sql(qrystrz,cnx,parse_dates='日期')
+dfz =pd.read_sql(qrystrz,cnx)
 print(dfz)
-dff =pd.read_sql(qrystrf,cnx,parse_dates='日期')
+# dff =pd.read_sql(qrystrf,cnx,parse_dates='日期')
+dff =pd.read_sql(qrystrf,cnx)
 print(dff)
 
 cnx.close()

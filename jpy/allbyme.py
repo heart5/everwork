@@ -20,17 +20,21 @@ import sys
 print("红黄褐")
 print(sys)
 print(sys.api_version)
+print(f'this is what? meaning')
 # -
 print("This is another cell.")
+print("谁去")
 
 
 print("The third.")
+print('好了吧。需要手动安装啊。')
 
 # +
 import pathmagic
 
 aaa = "120"
 print(f"The code is {aaa}")
+print(pathmagic.context)
 # -
 
 
