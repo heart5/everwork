@@ -43,6 +43,7 @@ def allin():
             cld.append(fl)
             cld.append(timestamp[0])
             cld.append(qddf.shape[0])
+            cld.append(qddf)
             targetlst.append(cld)
             # print(f"{fl}\t{timestamp[0]}\t{qddf.shape[0]}")
             # print(targetlst)
