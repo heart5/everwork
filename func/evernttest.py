@@ -512,6 +512,10 @@ def findnotebookfromevernote():
 
 @trycounttimes2('evernote服务器')
 def readinifromnote():
+    """
+    更新动态化配置到本地ini文件，确保数据新鲜
+    :return:
+    """
     # cfpeverwork, cfpeverworkpath = getcfp('everwork')
     # noteguid_inifromnote = cfpeverwork.get('evernote', 'ininoteguid')
     ininoteupdatenum = getcfpoptionvalue('everwork', 'evernote', 'ininoteupdatenum')
