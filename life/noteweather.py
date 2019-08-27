@@ -29,7 +29,7 @@ from pylab import *
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfp, cfplife, inilifepath
+    from func.configpr import cfp, cfplife, inilifepath, getcfpoptionvalue, setcfpoptionvalue
     from func.evernt import get_notestore, imglist2note
     from func.first import dirmainpath, touchfilepath2depth
     from func.logme import log
@@ -317,13 +317,11 @@ def weatherstat(df, destguid=None):
 
 
 def getnewestdataday(item):
-    if cfplife.has_option('天气', f'{item}最新日期'):
-        weatherlastestday = cfplife.get('天气', f'{item}最新日期')
-    else:
+    weatherlastestday = getcfpoptionvalue('everlife', '天气', f"{item}最新日期")
+    if not weatherlastestday:
         weatherlastestday = '2016-09-19'
-        cfplife.set('天气', f'{item}最新日期', '%s' % weatherlastestday)
-        cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
-    
+        setcfpoptionvalue('everlife', '天气', f'{item}最新日期', '%s' % weatherlastestday)
+        
     return weatherlastestday
 
 
