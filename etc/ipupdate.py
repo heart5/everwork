@@ -19,7 +19,7 @@ import evernote.edam.type.ttypes as ttypes
 
 with pathmagic.context():
     from func.first import getdirmain, dirmainpath
-    from func.configpr import getcfp
+    from func.configpr import getcfp, getcfpoptionvalue, setcfpoptionvalue
     from func.nettools import get_host_ip, get_ip, get_ip4alleth
     from func.datatools import readfromtxt, write2txt
     from func.evernttest import get_notestore, imglist2note, timestamp2str, makenote, token, evernoteapijiayi, readinifromnote
@@ -30,11 +30,6 @@ with pathmagic.context():
 
 
 def iprecord():
-    namestr = 'everip'
-    cfp, cfppath = getcfp(namestr)
-    if not cfp.has_section(namestr):
-        cfp.add_section(namestr)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
     device_id = getdeviceid()
     ip = wifi = wifiid = tun = None
     ethlst = get_ip4alleth()
@@ -81,18 +76,13 @@ def evalnone(input):
 # @profile
 def showiprecords():
     namestr = 'everip'
-    cfp, cfppath = getcfp(namestr)
     ip, wifi, wifiid, tun, device_id = iprecord()
     if ip is None:
         log.critical('无效ip，可能是没有处于联网状态')
         exit(1)
     print(f'{ip}\t{wifi}\t{wifiid}\t{tun}\t{device_id}')
-    if not cfp.has_section(device_id):
-        cfp.add_section(device_id)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
-    if cfp.has_option(device_id, 'guid'):
-        guid = cfp.get(device_id, 'guid')
-    else:
+    guid = getcfpoptionvalue(namestr, device_id, 'guid')
+    if not guid:
         global token
         note_store = get_notestore()
         parentnotebook = note_store.getNotebook(
@@ -105,29 +95,27 @@ def showiprecords():
         note = makenote(token, note_store, note.title, notebody='',
                         parentnotebook=parentnotebook)
         guid = note.guid
-        cfp.set(device_id, 'guid', guid)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
-    if cfp.has_option(device_id, 'ipr'):
-        ipr = evalnone(cfp.get(device_id, 'ipr'))
-        wifir = evalnone(cfp.get(device_id, 'wifir'))
-        wifiidr = evalnone(cfp.get(device_id, 'wifiidr'))
-        tunr = evalnone(cfp.get(device_id, 'tunr'))
-        startr = cfp.get(device_id, 'start')
+        setcfpoptionvalue(namestr, device_id, guid)
+    if getcfpoptionvalue(namestr, device_id, 'ipr'):
+        ipr = evalnone(getcfpoptionvalue(namestr, device_id, 'ipr'))
+        wifir = evalnone(getcfpoptionvalue(namestr, device_id, 'wifir'))
+        wifiidr = evalnone(getcfpoptionvalue(namestr, device_id, 'wifiidr'))
+        tunr = evalnone(getcfpoptionvalue(namestr, device_id, 'tunr'))
+        startr = getcfpoptionvalue(namestr, device_id, 'start')
     else:
-        cfp.set(device_id, 'ipr', ip)
+        setcfpoptionvalue(namestr, device_id, 'ipr', ip)
         ipr = ip
-        cfp.set(device_id, 'wifir', str(wifi))
+        setcfpoptionvalue(namestr, device_id, 'wifir', str(wifi))
         wifir = wifi
-        cfp.set(device_id, 'wifiidr', str(wifiid))
+        setcfpoptionvalue(namestr, device_id, 'wifiidr', str(wifiid))
         wifiidr = wifiid
-        cfp.set(device_id, 'tunr', str(tun))
+        setcfpoptionvalue(namestr, device_id, 'tunr', str(tun))
         tunr = tun
         start = datetime.datetime.now().strftime('%F %T')
         startr = start
-        cfp.set(device_id, 'start', start)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
+        setcfpoptionvalue(namestr, device_id, 'start', start)
 
-    if (ip != ipr) or (wifiid != wifiidr) or (tun != tunr):
+    if (ip != ipr) or (wifiid != wifiidr) or (wifi != wifir) or (tun != tunr):
         txtfilename = str(dirmainpath / 'data' / 'ifttt' /
                           f'ip_{device_id}.txt')
         print(txtfilename)
@@ -150,13 +138,12 @@ def showiprecords():
             device_name = cfpfromnote.get(namestr, device_id)
         else:
             device_name = device_id
-        cfp.set(device_id, 'ipr', ip)
-        cfp.set(device_id, 'wifir', str(wifi))
-        cfp.set(device_id, 'wifiidr', str(wifiid))
-        cfp.set(device_id, 'tunr', str(tun))
+        setcfpoptionvalue(namestr, device_id, 'ipr', ip)
+        setcfpoptionvalue(namestr, device_id, 'wifir', str(wifi))
+        setcfpoptionvalue(namestr, device_id, 'wifiidr', str(wifiid))
+        setcfpoptionvalue(namestr, device_id, 'tunr', str(tun))
         start = datetime.datetime.now().strftime('%F %T')
-        cfp.set(device_id, 'start', start)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
+        setcfpoptionvalue(namestr, device_id, 'start', start)
         # 把笔记输出放到最后，避免更新不成功退出影响数据逻辑
         imglist2note(get_notestore(), [], guid,
                      f'服务器_{device_name}_ip更新记录', "<pre>" + "\n".join(itemnew) + "</pre>")
@@ -166,4 +153,4 @@ if __name__ == '__main__':
     log.info(f'开始运行文件\t{__file__}\t{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co_filename}')
     showiprecords()
     # print(f"{self.__class__.__name__}")
-    log.info(f'文件\t{__file__}\t执行完毕\t。Done.')
+    log.info(f'文件\t{__file__}\t执行完毕')
