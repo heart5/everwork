@@ -132,11 +132,8 @@ def showiprecords():
         itemnew.extend(itemnewr)
         print(itemnew)
         readinifromnote()
-        cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
-        namestr = 'device'
-        if cfpfromnote.has_option(namestr, device_id):
-            device_name = cfpfromnote.get(namestr, device_id)
-        else:
+        device_name = getcfpoptionvalue('everinifromnote', 'device', device_id)
+        if not device_name:
             device_name = device_id
         setcfpoptionvalue(namestr, device_id, 'ipr', ip)
         setcfpoptionvalue(namestr, device_id, 'wifir', str(wifi))
