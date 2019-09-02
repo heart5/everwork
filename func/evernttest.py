@@ -269,6 +269,7 @@ def getnotecontent(guid:str):
     
     return soup
 
+
 def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
     """
     创建一个note
@@ -561,21 +562,23 @@ def writeini2note():
 
 
 def findsomenotest2showornote(nbguid, keyword, newnote=False):
-    global token
-    nost = get_notestore()
-    notesfind = findnotefromnotebook(token, nbguid, keyword)
+    tokenfst = getcfpoptionvalue('everwork', 'evernote', 'token')
+    notesfind = findnotefromnotebook(tokenfst, nbguid, keyword)
     if newnote:
-        makenote(token, nost, f"“{keyword}》”记列表", str(notesfind))
+        makenote(tokenfst, get_notestore(), f"“{keyword}》”记列表", str(notesfind))
     else:
         print(notesfind)
 
 
 def enapistartlog():
-    # print('我是evernt啊')
-    # global cfp
-    token = cfp.get('evernote', 'token')
-    ENtimes = cfp.getint('evernote', 'apicount')
-    ENAPIlasttime = pd.to_datetime(cfp.get('evernote', 'apilasttime'))
+    """
+    比较evenote API调用时间和log记录时间，判断是否续用API的调用次数
+    :return:
+    ENtimes 最新调用次数
+    ENAPIlasttime   最新调用时间记录
+    """
+    ENtimes = getcfpoptionvalue('everwork', 'evernote', 'apicount')
+    ENAPIlasttime = pd.to_datetime(getcfpoptionvalue('everwork', 'evernote', 'apilasttime'))
     apitime = getapitimesfromlog()
     print(ENAPIlasttime, apitime)
     if apitime:
@@ -592,10 +595,11 @@ def enapistartlog():
             ENtimes = apitime[1] + 1
     # writeini()
 
-    return token, ENtimes, ENAPIlasttime
+    return ENtimes, ENAPIlasttime
 
 
-token, ENtimes, ENAPIlasttime = enapistartlog()
+token = getcfpoptionvalue('everwork', 'evernote', 'token')
+ENtimes, ENAPIlasttime = enapistartlog()
 evernoteapiclearatzero()
 
 if __name__ == '__main__':
