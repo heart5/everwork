@@ -184,7 +184,9 @@ def orderdetails_check4product_customer():
     dfduibichanpin = dfall[np.isnan(dfall.品牌名称)][['商品编号', '单价', '金额']]
     if dfduibichanpin.shape[0] > 0:
         chanpinnotin = list(dfduibichanpin.index)
-        log.critical(f'产品档案需要更新，下列产品未包含：{chanpinnotin}')
+        chanpinnotinxlspath = dirmainpath / 'data' / 'work' / '未录入新品.xlsx'
+        dfduibichanpin.to_excel(chanpinnotinxlspath)
+        log.critical(f'产品档案需要更新，共有{dfduibichanpin.shape[0]}个产品未包含：{chanpinnotin[:5]}…...，输出至文件{chanpinnotinxlspath}')
         return False
 
     dfkehu = pd.read_sql(f'select * from customer', cnxp, index_col='index')
