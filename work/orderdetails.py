@@ -10,7 +10,7 @@
 """
 import os
 # import sys
-# import datetime
+import datetime
 # import xlrd
 import pandas as pd
 import numpy as np
@@ -185,7 +185,9 @@ def orderdetails_check4product_customer():
     if dfduibichanpin.shape[0] > 0:
         chanpinnotin = list(dfduibichanpin.index)
         chanpinnotinxlspath = dirmainpath / 'data' / 'work' / '未录入新品.xlsx'
-        dfduibichanpin.to_excel(chanpinnotinxlspath)
+        with pd.ExcelWriter(chanpinnotinxlspath, mode='a') as writer:
+            nowstr = datetime.datetime.now().strftime("%Y%m%d")
+            dfduibichanpin.to_excel(writer, sheet_name=f"{nowstr}({dfduibichanpin.shape[0]})")
         log.critical(f'产品档案需要更新，共有{dfduibichanpin.shape[0]}个产品未包含：{chanpinnotin[:5]}…...，输出至文件{chanpinnotinxlspath}')
         return False
 
@@ -208,7 +210,11 @@ def orderdetails_check4product_customer():
         kehunotin = list(dfduibikehu.index)
         for item in kehunotin:
             print(f"{item}\t{str2hex(item)}")
-        log.critical(f'客户档案需要更新，下列客户未包含：{kehunotin}')
+        kehunotinxlspath = dirmainpath / 'data' / 'work' / '未录入客户.xlsx'
+        with pd.ExcelWriter(kehunotinxlspath, mode='a') as writer:
+            nowstr = datetime.datetime.now().strftime("%Y%m%d")
+            dfduibikehu.to_excel(writer, sheet_name=f"{nowstr}({dfduibikehu.shape[0]})")
+        log.critical(f'客户档案需要更新，共有{dfduibikehu.shape[0]}个客户未包含：{kehunotin[:5]}…...，，输出至文件《{kehunotinxlspath}》')
         return False
 
     cnxp.close()
@@ -231,7 +237,7 @@ def showorderstat2note(jiangemiao):
 
 
 if __name__ == '__main__':
-    log.info(f'测试文件\t{__file__}')
+    log.info(f'运行文件\t{__file__}')
     orderdetails_check4product_customer()
     # showorderstat2note(60 * 15)
-    print('Done.测试完毕。')
+    log.info(f'{__file__}\t运行完毕。')
