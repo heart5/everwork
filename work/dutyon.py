@@ -15,13 +15,15 @@ from pandas.tseries.offsets import *
 import pathmagic
 
 with pathmagic.context():
-    from func.evernt import *
+    from func.evernttest import *
     from func.pdtools import isworkday
     from func.first import dbpathworkplan
     from func.wrapfuncs import timethis
+    from work.fetchdata import fetch_dutyondata2lite
 
 
 @timethis
+# @profile
 def showdutyonfunc(dtlist: list = None, zglist: list = None):
     cnxwp = lite.connect(dbpathworkplan)
     dfduty = pd.read_sql('select * from dutyon', cnxwp, parse_dates=['ruzhi', 'lizhi'])
@@ -189,13 +191,13 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
 
 
 @timethis
-def showdutyon2note():
+def showdutyon2note(monthnum:int = 3):
     recentdutyguid = '02540689-911d-4a2a-bd22-89fe44d41f2a'
     tday = pd.to_datetime(pd.to_datetime(datetime.datetime.today()).strftime('%F'))  # 罪魁祸首，日期中时间一定要归零
 
-    monthnum = 14
+    # monthnum = 14
     dutytablelist = list()
-    for i in range(1, monthnum, 1):
+    for i in range(1, monthnum + 1, 1):
         if tday.day == 1:
             tday = pd.to_datetime(tday.strftime('%Y-%m-02'))
         thismonth = tday + MonthBegin((-1) * i)
@@ -212,7 +214,7 @@ def showdutyon2note():
                             + tablehtml2evernote(dutytablelist[i][0],
                                                  dutytablelist[i][1].strftime('%Y-%m'), withindex=True)
 
-    imglist2note(get_notestore(), [], recentdutyguid, f'真元商贸员工出勤统计表（最近{monthnum-1}个月）', dutytableliststr)
+    imglist2note(get_notestore(), [], recentdutyguid, f'真元商贸员工出勤统计表（最近{monthnum}个月）', dutytableliststr)
 
     alldutyonguid = '0d22c1f8-b92e-4c39-8d3e-7a6cb150e011'
     dfall, dfallfrom, dfallto = showdutyonfunc([pd.to_datetime('2010-10-22')])
@@ -221,28 +223,13 @@ def showdutyon2note():
     imglist2note(get_notestore(), [], alldutyonguid, '真元员工出勤大统计', dutytableallstr)
 
 
-def duty_timer(jiangemiao):
-    try:
-        showdutyon2note()
-    except TypeError as te:
-        log.critical(f'类型错误。{te}')
-    except KeyError as ke:
-        log.critical(f'健值错误哦。{ke}')
-    except EDAMUserException as eue:
-        log.critical(f'evernote用户错误。{eue}')
-
-    global timer_duty2note
-    timer_duty2note = Timer(jiangemiao, duty_timer, [jiangemiao])
-    timer_duty2note.start()
-
-
 if __name__ == '__main__':
     # global log
     log.info(f'运行文件\t{__file__}')
 
-    # fetchattendance_from_evernote()
-    # duty_timer(60 * 60 * 3 + 60 * 37)
-    showdutyon2note()
+    fetch_dutyondata2lite()
+    monthnum = getinivaluefromnote('xingzheng', 'monthnum')
+    showdutyon2note(monthnum)
 
     # df, dtf, dtt = showdutyonfunc(list(pd.date_range(pd.to_datetime('2018-7-1'), pd.to_datetime('2018-7-31'),
     # freq='D')),zglist=['徐志伟', '梅富忠', '周莉']) print(dtf.strftime('%F'), dtt.strftime('%F')) print(df)
@@ -262,4 +249,4 @@ if __name__ == '__main__':
     # pd.to_datetime('2018-7-16')], '梅富忠', fromthen=True).values weekdaychinese = ['日', '一', '二', '三', '四', '五',
     # '六'] for [dt, name, iswork, xingzhi, tianshu] in resultlist: print(f'{dt}\t{weekdaychinese[int(dt.strftime(
     # "%w"))]}\t{iswork}\t{xingzhi}')
-    print('Done')
+    log.info(f'文件\t{__file__}执行结束。Done！')
