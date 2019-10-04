@@ -9,6 +9,7 @@ import numpy as np
 import sqlite3 as lite
 from pathlib import Path
 import xlrd
+import pygsheets
 
 import pathmagic
 
@@ -17,6 +18,29 @@ with pathmagic.context():
     from func.first import dbpathdingdanmingxi, dirmainpath
     from func.logme import log
     from func.configpr import cfpzysm, inizysmpath
+
+
+def gettopicfilefromgoogledrive(topic:str, neirong:str):
+    """
+    从googledrive读取文件名包含某关键词的文件并读取数据返回DataFrame
+    """
+    # 验证登录
+    gc = pygsheets.authorize(service_file=str( dirmainpath / 'data' / 'imp' / 'ewjinchu.json'))
+    files = gc.list_ssheets()
+    dffiles = pd.DataFrame(files)
+    # print(dffiles.head())
+
+    dfboot = dffiles[dffiles.name.str.contains(topic).values == True]
+    print(list(dfboot['name']))
+
+    dfboottrails = pd.DataFrame()
+    for ix in dfboot.index:
+        dts = gc.get_range(dfboot.loc[ix][0], neirong)
+        df = pd.DataFrame(dts)
+        dfboottrails = dfboottrails.append(df, True)
+        print(df.head())
+
+    return dfboottrails
 
 
 def chulixls_zhifubao(orderfile):
