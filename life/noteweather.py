@@ -11,12 +11,6 @@ e5d81ffa-89e7-49ff-bd4c-a5a71ae14320 武汉雨天记录
 296f57a3-c660-4dd5-885a-56492deb2cee 武汉天气图
 """
 
-# from imp4nb import *
-# import evernote.edam.notestore.NoteStore as NoteStore
-# import datetime
-# import matplotlib.pyplot as plt
-# import numpy as np
-# import os
 import pandas as pd
 import re
 import time
@@ -24,7 +18,6 @@ import pygsheets
 from threading import Timer
 from bs4 import BeautifulSoup
 from pylab import *
-# from matplotlib.ticker import FuncFormatter
 
 import pathmagic
 
@@ -36,11 +29,7 @@ with pathmagic.context():
     from func.mailsfunc import getmail
     from func.wrapfuncs import timethis, ift2phone
     from func.datatools import readfromtxt, write2txt
-
-
-# plot中显示中文
-# mpl.rcParams['font.sans-serif'] = ['SimHei']
-# mpl.rcParams['axes.unicode_minus'] = False
+    from func.filedatafunc import gettopicfilefromgoogledrive
 
 
 def getweatherfromevernote():
@@ -83,21 +72,7 @@ def getweatherfromgmail():
 
 
 def getweatherfromgoogledrive():
-    # 验证登录
-    gc = pygsheets.authorize(service_file=str( dirmainpath / 'data' / 'imp' / 'ewjinchu.json'))
-    files = gc.list_ssheets()
-    dffiles = pd.DataFrame(files)
-    # print(dffiles.head())
-
-    dfboot = dffiles[dffiles.name.str.contains('Today\'s weather report').values == True]
-    print(list(dfboot['name']))
-
-    dfboottrails = pd.DataFrame()
-    for ix in dfboot.index:
-        dts = gc.get_range(dfboot.loc[ix][0], 'A:H')
-        df = pd.DataFrame(dts)
-        dfboottrails = dfboottrails.append(df, True)
-        print(df.head())
+    dfboottrails = gettopicfilefromgoogledrive('Today\'s weather report', 'A:H')
     dfboottrails.columns = ['date', 'gaowen', 'diwen', 'fengsu', 'fengxiang', 'sunon', 'sunoff', 'shidu']
     dfboottrails['date'] = dfboottrails['date'].apply(lambda x: pd.Timestamp(x))
     dfboottrails['date'] = dfboottrails['date'].apply(lambda x: "%04d-%02d-%02d" % (x.year, x.month, x.day))
@@ -112,6 +87,8 @@ def getweatherfromgoogledrive():
 
 
 def weatherstat(df, destguid=None):
+    dfduplicates = df.groupby('date').apply(lambda d: tuple(d.index) if len(d.index) > 1 else None).dropna()
+    log.info(dfduplicates)
     df.drop_duplicates(inplace=True)  # 去重，去除可能重复的天气数据记录，原因可能是邮件重复发送等
     # print(df.head(30))
     df['date'] = df['date'].apply(lambda x : pd.to_datetime(x))
@@ -437,6 +414,40 @@ def fetchweatherinfo_from_googledrive():
             return df
 
 
+@timethis
+def getrainfromgoogledrive():
+    dfrainraw = gettopicfilefromgoogledrive('Rain in Wuhan', 'A:E')
+    dfrainraw.columns = ['raintime', 'tianxiang', 'huashi', 'sheshi', 'links']
+    dfrainraw['raintime'] = dfrainraw['raintime'].apply(lambda x:pd.to_datetime(x))
+    dfrainraw['date'] = dfrainraw['raintime'].apply(lambda x: pd.to_datetime(f"{x.year}-{x.month}-{x.day}"))
+    dfrainraw['mingmu'] = '下雨'
+    dfrain = dfrainraw.drop_duplicates(['raintime'])
+    dfrainduplicates = dfrain.groupby('date').apply(lambda d: tuple(d.raintime) if len(d.index) > 1 else None).dropna()
+    print(dfrainduplicates)
+    # dfout = dfgaowen.drop_duplicates(['date'], keep='first')
+    dfout = dfrain.loc[:, ['date', 'raintime', 'mingmu']]
+
+    return dfout, dfrain
+
+
+@timethis
+def getgaowenfromgoogledrive():
+    dfgaowenraw = gettopicfilefromgoogledrive('武汉高温纪录', 'A:D')
+    dfgaowenraw.columns = ['hottime', 'huashi', 'sheshi', 'tianxiang']
+    dfgaowenraw['hottime'] = dfgaowenraw['hottime'].apply(lambda x:pd.to_datetime(x))
+    dfgaowenraw['date'] = dfgaowenraw['hottime'].apply(lambda x: pd.to_datetime(f"{x.year}-{x.month}-{x.day}"))
+    dfgaowenraw['mingmu'] = '高温'
+    dfgaowen = dfgaowenraw.drop_duplicates(['hottime'])
+    dfgaowenduplicates = dfgaowen.groupby('date').apply(lambda d: tuple(d.hottime) if len(d.index) > 1 else None).dropna()
+    print(dfgaowenduplicates)
+    # dfout = dfgaowen.drop_duplicates(['date'], keep='first')
+    dfout = dfgaowen.loc[:, ['date', 'hottime', 'mingmu']]
+
+    return dfout, dfgaowen
+
+
+@timethis
+@ift2phone()
 def weatherstatdo():
     weathertxtfilename = str(dirmainpath / 'data' / 'ifttt' / 'weather.txt')
     print(weathertxtfilename)
@@ -464,9 +475,8 @@ def weatherstatdo():
             datenew = dfall['date'].max()
             weatherstat(dfall, '296f57a3-c660-4dd5-885a-56492deb2cee')
             log.info(f'天气信息({datenew})成功更新入天气信息统计笔记')
-            cfplife.set('天气', '统计天数', '%d' % len(items))
-            cfplife.set('天气', '笔记最新日期', '%s' % today)
-            cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
+            setcfpoptionvalue('everlife', '天气', '统计天数', len(items))
+            setcfpoptionvalue('everlife', '天气', '笔记最新日期', today)
         except IndexError as ixe:
             log.critical('读取天气信息并更新天气统计信息笔记时出现索引错误。%s' % (str(ixe)))
         except TypeError as te:
@@ -478,29 +488,13 @@ def weatherstatdo():
         log.info('时间的花儿静悄悄！')
 
 
-@timethis
-@ift2phone()
-def weatherstattimer(jiangemiao):
-    """
-    天气信息自动轮询并更新至笔记
-    :param jiangemiao:
-    :return:
-    """
-    weatherstatdo()
-
-    global timer_weather
-    timer_weather = Timer(jiangemiao, weatherstattimer, [jiangemiao])
-    # print(timer_weather)
-    timer_weather.start()
-
-
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    # weatherstattimer(60 * 60 + 60 * 28)
     weatherstatdo()
+    # df = getgaowenfromgoogledrive()
+    # print(df)
     # getweatherfromgoogledrive()
     # weathertxtfilename = "data\\ifttt\\weather.txt"
     # usn = isweatherupdate(weathertxtfilename)
-    # weatherstat(token, usn, '296f57a3-c660-4dd5-885a-56492deb2cee')
     # # print(getweatherfromgmail())
     log.info(f'文件\t{__file__}执行结束。Done！')
