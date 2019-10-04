@@ -135,6 +135,7 @@ def dftotal2top(df: pd.DataFrame):
 
 
 # @timethis
+# @profile
 def isworkday(dlist: list, person: str = '全体', fromthen=False):
     if fromthen and (len(dlist) == 1):
         dlist = pd.date_range(dlist[0], datetime.datetime.today(), freq='D')
