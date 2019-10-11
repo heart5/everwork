@@ -4,9 +4,12 @@
 """
 import time
 import platform
+import wrapt
 from functools import wraps
 from inspect import signature
 from py2ifttt import IFTTT
+from line_profiler import LineProfiler as lpt
+from memory_profiler import LineProfiler as lpm, show_results as lpm_show
 
 import pathmagic
 
@@ -17,6 +20,11 @@ with pathmagic.context():
 
 
 def logit(func):
+    """
+    函数具体调用信息写入日志或print至控制台
+    :param func
+    :return
+    """
     @wraps(func)
     def with_logging(*args, **kwargs):
         if getinivaluefromnote('everwork', 'logdetails'):
@@ -81,9 +89,42 @@ def timethis(func):
     return wrapper
 
 
+lptt = lpt()
+def lpt_wrapper():
+    """
+    显示函数调用时间（逐行）
+    """
+    @wrapt.decorator
+    def wrapper(func, instance, args, kwargs):
+        global lptt
+        lp_wrapper = lptt(func)
+        res = lp_wrapper(*args, **kwargs)
+        lptt.print_stats()
+        return res
+
+    return wrapper
+
+
+lpmm = lpm()
+def lpm_wrapper():
+    """
+    显示函数内存消耗（逐行）
+    """
+    @wrapt.decorator
+    def wrapper(func, instance, args, kwargs):
+        global lpmm
+        lp_wrapper = lpmm(func)
+        res = lp_wrapper(*args, **kwargs)
+        lpm_show(lpmm)
+        return res
+
+    return wrapper
+
+
 @timethis
 # @ift2phone("倒数计时器")
 @ift2phone()
+@lpt_wrapper()
 def countdown(n: int):
     """
     倒计时
@@ -99,7 +140,7 @@ def countdown(n: int):
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    countdown(100088)
+    countdown(10088)
     print(f"函数名\t{countdown.__name__}")
     print(f"函数文档\t{countdown.__doc__}")
     print(f"函数参数注释\t{countdown.__annotations__}")

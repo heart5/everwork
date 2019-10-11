@@ -17,17 +17,19 @@ with pathmagic.context():
     from func.first import dbpathworkplan
     from func.pdtools import descdb
     from func.logme import log
-    from func.configpr import cfp, cfpworkplan, iniworkplanpath
+    from func.configpr import cfp, cfpworkplan, iniworkplanpath, getcfpoptionvalue, setcfpoptionvalue
     from func.mailsfunc import getmail
-    from func.wrapfuncs import timethis
+    from func.wrapfuncs import timethis, lpt_wrapper, lpm_wrapper
     from func.evernt import get_notestore, evernoteapijiayi
     from func.nettools import trycounttimes2
+    from life.noteweather import getgaowenfromgoogledrive, getrainfromgoogledrive
 
 
+@timethis
 def fetchworkfile_from_gmail(topic):
-    hostg = cfp.get('gmail', 'host')
-    usernameg = cfp.get('gmail', 'username')
-    passwordg = cfp.get('gmail', 'password')
+    hostg = getcfpoptionvalue('everwork', 'gmail', 'host')
+    usernameg = getcfpoptionvalue('everwork', 'gmail', 'username')
+    passwordg = getcfpoptionvalue('everwork', 'gmail', 'password')
     dirwork = 'Work'
     mailitemsg = getmail(hostg, usernameg, passwordg,
                          dirtarget=dirwork, unseen=True, topic=topic)
@@ -46,11 +48,12 @@ def fetchworkfile_from_gmail(topic):
 
 
 @timethis
+# @lpm_wrapper()
 def chuliholidayleave_note(zhuti: list):
-    global note_store
+    # global note_store
     note_store = get_notestore()
     # print(zhuti)
-    guid = cfpworkplan.get('行政管理', f'{zhuti[0]}guid')
+    guid = getcfpoptionvalue('everworkplan', '行政管理', f'{zhuti[0]}guid')
 
     @trycounttimes2('evernote服务器')
     def getnote(guidin):
@@ -67,7 +70,7 @@ def chuliholidayleave_note(zhuti: list):
         updatenumold = 0
     if note.updateSequenceNum <= updatenumold:
         log.info(f'{zhuti[0]}笔记内容无更新。')
-        return
+        # return
     souporigin = BeautifulSoup(note.content, "html.parser")
     # print(soup)
     isjiaqi = False
@@ -147,7 +150,7 @@ def chuliholidayleave_note(zhuti: list):
                 item.append(ims[3])
                 items.append(item)
 
-    print(items)
+    # print(items)
     if isjiaqi:
         resultlisthd = items
         dfresult = None
@@ -185,19 +188,11 @@ def chuliholidayleave_note(zhuti: list):
         dfresult = dfresult.reset_index(drop=True)
     else:
         dfresult = pd.DataFrame(items, columns=columns)
-    # print(dfresult)
-    cnxp = lite.connect(dbpathworkplan)
-    # index, ['mingmu', 'xingzhi', 'tianshu', 'date']
-    dfresult.to_sql(zhuti[1], cnxp, if_exists='replace', index=None)
-    cnxp.close()
-    log.info(f'{zhuti[0]}数据表更新了{dfresult.shape[0]}条记录。')
-    cfpworkplan.set('行政管理', f'{zhuti[0]}updatenum',
-                    '%d' % note.updateSequenceNum)
-    cfpworkplan.write(open(iniworkplanpath, 'w', encoding='utf-8'))
+    return dfresult
 
 
 @timethis
-def fetchattendance_from_evernote():
+def fetch_dutyondata2lite():
     zhutis = [
         ['放假', 'holiday'],
         ['请假', 'leave'],
@@ -208,29 +203,35 @@ def fetchattendance_from_evernote():
     ]
     try:
         for zhuti in zhutis:
-            chuliholidayleave_note(zhuti)
+            dfresult = chuliholidayleave_note(zhuti)
+            if zhuti[0] in ['高温', '下雨']:
+                if zhuti[0] == '高温':
+                    dffromgd, dfallfromgd = getgaowenfromgoogledrive()
+                    dfresult = dfresult.append(dffromgd)
+                    dfresult.drop_duplicates(['hottime'], inplace=True)
+                else:
+                    dffromgd, dfallfromgd = getrainfromgoogledrive()
+                    dfresult = dfresult.append(dffromgd)
+                    dfresult.drop_duplicates(['raintime'], inplace=True)
+            countfromini = getcfpoptionvalue('everworkplan', '行政管理', f'{zhuti[0]}count')
+            if not countfromini:
+                countfromini = 0
+            if countfromini == dfresult.shape[0]:
+                log.info(f"本轮查询没有发现新的《{zhuti[0]}》相关数据,跳过！")
+                continue
+            cnxp = lite.connect(dbpathworkplan)
+            # index, ['mingmu', 'xingzhi', 'tianshu', 'date']
+            dfresult.to_sql(zhuti[1], cnxp, if_exists='replace', index=None)
+            cnxp.close()
+            log.info(f'{zhuti[0]}数据表更新了{dfresult.shape[0]}条记录。')
+            setcfpoptionvalue('everworkplan', '行政管理', f'{zhuti[0]}count', f"{dfresult.shape[0]}")
     except OSError as exp:
         topic = [x for [x, *y] in zhutis]
         log.critical(f'从evernote获取{topic}笔记信息时出现未名错误。{exp}')
 
 
-@timethis
-def filegmailevernote2datacenter(jiangemiao):
-    try:
-        fetchworkfile_from_gmail('')
-        fetchattendance_from_evernote()
-    except Exception as eeee:
-        log.critical('从gmail信箱、本地文件或evernote中获取数据时出现未名错误。%s' % (str(eeee)))
-
-    global timer_filegmail2datacenter
-    timer_filegmail2datacenter = Timer(
-        jiangemiao, filegmailevernote2datacenter, [jiangemiao])
-    timer_filegmail2datacenter.start()
-
-
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    # filegmailevernote2datacenter(60 * 53)
     fetchworkfile_from_gmail('')
-    fetchattendance_from_evernote()
+    fetch_dutyondata2lite()
     log.info(f'文件{__file__}运行结束！')

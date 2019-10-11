@@ -18,8 +18,8 @@ import os
 import re
 import math
 import pandas as pd
-import numpy as np
-from pandas import DataFrame
+# import numpy as np
+# from pandas import DataFrame
 
 # +
 import pathmagic
@@ -27,8 +27,9 @@ import pathmagic
 with pathmagic.context():
     from func.first import dirmainpath
     from func.logme import log
-    from func.configpr import getcfp, getcfpoptionvalue, setcfpoptionvalue
-    from func.wrapfuncs import timethis, ift2phone
+    # from func.configpr import getcfp, getcfpoptionvalue, setcfpoptionvalue
+    from func.configpr import getcfpoptionvalue
+    # from func.wrapfuncs import timethis, ift2phone
     from func.evernttest import getinivaluefromnote
 
 
@@ -45,10 +46,11 @@ def chuqinjiluzhengli():
     ptn = re.compile('^员工出勤记录(20\\d{4}).*\\.xls$')
     stopcount = 0
     fls = os.listdir(qdpath)
-    print(len(fls))
+    print(len(fls), fls)
     targetlst = []
     for fl in fls:
         timestamp = re.findall(ptn, fl)
+        print(timestamp)
         if timestamp:
             cld = []
             qddf = pd.read_excel(qdpath / fl, sheet_name='考勤记录')
@@ -100,33 +102,41 @@ def tongjichuqin():
 
 
 def splitjs(jsstr: str):
+    """
+    处理《计时工》原始打卡记录，规范成合规的时间间隔
+    :param jsstr: str
+    :return: str
+    """
+    zhongwuxiaban = getcfpoptionvalue('everinifromnote', 'xingzheng', 'zhongwuxiaban')
+    xiawushangban = getcfpoptionvalue('everinifromnote', 'xingzheng', 'xiawushangban')
+    xiawuxiaban = getcfpoptionvalue('everinifromnote', 'xingzheng', 'xiawuxiaban')
     ptn = re.compile('\\d{2}:\\d{2}')
     findlst = re.findall(ptn, jsstr)
     if len(findlst) == 2:
-        if (findlst[0] <= '12:00') & (findlst[1] >= '13:30'):
-            findlst.insert(1, '13:30')
-            findlst.insert(1, '12:00')
+        if (findlst[0] <= zhongwuxiaban) & (findlst[1] >= xiawushangban):
+            findlst.insert(1, xiawushangban)
+            findlst.insert(1, zhongwuxiaban)
             log.info(f"计时工打卡记录条目({len(findlst)})增补中午休息间隔\t{findlst}")
-        elif (findlst[0] >= '12:00') & (findlst[1] >= '13:30'):
+        elif (findlst[0] >= zhongwuxiaban) & (findlst[1] >= xiawushangban):
             log.info(f"计时工打卡记录条目({len(findlst)})属于正常下午班")
-        elif (findlst[0] <= '12:00') & (findlst[1] <= '13:30'):
+        elif (findlst[0] <= zhongwuxiaban) & (findlst[1] <= xiawushangban):
             log.info(f"计时工打卡记录条目({len(findlst)})属于正常上午班")
         else:
             log.critical(f"出现不合规范的计时工打卡记录({len(findlst)})\t{findlst}")
             findlst = None
     elif len(findlst) == 3:
-        if findlst[0] <= '12:00':
-            findlst.insert(1, '12:00')
+        if findlst[0] <= zhongwuxiaban:
+            findlst.insert(1, zhongwuxiaban)
             log.info(f"计时工打卡记录条目({len(findlst)})增补中午休息间隔\t{findlst}")
         else:
             log.critical(f"出现不合规范的计时工打卡记录({len(findlst)})\t{findlst}")
             findlst = None
     elif len(findlst) == 1:
-        if findlst[0] <= '12:00':
-            findlst.append('12:00')
+        if findlst[0] <= zhongwuxiaban:
+            findlst.append(zhongwuxiaban)
             log.info(f"计时工打卡记录条目({len(findlst)})增补中午休止\t{findlst}")
-        elif findlst[0] >= '12:00':
-            findlst.append('18:00')
+        elif findlst[0] >= zhongwuxiaban:
+            findlst.append(xiawuxiaban)
             log.info(f"计时工打卡记录条目({len(findlst)})增补下午休止\t{findlst}")
         else:
             log.critical(f"出现不合规范的计时工打卡记录({len(findlst)})\t{findlst}")
@@ -142,6 +152,11 @@ def splitjs(jsstr: str):
 
 
 def computejishi(inputlst: list):
+    """
+    计算工时
+    :param inputlst:
+    :return:
+    """
     if (len(inputlst) % 2) != 0:
         log.critical(f"打卡记录非偶数\t{inputlst}")
         return
@@ -150,7 +165,7 @@ def computejishi(inputlst: list):
     totalminute: int = 0
     for i in range(0, len(inputlst), 2):
         frtlst = inputlst[i].split(":")
-        print(frtlst)
+        print(frtlst, end='\t')
         frtmin = int(frtlst[0]) * 60
         frtmin += int(frtlst[1])
         seclst = inputlst[i+1].split(":")
@@ -163,13 +178,18 @@ def computejishi(inputlst: list):
 
 
 def tongjichuqinjishigong(inputs: pd.Series):
+    """
+    统计工时
+    :param inputs: 打卡，Series
+    :return: 出勤天数，分钟数累计，工时数
+    """
     df = pd.DataFrame(inputs)
     df.columns = ['打卡记录']
     # print(df)
     df['整理'] = df[df.columns[0]].apply(lambda x: splitjs(str(x)) if x else None)
     df['分钟'] = df[df.columns[1]].apply(lambda x: computejishi(x) if x else None)
 
-    return df, df['分钟'].sum()
+    return df['分钟'].count(), df['分钟'].sum(), math.ceil(df['分钟'].sum() / 60)
 
 
 def tongjichuqinixingzheng():
@@ -177,16 +197,18 @@ def tongjichuqinixingzheng():
 
 
 qdlst = chuqinjiluzhengli()
-jilusdf = qdlst[0][4]
+# print(qdlst)
+jilusdf = qdlst[1][4]
 ptnsep = re.compile('[,，]')
 jslst = re.split(ptnsep, getinivaluefromnote('xingzheng', '计时工'))
 xzlst = re.split(ptnsep, getinivaluefromnote('xingzheng', '行政岗位'))
 for name in jilusdf.columns:
     if name in jslst:
-        dfperson: DataFrame
-        heji: int
-        dfperson, heji = tongjichuqinjishigong(jilusdf[name])
-        print(f"计时工\t{name}\t{math.ceil(heji / 60)}")
+        chugongtianshu: int
+        fenzhongleiji: int
+        gongshi: int
+        chugongtianshu, fenzhongleiji, gongshi = tongjichuqinjishigong(jilusdf[name])
+        print(f"计时工\t{name}\t{chugongtianshu}\t{fenzhongleiji}\t{gongshi}")
     elif name in xzlst:
         print(f"行政岗位\t{name}")
     else:
