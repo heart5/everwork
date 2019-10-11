@@ -19,12 +19,13 @@ with pathmagic.context():
     from func.logme import log
     from func.configpr import cfp, cfpworkplan, iniworkplanpath, getcfpoptionvalue, setcfpoptionvalue
     from func.mailsfunc import getmail
-    from func.wrapfuncs import timethis
+    from func.wrapfuncs import timethis, lpt_wrapper, lpm_wrapper
     from func.evernt import get_notestore, evernoteapijiayi
     from func.nettools import trycounttimes2
     from life.noteweather import getgaowenfromgoogledrive, getrainfromgoogledrive
 
 
+@timethis
 def fetchworkfile_from_gmail(topic):
     hostg = getcfpoptionvalue('everwork', 'gmail', 'host')
     usernameg = getcfpoptionvalue('everwork', 'gmail', 'username')
@@ -47,6 +48,7 @@ def fetchworkfile_from_gmail(topic):
 
 
 @timethis
+# @lpm_wrapper()
 def chuliholidayleave_note(zhuti: list):
     # global note_store
     note_store = get_notestore()
@@ -190,7 +192,6 @@ def chuliholidayleave_note(zhuti: list):
 
 
 @timethis
-# @profile
 def fetch_dutyondata2lite():
     zhutis = [
         ['放假', 'holiday'],
