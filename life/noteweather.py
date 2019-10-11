@@ -27,7 +27,7 @@ with pathmagic.context():
     from func.first import dirmainpath, touchfilepath2depth
     from func.logme import log
     from func.mailsfunc import getmail
-    from func.wrapfuncs import timethis, ift2phone
+    from func.wrapfuncs import timethis, ift2phone, lpt_wrapper, lpm_wrapper
     from func.datatools import readfromtxt, write2txt
     from func.filedatafunc import gettopicfilefromgoogledrive
 
@@ -415,12 +415,24 @@ def fetchweatherinfo_from_googledrive():
 
 
 @timethis
+@lpt_wrapper()
 def getrainfromgoogledrive():
     dfrainraw = gettopicfilefromgoogledrive('Rain in Wuhan', 'A:E')
     dfrainraw.columns = ['raintime', 'tianxiang', 'huashi', 'sheshi', 'links']
     dfrainraw['raintime'] = dfrainraw['raintime'].apply(lambda x:pd.to_datetime(x))
     dfrainraw['date'] = dfrainraw['raintime'].apply(lambda x: pd.to_datetime(f"{x.year}-{x.month}-{x.day}"))
     dfrainraw['mingmu'] = '下雨'
+
+    # 处理数据错行
+    dfrainokay = dfrainraw[~dfrainraw.tianxiang.str.isnumeric()]
+    dfrainchuli = dfrainraw[dfrainraw.tianxiang.str.isnumeric()]
+    dfrainchuli.columns = ['raintime', 'huashi', 'sheshi', 'tianxiang', 'links', 'date', 'mingmu']
+    dfrainraw = dfrainokay.append(dfrainchuli).sort_index()
+
+    # 温度数值化
+    dfrainraw['huashi'] = dfrainraw['huashi'].apply(lambda x: re.findall(r'\d+', x)[0])
+    dfrainraw['sheshi'] = dfrainraw['sheshi'].apply(lambda x: re.findall(r'\d+', x)[0])
+
     dfrain = dfrainraw.drop_duplicates(['raintime'])
     dfrainduplicates = dfrain.groupby('date').apply(lambda d: tuple(d.raintime) if len(d.index) > 1 else None).dropna()
     print(dfrainduplicates)
@@ -475,7 +487,7 @@ def weatherstatdo():
             datenew = dfall['date'].max()
             weatherstat(dfall, '296f57a3-c660-4dd5-885a-56492deb2cee')
             log.info(f'天气信息({datenew})成功更新入天气信息统计笔记')
-            setcfpoptionvalue('everlife', '天气', '统计天数', len(items))
+            setcfpoptionvalue('everlife', '天气', '统计天数', f"{len(items)}")
             setcfpoptionvalue('everlife', '天气', '笔记最新日期', today)
         except IndexError as ixe:
             log.critical('读取天气信息并更新天气统计信息笔记时出现索引错误。%s' % (str(ixe)))
@@ -491,6 +503,9 @@ def weatherstatdo():
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     weatherstatdo()
+    # df, dfall = getrainfromgoogledrive()
+    # print(df)
+    # print(dfall)
     # df = getgaowenfromgoogledrive()
     # print(df)
     # getweatherfromgoogledrive()
