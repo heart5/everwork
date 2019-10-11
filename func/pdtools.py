@@ -23,7 +23,7 @@ with pathmagic.context():
     from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
     from func.logme import log
     from func.nettools import trycounttimes2
-    from func.wrapfuncs import timethis
+    from func.wrapfuncs import timethis, lpt_wrapper
 
 print(f"{__file__} is loading now...")
 
@@ -134,8 +134,8 @@ def dftotal2top(df: pd.DataFrame):
     return dfout
 
 
-# @timethis
-# @profile
+@timethis
+@lpt_wrapper()
 def isworkday(dlist: list, person: str = '全体', fromthen=False):
     if fromthen and (len(dlist) == 1):
         dlist = pd.date_range(dlist[0], datetime.datetime.today(), freq='D')
@@ -155,13 +155,14 @@ def isworkday(dlist: list, person: str = '全体', fromthen=False):
             item.append(person)
             dfperson = dfleave[dfleave.mingmu == person]
             dfperson.index = dfperson['date']
-            if dtdate in dfperson[dfperson.xingzhi == '上班'].index:
+            dttuple = tuple(dfperson[dfperson.xingzhi == '上班'].index)
+            if dtdate in dttuple:
                 item.append(True)
                 item.append('上班')
                 item.append(dfperson.loc[dtdate, ['tianshu']][0])
                 resultlist.append(item)
                 continue
-            if dtdate in dfperson[dfperson.xingzhi != '上班'].index:
+            if dtdate in tuple(dfperson[dfperson.xingzhi != '上班'].index):
                 item.append(False)
                 item.append(dfperson.loc[dtdate, ['xingzhi']][0])
                 item.append(dfperson.loc[dtdate, ['tianshu']][0])
@@ -183,13 +184,13 @@ def isworkday(dlist: list, person: str = '全体', fromthen=False):
                 continue
         else:
             item.append('全体')
-        if dtdate in dfholiday[dfholiday.mingmu == '上班'].index:
+        if dtdate in tuple(dfholiday[dfholiday.mingmu == '上班'].index):
             item.append(True)
             item.append('上班')
             item.append(dfholiday.loc[dtdate, ['tianshu']][0])
             resultlist.append(item)
             continue
-        if dtdate in dfholiday[dfholiday.mingmu != '上班'].index:
+        if dtdate in tuple(dfholiday[dfholiday.mingmu != '上班'].index):
             item.append(False)
             item.append(dfholiday.loc[dtdate, ['mingmu']][0])
             item.append(dfholiday.loc[dtdate, ['tianshu']][0])
@@ -655,8 +656,11 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
 
 
 if __name__ == '__main__':
-    # global log
-    log.info(f'测试文件\t{__file__}')
-    cnxp = lite.connect(dbpathquandan)
-    dataokay(cnxp)
-    print('Done.')
+    log.info(f'运行文件\t{__file__}')
+    isworkday(['2019-10-15'])
+    dtlist = list(pd.date_range('2019-01-01', '2019-10-07', freq='D'))
+    dfresult = isworkday(dtlist, '梅富忠')
+    print(dfresult)
+    # cnxp = lite.connect(dbpathquandan)
+    # dataokay(cnxp)
+    log.info(f'文件{__file__}运行结束！')
