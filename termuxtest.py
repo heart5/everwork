@@ -24,9 +24,17 @@ import sys
 sys.path.append('termux_python')
 with pathmagic.context():
     import termux_python.termux as tm
+    from func.wrapfuncs import lpt_wrapper, timethis
 
-# print('开工啊')
-print(sys.path)
-print(tm.battery_status())
-print(tm.camera_info())
-# tm.termux_sms_list()
+
+@timethis
+@lpt_wrapper()
+def showmsgfromtermux():
+    # print('开工啊')
+    print(sys.path)
+    print(tm.battery_status())
+    print(tm.camera_info())
+    # tm.termux_sms_list()
+
+
+showmsgfromtermux()
