@@ -80,7 +80,10 @@ def foot2show():
     itemread = readfromtxt(txtfilename)
     numlimit = 9    # 显示项目数
     print(itemread[:numlimit])
-    itemfine = [x.split('\t') for x in itemread if not 'False' in x]
+    itemsrc = [x.split('\t') for x in itemread if not 'False' in x]
+    itemnotfine = [x for x in itemsrc if len(x) < 3]
+    print(f"有问题的数据共有{len(itemnotfine)}行：{itemnotfine}")
+    itemfine = [x for x in itemsrc if len(x) >= 3]
     # print(itemfine)
     if len(itemfine) < 2:
         print('gps数据量不足，暂时无法输出移动距离信息')
@@ -88,6 +91,9 @@ def foot2show():
     timesr = list()
     dissr = list()
     for i in range(len(itemfine) - 1):
+#        if len(itemfine[i+1]) < 3:
+#            print(f"{itemfine[i]}")
+#            print(f"{itemfine[i+1]}")
         time1, lng1, lat1, *others = itemfine[i]
         time2, lng2, lat2, *others = itemfine[i + 1]
         # print(f'{lng1}\t{lat1}\t\t{lng2}\t{lat2}')
