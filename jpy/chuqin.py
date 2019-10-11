@@ -21,6 +21,7 @@ import pandas as pd
 import numpy as np
 from pandas import DataFrame
 
+# +
 import pathmagic
 
 with pathmagic.context():
@@ -30,6 +31,8 @@ with pathmagic.context():
     from func.wrapfuncs import timethis, ift2phone
     from func.evernttest import getinivaluefromnote
 
+
+# -
 
 def chuqinjiluzhengli():
     """
@@ -92,6 +95,7 @@ def chuqinjiluzhengli():
 
 
 def tongjichuqin():
+    print('56')
     pass
 
 
