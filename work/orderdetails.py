@@ -185,14 +185,14 @@ def orderdetails_check4product_customer():
     if dfduibichanpin.shape[0] > 0:
         chanpinnotin = list(dfduibichanpin.index)
         lasthash = getcfpoptionvalue('everdata', 'dataraw', 'chanpinhash')
-        nowhash = hash(str(kehunotin))
+        nowhash = hash(str(chanpinnotin))
         if nowhash != lasthash:
             chanpinnotinxlspath = dirmainpath / 'data' / 'work' / '未录入新品.xlsx'
             with pd.ExcelWriter(chanpinnotinxlspath, mode='a') as writer:
                 nowstr = datetime.datetime.now().strftime("%Y%m%d")
                 dfduibichanpin.to_excel(writer, sheet_name=f"{nowstr}({dfduibichanpin.shape[0]})")
             log.critical(f'产品档案需要更新，共有{dfduibichanpin.shape[0]}个产品未包含：{chanpinnotin[:5]}…...，输出至文件{chanpinnotinxlspath}')
-            setcfpoptionvalue('everdata', 'dataraw', 'chanpinhash', nowhash)
+            setcfpoptionvalue('everdata', 'dataraw', 'chanpinhash', f"{nowhash}")
         else:
             log.warning(f'产品档案需要更新，共有{dfduibichanpin.shape[0]}个产品未包含：{chanpinnotin[:5]}...，列表hash为{nowhash}')
 
@@ -225,7 +225,7 @@ def orderdetails_check4product_customer():
                 nowstr = datetime.datetime.now().strftime("%Y%m%d")
                 dfduibikehu.to_excel(writer, sheet_name=f"{nowstr}({dfduibikehu.shape[0]})")
             log.critical(f'客户档案需要更新，共有{dfduibikehu.shape[0]}个客户未包含：{kehunotin[:5]}…...，，输出至文件《{kehunotinxlspath}》')
-            setcfpoptionvalue('everdata', 'dataraw', 'kehuhash', nowhash)
+            setcfpoptionvalue('everdata', 'dataraw', 'kehuhash', f"{nowhash}")
         else:
             log.warning(f'客户档案需要更新，共有{dfduibikehu.shape[0]}个客户未包含：{kehunotin[:5]}...，列表hash为{nowhash}')
 
