@@ -17,4 +17,27 @@ race = lambda x: x**0.5
 lop = race(23)
 print(lop)
 
+# +
+import sqlite3 as lite
+import pandas as pd
+
+import pathmagic
+
+with pathmagic.context():
+    from func.first import dirmainpath
+
+print(dirmainpath)
+pathquandan = dirmainpath / 'data' / 'quandan.db'
+cnx = lite.connect(pathquandan)
+
+df = pd.read_sql_query("select * from xiaoshoumingxi",cnx)
+print(len(df))
+
+df = pd.read_sql_query("select * from alldata",cnx)
+print(len(df))
+
+
+cnx.close()
+# -
+
 
