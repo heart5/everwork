@@ -19,9 +19,13 @@ print(f"{__file__} is loading now...")
 
 
 def str2hex(string):
+    """
+    转换字符串为hex字符串（大写）
+    """
     str_bin = string.encode('utf-8')
 
-    return binascii.hexlify(str_bin).decode('utf-8')
+    return binascii.hexlify(str_bin).decode('utf-8').upper()
+
 
 def getfilepathnameext(tfile):
     tfile = os.path.abspath(tfile)
