@@ -23,7 +23,8 @@ with pathmagic.context():
     from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
     from func.logme import log
     from func.nettools import trycounttimes2
-    from func.wrapfuncs import timethis, lpt_wrapper
+    from func.wrapfuncs import timethis
+    from func.profilerlm import lpt_wrapper
 
 print(f"{__file__} is loading now...")
 

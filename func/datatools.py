@@ -13,7 +13,7 @@ import pathmagic
 with pathmagic.context():
     from func.logme import log
     from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi, touchfilepath2depth
-    from func.wrapfuncs import timethis
+    # from func.wrapfuncs import timethis
 
 print(f"{__file__} is loading now...")
 
@@ -60,7 +60,7 @@ def get_filesize(filepath):
     return round(fsize, 2)
 
 
-@timethis
+# @timethis
 def compact_sqlite3_db(dbpath):
     sizebefore = get_filesize(dbpath)
     conn = lite.connect(dbpath)
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     # compact_sqlite3_db(dbpathquandan)
     # compact_sqlite3_db(dbpathworkplan)
     # compact_sqlite3_db(dbpathdingdanmingxi)
-    (*aaa,ext) = getfilepathnameext(__file__)
+    (*aaa, ext) = getfilepathnameext(__file__)
     print(ext)
 
     outputstr = str2hex('天富 1  29')

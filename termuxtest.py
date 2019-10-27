@@ -19,7 +19,8 @@ import sys
 sys.path.append('termux_python')
 with pathmagic.context():
     import termux_python.termux as tm
-    from func.wrapfuncs import lpt_wrapper, timethis
+    from func.wrapfuncs import timethis
+    from func.profilerlm import lpt_wrapper
 
 
 @timethis

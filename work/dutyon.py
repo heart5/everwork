@@ -18,7 +18,8 @@ with pathmagic.context():
     from func.evernttest import *
     from func.pdtools import isworkday
     from func.first import dbpathworkplan
-    from func.wrapfuncs import timethis, lpt_wrapper, lpm_wrapper
+    from func.wrapfuncs import timethis
+    from func.profilerlm import lpt_wrapper, lpm_wrapper
     from work.fetchdata import fetch_dutyondata2lite
 
 
