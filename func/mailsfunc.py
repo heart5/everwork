@@ -107,7 +107,7 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
                     fnamestr = fdh[0][0].decode(fdh[0][1])  # bytes to str with it's encoding
                     fname = email.header.make_header(email.header.decode_header(fnamestr))  # Header类型的数据，内容为“导出数据.xls”
                     fname = str(fname)  # 字符串格式的“导出数据.xls”
-                    # print('附件名:', fname)
+                    log.info('附件名:', fname)
                     attach_data = part.get_payload(decode=True)  # 解码出附件数据，然后存储到文件中
 
                     pointat = fname.rfind('.')
@@ -289,9 +289,12 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
                 print(message)
             except Exception as eeefetch:
                 log.critical("处理邮件[%s,%d/%d]时出现未名错误。%s" % (num, count, totalcount, str(eeefetch)))
+            finally:
+                log.info(f"邮件编码列表：{numlistinside}")
+                log.info(f"邮件主题列表：{mailitemsinside}")
+
         servinner.close()
         servinner.logout()
-        # print(mailitemsinside)
         log.info('实际处理邮件%d封，该邮件编码列表总数量为%d。' % (count, len(numlistinside)))
 
     mailitemsresult = list()
