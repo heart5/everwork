@@ -170,6 +170,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
 
     # 去除控制符
     neirong = re.sub('[\x00-\x08|\x0b-\x0c|\x0e-\x1f]', '', neirong)
+    neirong = re.sub('&', 'and连接符', neirong)
 
     nbody += neirong
     nbody += "</en-note>"
