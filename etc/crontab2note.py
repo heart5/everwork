@@ -21,7 +21,7 @@ def findnewcronthenupdate():
     cflen = [len(x.split()) for x in cfl if not x.startswith('#')]
     clean = True
     for it in cflen:
-        clean = clean and (it == 6)
+        clean = clean and (it >= 6)
         if not clean:
             break
 
