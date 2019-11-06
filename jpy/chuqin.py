@@ -197,8 +197,8 @@ def tongjichuqinixingzheng():
 
 
 qdlst = chuqinjiluzhengli()
-# print(qdlst)
-jilusdf = qdlst[1][4]
+print(qdlst)
+jilusdf = qdlst[-1][4]
 ptnsep = re.compile('[,，]')
 jslst = re.split(ptnsep, getinivaluefromnote('xingzheng', '计时工'))
 xzlst = re.split(ptnsep, getinivaluefromnote('xingzheng', '行政岗位'))
