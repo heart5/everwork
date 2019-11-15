@@ -20,7 +20,7 @@ with pathmagic.context():
     from func.first import getdirmain, dirmainpath, touchfilepath2depth
     from func.datatools import readfromtxt, write2txt
     from func.evernttest import token, get_notestore, imglist2note, \
-        evernoteapijiayi, makenote, readinifromnote
+        evernoteapijiayi, makenote, readinifromnote, getinivaluefromnote
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_telephony_deviceinfo, \
@@ -90,6 +90,9 @@ def foot2show():
         return
     timesr = list()
     dissr = list()
+    # speedsr = list()
+    highspeed = getinivaluefromnote('life', 'highspeed')
+    print(f"{highspeed}\t{type(highspeed)}")
     for i in range(len(itemfine) - 1):
 #        if len(itemfine[i+1]) < 3:
 #            print(f"{itemfine[i]}")
@@ -97,8 +100,24 @@ def foot2show():
         time1, lng1, lat1, *others = itemfine[i]
         time2, lng2, lat2, *others = itemfine[i + 1]
         # print(f'{lng1}\t{lat1}\t\t{lng2}\t{lat2}')
-        dis = geodistance(eval(lng1), eval(lat1), eval(lng2), eval(lat2))
+        dis = round(geodistance(eval(lng1), eval(lat1), eval(lng2), eval(lat2)) / 1000, 3)
         itemtime = pd.to_datetime(time1)
+        itemtimeend = pd.to_datetime(time2)
+        timedelta = itemtime - itemtimeend
+        while timedelta.seconds == 0:
+            log.info(f"位置记录时间戳相同：{itemtime}\t{itemtimeend}")
+            i = i + 1
+            time2, lng2, lat2, *others = itemfine[i + 1]
+            dis = geodistance(eval(lng1), eval(lat1), eval(lng2), eval(lat2))
+            itemtime = pd.to_datetime(time1)
+            itemtimeend = pd.to_datetime(time2)
+            timedelta = itemtime - itemtimeend
+        timedeltahour = timedelta.seconds / 60 / 60
+        itemspeed = round(dis / timedeltahour, 2)
+        if itemspeed >= highspeed:
+            log.info(f"时间起点：{itemtimeend}，时间截止点：{itemtime}，时长：{round(timedeltahour, 3)}小时，距离：{dis}公里，速度：{itemspeed}码")
+            i += 1
+            continue
         timesr.append(itemtime)
         dissr.append(round(dis, 1))
     imglst = []
