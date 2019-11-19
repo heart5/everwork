@@ -13,3 +13,4 @@
 *.lprof
 *tags*
 *QR.png
+/venv/
