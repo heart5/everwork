@@ -170,12 +170,12 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
             print(itemdirs.decode('ascii').split(') \"/\" \"')[1][:-1], end='\t')
         print()
     typ, dirs = serv.list(directory=dirtarget)
-    # print(dirs)
+    print(typ, dirs)
     if unseen:
         statutuplestr = '(unseen)'
     else:
         statutuplestr = '(messages)'
-    # print(statutuplestr)
+    print(statutuplestr)
     # print(serv.status(dirtarget,statutuplestr))
     # print(serv.status('"[Gmail]/All Mail"','(messages)'))
     # print(serv.status('Ifttt/Notification','(UIDVALIDITY)'))
@@ -390,7 +390,18 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
     return items
 
 
-def findnewthenupdatenote(qrfile, cfpfile, cfpsection, pre, desc, sendsms=False):
+def findnewthenupdatenote(qrfile: str, cfpfile, cfpsection, pre, desc, sendmail=False, sendsms=False):
+    """
+    发现文件内容更新就更新至相应笔记，并视情况发送短信提醒
+
+    :param qrfile: 文件名称
+    :param cfpfile: 配置文件名称
+    :param cfpsection: 配置文件中所属片段名称
+    :param pre: 前缀名，用于区分不同的项目
+    :param desc: 项目描述
+    :param sendsms: 是否同时发送短信进行提醒的开关
+    :return:
+    """
     qrfile = os.path.abspath(qrfile)
     if os.path.exists(qrfile):
         # print(qrfile)
@@ -398,36 +409,51 @@ def findnewthenupdatenote(qrfile, cfpfile, cfpsection, pre, desc, sendsms=False)
         qrfiletimeini = getcfpoptionvalue(cfpfile, cfpsection, f'{pre}filetime') 
         qrfilesecsnew = os.stat(qrfile).st_mtime
         qrfiletimenew = str(qrfilesecsnew)
-        if qrfiletimeini: # or True:
-            qrftlst = qrfiletimeini.split(',')
+        if qrfiletimeini:  # or True:
+            qrftlst = str(qrfiletimeini).split(',')  # 挂一道是为了确保单一数值时getcfpoptionvalue返回的float转换为str方便split
             print(f"{timestamp2str(float(qrftlst[0]))}\t{qrfile}")
-            if (qrfiletimenew > qrftlst[0]): # or True:
+            if (qrfiletimenew > qrftlst[0]):  # or True:
                 (*full, ext) = getfilepathnameext(qrfile)
                 # print(full)
                 # print(ext)
-                ext = ext.lower()
+                ext = ext.lower()   # 文件扩展名强制小写，缩小判断目标池
                 targetimglst = []
                 filecontent = str(qrfile)
                 if ext in ['.png', '.jpg', 'bmp', 'gif']:
                     targetimglst = [qrfile]
+                elif ext in ['.log']:
+                    filecontentinlog = open(qrfile, 'r', encoding='utf-8').read()   # 指定编码，解决Windows系统下的编码问题
+                    # print(filecontent)
+                    ptn = re.compile("(\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2},\\d{3})\\s", re.DOTALL)
+                    # findptnlst = re.findall(ptn, filecontent)
+                    findptnlst = re.split(ptn, filecontentinlog)[::-1]  # 倒置
+                    findptnlstcount = int((len(findptnlst) - 1) / 2 )
+                    loglimit = getinivaluefromnote('everlog', 'loglimit')
+                    if loglimit > findptnlstcount:
+                        actuallinesnum = findptnlstcount
+                    else:
+                        actuallinesnum = loglimit
+                    findptnlst.insert(0, f"共有{findptnlstcount}行，实际展示最近时间的{actuallinesnum}行\n")
+                    filecontent = '\n'.join(findptnlst[:(actuallinesnum * 2 + 1)]).replace('<', '《')\
+                        .replace('>', '》').replace('=', '等于').replace('&', '并或')
                 else:
                     filecontent = open(qrfile, 'r').read()
                 qrtstr = f"{qrfiletimenew},{qrfiletimeini}"
-                qrtstrlst = qrtstr.split(',')
+                qrtstrlst = [ x for x in qrtstr.split(',') if len(x) != 0]
                 qrtstrflst = [timestamp2str(float(x)) for x in qrtstrlst]
                 targetstr = f'<pre>{filecontent}</pre><pre>--------------\n'+'\n'.join(qrtstrflst)+'</pre>'
                 qrnoteguid = getinivaluefromnote(cfpsection, f"{pre}{getdeviceid()}")
                 # print(targetimglst)
                 # print(targetstr)
-                imglist2note(note_store, targetimglst, qrnoteguid,
-                             f"{getinivaluefromnote('device', getdeviceid())} {desc}", targetstr)
-                mailfun(qrfile)
+                imglist2note(note_store, targetimglst, qrnoteguid, f"{getinivaluefromnote('device', getdeviceid())} {desc}", targetstr)
+                if sendmail:
+                    mailfun(qrfile)
                 if sendsms:
                     termux_sms_send(f"{desc}\t有新的更新，请尽快处置。")
                 setcfpoptionvalue(cfpfile, cfpsection, f'{pre}filetime', qrtstr)
         else:
             mailfun(qrfile, True)
-            setcfpoptionvalue(cfpfile, cfpsection, f'{pre}filetime',qrfiletimenew)
+            setcfpoptionvalue(cfpfile, cfpsection, f'{pre}filetime', qrfiletimenew)
     else:
         log.critical(f"{qrfile}不存在，请检查文件名称")
 
@@ -438,7 +464,8 @@ if __name__ == '__main__':
     # qrfile = getdirmain() / fl
     # findnewthenupdatenote(qrfile, 'everwebchat', 'webchat', 'qr', 'QR微信二维码')
 
-    cronfile = '/data/data/com.termux/files/usr/var/spool/cron/crontabs/u0_a133'
-    findnewthenupdatenote(cronfile, 'everwork', 'everwork', 'cron',
-                          'cron自动运行排期表')
+    # cronfile = '/data/data/com.termux/files/usr/var/spool/cron/crontabs/u0_a133'
+    # findnewthenupdatenote(cronfile, 'everwork', 'everwork', 'cron', 'cron自动运行排期表')
+    cronfile = dirmainpath / 'log' / 'log2note.log'
+    findnewthenupdatenote(cronfile, 'eversys', 'everwork', 'cron_log2note_log', 'cron_log2note日志')
     # log.info(f"文件\t{__file__}\t运行结束。")
