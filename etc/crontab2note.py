@@ -5,6 +5,7 @@
 import os
 import re
 import pathmagic
+from pathlib import Path
 
 with pathmagic.context():
     # from func.first import dirmainpath
@@ -34,7 +35,7 @@ def findnewcronthenupdate():
 
 
 def findcronlogthenupdate():
-    logpath = "/data/termux/com.termux/files/usr/var/log"
+    logpath = "/data/data/com.termux/files/usr/var/log"
     # logpath = dirmainpath / 'log'
     logfiles = os.listdir(logpath)
     ptn = re.compile("ew_")
@@ -44,7 +45,7 @@ def findcronlogthenupdate():
     for item in ewlogfiles:
         pre = re.split(ptn, item)[1].replace('.', '_')
         print(pre)
-        findnewthenupdatenote(item, 'eversys', 'everwork', pre, f"cron_{pre}", f"cron_{pre}日志")
+        findnewthenupdatenote(Path(logpath) / item, 'eversys', 'everwork', f"cron_{pre}", f"cron_{pre}日志")
 
 
 if __name__ == '__main__':
