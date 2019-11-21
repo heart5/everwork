@@ -409,7 +409,7 @@ def after_logout():
 def keepliverun():
     # 为了让实验过程更加方便（修改程序不用多次扫码），我们使用热启动
     status4login = itchat.check_login()
-    print(status4login)
+    # print(status4login)
     if status4login == '200':
         log.info(f'已处于成功登录状态')
         return
@@ -418,7 +418,7 @@ def keepliverun():
 
     global men_wc, meu_wc
     owner = getowner()
-    showmsg(owner)
+    # showmsg(owner)
     men_wc = owner['User']['NickName']
     meu_wc = owner['User']['UserName']
     # getowner()
