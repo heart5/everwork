@@ -21,17 +21,22 @@ def findnewcronthenupdate():
     print(me)
     cronfile = f'/data/data/com.termux/files/usr/var/spool/cron/crontabs/{me}'
     cfl = open(cronfile, 'r').readlines()
+    # print(f"{cfl}")
     cflen = [len(x.split()) for x in cfl if not x.startswith('#')]
+    # print(cflen)
     clean = True
     for it in cflen:
         clean = clean and (it >= 6)
         if not clean:
             break
 
+    print(clean)
     if clean:
         findnewthenupdatenote(cronfile, 'eversys', 'everwork', 'cron', 'cron自动运行排期表', sendmail=True)
     else:
         log.critical(f"自动运行排表有误，请检查。{len(cflen)}\t{cflen}")
+
+    # print(f"cron检查更新函数运行结束")
 
 
 def findcronlogthenupdate():
