@@ -9,7 +9,7 @@ from functools import wraps
 from inspect import signature
 from py2ifttt import IFTTT
 from line_profiler import LineProfiler as lpt
-from memory_profiler import LineProfiler as lpm, show_results as lpm_show
+# from memory_profiler import LineProfiler as lpm, show_results as lpm_show
 
 import pathmagic
 
@@ -39,23 +39,23 @@ def lpt_wrapper():
     return wrapper
 
 
-lpmm = lpm()
+# lpmm = lpm()
 
 
-def lpm_wrapper():
-    """
-    显示函数内存消耗（逐行）
-    """
-    @wrapt.decorator
-    def wrapper(func, instance, args, kwargs):
-        global lpmm
-        print(instance)
-        lp_wrapper = lpmm(func)
-        res = lp_wrapper(*args, **kwargs)
-        lpm_show(lpmm)
-        return res
+# def lpm_wrapper():
+    # """
+    # 显示函数内存消耗（逐行）
+    # """
+    # @wrapt.decorator
+    # def wrapper(func, instance, args, kwargs):
+        # global lpmm
+        # print(instance)
+        # lp_wrapper = lpmm(func)
+        # res = lp_wrapper(*args, **kwargs)
+        # lpm_show(lpmm)
+        # return res
 
-    return wrapper
+    # return wrapper
 
 
 @lpt_wrapper()
