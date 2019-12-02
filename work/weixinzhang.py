@@ -202,7 +202,7 @@ def showjinzhang():
     dddfclnames.append('memo')
     dddf = dddf.reindex(columns=dddfclnames)
     dddf['name'] = dddf.namecontent.apply(lambda x : re.split('收到转账', x)[0])
-    dddf['amount'] = dddf.namecontent.apply(lambda x : re.findall('([0-9\.]{2,})', x)[0])
+    dddf['amount'] = dddf.namecontent.apply(lambda x : re.findall('([0-9]+\.[0-9]{2})', x)[0])
     dddf['memo'] = dddf.namecontent.apply(lambda x : re.findall('\[(.*)\]', x)[0])
     dddf.set_index('stime', inplace=True)
     clnameswithindex = ['stime','name', 'amount', 'send', 'memo', 'etime' ]
