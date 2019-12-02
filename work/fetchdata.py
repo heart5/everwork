@@ -20,7 +20,7 @@ with pathmagic.context():
     from func.configpr import cfp, cfpworkplan, iniworkplanpath, getcfpoptionvalue, setcfpoptionvalue
     from func.mailsfunc import getmail
     from func.wrapfuncs import timethis
-    from func.profilerlm import lpt_wrapper, lpm_wrapper
+    from func.profilerlm import lpt_wrapper
     from func.evernt import get_notestore, evernoteapijiayi
     from func.nettools import trycounttimes2
     from life.noteweather import getgaowenfromgoogledrive, getrainfromgoogledrive

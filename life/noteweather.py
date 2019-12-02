@@ -28,7 +28,7 @@ with pathmagic.context():
     from func.logme import log
     from func.mailsfunc import getmail
     from func.wrapfuncs import timethis, ift2phone
-    from func.profilerlm import lpt_wrapper, lpm_wrapper
+    from func.profilerlm import lpt_wrapper
     from func.datatools import readfromtxt, write2txt
     from func.filedatafunc import gettopicfilefromgoogledrive
 

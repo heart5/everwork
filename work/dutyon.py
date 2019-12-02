@@ -19,7 +19,7 @@ with pathmagic.context():
     from func.pdtools import isworkday
     from func.first import dbpathworkplan
     from func.wrapfuncs import timethis
-    from func.profilerlm import lpt_wrapper, lpm_wrapper
+    from func.profilerlm import lpt_wrapper
     from work.fetchdata import fetch_dutyondata2lite
 
 
