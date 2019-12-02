@@ -27,7 +27,7 @@ with pathmagic.context():
     from func.nettools import trycounttimes2
     # from etc.getid import getid
 
-print(f"{__file__} is loading now...")
+# print(f"{__file__} is loading now...")
 
 def get_notestore():
     """
@@ -581,7 +581,7 @@ def enapistartlog():
     ENtimes = getcfpoptionvalue('everwork', 'evernote', 'apicount')
     ENAPIlasttime = pd.to_datetime(getcfpoptionvalue('everwork', 'evernote', 'apilasttime'))
     apitime = getapitimesfromlog()
-    print(ENAPIlasttime, apitime)
+    # print(ENAPIlasttime, apitime)
     if apitime:
         # 比较ini和log中API存档的时间，解决异常退出时调用次数无法准确反映的问题
         if apitime[0] > ENAPIlasttime:
