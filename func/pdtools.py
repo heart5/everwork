@@ -26,7 +26,7 @@ with pathmagic.context():
     from func.wrapfuncs import timethis
     from func.profilerlm import lpt_wrapper
 
-print(f"{__file__} is loading now...")
+# print(f"{__file__} is loading now...")
 
 # plot中显示中文
 # mpl.rcParams['font.sans-serif'] = ['SimHei']

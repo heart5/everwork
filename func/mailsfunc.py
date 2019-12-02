@@ -411,7 +411,7 @@ def findnewthenupdatenote(qrfile: str, cfpfile, cfpsection, pre, desc, sendmail=
         qrfiletimenew = str(qrfilesecsnew)
         if qrfiletimeini:  # or True:
             qrftlst = str(qrfiletimeini).split(',')  # 挂一道是为了确保单一数值时getcfpoptionvalue返回的float转换为str方便split
-            print(f"{timestamp2str(float(qrftlst[0]))}\t{qrfile}")
+            print(f"{timestamp2str(qrfilesecsnew)}\t{timestamp2str(float(qrftlst[0]))}\t{qrfile}")
             if (qrfiletimenew > qrftlst[0]):  # or True:
                 (*full, ext) = getfilepathnameext(qrfile)
                 # print(full)

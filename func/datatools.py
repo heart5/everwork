@@ -15,7 +15,7 @@ with pathmagic.context():
     from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi, touchfilepath2depth
     # from func.wrapfuncs import timethis
 
-print(f"{__file__} is loading now...")
+# print(f"{__file__} is loading now...")
 
 
 def str2hex(string):
