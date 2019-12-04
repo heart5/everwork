@@ -18,8 +18,8 @@ from evernote.edam.notestore.NoteStore import NoteFilter, NotesMetadataResultSpe
 from evernote.edam.type.ttypes import Note, Resource, Data
 from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_MINOR
 
+print(f"{__file__} is loading now ...")
 import pathmagic
-
 with pathmagic.context():
     from func.configpr import cfp, inifilepath, getcfp
     from func.first import dirlog, dirmainpath
