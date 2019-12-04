@@ -14,7 +14,7 @@ import pygsheets
 import pathmagic
 
 with pathmagic.context():
-    from func.evernt import imglist2note, get_notestore, tablehtml2evernote
+    from func.evernttest import imglist2note, get_notestore, tablehtml2evernote
     from func.first import dbpathdingdanmingxi, dirmainpath
     from func.logme import log
     from func.configpr import cfpzysm, inizysmpath

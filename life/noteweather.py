@@ -23,7 +23,7 @@ import pathmagic
 
 with pathmagic.context():
     from func.configpr import cfp, cfplife, inilifepath, getcfpoptionvalue, setcfpoptionvalue
-    from func.evernt import get_notestore, imglist2note
+    from func.evernttest import get_notestore, imglist2note
     from func.first import dirmainpath, touchfilepath2depth
     from func.logme import log
     from func.mailsfunc import getmail

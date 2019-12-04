@@ -12,7 +12,6 @@ from threading import Timer
 from bs4 import BeautifulSoup
 
 import pathmagic
-
 with pathmagic.context():
     from func.first import dbpathworkplan
     from func.pdtools import descdb
@@ -21,7 +20,7 @@ with pathmagic.context():
     from func.mailsfunc import getmail
     from func.wrapfuncs import timethis
     from func.profilerlm import lpt_wrapper
-    from func.evernt import get_notestore, evernoteapijiayi
+    from func.evernttest import get_notestore, evernoteapijiayi
     from func.nettools import trycounttimes2
     from life.noteweather import getgaowenfromgoogledrive, getrainfromgoogledrive
 
@@ -236,3 +235,4 @@ if __name__ == '__main__':
     fetchworkfile_from_gmail('')
     fetch_dutyondata2lite()
     log.info(f'文件{__file__}运行结束！')
+
