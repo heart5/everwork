@@ -32,7 +32,7 @@ def findnewcronthenupdate():
 
     print(clean)
     if clean:
-        findnewthenupdatenote(cronfile, 'eversys', 'everwork', 'cron', 'cron自动运行排期表', sendmail=True)
+        findnewthenupdatenote(cronfile, 'eversys', 'everwork', 'cron', 'cron自动运行排期表')
     else:
         log.critical(f"自动运行排表有误，请检查。{len(cflen)}\t{cflen}")
 
