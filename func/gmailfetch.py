@@ -14,7 +14,7 @@ from google.auth.transport.requests import Request
 import pathmagic
 
 with pathmagic.context():
-    from func.first import getdirmain
+    from func.first import getdirmain, touchfilepath2depth
     from func.logme import log
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
 
@@ -94,13 +94,14 @@ def getworknewmail():
     print(f"未读邮件数量为：{msg4work['resultSizeEstimate']}")
 
     # 从配置文件读出已处理邮件列表并装配成list待用
-    msgidsrecordstr = getcfpoptionvalue('evergmailc', 'mail', '待处理')
+    msgidsrecordstr = getcfpoptionvalue('evergmailc', 'mail', '已处理')
     if not msgidsrecordstr:
         msgidsrecordlst = []
     else:
         msgidsrecordlst = msgidsrecordstr.split(',')
 
     # 遍历待处理邮件并做相应处置
+    msgchulilst = list()
     for msg in msg4work['messages']:
         # 判断是否在已处理列表中，是则跳过继续循环
         msgid = msg['id']
@@ -111,7 +112,7 @@ def getworknewmail():
         # 获取邮件
         mailmsg = service.users().messages().get(userId='me', id=msgid).execute()
         print(msgid)
-        pprint.pprint(mailmsg)
+        # pprint.pprint(mailmsg)
         # print(f"{mailmsg['snippet']}")
 
         # 处理邮件标题
@@ -131,7 +132,7 @@ def getworknewmail():
         for part in mailmsg['payload']['parts']:
             attachname = part['filename']
             if attachname:
-                print(part)
+                pprint.pprint(part)
                 attach = service.users().messages().attachments().get(userId='me',
                                                                       id=part['body']['attachmentId'],
                                                                       messageId=msgid).execute()
@@ -152,6 +153,7 @@ def getworknewmail():
                 attachfile = os.path.join(datadiri, attachname[:pointat1] + timenowstr + attachname[pointat1:])
 
                 print(attachfile, attach['size'])
+                touchfilepath2depth(attachfile)
                 f = open(attachfile, 'wb')
                 f.write(file_data)
                 f.close()
@@ -163,8 +165,11 @@ def getworknewmail():
         # modifymsg = service.users().messages().modify(userId='me', id=msg['id'], body=modifylabeldict).execute()
         print(f"邮件{msgid}处理完毕，标记为已处理")
         msgidsrecordlst.insert(0, msgid)
+        msgchulilst.append(msgid)
+        log.info(f"邮件{msgid}\t{msgheader}处理完毕，附件列表为：{msgattachmentslst}")
 
-    setcfpoptionvalue('evergmailc', 'mail', '待处理', ','.join(msgidsrecordlst))
+    setcfpoptionvalue('evergmailc', 'mail', '已处理', ','.join(msgidsrecordlst))
+    log.info(f"共有{len(msgchulilst)}封邮件处理完毕，邮件编号列表：{msgchulilst}")
 
 
 if __name__ == '__main__':
