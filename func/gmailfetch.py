@@ -5,6 +5,7 @@ import pickle
 import os.path
 import base64
 import pprint
+from pathlib import Path
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -101,10 +102,14 @@ def getworknewmail():
         msgidsrecordlst = msgidsrecordstr.split(',')
 
     # 遍历待处理邮件并做相应处置
-    msgchulilst = list()
+    msgidlst = list()
     for msg in msg4work['messages']:
+        # 遍历，通过头部插入实现升序排列
+        msgidlst.insert(0, msg['id'])
+
+    msgchulilst = list()
+    for msgid in msgidlst:
         # 判断是否在已处理列表中，是则跳过继续循环
-        msgid = msg['id']
         if msgid in msgidsrecordlst:
             print(f"邮件\t{msgid}\t已处理过")
             continue
@@ -153,7 +158,7 @@ def getworknewmail():
                 attachfile = os.path.join(datadiri, attachname[:pointat1] + timenowstr + attachname[pointat1:])
 
                 print(attachfile, attach['size'])
-                touchfilepath2depth(attachfile)
+                touchfilepath2depth(Path(attachfile))
                 f = open(attachfile, 'wb')
                 f.write(file_data)
                 f.close()
