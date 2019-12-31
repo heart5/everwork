@@ -101,9 +101,13 @@ def foot2show():
         time2, lng2, lat2, *others = itemfine[i + 1]
         # print(f'{lng1}\t{lat1}\t\t{lng2}\t{lat2}')
         dis = round(geodistance(eval(lng1), eval(lat1), eval(lng2), eval(lat2)) / 1000, 3)
-        itemtime = pd.to_datetime(time1)
-        itemtimeend = pd.to_datetime(time2)
-        timedelta = itemtime - itemtimeend
+        try:
+            itemtime = pd.to_datetime(time1)
+            itemtimeend = pd.to_datetime(time2)
+            timedelta = itemtime - itemtimeend
+        except:
+            log.critical(f"{time1}\t{time2}，此时间点处数据存在问题")
+            raise
         while timedelta.seconds == 0:
             log.info(f"位置记录时间戳相同：{itemtime}\t{itemtimeend}")
             i = i + 1
