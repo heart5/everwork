@@ -407,6 +407,7 @@ def findnewthenupdatenote(qrfile: str, cfpfile, cfpsection, pre, desc, sendmail=
         # print(qrfile)
         # print(os.path.abspath(qrfile))
         qrfiletimeini = getcfpoptionvalue(cfpfile, cfpsection, f'{pre}filetime') 
+        # print(qrfiletimeini)
         qrfilesecsnew = os.stat(qrfile).st_mtime
         qrfiletimenew = str(qrfilesecsnew)
         if qrfiletimeini:  # or True:
@@ -438,12 +439,13 @@ def findnewthenupdatenote(qrfile: str, cfpfile, cfpsection, pre, desc, sendmail=
                         .replace('>', '》').replace('=', '等于').replace('&', '并或')
                 else:
                     filecontent = open(qrfile, 'r').read()
+                filecontent = re.sub('<', '《', filecontent)
                 qrtstr = f"{qrfiletimenew},{qrfiletimeini}"
                 qrtstrlst = [ x for x in qrtstr.split(',') if len(x) != 0]
                 qrtstrflst = [timestamp2str(float(x)) for x in qrtstrlst]
                 targetstr = f'<pre>{filecontent}</pre><pre>--------------\n'+'\n'.join(qrtstrflst)+'</pre>'
                 qrnoteguid = getinivaluefromnote(cfpsection, f"{pre}{getdeviceid()}")
-                # print(targetimglst)
+                # print(qrnoteguid)
                 # print(targetstr)
                 imglist2note(note_store, targetimglst, qrnoteguid, f"{getinivaluefromnote('device', getdeviceid())} {desc}", targetstr)
                 if sendmail:
