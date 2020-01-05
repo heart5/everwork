@@ -46,11 +46,19 @@ def findcronlogthenupdate():
     ptn = re.compile("ew_")
     # ptn = re.compile("ever")
     ewlogfiles = [ x for x in logfiles if re.match(ptn, x) and x.endswith('.log')]
+    ewlogfiles.append('.zshrc')
+    ewlogfiles.append('.vimrc')
+    ewlogfiles.append('.tmux.conf')
     print(ewlogfiles)
     for item in ewlogfiles:
-        pre = re.split(ptn, item)[1].replace('.', '_')
-        print(pre)
-        findnewthenupdatenote(Path(logpath) / item, 'eversys', 'everwork', f"cron_{pre}", f"cron_{pre}日志")
+        # pre = re.split(ptn, item)[1].replace('.', '_')
+        pre = item.replace('.', '_').replace('ew_', '')
+        if item.endswith('.log'):
+            itempath = Path(logpath) / item
+        else:
+            itempath = Path('/data/data/com.termux/files/home') / item
+        print(pre, itempath)
+        findnewthenupdatenote(itempath, 'eversys', 'everwork', f"cron_{pre}", f"cron_{pre}日志")
 
 
 if __name__ == '__main__':
