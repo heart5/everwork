@@ -14,7 +14,7 @@ from threading import Timer
 import pathmagic
 
 with pathmagic.context():
-    from func.evernt import get_notestore, imglist2note, tablehtml2evernote
+    from func.evernttest import get_notestore, imglist2note, tablehtml2evernote
     from func.mailsfunc import jilugmail
     from func.logme import log
     from func.configpr import cfplife, inilifepath

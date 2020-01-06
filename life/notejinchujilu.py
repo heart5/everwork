@@ -49,7 +49,7 @@ import pathmagic
 
 with pathmagic.context():
     from func.configpr import cfplife, inilifepath
-    from func.evernt import get_notestore, evernoteapijiayi, tablehtml2evernote, imglist2note
+    from func.evernttest import get_notestore, evernoteapijiayi, tablehtml2evernote, imglist2note
     from func.logme import log
     from func.mailsfunc import jilugmail
     from func.first import dirmainpath
