@@ -120,9 +120,3 @@ for name in jiludf.columns:
     else:
         print(f"正常岗位\t{name}")
 # print(qdlst)
-
-# + {"pycharm": {"is_executing": false}}
-
-# -
-
-
