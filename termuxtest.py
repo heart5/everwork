@@ -21,6 +21,7 @@ with pathmagic.context():
     import termux_python.termux as tm
     from func.wrapfuncs import timethis
     from func.profilerlm import lpt_wrapper
+    from func.logme import log
 
 
 @timethis
@@ -33,4 +34,8 @@ def showmsgfromtermux():
     # tm.termux_sms_list()
 
 
-showmsgfromtermux()
+if __name__ == '__main__':
+    log.info(
+        f'开始运行文件\t{__file__}\t{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co_filename}')
+    showmsgfromtermux()
+    log.info(f"文件\t{__file__}\t执行完毕")
