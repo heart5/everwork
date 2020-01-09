@@ -2,15 +2,20 @@ from __future__ import print_function
 
 import datetime
 import pickle
+import os
 import os.path
 import base64
 import pprint
+import json
 from pathlib import Path
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from apiclient import errors
+from email.mime.text import MIMEText
 
+import mimetypes
 
 import pathmagic
 
@@ -75,6 +80,7 @@ def getworknewmail():
     labels = results.get('labels', [])
 
     """获取目标label的id"""
+    worklabelname = "Work"
     worklabelid = None
     if not labels:
         print('No labels found.')
@@ -83,7 +89,7 @@ def getworknewmail():
         # pprint.pprint(labels)
         for label in labels:
             # print(label['name'], label['id'], label['messagesTotal'], label['messagesUnread'])
-            if label['name'] == 'Work':
+            if label['name'] == worklabelname:
                 # pprint.pprint(label)
                 worklabelid = label['id']
 
@@ -93,6 +99,10 @@ def getworknewmail():
     msg4work = service.users().messages().list(userId='me', labelIds=[worklabelid], q='is:unread').execute()
     pprint.pprint(msg4work)
     print(f"未读邮件数量为：{msg4work['resultSizeEstimate']}")
+    if msg4work['resultSizeEstimate'] == 0:
+        log.info(f"目录《{worklabelname}》\t{worklabelid}没有新邮件")
+        return
+ 
 
     # 从配置文件读出已处理邮件列表并装配成list待用
     msgidsrecordstr = getcfpoptionvalue('evergmailc', 'mail', '已处理')
@@ -177,5 +187,110 @@ def getworknewmail():
     log.info(f"共有{len(msgchulilst)}封邮件处理完毕，邮件编号列表：{msgchulilst}")
 
 
+def create_message(sender, to, subject, message_text):
+    """Create a message for an email.
+
+    Args:
+      sender: Email address of the sender.
+      to: Email address of the receiver.
+      subject: The subject of the email message.
+      message_text: The text of the email message.
+
+    Returns:
+      An object containing a base64url encoded email object.
+    """
+    message = MIMEText(message_text)
+    print(message)
+    message['to'] = to
+    message['from'] = sender
+    message['subject'] = subject
+    print(message.as_bytes())
+    # return {'raw': base64.urlsafe_b64encode(message.as_string())}
+    rawasbytes = base64.urlsafe_b64encode(message.as_bytes())
+    print(rawasbytes)
+
+    rawcontent = rawasbytes.decode()
+    print(rawcontent)
+
+    return {"raw": rawcontent}
+
+
+def create_message_with_attachment( sender, to, subject, message_text, file):
+    """Create a message for an email.
+
+    Args:
+      sender: Email address of the sender.
+      to: Email address of the receiver.
+      subject: The subject of the email message.
+      message_text: The text of the email message.
+      file: The path to the file to be attached.
+
+    Returns:
+      An object containing a base64url encoded email object.
+    """
+    message = MIMEMultipart()
+    message['to'] = to
+    message['from'] = sender
+    message['subject'] = subject
+
+    msg = MIMEText(message_text)
+    message.attach(msg)
+
+    content_type, encoding = mimetypes.guess_type(file)
+
+    if content_type is None or encoding is not None:
+      content_type = 'application/octet-stream'
+    main_type, sub_type = content_type.split('/', 1)
+    if main_type == 'text':
+      fp = open(file, 'rb')
+      msg = MIMEText(fp.read(), _subtype=sub_type)
+      fp.close()
+    elif main_type == 'image':
+      fp = open(file, 'rb')
+      msg = MIMEImage(fp.read(), _subtype=sub_type)
+      fp.close()
+    elif main_type == 'audio':
+      fp = open(file, 'rb')
+      msg = MIMEAudio(fp.read(), _subtype=sub_type)
+      fp.close()
+    else:
+      fp = open(file, 'rb')
+      msg = MIMEBase(main_type, sub_type)
+      msg.set_payload(fp.read())
+      fp.close()
+    filename = os.path.basename(file)
+    msg.add_header('Content-Disposition', 'attachment', filename=filename)
+    message.attach(msg)
+
+    return {'raw': base64.urlsafe_b64encode(message.as_string())}
+
+
+def send_message(service, user_id, message):
+    """Send an email message.
+
+    Args:
+      service: Authorized Gmail API service instance.
+      user_id: User's email address. The special value "me"
+      can be used to indicate the authenticated user.
+      message: Message to be sent.
+
+    Returns:
+      Sent Message.
+    """
+    try:
+      message = (service.users().messages().send(userId=user_id, body=message) .execute())
+      print('Message Id: %s' % message['id'])
+      return message
+    except (errors.HttpError):
+      print('An error occurred: %s' % error)
+
+
+def sendmymail():
+    service = getservice()
+    mymail = create_message('baiyefeng@gmail.com', 'baiyefeng@gmail.com', '尝试通过gmail API发送邮件', '来来来，API很棒的')
+    print(mymail)
+    send_message(service, 'me', mymail)
+
 if __name__ == '__main__':
     getworknewmail()
+    # sendmymail()
