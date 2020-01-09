@@ -297,6 +297,9 @@ def dingdanxiaoshouyuedufenxi(dforder):
 
     writer = pd.ExcelWriter(str(dirmainpath / 'data' / '客户销售总表.xlsx'))
     dfzhongduan = dfshow[dfshow.类型大类 == '终端客户']
+    # dfzhongduan.to_excel('test4kehuquandan.xlsx')
+    # print(dfzhongduan.dtypes)
+    # print(dfzhongduan.head(5))
     pd.DataFrame(dfzhongduan).to_excel(writer, sheet_name='客户销售全单')
     log.info('成功输出《客户销售全单》')
     writer.close()
@@ -425,6 +428,7 @@ def showorderstat():
     workplannotebookguid = '2c8e97b5-421f-461c-8e35-0f0b1a33e91c'
     pathor = dirmainpath / 'data' / 'work' / '销售订单'
     dforder = chulidataindir_order(pathor)
+    # print(dforder.dtypes)
     dingdanxiaoshouyuedufenxi(dforder)
     dforder = dforder.loc[:, ['日期', '订单编号', '区域', '类型', '客户名称', '业务人员', '订单金额']]
     dforder.sort_values(by=['日期', '订单编号', '业务人员'], ascending=False, inplace=True)
@@ -461,7 +465,7 @@ def showorderstat():
                 continue
         if cfpzysm.has_option(notestr + 'guid', person + '最新订单日期'):
             ordertoday = cfpzysm.get(notestr + 'guid', person + '最新订单日期')
-            if zuixinriqi <= pd.to_datetime(ordertoday):  # and False:
+            if zuixinriqi <= pd.to_datetime(ordertoday):  # and False: # 调试开关，强行生成图表
                 continue
         dfperson = dforderzuixinriqi[dforderzuixinriqi.业务人员 == person]
         dfpersonsum = dfperson.groupby('业务人员').sum()['订单金额']
@@ -571,7 +575,7 @@ def showorderstat():
         if cfpzysm.has_option(notestr, person + '最新订单日期'):
             ordertoday = cfpzysm.get(notestr, person + '最新订单日期')
             # print(f'{zuixinriqi}\t{ordertoday}')
-            if zuixinriqi <= pd.to_datetime(ordertoday): # and False:
+            if zuixinriqi <= pd.to_datetime(ordertoday): # and False: # 调试开关，强行生成图表
                 continue
         dfpersonsum = dfperson['订单金额'].sum()
         dfperson = dfperson.groupby(['日期']).sum()
