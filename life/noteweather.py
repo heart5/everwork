@@ -17,6 +17,8 @@ import time
 import pygsheets
 from threading import Timer
 from bs4 import BeautifulSoup
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
 from pylab import *
 
 import pathmagic
