@@ -23,7 +23,7 @@ with pathmagic.context():
     # from func.first import dbpathquandan
     from func.logme import log
 
-log.debug('自动线程任务启动……')
+log.debug(f'线程任务\t{__file__}\t启动……')
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
 # desclitedb(cnx)
 # swissknife(cnx)
@@ -44,4 +44,5 @@ pinpaifenxido()
 # zipdata2one_timer(60 * 60 * 12 + 60 * 35)
 
 # print(vars())
-log.info('自动线程任务启动完毕！')
+log.info(f"倒数第二行")
+log.info('线程任务\t{__file__}\t执行完毕！')
