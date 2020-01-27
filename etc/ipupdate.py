@@ -95,7 +95,7 @@ def showiprecords():
         note = makenote(token, note_store, note.title, notebody='',
                         parentnotebook=parentnotebook)
         guid = note.guid
-        setcfpoptionvalue(namestr, device_id, guid)
+        setcfpoptionvalue(namestr, device_id, 'guid', guid)
     if getcfpoptionvalue(namestr, device_id, 'ipr'):
         ipr = evalnone(getcfpoptionvalue(namestr, device_id, 'ipr'))
         wifir = evalnone(getcfpoptionvalue(namestr, device_id, 'wifir'))
