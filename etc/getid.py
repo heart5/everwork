@@ -16,6 +16,7 @@ with pathmagic.context():
     from func.wrapfuncs import timethis, ift2phone
     from func.evernttest import getinivaluefromnote
     from func.termuxtools import termux_location, termux_telephony_deviceinfo
+    from func.sysfunc import execcmd
     try:
         import wmi
     except ImportError:
@@ -65,11 +66,25 @@ def getdeviceid():
         print(hex(hash(uid)))
         id = hex(hash(uid))
     elif sysstr == 'Linux':
-        outputdict = termux_telephony_deviceinfo()
-        id = outputdict["device_id"].strip()
+        try:
+            outputdict = termux_telephony_deviceinfo()
+            id = outputdict["device_id"].strip()
+        except Exception as e:
+            print(f"运行termux专用库出错{e}\n下面尝试用主机名代替")
+            try:
+                idstr = execcmd("uname -n")
+                uid = uuid.uuid3(uuid.NAMESPACE_URL, idstr)
+                # print(uid)
+                print(hex(hash(uid)))
+                id = hex(hash(uid))
+            except Exception as e:
+                print(f"天啊，命令行都不成！只好强行赋值了")
+                id = 123456789
+#                 raise
     else:
-        log.critical('既不是Windows也不是Linux，那是啥啊。不搞了，闪退！！！')
-        exit(1)
+        log.critical('既不是Windows也不是Linux，那是啥啊。只好强行赋值了！！！')
+        id = 123456789
+#         exit(1)
 
     id = str(id)
     setcfpoptionvalue('everhard', 'everhard', 'device_id', id)
