@@ -67,8 +67,8 @@ def chuqinjiluzhengli():
             # print(f"{fl}\t{timestamp[0]}\t{qddf.shape[0]}")
             # print(targetlst)
             stopcount += 1
-        if stopcount >= 5:
-            break
+#         if stopcount >= 5:
+#             break
 
     return targetlst
 
@@ -173,9 +173,7 @@ def tongjichuqinixingzheng():
     pass
 
 
-if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
-
+def zonghetongji():
     qdlst = chuqinjiluzhengli()
     # print(qdlst)
     biaoti = qdlst[-1][0]
@@ -197,4 +195,8 @@ if __name__ == '__main__':
             print(f"正常岗位\t{name}")
     # print(qdlst)
 
+
+if __name__ == '__main__':
+    log.info(f'运行文件\t{__file__}')
+    zonghetongji()
     log.info(f'文件{__file__}运行结束')
