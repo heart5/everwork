@@ -170,19 +170,19 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                             if eee.errno == 11001:
                                 log.critical(f'寻址失败，貌似网络不通。{eee}')
                             elif eee.errno == 10061:
-                                log.warning(f'被主动拒绝，好没面啊！{eee}')
+                                log.critical(f'被主动拒绝，好没面啊！{eee}')
                             elif eee.errno == 10060:
-                                log.warning(f'够不着啊，是不是在墙外？！{eee}')
+                                log.critical(f'够不着啊，是不是在墙外？！{eee}')
                             elif eee.errno == 10048:
-                                log.warning(f'多次强行连接，被拒了！{eee}')
+                                log.critical(f'多次强行连接，被拒了！{eee}')
                             elif eee.errno == 10054:
-                                log.warning(f'主机发脾气，强行断线了。{eee}')
+                                log.critical(f'主机发脾气，强行断线了。{eee}')
                             elif eee.errno == 8:
-                                log.warning(f'和{servname}握手失败。{eee}')
+                                log.critical(f'和{servname}握手失败。{eee}')
                             elif eee.errno == 4:
-                                log.warning(f'和{servname}连接异常，被中断。{eee}')
+                                log.critical(f'和{servname}连接异常，被中断。{eee}')
                             else:
-                                log.warning(f'连接失败。{eee.errno}\t{eee}')
+                                log.critical(f'连接失败。{eee.errno}\t{eee}')
                         else:
                             log.critical(f'连接失败。{eee}')
                         log.critical(
