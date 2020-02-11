@@ -12,7 +12,7 @@ import os
 import re
 # from requests.packages.urllib3 import HTTPConnectionPool
 from evernote.edam.error.ttypes import EDAMSystemException
-from requests.packages.urllib3.exceptions import NewConnectionError
+from urllib3.exceptions import *
 import requests
 from bs4 import BeautifulSoup
 import struct
@@ -158,8 +158,8 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                 except (
                         ConnectionRefusedError, ConnectionResetError,
                         ConnectionAbortedError, NewConnectionError,
-                        ConnectionError,
-                        struct.error,socket.gaierror,
+                        ConnectionError, MaxRetryError,
+                        struct.error, socket.gaierror,
                         ssl.SSLError, EDAMSystemException,
                         OSError, IndexError, Exception
                 ) as eee:
