@@ -401,15 +401,19 @@ def after_login():
 
 def after_logout():
     global men_wc
-    termux_sms_send(f"微信({men_wc})登录已退出，如有必要请重新启动")
+    try:
+        termux_sms_send(f"微信({men_wc})登录已退出，如有必要请重新启动")
+    except Exception as e:
+        log.critical(f"尝试发送退出提醒短信失败。{e}")
+        pass
     log.critical(f'退出微信({men_wc})登录')
 
 
-@trycounttimes2('微信服务器', 200, 20)
+@trycounttimes2('微信服务器', 200, 50)
 def keepliverun():
     # 为了让实验过程更加方便（修改程序不用多次扫码），我们使用热启动
     status4login = itchat.check_login()
-    # print(status4login)
+    log.critical(f"微信登录状态为：\t{status4login}")
     if status4login == '200':
         log.info(f'已处于成功登录状态')
         return
@@ -429,7 +433,12 @@ def keepliverun():
     # raise Exception
 
 
-note_store = get_notestore()
-men_wc = ''
-meu_wc = ''
-keepliverun()
+if __name__ == '__main__':
+    log.info(f'运行文件\t{__file__}')
+
+    note_store = get_notestore()
+    men_wc = ''
+    meu_wc = ''
+    keepliverun()
+
+    log.info(f'{__file__}\t运行结束！')
