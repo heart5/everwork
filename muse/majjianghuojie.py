@@ -32,7 +32,7 @@ def getsinglepage(url: str):
     soup = BeautifulSoup(mjhtml.text, 'lxml')
     if souptitle := soup.title.text == "404 Not Found":
         print(f"该网页无有效内容返回或者已经不存在\t{url}")
-        return
+        return pd.DataFrame()
     else:
         print(souptitle)
 
@@ -109,7 +109,8 @@ def updateurllst(url):
         # 用\t标记无效的链接，这里做对比的时候需要去掉tab
         urlsrecord = [x.strip('\t') for x in readfrominiurls.split(',')]
         if url not in urlsrecord:
-            if rstdf := getsinglepage(url):
+            rstdf = getsinglepage(url)
+            if rstdf.shape[0] != 0:
                 urlsrecord.insert(0, url)
                 recorddf = pd.read_excel(excelpath)
                 rstdf = recorddf.append(getsinglepage(url))
@@ -128,8 +129,8 @@ def updateurllst(url):
             # log.info(f"此链接已经存在于列表中\t{url}")
             pass
     else:
-
-        if firstdf := getsinglepage(url):
+        firstdf = getsinglepage(url)
+        if firstdf.shape[0] != 0:
             urlsrecord = [url]
             firstdf.to_excel(excelwriter, index=False, encoding='utf-8')
             excelwriter.close()
