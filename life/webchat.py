@@ -316,6 +316,11 @@ def text_reply(msg):
         # itchat.send_msg(outstr)
         itchat.send_msg(f"{zhanjidesc()}", toUserName=msg['FromUserName'])
 
+    # 根据口令显示火界麻将战绩综合统计结果
+    if msg['Text'] == '^火界麻将战果统计$':
+        log.info(f"根据口令显示火界麻将战绩综合统计结果")
+        itchat.send_msg(f"{zhanjidesc()}", toUserName=msg['FromUserName'])
+
     # 特定指令则退出
     if msg['Text'] == '退出小元宝系统':
         log.info(f"根据指令退出小元宝系统")
