@@ -27,6 +27,7 @@ with pathmagic.context():
     import evernote.edam.type.ttypes as ttypes
     from work.zymessage import searchcustomer, searchqiankuan, searchpinxiang
     from etc.getid import getdeviceid
+    from muse.majjianghuojie import updateurllst, zhanjidesc
 
 
 def newchatnote():
@@ -303,6 +304,17 @@ def text_reply(msg):
         innermsg['fmText'] = itemstr
 
     showfmmsg(innermsg)
+
+    # 处理火界麻将战绩网页
+    ptn = re.compile("h5_whmj_qp/zhanji/index.php\?id=")
+    msgtxt = msg['Text']
+    if re.findall(ptn, msgtxt):
+        if msgtxt.startswith('http'):
+            updateurllst(msgtxt)
+        outstr = f"发现新的火界麻将战绩网页链接并处理\t{msgtxt}"
+        log.info(outstr)
+        # itchat.send_msg(outstr)
+        itchat.send_msg(f"{zhanjidesc()}", toUserName=msg['FromUserName'])
 
     # 特定指令则退出
     if msg['Text'] == '退出小元宝系统':
