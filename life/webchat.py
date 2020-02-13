@@ -317,7 +317,7 @@ def text_reply(msg):
         itchat.send_msg(f"{zhanjidesc()}", toUserName=msg['FromUserName'])
 
     # 根据口令显示火界麻将战绩综合统计结果
-    if msg['Text'] == '^火界麻将战果统计$':
+    if msg['Text'] == '火界麻将战果统计':
         log.info(f"根据口令显示火界麻将战绩综合统计结果")
         itchat.send_msg(f"{zhanjidesc()}", toUserName=msg['FromUserName'])
 
