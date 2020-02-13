@@ -109,10 +109,7 @@ def updateurllst(url):
         # 用\t标记无效的链接，这里做对比的时候需要去掉tab
         urlsrecord = [x.strip('\t') for x in readfrominiurls.split(',')]
         if url not in urlsrecord:
-            if rstdf := getsinglepage(url) == None:
-                log.critical(f"这个网页貌似无效\t{url}")
-                urlsrecord.insert(0, f"\t{url}")
-            else:
+            if rstdf := getsinglepage(url):
                 urlsrecord.insert(0, url)
                 recorddf = pd.read_excel(excelpath)
                 rstdf = recorddf.append(getsinglepage(url))
@@ -121,6 +118,10 @@ def updateurllst(url):
                 rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
                 excelwriter.close()
                 log.info(f"{rstdf.shape[0]}条记录写入文件\t{excelpath}")
+
+            else:
+                log.critical(f"这个网页貌似无效\t{url}")
+                urlsrecord.insert(0, f"\t{url}")
             log.info(f"此将链接加入列表（现数量为{len(urlsrecord)}\t{url}")
             setcfpoptionvalue('evermuse', 'huojiemajiang', 'zhanjiurls', ','.join(urlsrecord))
         else:
@@ -128,14 +129,15 @@ def updateurllst(url):
             pass
     else:
 
-        if firstdf := getsinglepage(url) == None:
-            log.critical(f"这个网页貌似无效\t{url}")
-            urlsrecord = [f"\t{url}"]
-        else:
+        if firstdf := getsinglepage(url):
             urlsrecord = [url]
             firstdf.to_excel(excelwriter, index=False, encoding='utf-8')
             excelwriter.close()
             log.info(f"{firstdf.shape[0]}条记录写入文件\t{excelpath}")
+        else:
+            log.critical(f"这个网页貌似无效\t{url}")
+            urlsrecord = [f"\t{url}"]
+
         log.info(f"第一条链接加入列表\t{url}")
         setcfpoptionvalue('evermuse', 'huojiemajiang', 'zhanjiurls', ','.join(urlsrecord))
 
