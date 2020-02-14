@@ -143,15 +143,21 @@ def updateurllst(url):
         setcfpoptionvalue('evermuse', 'huojiemajiang', 'zhanjiurls', ','.join(urlsrecord))
 
 
-def zhanjidesc():
+def zhanjidesc(recentday: bool = True):
     excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf
     rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
     rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
     print(rstdf.describe())
+    if recentday:
+        zuijindatestart = pd.to_datetime(rstdf['time'].max().strftime("%Y-%m-%d"))
+        rstdf = rstdf[rstdf.time >= zuijindatestart]
     outlst = list()
     rgp = rstdf.groupby(['guest']).count()
+    timeend = pd.to_datetime(rstdf['time'].max().strftime("%Y-%m-%d %H:%M:%S"))
+    timestart = pd.to_datetime(rstdf['time'].min().strftime("%Y-%m-%d %H:%M:%S"))
+    outlst.append(f"战果统计（{timestart}至{timeend}）")
     outlst.append(f"参战人数：\t{rgp.shape[0]}")
     outlst.append(f"进行局数：\t{rstdf.groupby(['roomid']).count().shape[0]}")
 
@@ -166,6 +172,8 @@ def zhanjidesc():
     outlst.append(f"最被吐槽的炮王排名：\n{formatdfstr(dianpao)}")
     jingding = rstdf.groupby(['guest']).sum()['jingding'].sort_values(ascending=False)
     outlst.append(f"最有含金量的金顶排名：\n{formatdfstr(jingding)}")
+    shuying = rstdf.groupby(['guest']).sum()['score'].sort_values(ascending=False)
+    outlst.append(f"输赢光荣榜：\n{formatdfstr(shuying)}")
 
     outstr = '\n\n'.join(outlst)
     return outstr
@@ -185,7 +193,7 @@ if __name__ == '__main__':
     for sp in splst:
         updateurllst(sp)
 
-    rst = zhanjidesc()
+    rst = zhanjidesc(False)
     print(rst)
 
     # eurl = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eca8b4c6e0bc4313c3a4658fc5b85720"
