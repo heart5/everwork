@@ -520,7 +520,7 @@ def readinifromnote():
     """
     # cfpeverwork, cfpeverworkpath = getcfp('everwork')
     # noteguid_inifromnote = cfpeverwork.get('evernote', 'ininoteguid')
-    ininoteupdatenum = getcfpoptionvalue('everwork', 'evernote', 'ininoteupdatenum')
+    ininoteupdatenum = getcfpoptionvalue('eversys', 'evernote', 'ininoteupdatenum')
     # print(ininoteupdatenum)
     if not ininoteupdatenum:
         ininoteupdatenum = 0
@@ -548,7 +548,7 @@ def readinifromnote():
         fileobj.write(item + '\n')
     fileobj.close()
 
-    setcfpoptionvalue('everwork', 'evernote', 'ininoteupdatenum', str(note.updateSequenceNum))
+    setcfpoptionvalue('eversys', 'evernote', 'ininoteupdatenum', str(note.updateSequenceNum))
     log.info(f'配置笔记内容有变化，更新本地化的ini配置文件。')
 
 
