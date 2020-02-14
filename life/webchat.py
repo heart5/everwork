@@ -14,16 +14,17 @@ from itchat.content import *
 from bs4 import BeautifulSoup
 
 import pathmagic
+
 with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain, dirmainpath
-    from func.configpr import getcfp
+    # from func.configpr import getcfp
     from func.logme import log
     from func.nettools import trycounttimes2
     from func.evernttest import token, get_notestore, makenote, imglist2note, \
         evernoteapijiayi, getinivaluefromnote
     from func.datatools import readfromtxt, write2txt
     from func.termuxtools import termux_sms_send
-    from work.weixinzhang import showjinzhang, showshoukuan
+    # from work.weixinzhang import showjinzhang, showshoukuan
     import evernote.edam.type.ttypes as ttypes
     from work.zymessage import searchcustomer, searchqiankuan, searchpinxiang
     from etc.getid import getdeviceid
@@ -40,7 +41,7 @@ def newchatnote():
     evernoteapijiayi()
     note = ttypes.Note()
     note.title = f"微信（{getowner()['User']['NickName']}）记录:" \
-        f"{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}"
+                 f"{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}"
     print(note.title)
     notechat = makenote(token, note_store, note.title, notebody='',
                         parentnotebook=parentnotebook)
@@ -60,7 +61,7 @@ def showmsg(msg):
     for item in msg:
         # print(item)
         # if item.lower().find('name') < 0:
-            # continue
+        # continue
         print(f'{item}\t{type(msg[item])}', end='\t')
         if type(msg[item]) in [dict, itchat.storage.templates.Chatroom,
                                itchat.storage.templates.User]:
@@ -151,16 +152,16 @@ def showfmmsg(inputformatmsg):
     write2txt(chattxtfilename, chatitems)
 
     # if inputformatmsg['fmText'].startswith('收到转账'):
-        # showjinzhang()
+    # showjinzhang()
 
     # if inputformatmsg['fmText'].startswith('微信支付收款'):
-        # showshoukuan()
+    # showshoukuan()
 
     # readinifromnote()
     # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
     # print(f"{men_wc}")
     # if len(men_wc) ==0 :
-        # log.critical(f"登录名为空！！！")
+    # log.critical(f"登录名为空！！！")
     chatnoteguid = getinivaluefromnote('webchat', men_wc).lower()
     updatefre = getinivaluefromnote('webchat', 'updatefre')
     showitemscount = getinivaluefromnote('webchat', 'showitems')
@@ -189,7 +190,7 @@ def note_reply(msg):
     if msg["FileName"] == "微信转账":
         ptn = re.compile("<pay_memo><!\\[CDATA\\[(.*)\\]\\]></pay_memo>")
         pay = re.search(ptn, msg["Content"])[1]
-        innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+        innermsg['fmText'] = innermsg['fmText'] + f"[{pay}]"
     if msg["FileName"].find('红包') >= 0:
         showmsg(msg)
     showfmmsg(innermsg)
@@ -201,7 +202,7 @@ def map_reply(msg):
     innermsg = formatmsg(msg)
     gps = msg['Url'].split('=')[1]
     # print(f"[{gps}]")
-    innermsg['fmText'] = innermsg['fmText']+f"[{gps}]"
+    innermsg['fmText'] = innermsg['fmText'] + f"[{gps}]"
     showfmmsg(innermsg)
 
 
@@ -234,7 +235,6 @@ def soupclean2item(msgcontent):
     return soup, items
 
 
-
 @itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True,
                      isMpChat=True)
 def sharing_reply(msg):
@@ -251,13 +251,12 @@ def sharing_reply(msg):
             itms = soup.opitems.find_all('opitem')
             userfre = [f'{x.weapp_username.string}\t{x.hint_word.string}' for x in itms if x.word.string.find(
                 '收款记录') >= 0][0]
-            innermsg['fmText'] = innermsg['fmText'] + \
-                f"[{soup.des.string}\n[{userfre}]]"
+            innermsg['fmText'] = innermsg['fmText'] + f"[{soup.des.string}\n[{userfre}]]"
         # elif innermsg["fmText"].endswith("微信支付凭证"):
-            # innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
+        # innermsg['fmText'] = innermsg['fmText']+f"[{soup.des.string}]"
         elif cleansender == '微信运动' and innermsg["fmText"].endswith("刚刚赞了你"):
             innermsg['fmText'] = innermsg['fmText'] + \
-                f"[{soup.rankid.string}\t{soup.displayusername.string}]"
+                                 f"[{soup.rankid.string}\t{soup.displayusername.string}]"
         elif cleansender == '微信运动' and innermsg["fmText"].endswith("排行榜冠军"):
             ydlst = []
             mni = soup.messagenodeinfo
@@ -268,10 +267,10 @@ def sharing_reply(msg):
                 istr = f"{item.username.string}\t{item.rank.rankdisplay.string}\t{item.score.scoredisplay.string}"
                 ydlst.append(istr)
             pay = "\n".join(ydlst)
-            innermsg['fmText'] = innermsg['fmText']+f"[{pay}]"
+            innermsg['fmText'] = innermsg['fmText'] + f"[{pay}]"
         elif soup.des or soup.digest:
             valuepart = soup.des or soup.digest
-            innermsg['fmText'] = innermsg['fmText']+f"[{valuepart.string}]"
+            innermsg['fmText'] = innermsg['fmText'] + f"[{valuepart.string}]"
         else:
             showmsg(msg)
     elif len(items) > 0:
@@ -280,7 +279,7 @@ def sharing_reply(msg):
             itemstr += item.title.string + '\n'
         # 去掉尾行的回车
         itemstr = itemstr[:-1]
-        innermsg['fmText'] = innermsg['fmText']+itemstr
+        innermsg['fmText'] = innermsg['fmText'] + itemstr
     elif type(msg['User']) == itchat.storage.MassivePlatform:
         showmsg(msg)
 
@@ -306,7 +305,7 @@ def text_reply(msg):
     showfmmsg(innermsg)
 
     # 处理火界麻将战绩网页
-    ptn = re.compile("h5_whmj_qp/zhanji/index.php\?id=")
+    ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
     msgtxt = msg['Text']
     if re.findall(ptn, msgtxt):
         if msgtxt.startswith('http'):
@@ -352,7 +351,7 @@ def text_reply(msg):
     # print(f"type:{type(thisid)}\t{thisid}")
     houseid = getinivaluefromnote('webchat', 'datahouse')
     # print(f"type:{type(houseid)}\t{houseid}")
-    if thisid != str(houseid) :
+    if thisid != str(houseid):
         print(f"不是数据分析中心，咱不管哦")
         return
 
@@ -367,7 +366,7 @@ def text_reply(msg):
         if diyihang[0].strip() == '真元信使':
             if len(diyihang) == 1:
                 if (len(qrylst) == 1) or (qrylst[1].strip == ''):
-                    rstfile , rst = searchcustomer()
+                    rstfile, rst = searchcustomer()
                 else:
                     qrystr = qrylst[1].strip()
                     rstfile, rst = searchcustomer(qrystr.split())
@@ -377,6 +376,8 @@ def text_reply(msg):
             elif diyihang[1] == '品项':
                 qrystr = qrylst[1].strip()
                 rstfile, rst = searchpinxiang(qrystr.split())
+            else:
+                rstfile, rst = None, None
 
             itchat.send_msg(rst, toUserName=msg['FromUserName'])
             nowtuple = time.time()
@@ -387,7 +388,7 @@ def text_reply(msg):
                          'fmType': 'Text',
                          # 'fmText': os.path.split(rstfile)[1]
                          'fmText': rst
-                        }
+                         }
             showfmmsg(finnalmsg)
 
             if rstfile:
@@ -402,8 +403,8 @@ def text_reply(msg):
                              'fmType': 'File',
                              # 'fmText': os.path.split(rstfile)[1]
                              'fmText':
-                             rstfile.replace(os.path.abspath(dirmainpath), '')[1:]
-                            }
+                                 rstfile.replace(os.path.abspath(dirmainpath), '')[1:]
+                             }
                 showfmmsg(finnalmsg)
                 itchat.send_file(rstfile)
                 infostr = f"成功发送查询结果文件：{os.path.split(rstfile)[1]}给{innermsg['fmSender']}"
