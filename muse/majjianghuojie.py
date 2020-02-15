@@ -183,7 +183,7 @@ def updateurllst(url):
         setcfpoptionvalue('evermuse', 'huojiemajiang', 'zhanjiurls', ','.join(urlsrecord))
 
 
-def zhanjidesc(recentday: bool = True):
+def zhanjidesc(ownername, recentday: bool = True):
     excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf
@@ -260,7 +260,7 @@ if __name__ == '__main__':
     for sp in splst:
         updateurllst(sp)
 
-    rst = zhanjidesc(False)
+    rst = zhanjidesc(ownername, False)
     print(rst)
 
     # eurl = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eca8b4c6e0bc4313c3a4658fc5b85720"
