@@ -239,9 +239,18 @@ def soupclean2item(msgcontent):
                      isMpChat=True)
 def sharing_reply(msg):
     innermsg = formatmsg(msg)
-    if msg['Text'] == '本局战绩':
-        showmsg(msg)
-        itchat.send_msg(msg)
+
+    # 处理火界麻将战绩网页
+    # http://zj.lgmob.com/h5_whmj_qp/fks0_eb81c193dea882941fe13dfa5be24a11.html
+    ptn = re.compile("h5_whmj_qp/fks0_")
+    msgurl = msg['Url']
+    if re.findall(ptn, msgurl):
+        if msgurl.startswith('http'):
+            roomid = updateurllst(msgurl)
+            outstr = f"微信【Sharing】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}\t{msgurl}"
+            log.info(outstr)
+            itchat.send_msg(outstr)
+
     soup, items = soupclean2item(msg['Content'])
 
     # 过滤掉已经研究过属性公众号信息，对于尚未研究过的显示详细信息
@@ -286,8 +295,6 @@ def sharing_reply(msg):
     elif type(msg['User']) == itchat.storage.MassivePlatform:
         log.info(f"公众号信息\t{msg['User']}")
         showmsg(msg)
-    else:
-        showmsg(msg)
 
     showfmmsg(innermsg)
 
@@ -316,9 +323,9 @@ def text_reply(msg):
     if re.findall(ptn, msgtxt):
         if msgtxt.startswith('http'):
             roomid = updateurllst(msgtxt)
-            outstr = f"发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}\t{msgtxt}"
+            outstr = f"微信【Text】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}\t{msgtxt}"
             log.info(outstr)
-            itchat.send_msg(f"新的战绩url被处理，房间号为：\t{roomid}")
+            itchat.send_msg(outstr)
 
     # 根据口令显示火界麻将战绩综合统计结果
     if msg['Text'].startswith('火界麻将战果统计') or msg['Text'].startswith('麻果'):
