@@ -312,7 +312,7 @@ def text_reply(msg):
             updateurllst(msgtxt)
         outstr = f"发现新的火界麻将战绩网页链接并处理\t{msgtxt}"
         log.info(outstr)
-        zhanji = zhanjidesc()
+        zhanji = zhanjidesc(men_wc, True)
         itchat.send_msg(f"{zhanji}", toUserName=msg['FromUserName'])
         nowtuple = time.time()
         nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
@@ -328,7 +328,7 @@ def text_reply(msg):
     # 根据口令显示火界麻将战绩综合统计结果
     if msg['Text'].startswith('火界麻将战果统计') or msg['Text'].startswith('麻果'):
         log.info(f"根据口令显示火界麻将战绩综合统计结果")
-        zhanji = zhanjidesc(False)
+        zhanji = zhanjidesc(men_wc, False)
         itchat.send_msg(f"{zhanji}", toUserName=msg['FromUserName'])
         nowtuple = time.time()
         nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
