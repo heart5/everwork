@@ -272,6 +272,8 @@ if __name__ == '__main__':
     own = '白晔峰'
 
     splst = fetchmjurl(own)
+    for sp in splst[:4]:
+        print(sp)
 
     for sp in splst:
         updateurllst(sp)
