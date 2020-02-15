@@ -145,7 +145,7 @@ def updateurllst(url):
     excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
     touchfilepath2depth(excelpath)
     excelwriter = pd.ExcelWriter(excelpath)
-    roomid: str = ''
+    roomid: str = '已处理'
     if readfrominiurls := getcfpoptionvalue('evermuse', 'huojiemajiang', 'zhanjiurls'):
         # 用\t标记无效的链接，这里做对比的时候需要去掉tab
         urlsrecord = [x.strip('\t') for x in readfrominiurls.split(',')]
@@ -276,7 +276,7 @@ if __name__ == '__main__':
     for sp in splst:
         updateurllst(sp)
 
-    rst = zhanjidesc(own, False)
+    rst = zhanjidesc(own)
     print(rst)
 
     # eurl = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eca8b4c6e0bc4313c3a4658fc5b85720"

@@ -239,6 +239,9 @@ def soupclean2item(msgcontent):
                      isMpChat=True)
 def sharing_reply(msg):
     innermsg = formatmsg(msg)
+    if msg['Text'] == '本局战绩':
+        showmsg(msg)
+        itchat.send_msg(msg)
     soup, items = soupclean2item(msg['Content'])
 
     # 过滤掉已经研究过属性公众号信息，对于尚未研究过的显示详细信息
@@ -281,6 +284,9 @@ def sharing_reply(msg):
         itemstr = itemstr[:-1]
         innermsg['fmText'] = innermsg['fmText'] + itemstr
     elif type(msg['User']) == itchat.storage.MassivePlatform:
+        log.info(f"公众号信息\t{msg['User']}")
+        showmsg(msg)
+    else:
         showmsg(msg)
 
     showfmmsg(innermsg)
@@ -319,10 +325,10 @@ def text_reply(msg):
         log.info(f"根据口令显示火界麻将战绩综合统计结果")
         msgtxt = msg['Text']
         recentday = True
-        if msgtxt.find('全部'):
+        if msgtxt.find('全部') != -1:
             recentday = False
         simpledesc = True
-        if msgtxt.find('综合'):
+        if msgtxt.find('综合') != -1:
             simpledesc = False
         zhanji = zhanjidesc(men_wc, recentday, simpledesc)
         itchat.send_msg(f"{zhanji}", toUserName=msg['FromUserName'])
