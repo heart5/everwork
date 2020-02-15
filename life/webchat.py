@@ -240,10 +240,12 @@ def soupclean2item(msgcontent):
 def sharing_reply(msg):
     innermsg = formatmsg(msg)
 
-    showmsg(msg)
+    # showmsg(msg)
     # 处理火界麻将战绩网页
     # http://zj.lgmob.com/h5_whmj_qp/fks0_eb81c193dea882941fe13dfa5be24a11.html
-    ptn = re.compile("h5_whmj_qp/fks0_")
+    # ptn = re.compile("h5_whmj_qp/fks0_")
+    # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
+    ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
     msgurl = msg['Url']
     print(msgurl)
     if re.findall(ptn, msgurl):
