@@ -44,8 +44,8 @@ def get_ip(*args):
                            r'{3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?![\.\d])', my_addr)
         print(ipfind)
         ip = None
-        if (ipfind != None):
-            if re.search(r'0\.0\.0\.0', ipfind.group()) == None:
+        if ipfind is not None:
+            if re.search(r'0\.0\.0\.0', ipfind.group()) is None:
                 ip = ipfind.group()
         print(ip)
         return ip
@@ -69,6 +69,7 @@ def get_host_ip():
 
 
 def get_ip4alleth(*args):
+    print(args)
     resultiplst = []
     if platform.system() == 'Windows':
         ip = get_host_ip()
@@ -90,7 +91,7 @@ def get_ip4alleth(*args):
             #  print(ipfind)
             ip = None
             if ipfind is not None:
-                if re.match(r'0\.0\.0\.0', ipfind.group()) == None:
+                if re.match(r'0\.0\.0\.0', ipfind.group()) is None:
                     ip = ipfind.group()
                     resultiplst.append([ethitem, ip])
             #  print(ip)
@@ -134,7 +135,7 @@ def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务�
             else:
                 log.critical(f'连接失败。{eee}')
             log.critical(
-                f"第{i+1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
+                f"第{i + 1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
             # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
             if i == (trytimes - 1):
                 log.critical(f'“{servname}”连接失败，只好无功而返。')
@@ -191,7 +192,8 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                     # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
                     if i == (trytimes - 1):
                         badnews = f'{__file__}\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}\t{eee}'
-                        # badnews = f'{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co__filename}\t\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
+                        # badnews = f'{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co__filename}\t\"{
+                        # servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
                         log.critical(badnews)
                         termux_sms_send(badnews)
                         # exit(1)
