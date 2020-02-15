@@ -309,27 +309,24 @@ def text_reply(msg):
     msgtxt = msg['Text']
     if re.findall(ptn, msgtxt):
         if msgtxt.startswith('http'):
-            updateurllst(msgtxt)
-        outstr = f"发现新的火界麻将战绩网页链接并处理\t{msgtxt}"
-        log.info(outstr)
-        zhanji = zhanjidesc(men_wc, True)
-        itchat.send_msg(f"{zhanji}", toUserName=msg['FromUserName'])
-        nowtuple = time.time()
-        nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
-        finnalmsg = {'fmId': math.floor(nowtuple),
-                     'fmTime': nowdatetime.strftime("%Y-%m-%d %H:%M:%S"),
-                     'fmSend': True, 'fmSender': innermsg['fmSender'],
-                     'fmType': 'Text',
-                     # 'fmText': os.path.split(rstfile)[1]
-                     'fmText': zhanji
-                     }
-        showfmmsg(finnalmsg)
+            roomid = updateurllst(msgtxt)
+            outstr = f"发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}\t{msgtxt}"
+            log.info(outstr)
+            itchat.send_msg(f"新的战绩url被处理，房间号为：\t{roomid}")
 
     # 根据口令显示火界麻将战绩综合统计结果
     if msg['Text'].startswith('火界麻将战果统计') or msg['Text'].startswith('麻果'):
         log.info(f"根据口令显示火界麻将战绩综合统计结果")
-        zhanji = zhanjidesc(men_wc, False)
+        msgtxt = msg['Text']
+        recentday = True
+        if msgtxt.find('全部'):
+            recentday = False
+        simpledesc = True
+        if msgtxt.find('综合'):
+            simpledesc = False
+        zhanji = zhanjidesc(men_wc, recentday, simpledesc)
         itchat.send_msg(f"{zhanji}", toUserName=msg['FromUserName'])
+        itchat.send_msg(f"{msg['FromUserName']}\t查询信息：\n{msgtxt}")
         nowtuple = time.time()
         nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
         finnalmsg = {'fmId': math.floor(nowtuple),

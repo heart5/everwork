@@ -47,7 +47,7 @@ def getsinglepage(url: str):
     ptn = re.compile('^[+-]?\\d+$')
     resultlst = []
     for gl in gamelist:
-        itemlst = []
+        itemlst = list()
         itemlst.append(roomid)
         itemlst.append(roomtime)
         # 房间信息
@@ -91,7 +91,7 @@ def getsinglepage(url: str):
 
 def fetchmjurl(owner):
     filename = getdirmain() / 'data' / 'webchat' / f"chatitems({owner}).txt"
-    print(filename)
+    # print(filename)
     # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
     ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
     # rstlst = []
@@ -117,10 +117,10 @@ def fetchmjfang(owner):
     :return: DataFrame 开房信息df
     """
     filename = getdirmain() / 'data' / 'webchat' / f"chatitems({owner}).txt"
-    print(filename)
+    # print(filename)
     # http://s0.lgmob.com/h5_whmj_qp/?d=217426
     ptn = re.compile("h5_whmj_qp/\\?d=(\\d+)")
-    rstlst = []
+    # rstlst = []
     with open(filename, "r", encoding='utf-8') as f:
         filelines = f.readlines()
         rstlst = [getfangitem(line) for line in filelines if re.findall(ptn, line)]
@@ -145,11 +145,13 @@ def updateurllst(url):
     excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
     touchfilepath2depth(excelpath)
     excelwriter = pd.ExcelWriter(excelpath)
+    roomid: str
     if readfrominiurls := getcfpoptionvalue('evermuse', 'huojiemajiang', 'zhanjiurls'):
         # 用\t标记无效的链接，这里做对比的时候需要去掉tab
         urlsrecord = [x.strip('\t') for x in readfrominiurls.split(',')]
         if url not in urlsrecord:
             rstdf = getsinglepage(url)
+            roomid = rstdf.iloc[0, 0]
             if rstdf.shape[0] != 0:
                 urlsrecord.insert(0, url)
                 recorddf = pd.read_excel(excelpath)
@@ -170,6 +172,7 @@ def updateurllst(url):
             pass
     else:
         firstdf = getsinglepage(url)
+        roomid = firstdf.iloc[0, 0]
         if firstdf.shape[0] != 0:
             urlsrecord = [url]
             firstdf.to_excel(excelwriter, index=False, encoding='utf-8')
@@ -182,8 +185,10 @@ def updateurllst(url):
         log.info(f"第一条链接加入列表\t{url}")
         setcfpoptionvalue('evermuse', 'huojiemajiang', 'zhanjiurls', ','.join(urlsrecord))
 
+    return roomid
 
-def zhanjidesc(ownername, recentday: bool = True):
+
+def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf
@@ -194,12 +199,15 @@ def zhanjidesc(ownername, recentday: bool = True):
     fanglst = fetchmjfang(ownername)
     # print(fanglst)
     fangclosedf = rstdf.groupby('roomid').max()['time']
+    # 以房号为索引进行数据合并，默认join='uter'
     fangfinaldf = pd.concat([fanglst, fangclosedf], axis=1)
     fangfinaldf = fangfinaldf.rename(columns={'time': 'closetime'})
-    # print(fangfinaldf)
-    # fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(lambda df: int((df['closetime'] - df['maxtime']).total_seconds() / 60) if df['closetime'] else pd.NaT, axis=1)
+    # print(fangfinaldf) fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(lambda df: int((df['closetime'] - df[
+    # 'maxtime']).total_seconds() / 60) if df['closetime'] else pd.NaT, axis=1)
     fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(
         lambda df: (df['closetime'] - df['maxtime']).total_seconds() // 60 if df['closetime'] else pd.NaT, axis=1)
+
+    # 根据开关，选择输出当天或者全部数据结果
     if recentday:
         zuijindatestart = pd.to_datetime(rstdf['time'].max().strftime("%Y-%m-%d"))
         rstdf = rstdf[rstdf.time >= zuijindatestart]
@@ -210,9 +218,11 @@ def zhanjidesc(ownername, recentday: bool = True):
     rgp = rstdf.groupby(['guest']).count()
     timeend = pd.to_datetime(rstdf['time'].max().strftime("%Y-%m-%d %H:%M:%S"))
     timestart = pd.to_datetime(rstdf['time'].min().strftime("%Y-%m-%d %H:%M:%S"))
-    outlst.append(f"战果统计（{timestart}至{timeend}）")
+    titlestr = f"战果统计（{timestart}至{timeend}）"
+    outlst.append(titlestr)
+
     outlst.append(f"参战人数：\t{rgp.shape[0]}")
-    fangtotalstr = f"（共开房{fangfinaldf.shape[0]}间）"
+    fangtotalstr = f"（共开房{fangfinaldf.shape[0]}次）"
     outlst.append(f"进行圈数：\t{rstdf.groupby(['roomid']).count().shape[0]}\t{fangtotalstr}")
 
     def formatdfstr(ddf):
@@ -227,11 +237,16 @@ def zhanjidesc(ownername, recentday: bool = True):
     jingding = rstdf.groupby(['guest']).sum()['jingding'].sort_values(ascending=False)
     outlst.append(f"最有含金量的金顶排名：\n{formatdfstr(jingding)}")
     shuying = rstdf.groupby(['guest']).sum()['score'].sort_values(ascending=False)
-    outlst.append(f"输赢光荣榜：\n{formatdfstr(shuying)}")
+    shuyingstr = f"输赢光荣榜：\n{formatdfstr(shuying)}"
+    outlst.append(shuyingstr)
+
+    # 根据开关，输出简版输赢信息
+    if simpledesc:
+        outstr = titlestr + '\n' + shuyingstr
+        return outstr
 
     teams = list(set(rstdf['guest']))
     # print(teams)
-
     playtimelst = []
     for player in teams:
         ptime = fangfinaldf.loc[rstdf[rstdf.guest == player].roomid].sum()['playmin']
@@ -242,6 +257,7 @@ def zhanjidesc(ownername, recentday: bool = True):
     outlst.append(f"劳模榜（作战分钟数）：\n{formatdfstr(playtimedf[['name', 'mins']].reset_index(drop=True))}")
 
     outstr = '\n\n'.join(outlst)
+
     return outstr
 
 
@@ -253,14 +269,14 @@ if __name__ == '__main__':
     # sp3 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_5e2380aff0e95d7003ca59d061f5a76f"
     # splst = [sp1, sp2, sp3]
 
-    ownername = '白晔峰'
+    own = '白晔峰'
 
-    splst = fetchmjurl(ownername)
+    splst = fetchmjurl(own)
 
     for sp in splst:
         updateurllst(sp)
 
-    rst = zhanjidesc(ownername, False)
+    rst = zhanjidesc(own, False)
     print(rst)
 
     # eurl = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eca8b4c6e0bc4313c3a4658fc5b85720"
