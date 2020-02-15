@@ -3,25 +3,26 @@
 """
 
 import os
-import shutil
-import sqlite3 as lite
-import pandas as pd
-import xlrd
 import random
 import re
+import shutil
+import sqlite3 as lite
 
+import pandas as pd
+import xlrd
 from xpinyin import Pinyin
 
 import pathmagic
 
 with pathmagic.context():
-    from func.evernttest import evernoteapijiayi, makenote, getinivaluefromnote
-    from func.first import dbpathworkplan, dbpathquandan, dbpathdingdanmingxi, dirmainpath, ywananchor, touchfilepath2depth
+    from func.evernttest import getinivaluefromnote
+    from func.first import dbpathquandan, dbpathdingdanmingxi, dirmainpath
     from func.configpr import getcfp
     from func.logme import log
-    from func.pdtools import gengxinfou, desclitedb
+    from func.pdtools import gengxinfou
 
 print(f"{__file__} is loading now...")
+
 
 def chulikhqd():
     """
@@ -32,7 +33,7 @@ def chulikhqd():
                    x.startswith('客户清单')]
     # print(khqdnamelst)
     # 对获取的合格文件根据时间进行排序，升序
-    khqdnamelst.sort(key=lambda fn:os.path.getmtime(workpath / fn))
+    khqdnamelst.sort(key=lambda fn: os.path.getmtime(workpath / fn))
     newestonlyname = khqdnamelst[-1]
     newestfn = workpath / newestonlyname
     targetfn = dirmainpath / 'data' / '客户清单最新.xls'
@@ -49,12 +50,12 @@ def chulikhqd():
         cfpdata.write(open(cfpdatapath, 'w', encoding='utf-8'))
         log.info(f"《客户清单》有新文件：{newestonlyname}")
     cnx = lite.connect(dbpathquandan)
-    if gengxinfou(targetfn, cnx, 'fileread') : # or True:
+    if gengxinfou(targetfn, cnx, 'fileread'):  # or True:
         workbook = xlrd.open_workbook(targetfn, encoding_override="cp936")
         sheet = workbook.sheet_by_index(0)
         # sheet的名称，行数，列数
-        print (sheet.name,sheet.nrows,sheet.ncols)
-        datafromsheet = [sheet.row_values(i, 0 ,sheet.ncols) for i in
+        print(sheet.name, sheet.nrows, sheet.ncols)
+        datafromsheet = [sheet.row_values(i, 0, sheet.ncols) for i in
                          range(0, sheet.nrows)]
         # print(datafromsheet[:5])
         df = pd.DataFrame(datafromsheet[1:], columns=datafromsheet[0])
@@ -80,7 +81,7 @@ def chuliquandan():
                    x.find('全单统计管理') >= 0]
     # print(khqdnamelst)
     # 对获取的合格文件根据时间进行排序，升序
-    khqdnamelst.sort(key=lambda fn:os.path.getmtime(workpath / fn))
+    khqdnamelst.sort(key=lambda fn: os.path.getmtime(workpath / fn))
     newestonlyname = khqdnamelst[-1]
     newestfn = workpath / newestonlyname
     targetfn = dirmainpath / 'data' / '全单统计管理最新.xlsm'
@@ -97,14 +98,14 @@ def chuliquandan():
         cfpdata.write(open(cfpdatapath, 'w', encoding='utf-8'))
         log.info(f"《全单统计管理》有新文件：{newestonlyname}")
     cnx = lite.connect(dbpathquandan)
-    if gengxinfou(targetfn, cnx, 'fileread') : # or True:
+    if gengxinfou(targetfn, cnx, 'fileread'):  # or True:
         # workbook = xlrd.open_workbook(targetfn, encoding_override="cp936")
         # workbook = xlrd.open_workbook(targetfn)
         # sheet = workbook.sheet_by_name('全单统计管理')
         # # sheet的名称，行数，列数
         # print (sheet.name,sheet.nrows,sheet.ncols)
         # datafromsheet = [sheet.row_values(i, 0 ,sheet.ncols) for i in
-                         # range(0, sheet.nrows)]
+        # range(0, sheet.nrows)]
         # # print(datafromsheet[:5])
         # df = pd.DataFrame(datafromsheet[1:], columns=datafromsheet[0])
         # df = df.loc[:, ['往来单位全名', '往来单位编号', '联系人', '联系电话', '地址']]
@@ -157,8 +158,8 @@ def getbianmalst(args):
             fbqylst = (list(dfquyu['区域']))
             # print(f"{fbqylst}")
             if len(fbqylst) > 0:
-                    for fbqy in fbqylst:
-                        cquyutlst.append(fbqy)
+                for fbqy in fbqylst:
+                    cquyutlst.append(fbqy)
         # 转换区域为数字格式方便查询
         for qy in cquyulst:
             dfquyu = pd.read_sql(f"select * from quyu where 区域名称='{qy}'", con=cnx,
@@ -175,7 +176,7 @@ def getbianmalst(args):
         dfs = df
         for name in cnamelst:
             # 增加对客户编码的识别判断，最高优先级别
-            ptnstr= "[0-3][0-9][0-6]0[0-9]{2}[1-9]"
+            ptnstr = "[0-3][0-9][0-6]0[0-9]{2}[1-9]"
             ptn = re.compile(f"^{ptnstr}")
             if re.match(ptn, name):
                 dfs = dfs[dfs.往来单位编号.str.contains(f"^{name}")]
@@ -207,7 +208,7 @@ def validfilename(prefix, args):
         py = Pinyin()
         tezhengstr4filename = '_'.join([py.get_pinyin(x, '') for x in args[0]])
     rdffile = dirmainpath / 'data' / 'webchat' / f'{prefix}_{tezhengstr4filename}.xlsx'
-        # print(rdffile)
+    # print(rdffile)
     return rdffile
 
 
@@ -231,9 +232,7 @@ def getresult(resultdf, prefix, args):
                     dftmp = pd.DataFrame(columns=resultdf.columns)
                     df2sheet = dftmp.append(df2sheet)
                     # print(f"{df2sheet}")
-                df2sheet.to_excel(excelwriter,
-                                          sheet_name=str(ix).replace('*',
-                                                                     '').strip(), index=False)
+                df2sheet.to_excel(excelwriter, sheet_name=str(ix).replace('*', '').strip(), index=False)
         else:
             resultdf.to_excel(excelwriter)
         excelwriter.save()
@@ -261,13 +260,14 @@ def searchcustomer(*args, **kw):
         return None, notfoundshow()
 
     cnx = lite.connect(dbpathquandan)
-    # df = pd.read_sql('select 往来单位全名, substr(往来单位编号, 1, 7) as 往来单位编号, 联系人, 地址  from customeruid', con=cnx, index_col='往来单位全名')
-    # df = pd.read_sql('select 往来单位全名 as 名称, 往来单位编号 as 编码, 联系人, 地址  from customeruid', con=cnx, index_col='名称')
+    # df = pd.read_sql('select 往来单位全名, substr(往来单位编号, 1, 7) as 往来单位编号, 联系人, 地址  from customeruid', con=cnx,
+    # index_col='往来单位全名') df = pd.read_sql('select 往来单位全名 as 名称, 往来单位编号 as 编码, 联系人, 地址  from customeruid', con=cnx,
+    # index_col='名称')
     df = pd.read_sql('select 往来单位全名 as 名称, 往来单位编号 as 编码, 联系人, 地址  from customeruid', con=cnx)
     cnx.close()
     resultdf = df[df.编码.isin(targetbmlst)]
     # resultdf['客户编码'] = resultdf['往来单位编号'].str.slice(0,7)
-    resultdf['编码'] = resultdf['编码'].str.slice(0,7)
+    resultdf['编码'] = resultdf['编码'].str.slice(0, 7)
     resultdf.set_index('名称', inplace=True)
     # resultdf['拼接'] = resultdf['编码'].map(lambda x: x+'号')
     # resultdf['拼接'] = resultdf['编码'] + resultdf['编码']
@@ -279,23 +279,29 @@ def searchcustomer(*args, **kw):
 
 
 def searchqiankuan(*args, **kw):
+    print(kw)
     chuliquandan()
     targetbmlst = getbianmalst(args)
     if len(targetbmlst) == 0:
         return None, notfoundshow()
 
     cnx = lite.connect(dbpathquandan)
-    # df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, substr(终端编码, 1, 7) as 终端编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
-    df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, 终端编码 as 编码, 终端名称 as 单位全名, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
+    # df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, substr(终端编码, 1, 7) as 终端编码, 终端名称,
+    # 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl',
+    # con=cnx)
+    df = pd.read_sql(
+        'select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, 终端编码 as 编码, 终端名称 as 单位全名, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl',
+        con=cnx)
     cnx.close()
     filterdf = df[df.编码.isin(targetbmlst)]
     resultdf = filterdf[(filterdf.收款日期.isnull()) & (filterdf.送达日期.notna())]
-    resultdf['编码'] = resultdf['编码'].str.slice(0,7)
+    resultdf['编码'] = resultdf['编码'].str.slice(0, 7)
     resultdf.set_index('编码', inplace=True)
 
     rdffile, rdfstr = getresult(resultdf, 'khqk', args)
 
     return rdffile, rdfstr
+
 
 def strlst2sqltuple(lst):
     """
@@ -303,36 +309,38 @@ def strlst2sqltuple(lst):
     """
     targetbmlst_quote = ['\'' + x + '\'' for x in lst]
     sqltuple = "(" + ','.join(targetbmlst_quote) + ')'
-    print(f"{sqltuple }")
+    print(f"{sqltuple}")
 
     return sqltuple
 
 
 def searchpinxiang(*args, **kw):
+    print(kw)
     chuliquandan()
     targetbmlst = getbianmalst(args)
     if len(targetbmlst) == 0:
         return None, notfoundshow()
 
-    cnx = lite.connect(dbpathquandan, detect_types=lite.PARSE_DECLTYPES|lite.PARSE_COLNAMES)
+    cnx = lite.connect(dbpathquandan, detect_types=lite.PARSE_DECLTYPES | lite.PARSE_COLNAMES)
     # desclitedb(cnx)
     cursor = cnx.cursor()
     cursor.execute(f'attach database \'{dbpathdingdanmingxi}\' as \'C\'')
     targetbmlst2str = strlst2sqltuple(targetbmlst)
-    dfcustomer = pd.read_sql(f"select 往来单位编号, 往来单位全名 from customeruid where 往来单位编号 in {targetbmlst2str}", con=cnx, index_col=['往来单位编号'])
+    dfcustomer = pd.read_sql(f"select 往来单位编号, 往来单位全名 from customeruid where 往来单位编号 in {targetbmlst2str}", con=cnx,
+                             index_col=['往来单位编号'])
     # print(f"{dfcustomer}")
     # print(f"{dfcustomer.dtypes}")
     ctlst = list(dfcustomer['往来单位全名'])
     # print(f"{ctlst}")
-    customerstr4sql = strlst2sqltuple(ctlst)
-    # 加参数探测特殊数据类型比如日期时间
-    # cnxmingxi = lite.connect(dbpathdingdanmingxi, detect_types=lite.PARSE_DECLTYPES|lite.PARSE_COLNAMES)
-    # # desclitedb(cnxmingxi)
-    # dfpinxiang = pd.read_sql(f"select * from orderdetails where 单位全名 in {customerstr4sql}", parse_dates=True, con=cnxmingxi)
-    # cnxmingxi.close()
-    # print(f"{dfpinxiang.dtypes}")
-    # dfpinxiang = pd.read_sql(f"select * from C.orderdetails where 单位全名 in {customerstr4sql}", parse_dates=True, con=cnx)
-    dfpinxiang = pd.read_sql(f"select 单位全名, customer.往来单位编号 as 单位编号, 日期, 商品全名, 数量, 金额 from C.orderdetails inner join customer on C.orderdetails.单位全名=customer.往来单位 where 单位编号 in {targetbmlst2str}", parse_dates=True, con=cnx)
+    # customerstr4sql = strlst2sqltuple(ctlst)
+    # 加参数探测特殊数据类型比如日期时间 cnxmingxi = lite.connect(dbpathdingdanmingxi,
+    # detect_types=lite.PARSE_DECLTYPES|lite.PARSE_COLNAMES) # desclitedb(cnxmingxi) dfpinxiang = pd.read_sql(
+    # f"select * from orderdetails where 单位全名 in {customerstr4sql}", parse_dates=True, con=cnxmingxi)
+    # cnxmingxi.close() print(f"{dfpinxiang.dtypes}") dfpinxiang = pd.read_sql(f"select * from C.orderdetails where
+    # 单位全名 in {customerstr4sql}", parse_dates=True, con=cnx)
+    dfpinxiang = pd.read_sql(
+        f"select 单位全名, customer.往来单位编号 as 单位编号, 日期, 商品全名, 数量, 金额 from C.orderdetails inner join customer on C.orderdetails.单位全名=customer.往来单位 where 单位编号 in {targetbmlst2str}",
+        parse_dates=True, con=cnx)
     # print(f"{dfpinxiang.dtypes}")
     being = pd.to_datetime(getinivaluefromnote('webchat', 'datafrom'))
     df = dfpinxiang[dfpinxiang.日期 >= being]
@@ -344,7 +352,7 @@ def searchpinxiang(*args, **kw):
     cnx.close()
     dfpxjc = dfpxjc['简称']
     df['商品全名'] = df['商品全名'].apply(lambda x:
-                                                          dfpxjc.loc[x] if (x in list(dfpxjc.index)) else x)
+                                  dfpxjc.loc[x] if (x in list(dfpxjc.index)) else x)
     df['单位'] = df['单位编号'].apply(lambda x: dfcustomer.loc[x])
     # print(f"{df.dtypes}")
     # print(f"{df}")
@@ -353,13 +361,12 @@ def searchpinxiang(*args, **kw):
     # dfsort = dfpxsum.sort_values('金额', ascending=False)
     dfsort = dfpxsum.sort_values(['单位', '金额'], ascending=[True, False])
     dfsort.set_index('单位', inplace=True)
-    # print(f"{dfsort}")
-    # df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, substr(终端编码, 1, 7) as 终端编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
-    # df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, 终端编码 as 编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from quandantjgl', con=cnx)
-    # cnx.close()
-    # filterdf = df[df.编码.isin(targetbmlst)]
-    # resultdf = filterdf[(filterdf.收款日期.isnull()) & (filterdf.送达日期.notna())]
-    # resultdf['编码'] = resultdf['编码'].str.slice(0,7)
+    # print(f"{dfsort}") df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, substr(终端编码, 1,
+    # 7) as 终端编码, 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from
+    # quandantjgl', con=cnx) df = pd.read_sql('select (strftime("%Y-%m-%d",订单日期) || "-" || 单号) as 单号, 终端编码 as 编码,
+    # 终端名称, 送货金额, 应收金额, strftime("%Y-%m-%d", 送达日期) as 送达日期, 实收金额, strftime("%Y-%m-%d", 收款日期) as 收款日期 from
+    # quandantjgl', con=cnx) cnx.close() filterdf = df[df.编码.isin(targetbmlst)] resultdf = filterdf[(
+    # filterdf.收款日期.isnull()) & (filterdf.送达日期.notna())] resultdf['编码'] = resultdf['编码'].str.slice(0,7)
 
     rdffile, rdfstr = getresult(dfsort, 'khpx', args)
 
@@ -372,33 +379,33 @@ if __name__ == '__main__':
     # cnxp = lite.connect(dbpathquandan)
     # dataokay(cnxp)
     qrylst = [
-              '联合一百 捌区'
-              # , '天猫 飞翔'
-              # , '天猫 '
-              # , '飞翔 '
-              # , '1020082'
-              # , '阿里之门 叁拾叁区 捌区'
-              # , '零区 汉口'
-              # , '联合 零区 贰拾贰区 汉口'
-              # , '学三'
-              , '南苑'
-              , '七里'
-              # , '千佛手'
-              # , '翼社区 汉口'
-             ]
+        '联合一百 捌区'
+        # , '天猫 飞翔'
+        # , '天猫 '
+        # , '飞翔 '
+        # , '1020082'
+        # , '阿里之门 叁拾叁区 捌区'
+        # , '零区 汉口'
+        # , '联合 零区 贰拾贰区 汉口'
+        # , '学三'
+        , '南苑'
+        , '七里'
+        # , '千佛手'
+        # , '翼社区 汉口'
+    ]
 
     # searchqiankuan()
     for qry in qrylst:
-        rfile, rstr =  searchpinxiang(qry.split())
+        rfile, rstr = searchpinxiang(qry.split())
         print(rstr)
-        
+
     # for qry in qrylst:
-        # rfile, rstr =  searchqiankuan(qry.split())
-        # print(rstr)
-        
+    # rfile, rstr =  searchqiankuan(qry.split())
+    # print(rstr)
+
     # for qry in qrylst:
-        # rfile, rstr =  searchcustomer(qry.split())
-        # print(rstr)
+    # rfile, rstr =  searchcustomer(qry.split())
+    # print(rstr)
 
     # searchcut(rstr)
     # fl, flstr = searchcustomer(qry1.split())
