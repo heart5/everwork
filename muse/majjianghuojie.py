@@ -12,7 +12,7 @@ import pathmagic
 
 with pathmagic.context():
     from func.logme import log
-    from func.evernttest import trycounttimes2
+    from func.evernttest import trycounttimes2, getinivaluefromnote
     from func.first import getdirmain, touchfilepath2depth
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
 
@@ -120,25 +120,33 @@ def fetchmjfang(owner):
     # print(filename)
     # http://s0.lgmob.com/h5_whmj_qp/?d=217426
     ptn = re.compile("h5_whmj_qp/\\?d=(\\d+)")
-    # rstlst = []
+    # line in txt
+    # 2020-02-13 11:27:21	True	搓雀雀(群)白晔峰	Text	http://s0.lgmob.com/h5_whmj_qp/?d=852734
     with open(filename, "r", encoding='utf-8') as f:
         filelines = f.readlines()
-        rstlst = [getfangitem(line) for line in filelines if re.findall(ptn, line)]
+        fanglst = [line.strip() for line in filelines if re.search(ptn, line)]
+        rstlst = [[pd.to_datetime(lnspt[0]), re.findall(r'\b\w+\b', lnspt[2])[-1], int(lnspt[-1].split('=')[-1])] for
+                  line in fanglst if (lnspt := line.split('\t'))]
 
-    rstdf = pd.DataFrame(rstlst, columns=['time', 'roomid'])
+    rstdf = pd.DataFrame(rstlst, columns=['time', 'name', 'roomid'])
     # print(rstdf)
-    countdf = rstdf.groupby('roomid').count()['time']
+    # 房号发布次数
+    countdf = rstdf.groupby('roomid')['time'].count()
     # print(countdf)
-    maxtimedf = rstdf.groupby('roomid').max()['time']
-    mintimedf = rstdf.groupby('roomid').min()['time']
+    # 房号发布最近时间
+    maxtimedf = rstdf.groupby('roomid')['time'].max()
+    # 房号发布最早时间
+    mintimedf = rstdf.groupby('roomid')['time'].min()
+    # 房号发布人
+    namedf = rstdf.groupby('roomid')['name'].last()
 
-    cdf = pd.concat([countdf, maxtimedf, mintimedf], axis=1)
+    cdf = pd.concat([countdf, maxtimedf, mintimedf, namedf], axis=1)
     # print(cdf)
     cleandf = cdf
-    cleandf.columns = ['count', 'maxtime', 'mintime']
+    cleandf.columns = ['count', 'maxtime', 'mintime', 'name']
     cleandf['consumemin'] = (cleandf['maxtime'] - cleandf['mintime']).map(lambda x: int(x.total_seconds() / 60))
 
-    return cleandf
+    return cleandf.sort_values('mintime', ascending=False)
 
 
 def updateurllst(url):
@@ -194,25 +202,32 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     rstdf = recorddf
     rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
     rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
-    # print(rstdf.describe())
+    print(rstdf.head())
+    # print(rstdf.dtypes)
 
-    fanglst = fetchmjfang(ownername)
-    # print(fanglst)
-    fangclosedf = rstdf.groupby('roomid').max()['time']
+    fangdf = fetchmjfang(ownername)
+    # print(fangdf.dtypes)
+    fangclosedf = rstdf.groupby('roomid')['time'].max()
+    # print(fangclosedf)
     # 以房号为索引进行数据合并，默认join='uter'
-    fangfinaldf = pd.concat([fanglst, fangclosedf], axis=1)
+    fangfinaldf = pd.concat([fangdf, fangclosedf], axis=1).sort_values(by=['mintime'], ascending=False)
     fangfinaldf = fangfinaldf.rename(columns={'time': 'closetime'})
     # print(fangfinaldf) fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(lambda df: int((df['closetime'] - df[
     # 'maxtime']).total_seconds() / 60) if df['closetime'] else pd.NaT, axis=1)
     fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(
         lambda df: (df['closetime'] - df['maxtime']).total_seconds() // 60 if df['closetime'] else pd.NaT, axis=1)
+    # print(fangfinaldf[fangfinaldf['mintime'].isnull()])
 
     # 根据开关，选择输出当天或者全部数据结果
     if recentday:
         zuijindatestart = pd.to_datetime(rstdf['time'].max().strftime("%Y-%m-%d"))
         rstdf = rstdf[rstdf.time >= zuijindatestart]
-        fangfinaldf = fangfinaldf[fangfinaldf.closetime >= zuijindatestart]
-    # print(fangfinaldf)
+        fangmindf = fangfinaldf[fangfinaldf.mintime >= zuijindatestart]
+        fangclsdf = fangfinaldf[fangfinaldf.closetime >= zuijindatestart]
+        fangfinaldf = pd.concat([fangmindf, fangclsdf])
+        fangfinaldf.drop_duplicates(['closetime'], inplace=True)
+    print(fangfinaldf[fangfinaldf['mintime'].isnull()])
+    print(fangfinaldf)
     # print(rstdf)
     outlst = list()
     rgp = rstdf.groupby(['guest']).count()
@@ -228,16 +243,20 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     def formatdfstr(ddf):
         return '\n'.join(str(ddf).split('\n')[1:-1])
 
+    if shownumber := getinivaluefromnote('game', 'huojieshow'):
+        pass
+    else:
+        shownumber = 3
     kaifang = rstdf[rstdf.host == True].groupby(['guest']).count()['host'].sort_values(ascending=False)
-    outlst.append(f"开房积极分子排名：\n{formatdfstr(kaifang)}")
+    outlst.append(f"开房积极分子排名：\n{formatdfstr(kaifang[:shownumber])}")
     zimo = rstdf.groupby(['guest']).sum()['zimo'].sort_values(ascending=False)
-    outlst.append(f"自摸技术能手排名：\n{formatdfstr(zimo)}")
+    outlst.append(f"自摸技术能手排名：\n{formatdfstr(zimo[:shownumber])}")
     dianpao = rstdf.groupby(['guest']).sum()['dianpao'].sort_values(ascending=False)
-    outlst.append(f"最被吐槽的炮王排名：\n{formatdfstr(dianpao)}")
+    outlst.append(f"最被吐槽的炮王排名：\n{formatdfstr(dianpao[:shownumber])}")
     jingding = rstdf.groupby(['guest']).sum()['jingding'].sort_values(ascending=False)
-    outlst.append(f"最有含金量的金顶排名：\n{formatdfstr(jingding)}")
+    outlst.append(f"最有含金量的金顶排名：\n{formatdfstr(jingding[:shownumber])}")
     shuying = rstdf.groupby(['guest']).sum()['score'].sort_values(ascending=False)
-    shuyingstr = f"输赢光荣榜：\n{formatdfstr(shuying)}"
+    shuyingstr = f"大赢家光荣榜：\n{formatdfstr(shuying[:shownumber])}"
     outlst.append(shuyingstr)
 
     # 根据开关，输出简版输赢信息
@@ -254,7 +273,7 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
 
     playtimedf = pd.DataFrame(playtimelst, columns=['name', 'mins']).sort_values(['mins'], ascending=False)
     print(playtimedf)
-    outlst.append(f"劳模榜（作战分钟数）：\n{formatdfstr(playtimedf[['name', 'mins']].reset_index(drop=True))}")
+    outlst.append(f"劳模榜（作战分钟数）：\n{formatdfstr(playtimedf[['name', 'mins']].reset_index(drop=True)[:shownumber])}")
 
     outstr = '\n\n'.join(outlst)
 
@@ -271,6 +290,9 @@ if __name__ == '__main__':
 
     own = '白晔峰'
 
+    # fangdf = fetchmjfang(own)
+    # print(fangdf)
+
     splst = fetchmjurl(own)
     for sp in splst[:4]:
         print(sp)
@@ -278,7 +300,7 @@ if __name__ == '__main__':
     for sp in splst:
         updateurllst(sp)
 
-    rst = zhanjidesc(own)
+    rst = zhanjidesc(own, False, False)
     print(rst)
 
     # eurl = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eca8b4c6e0bc4313c3a4658fc5b85720"
