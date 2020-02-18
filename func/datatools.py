@@ -38,6 +38,7 @@ def getfilepathnameext(tfile):
 def write2txt(weathertxtfilename, inputitemlist):
     # print(inputitemlist)
     fileobject = open(weathertxtfilename, 'w', encoding='utf-8')
+    # fileobject = open(weathertxtfilename, 'w', encoding='ISO8859-1')
     if inputitemlist is not None:
         for item in inputitemlist:
             # print(item)
@@ -49,8 +50,15 @@ def readfromtxt(weathertxtfilename):
     if not os.path.exists(weathertxtfilename):
         touchfilepath2depth(weathertxtfilename)
         write2txt(weathertxtfilename, None)
+    items = []
+    # with open(weathertxtfilename, 'r', encoding='ISO8859-1') as ftxt:
     with open(weathertxtfilename, 'r', encoding='utf-8') as ftxt:
         items = [line.strip() for line in ftxt]  # strip()，去除行首行尾的空格
+        # for line in ftxt:
+            # try:
+                # items.append(line.strip())
+            # except UnicodeDecodeError as ude:
+                # log.error(f"{line}\n{ude}")
     return items
 
 
