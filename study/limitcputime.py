@@ -19,4 +19,6 @@ def set_max_memory(size):
     soft, hard = resource.getrlimit(resource.RLIMIT_AS)
     resource.setrlimit(resource.RLIMIT_AS, (size, hard))
     
+print("start booting")
 set_max_runtime(10)
+print("home is warm.")
