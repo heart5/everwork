@@ -5,7 +5,7 @@
 import binascii
 import datetime
 import hashlib
-import os
+# import os
 import re
 import time
 # import nltk
@@ -21,13 +21,14 @@ from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_M
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfp, inifilepath, getcfp, getcfpoptionvalue, setcfpoptionvalue
+    from func.configpr import cfp, inifilepath, getcfpoptionvalue, setcfpoptionvalue
     from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.nettools import trycounttimes2
     # from etc.getid import getid
 
 # print(f"{__file__} is loading now...")
+
 
 def get_notestore():
     """
@@ -169,7 +170,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     # neirong= "<pre>" + neirong + "</pre>"
 
     # 去除控制符
-    neirong = re.sub('[\x00-\x08|\x0b-\x0c|\x0e-\x1f]', '', neirong)
+    neirong = re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f]', '', neirong)
     neirong = re.sub('&', 'and连接符', neirong)
 
     nbody += neirong
@@ -263,11 +264,11 @@ def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000)
     return items
 
 
-def getnotecontent(guid:str):
-    note_store = get_notestore()
-    soup = BeautifulSoup(note_store.getNoteContent(guid), "html.parser")
+def getnotecontent(guid: str):
+    ns = get_notestore()
+    soup = BeautifulSoup(ns.getNoteContent(guid), "html.parser")
     # print(soup)
-    
+
     return soup
 
 
@@ -438,18 +439,28 @@ def p_notebookattributeundertoken(notebook):
     :param notebook:
     :return:
     """
-    print('名称：' + notebook.name, end='\t')  # phone
-    # f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
-    print('guid：' + notebook.guid, end='\t')
-    print('更新序列号：' + str(notebook.updateSequenceNum), end='\t')  # 8285
-    print('默认笔记本：' + str(notebook.defaultNotebook), end='\t')  # False
-    print('创建时间：' + timestamp2str(int(notebook.serviceCreated / 1000)),
-          end='\t')  # 2010-09-15 11:37:43
-    print('更新时间：' + timestamp2str(int(notebook.serviceUpdated / 1000)),
-          end='\t')  # 2016-08-29 19:38:24
-    # print '发布中\t', notebook.publishing  #这种权限的调用返回None
-    # print '发布过\t', notebook.published  #这种权限的调用返回None
-    print('笔记本组：' + str(notebook.stack))  # 手机平板
+    rstdict = dict()
+    rstdict['名称'] = notebook.name  # phone
+    rstdict['guid'] = notebook.guid
+    rstdict['更新序列号'] = notebook.updateSequenceNum
+    rstdict['默认笔记本'] = notebook.defaultNotebook
+    rstdict['创建时间'] = timestamp2str(int(notebook.serviceCreated / 1000))
+    rstdict['更新时间'] = timestamp2str(int(notebook.serviceUpdated / 1000))
+    rstdict['笔记本组'] = notebook.stack
+
+    # print('名称：' + notebook.name, end='\t')  # phone
+    # # f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
+    # print('guid：' + notebook.guid, end='\t')
+    # print('更新序列号：' + str(notebook.updateSequenceNum), end='\t')  # 8285
+    # print('默认笔记本：' + str(notebook.defaultNotebook), end='\t')  # False
+    # print('创建时间：' + timestamp2str(int(notebook.serviceCreated / 1000)),
+    #       end='\t')  # 2010-09-15 11:37:43
+    # print('更新时间：' + timestamp2str(int(notebook.serviceUpdated / 1000)),
+    #       end='\t')  # 2016-08-29 19:38:24
+    # # print '发布中\t', notebook.publishing  #这种权限的调用返回None
+    # # print '发布过\t', notebook.published  #这种权限的调用返回None
+    # print('笔记本组：' + str(notebook.stack))  # 手机平板
+
     # print '共享笔记本id\t', notebook.sharedNotebookIds  #这种权限的调用返回None
     # print '共享笔记本\t', notebook.sharedNotebooks  #这种权限的调用返回None
     # print '商务笔记本\t', notebook.businessNotebook  #这种权限的调用返回None
@@ -462,6 +473,10 @@ def p_notebookattributeundertoken(notebook):
     # noSetParentTag=None, noCreateNotes=None, noEmailNotes=True, noReadNotes=None, noExpungeNotes=None,
     # noShareNotes=None, noSendMessageToRecipients=None)
     # print '接受人设定\t', notebook.recipientSettings  #这种权限的调用没有返回这个值，报错
+
+    # print(rstdict)
+
+    return rstdict
 
 
 def p_noteattributeundertoken(note):
@@ -508,9 +523,13 @@ def findnotebookfromevernote():
     notebooks = note_store.listNotebooks()
     # p_notebookattributeundertoken(notebooks[-1])
 
+    rstdf = pd.DataFrame()
     for x in notebooks:
-        p_notebookattributeundertoken(x)
+        rstdf = rstdf.append(pd.Series(p_notebookattributeundertoken(x)), ignore_index=True)
 
+    # print(rstdf)
+
+    return rstdf
 
 @trycounttimes2('evernote服务器')
 def readinifromnote():
@@ -578,25 +597,25 @@ def enapistartlog():
     ENtimes 最新调用次数
     ENAPIlasttime   最新调用时间记录
     """
-    ENtimes = getcfpoptionvalue('everwork', 'evernote', 'apicount')
-    ENAPIlasttime = pd.to_datetime(getcfpoptionvalue('everwork', 'evernote', 'apilasttime'))
+    entimes = getcfpoptionvalue('everwork', 'evernote', 'apicount')
+    enapilasttime = pd.to_datetime(getcfpoptionvalue('everwork', 'evernote', 'apilasttime'))
     apitime = getapitimesfromlog()
     # print(ENAPIlasttime, apitime)
     if apitime:
         # 比较ini和log中API存档的时间，解决异常退出时调用次数无法准确反映的问题
-        if apitime[0] > ENAPIlasttime:
-            diff = apitime[0] - ENAPIlasttime
+        if apitime[0] > enapilasttime:
+            diff = apitime[0] - enapilasttime
         else:
-            diff = ENAPIlasttime - apitime[0]
+            diff = enapilasttime - apitime[0]
         # print(diff.seconds)
         if diff.seconds > 60:
             log.info('程序上次异常退出，调用log中的API数据[%s,%d]' %
                      (str(apitime[0]), apitime[1]))
-            ENAPIlasttime = apitime[0]
-            ENtimes = apitime[1] + 1
+            enapilasttime = apitime[0]
+            entimes = apitime[1] + 1
     # writeini()
 
-    return ENtimes, ENAPIlasttime
+    return entimes, enapilasttime
 
 
 token = getcfpoptionvalue('everwork', 'evernote', 'token')
@@ -609,7 +628,8 @@ if __name__ == '__main__':
     print(nost)
     readinifromnote()
     # writeini()
-    findnotebookfromevernote()
+    ntdf = findnotebookfromevernote()
+    print(ntdf)
 
     # 查找主题包含关键词的笔记
     # notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
