@@ -1,6 +1,6 @@
 # encoding:utf-8
 """
-功能描述
+首函，用于定位相对目录，丰富工作目录路径，还有构建路径的基本函数
 """
 import os
 import sys
@@ -24,6 +24,8 @@ def touchfilepath2depth(filepath: Path):
     # if not os.path.exists(str(filepath)):
     #     fp = open(str(filepath), 'w', encoding='utf-8')
     #     fp.close()
+
+    return filepath
 
 
 def getdirmain():
