@@ -443,9 +443,10 @@ def p_notebookattributeundertoken(notebook):
     rstdict['名称'] = notebook.name  # phone
     rstdict['guid'] = notebook.guid
     rstdict['更新序列号'] = notebook.updateSequenceNum
-    rstdict['默认笔记本'] = notebook.defaultNotebook
-    rstdict['创建时间'] = timestamp2str(int(notebook.serviceCreated / 1000))
-    rstdict['更新时间'] = timestamp2str(int(notebook.serviceUpdated / 1000))
+    rstdict['默认笔记本']: bool = notebook.defaultNotebook
+    # print(type(rstdict['默认笔记本']), rstdict['默认笔记本'])
+    rstdict['创建时间'] = pd.to_datetime((int(notebook.serviceCreated / 1000)))
+    rstdict['更新时间'] = pd.to_datetime((int(notebook.serviceUpdated / 1000)))
     rstdict['笔记本组'] = notebook.stack
 
     # print('名称：' + notebook.name, end='\t')  # phone
@@ -529,7 +530,11 @@ def findnotebookfromevernote():
 
     # print(rstdf)
 
+    rstdf['默认笔记本'] = rstdf['默认笔记本'].astype(bool)
+    rstdf.set_index('guid', inplace=True)
+
     return rstdf
+
 
 @trycounttimes2('evernote服务器')
 def readinifromnote():
