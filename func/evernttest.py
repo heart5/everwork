@@ -222,7 +222,7 @@ def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000)
     :param notebookguid: 笔记本的guid
     :param titlefind: 关键词
     :param notecount: 搜索结果数量限值
-    :return: 列表，包含形如[noteguid, notetitle]的list
+    :return: 列表，包含形如[noteguid, notetitle, note.updateSequenceNum]的list
     """
     global note_store
     note_store = get_notestore()
@@ -265,6 +265,11 @@ def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000)
 
 
 def getnotecontent(guid: str):
+    """
+    获取笔记内容
+    :param guid:
+    :return:
+    """
     ns = get_notestore()
     soup = BeautifulSoup(ns.getNoteContent(guid), "html.parser")
     # print(soup)
@@ -437,30 +442,20 @@ def p_notebookattributeundertoken(notebook):
     """
     测试笔记本（notebook）数据结构每个属性的返回值,开发口令（token）的方式调用返回如下
     :param notebook:
-    :return:
+    :return:dict
     """
     rstdict = dict()
     rstdict['名称'] = notebook.name  # phone
-    rstdict['guid'] = notebook.guid
-    rstdict['更新序列号'] = notebook.updateSequenceNum
-    rstdict['默认笔记本']: bool = notebook.defaultNotebook
+    rstdict['guid'] = notebook.guid  # f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
+    rstdict['更新序列号'] = notebook.updateSequenceNum  # 8285
+    rstdict['默认笔记本']: bool = notebook.defaultNotebook  # False
     # print(type(rstdict['默认笔记本']), rstdict['默认笔记本'])
-    rstdict['创建时间'] = pd.to_datetime((int(notebook.serviceCreated / 1000)))
-    rstdict['更新时间'] = pd.to_datetime((int(notebook.serviceUpdated / 1000)))
-    rstdict['笔记本组'] = notebook.stack
+    rstdict['创建时间'] = pd.to_datetime((int(notebook.serviceCreated / 1000)))  # 2010-09-15 11:37:43
+    rstdict['更新时间'] = pd.to_datetime((int(notebook.serviceUpdated / 1000)))  # 2016-08-29 19:38:24
+    rstdict['笔记本组'] = notebook.stack  # 手机平板
 
-    # print('名称：' + notebook.name, end='\t')  # phone
-    # # f64c3076-60d1-4f0d-ac5c-f0e110f3a69a
-    # print('guid：' + notebook.guid, end='\t')
-    # print('更新序列号：' + str(notebook.updateSequenceNum), end='\t')  # 8285
-    # print('默认笔记本：' + str(notebook.defaultNotebook), end='\t')  # False
-    # print('创建时间：' + timestamp2str(int(notebook.serviceCreated / 1000)),
-    #       end='\t')  # 2010-09-15 11:37:43
-    # print('更新时间：' + timestamp2str(int(notebook.serviceUpdated / 1000)),
-    #       end='\t')  # 2016-08-29 19:38:24
-    # # print '发布中\t', notebook.publishing  #这种权限的调用返回None
-    # # print '发布过\t', notebook.published  #这种权限的调用返回None
-    # print('笔记本组：' + str(notebook.stack))  # 手机平板
+    # print('发布中\t', notebook.publishing)     # 这种权限的调用返回None
+    # print('发布过\t', notebook.published)      # 这种权限的调用返回None
 
     # print '共享笔记本id\t', notebook.sharedNotebookIds  #这种权限的调用返回None
     # print '共享笔记本\t', notebook.sharedNotebooks  #这种权限的调用返回None
@@ -518,7 +513,18 @@ def p_noteattributeundertoken(note):
 
 
 def findnotebookfromevernote():
-    # 列出账户中的全部笔记本
+    """
+    列出所有笔记本
+    :return: rstdf，
+    DataFrame格式，dtypes
+    创建时间     datetime64[ns]
+    名称               object
+    更新序列号           float64
+    更新时间     datetime64[ns]
+    笔记本组             object
+    默认笔记本              bool
+    dtype: object
+    """
     global note_store
     note_store = get_notestore()
     notebooks = note_store.listNotebooks()
@@ -587,12 +593,21 @@ def writeini2note():
 
 
 def findsomenotest2showornote(nbguid, keyword, newnote=False):
+    """
+    获取指定笔记本中主题包含某关键词的笔记
+    :param nbguid: 笔记本guid
+    :param keyword: 关键词
+    :param newnote: 是否生成新的笔记来存储显示查询结果
+    :return: list，包含[guid, title, updatenum]的list
+    """
     tokenfst = getcfpoptionvalue('everwork', 'evernote', 'token')
     notesfind = findnotefromnotebook(tokenfst, nbguid, keyword)
     if newnote:
         makenote(tokenfst, get_notestore(), f"“{keyword}》”记列表", str(notesfind))
     else:
         print(notesfind)
+
+    return notesfind
 
 
 def enapistartlog():
