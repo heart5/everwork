@@ -610,6 +610,25 @@ def findsomenotest2showornote(nbguid, keyword, newnote=False):
     return notesfind
 
 
+def getsampledffromdatahouse(keyword: str, notebookstr='datahouse', firstcolumn=True):
+    """
+    封装出直接获取示例数据集的函数
+    :param keyword: 关键词
+    :param notebookstr: 笔记本名称，默认是“datahouse”
+    :param firstcolumn: 首行是否包含标题
+    :return: DataFrame
+    """
+    ntsdf = findnotebookfromevernote()
+    ntguid = ntsdf.loc[ntsdf.名称 == notebookstr].index.values[-1]
+    noteguid = findsomenotest2showornote(ntguid, keyword)[0][0]
+    soup = getnotecontent(noteguid)
+    soupstrlst = [item.text.split(',') for item in soup.find_all('div') if len(item.text) > 0]
+    if firstcolumn:
+        return pd.DataFrame(soupstrlst[1:], columns=soupstrlst[0])
+    else:
+        return pd.DataFrame(soupstrlst)
+
+
 def enapistartlog():
     """
     比较evenote API调用时间和log记录时间，判断是否续用API的调用次数
@@ -648,8 +667,9 @@ if __name__ == '__main__':
     print(nost)
     readinifromnote()
     # writeini()
-    ntdf = findnotebookfromevernote()
-    print(ntdf)
+    # ntdf = findnotebookfromevernote()
+    # print(ntdf)
+    print(getsampledffromdatahouse('火界'))
 
     # 查找主题包含关键词的笔记
     # notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
