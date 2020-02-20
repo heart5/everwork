@@ -19,7 +19,7 @@
 # + [markdown] toc-hr-collapsed=true
 # ## 构建DataFrame
 
-# + [markdown] toc-hr-collapsed=true
+# + [markdown] toc-hr-collapsed=true toc-hr-collapsed=true
 # ### 从字典构建DataFrame
 
 # + pycharm={"is_executing": false, "name": "#%%\n"}
@@ -61,9 +61,10 @@ df2
 
 # + jupyter={"outputs_hidden": false} pycharm={"is_executing": false, "name": "#%%\n"}
 df2.dtypes
-# -
 
+# + [markdown] toc-hr-collapsed=true
 # ## DataFrame重置索引df.reset_index()
+# -
 
 # #### 单索引的情况
 
@@ -127,9 +128,12 @@ dfm.index
 
 # + jupyter={"outputs_hidden": false} pycharm={"is_executing": false, "name": "#%%\n"}
 dfm.index.values
+
+# + [markdown] toc-hr-collapsed=false
+# ## DataFrame值修改、选择和过滤
 # -
 
-# ## Pandas DataFrame值修改
+# ### Pandas DataFrame值修改
 # When setting values in a pandas object, care must be taken to avoid what is called chained indexing. 
 #
 # 要修改pandas--DataFrame中的值要注意避免在链式索引上得到的DataFrame的值
@@ -151,15 +155,87 @@ dfmi.loc[:,('one','first')]
 dfmi.iloc[:,[0, 3]] = 'Just a test'
 dfmi
 
-# ### 数据集过滤
+# ### 数据集中数据和选取和过滤
+
+# #### 数据准备
 
 import sys
+import pandas as pd
+import numpy as np
 import pathmagic
 with pathmagic.context():
-    print(sys.path)
     from func.first import dirmainpath
     from func.evernttest import getsampledffromdatahouse
 sampledf = getsampledffromdatahouse('火界')
+backsampledf.loc[:, :] = sampledf.loc[:, :]
+
+sampledf.loc[:, 'maxtime'] = pd.to_datetime(sampledf['maxtime'])
+sampledf.loc[:, 'mintime'] = pd.to_datetime(sampledf['mintime'])
+sampledf.loc[:, 'closetime'] = pd.to_datetime(sampledf['closetime'])
+def convert2int(x):
+    if type(x) == str:
+        if len(x) == 0:
+            return np.nan
+        else:
+            return int(float(x))
+    return int(float(x))
+sampledf.loc[:, 'roomid'] = sampledf['roomid'].apply(lambda x: convert2int(x))
+sampledf.loc[:, 'count'] = sampledf['count'].apply(lambda x: convert2int(x))
+sampledf.loc[:, 'consumemin'] = sampledf['consumemin'].apply(lambda x: convert2int(x))
+sampledf.loc[:, 'playmin'] = sampledf['playmin'].apply(lambda x: convert2int(x))
+sampledf
+
+sampledf.dtypes
+
+# #### 通过[]来选取
+
+# + [markdown] toc-hr-collapsed=true
+# ##### 选取一列或几列
+# -
+
+sampledf['mintime']
+
+sampledf[['mintime', 'maxtime', 'closetime']]
+
+# ##### 选取一行或几行
+
+sampledf[0:3]
+
+# #### 通过loc选取数据
+
+# ##### 单索引的loc用法
+
+sampledf.loc[0:5,['roomid', 'count']]
+
+# ##### 多重索引的loc用法
+
+sampledf4grp = sampledf.copy(deep=True)
+sampledf4grp.loc[:, 'closedate']= sampledf4grp['closetime'].apply(lambda x: pd.to_datetime(x.strftime("%Y-%m-%d")) if x is not pd.NaT else x)
+grpcount = sampledf4grp.groupby(['closedate', 'name']).count()['roomid']
+grpcount
+
+grpcount.loc['2020-02-11', '徐晓锋']
+
+# #### 通过iloc选取数据
+
+sampledf.iloc[0:5,0:2]
+
+# #### 通过iat获取某一个cell的值
+
+sampledf.iat[1, 3]
+
+# #### 通过[]过滤一些值
+# []中是一个boolean 表达式，凡是计算为 True 的行就会被选取。
+
+sampledf[sampledf['count'] > 2]
+
+sampledf[sampledf.apply(lambda x: x['maxtime'] > x['mintime'], axis=1)]
+
+# #### 使用isin
+# 1. 在过滤条件前加~，就是取反（not）的意思
+# 2. 过滤条件可以取或（or）|,取且（and）&
+
+sampledf[(~(sampledf['name'].isin(['余晗'])))&(sampledf['mintime'].notnull())]
 
 # ## pd常用函数和功能
 
@@ -177,7 +253,9 @@ nndf[nndf['age'].notnull()]
 
 nndf.isnull()
 
+# + [markdown] toc-hr-collapsed=false
 # ### 连接数据集，concat、merge
+# -
 
 # Pandas操作数据集非常的方便，其中体现在就是有些在SQL语句中常用的方法，比如在合并数据集、left join、right join、full join、inner join，在Pandas中都可以使用concat和merge简单的实现
 #
@@ -211,7 +289,7 @@ df4 = pd.DataFrame({'B': ['B2', 'B3', 'B6', 'B7'],
                     index=[2, 3, 6, 7])
 df4
 
-# + [markdown] toc-hr-collapsed=true
+# + [markdown] toc-hr-collapsed=true toc-hr-collapsed=true
 # #### 使用contact
 # -
 
@@ -321,6 +399,25 @@ joinlst = ['inner', 'outer']
 for jstyle in joinlst:
     print(jstyle+'\n', leftother.join(right, how=jstyle, on='key'))
 
-# ### 数据过滤
+# ### 数据聚合和分组运算
+
+# pandas提供了一个灵活高效的groupby功能，它使你能以一种自然的方式对数据集进行切片、切块、摘要等操作。根据一个或多个键（可以是函数、数组或DataFrame列名）拆分pandas对象。计算分组摘要统计，如计数、平均值、标准差，或用户自定义函数。对DataFrame的列应用各种各样的函数。应用组内转换或其他运算，如规格化、线性回归、排名或选取子集等。计算透视表或交叉表。执行分位数分析以及其他分组分析。
+
+sampledf.dtypes
+
+sampledf[:5]
+
+# lambda 中如果有if，则必须有else配对
+sampledf.loc[:, 'closedate'] = sampledf['closetime'].apply(lambda x: pd.to_datetime(x.strftime("%Y-%m-%d")) if (x is not pd.NaT) else x)
+sampledf
+
+grpcounts = sampledf.groupby([sampledf['closedate'], sampledf['name']]).count()['roomid']
+grpcounts.size, type(grpcounts), grpcounts
+
+grpcounts.loc["2020-02-11", '余晗']
+
+grpcounts.unstack()
+
+grpcounts.reset_index('closedate')['何龙飞':'徐晓锋']
 
 
