@@ -210,22 +210,23 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     fangclosedf = rstdf.groupby('roomid')['time'].max()
     # print(fangclosedf)
     # 以房号为索引进行数据合并，默认join='uter'
-    fangfinaldf = pd.concat([fangdf, fangclosedf], axis=1).sort_values(by=['mintime'], ascending=False)
+    fangfinaldf: pd.DataFrame = pd.concat([fangdf, fangclosedf], axis=1).sort_values(by=['mintime'], ascending=False)
     fangfinaldf = fangfinaldf.rename(columns={'time': 'closetime'})
     # print(fangfinaldf) fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(lambda df: int((df['closetime'] - df[
     # 'maxtime']).total_seconds() / 60) if df['closetime'] else pd.NaT, axis=1)
     fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(
         lambda df: (df['closetime'] - df['maxtime']).total_seconds() // 60 if df['closetime'] else pd.NaT, axis=1)
     # print(fangfinaldf[fangfinaldf['mintime'].isnull()])
+    fangfinaldf.to_csv(csvfile := touchfilepath2depth(getdirmain() / 'data' / 'game' / 'huojiemajiangfang.csv'))
 
     # 根据开关，选择输出当天或者全部数据结果
     if recentday:
         zuijindatestart = pd.to_datetime(rstdf['time'].max().strftime("%Y-%m-%d"))
         rstdf = rstdf[rstdf.time >= zuijindatestart]
-        fangmindf = fangfinaldf[fangfinaldf.mintime >= zuijindatestart]
-        fangclsdf = fangfinaldf[fangfinaldf.closetime >= zuijindatestart]
-        fangfinaldf = pd.concat([fangmindf, fangclsdf])
-        fangfinaldf.drop_duplicates(['closetime'], inplace=True)
+        fangfilter = fangfinaldf.apply(lambda x: x['mintime'] >= zuijindatestart or x['closetime'] >= zuijindatestart,
+                                       axis=1)
+        # print(fangfilter)
+        fangfinaldf = fangfinaldf[fangfilter]
     print(fangfinaldf[fangfinaldf['mintime'].isnull()])
     print(fangfinaldf)
     # print(rstdf)
@@ -273,7 +274,7 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
 
     playtimedf = pd.DataFrame(playtimelst, columns=['name', 'mins']).sort_values(['mins'], ascending=False)
     print(playtimedf)
-    outlst.append(f"劳模榜（作战分钟数）：\n{formatdfstr(playtimedf[['name', 'mins']].reset_index(drop=True)[:shownumber])}")
+    outlst.append(f"劳模榜（作战分钟数）：\n{formatdfstr(playtimedf[['name', 'mins']].reset_index(drop=True)[:shownumber + 1])}")
 
     outstr = '\n\n'.join(outlst)
 
@@ -300,7 +301,7 @@ if __name__ == '__main__':
     for sp in splst:
         updateurllst(sp)
 
-    rst = zhanjidesc(own, False, False)
+    rst = zhanjidesc(own, True, False)
     print(rst)
 
     # eurl = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eca8b4c6e0bc4313c3a4658fc5b85720"
