@@ -15,7 +15,7 @@ import sys
 
 class context:
     def __enter__(self):
-        sys.path.extend(['..', '.'])
+        sys.path.extend(['../../', '..', '.'])
 
     def __exit__(self, *args):
         pass
