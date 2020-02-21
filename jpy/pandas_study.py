@@ -167,7 +167,7 @@ with pathmagic.context():
     from func.first import dirmainpath
     from func.evernttest import getsampledffromdatahouse
 sampledf = getsampledffromdatahouse('火界')
-backsampledf.loc[:, :] = sampledf.loc[:, :]
+backsampledf = sampledf.copy(deep=True)
 
 sampledf.loc[:, 'maxtime'] = pd.to_datetime(sampledf['maxtime'])
 sampledf.loc[:, 'mintime'] = pd.to_datetime(sampledf['mintime'])
@@ -253,7 +253,7 @@ nndf[nndf['age'].notnull()]
 
 nndf.isnull()
 
-# + [markdown] toc-hr-collapsed=false
+# + [markdown] toc-hr-collapsed=true
 # ### 连接数据集，concat、merge
 # -
 
@@ -411,13 +411,128 @@ sampledf[:5]
 sampledf.loc[:, 'closedate'] = sampledf['closetime'].apply(lambda x: pd.to_datetime(x.strftime("%Y-%m-%d")) if (x is not pd.NaT) else x)
 sampledf
 
-grpcounts = sampledf.groupby([sampledf['closedate'], sampledf['name']]).count()['roomid']
-grpcounts.size, type(grpcounts), grpcounts
+# #### 单列分组
+
+sampledf.groupby('closedate').count()['roomid']
+
+sampledf.groupby('closedate').count()['roomid'].index
+
+# #### 多列分组
+
+grpcounts = sampledf[['roomid', 'playmin']].groupby([sampledf['closedate'], sampledf['name']]).count()
+grpcounts.size, type(grpcounts), grpcounts, grpcounts.index[:3]
+
+# 通过两个键对数据进行了分组，得到的Series或DataFrame具有一个层次化索引（由唯一的键对组成）。
+# 值可以通过loc提取
+
+grpcounts.loc["2020-02-10":"2020-02-12"]
 
 grpcounts.loc["2020-02-11", '余晗']
 
+# - [ ] 提取层次索引的第二层无法实现
+#
+
+# 分组键可以是任何**长度适当**的数组
+
+firstlst, secondlst = list(), list()
+for i in range(18):
+    firstlst.extend(np.random.permutation(5))
+    secondlst.extend(np.random.permutation(5))
+firstlst = firstlst[:-1]
+secondlst = secondlst[:-1]
+print(firstlst, secondlst)
+print(sampledf[['roomid', 'playmin']].groupby([firstlst, secondlst]).count())
+
+# unstack解堆，可以把层次索引的第二层翻转成列标题
+
 grpcounts.unstack()
 
+# 拆离层次索引的某层到数据集中，一般在输出的时候用，便于浏览
+
 grpcounts.reset_index('closedate')['何龙飞':'徐晓锋']
+
+# #### 将列名（可以是字符串、数字或其他Python对象）用作分组
+
+grptwo = sampledf.groupby(['closedate', 'name']).count()
+grptwo
+
+grptwo.groupby(level='closedate').count()
+
+# 如何使用groupby，它都会有一个size方法，可以返回一个含有分组大小的Series
+
+sampledf.groupby(['closedate', 'name']).size()
+
+# #### groupby对象支持迭代
+
+# +
+for (k1, k2), group in sampledf.groupby(['closedate', 'name'])[['roomid', 'playmin']]:
+#     print(k1, k2)
+#     print(group)
+    pass
+
+iamkey = list(sampledf.groupby(['closedate', 'name']))[0][0]
+print(iamkey)
+dict(list(sampledf.groupby(['closedate', 'name'])))[iamkey]
+# -
+
+# 获取数据用loc，key的话需要构造合适格式的数据
+
+shuanggrp = sampledf.groupby(['closedate', 'name'])[['roomid', 'playmin']].count()
+shuanggrp.loc[pd.to_datetime('2020-2-11'), '徐晓锋']
+
+# 对这些数据片段做任何操作。比如：将这些数据片段做成一个字典
+
+pieces = dict(list(sampledf.groupby('name')))
+type(pieces['余晗']), pieces['余晗']
+
+# #### axis=1，横向分组
+
+grphengxiang = sampledf.groupby(sampledf.dtypes, axis=1)
+pieceshengxiang = list(grphengxiang)
+grphengxiang.count()
+
+# #### 通过字典或Series分组
+
+mapping = {'roomid':'shuzhi', 'count':'shuzhi', 'maxtime':'shijian', 'mintime':'shijian', 'name':'zifuchuan', 'consumetime':'shuzhi', 'closetime':'shijian', 'playmin':'shuzhi', 'closedate':'shijian'}
+dict(list(sampledf.groupby(mapping, axis=1)))['shuzhi'].sum()
+
+mapseries = pd.Series(mapping)
+mapseries
+
+sampledf.groupby(mapseries, axis=1).count()
+
+# #### 通过函数进行分组
+
+# 相较于字典或Series，Python函数在定义分组映射关系时可以更有创意且更为抽象。任何被当做分组键的函数都会在各个**索引值**上被调用一次，其返回值就会被用作分组名称。
+
+sampleother = sampledf.copy(deep=True)
+
+sampleother = sampleother.set_index('closedate')
+
+
+def fenzudate(x):
+    if x < pd.to_datetime('2020-02-10'):
+        return 'shangxun'
+    else:
+        return 'zhongxun'
+
+
+sampleother.groupby(fenzudate).count()
+
+jikaifou = sampledf['count'].apply(lambda x: 'jikai' if x == 1.0 else 'tuoyan')
+
+sampleother.groupby([fenzudate, list(jikaifou)]).count()
+
+# #### 根据索引级别进行分组
+
+# 层次化索引数据集最方便的地方在于它能够根据索引级别进行聚合。要实现该目的，通过level关键字传入级别编号或名称即可。
+
+columns = pd.MultiIndex.from_arrays([list(mapping.values()), list(mapping.keys())], names=['guishu', 'name'])
+columns
+
+sampleanother = pd.DataFrame(sampledf.values, columns=columns)
+sampleanother
+
+sampleanother.groupby(level='guishu', axis=1).count()
 
 
