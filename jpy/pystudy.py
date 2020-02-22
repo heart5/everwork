@@ -377,7 +377,7 @@ dit = {'name':'zxf',
        'address':'shanghai'}
  
 # 将字典的key转换成列表
-lst = list(dit.keys())
+lst = list(dit)
 print(lst)  # ['name', 'age', 'gender', 'address']
  
 # 将字典的value转换成列表
