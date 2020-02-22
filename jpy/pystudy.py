@@ -152,7 +152,7 @@ test(a='2', b='you are great')  # TypeError: test() takes 0 positional arguments
 # cond(yes)->e
 # cond(no)->op
 # ```
-# + [markdown] toc-hr-collapsed=false
+# + [markdown] toc-hr-collapsed=false toc-hr-collapsed=false
 # ## re 正则
 # -
 
@@ -346,5 +346,43 @@ print(ptn, re.findall(ptn, "白晔峰")[-1])
 fangidstr = fangtabstr.split("\t")[-1]
 print(re.findall("d=(\d+)", fangidstr)[-1])
 
+# ## 列表和字典之间的相互转换
+
+
+# ### 使用zip函数
+
+a = ['a1','a2','a3','a4']
+b = ['b1','b2','b3']
+d = zip(a,b)
+print(dict(d)) 
+
+# ### 使用嵌套列表转换成字典
+
+a = ['a1','a2']
+b = ['b1','b2']
+c = [a,b]
+print(dict(c)) # {'a1': 'a2', 'b1': 'b2'}
+# 相当于遍历子列表，如下
+dit = {}
+for i in c:
+    dit[i[0]] = i[1]
+print(dit)
+
+# 字典转换成列表
+
+# +
+dit = {'name':'zxf',
+       'age':'22',
+       'gender':'male',
+       'address':'shanghai'}
+ 
+# 将字典的key转换成列表
+lst = list(dit.keys())
+print(lst)  # ['name', 'age', 'gender', 'address']
+ 
+# 将字典的value转换成列表
+lst2 = list(dit.values())
+print(lst2)
+# -
 
 
