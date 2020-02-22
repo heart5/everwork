@@ -535,4 +535,10 @@ sampleanother
 
 sampleanother.groupby(level='guishu', axis=1).count()
 
+# ## 公式表达式
+
+# $e^{i\pi} + 1 = 0$
+
+# $$e^x=\sum_{i=0}^\infty \frac{1}{i!}x^i$$
+
 
