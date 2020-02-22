@@ -104,7 +104,8 @@ print(tenlst)
 # print('\t'.join([str(x) for x in tenlst]))
 
 for i in range(1, 10):
-    print('\t' * (i - 1), end='')
+    if i!= 1:
+        print(str(i) + "\t" * (i - 1), end='')
     for j in range(1, 10):
         if i > j:
             continue
