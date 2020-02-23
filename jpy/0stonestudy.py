@@ -35,7 +35,7 @@ print(hainanstr)
 goodstr = '我和我的同学一起玩'
 print(goodstr)
 goodstr = '我们都很高兴'
-print()
+print(goodstr)
 
 # #### 数字
 
@@ -60,17 +60,18 @@ personlist = [['白珍石',10], ['戚轩溢',9], ['王贞元',10], ['白珍赫',
 for name,age in personlist:
     print(f"{name}的年龄是{age}岁")
 
-personlist = [['白珍石', 'yellow'], ['戚轩溢', 'blue']]
+personlist = [['白珍石', '黄'], ['戚轩溢', '蓝']]
 for name,team in personlist:
-    print(f"{name}的队伍是{team}队")
+    print(f"{name}喜欢{team}色")
 
-www  = 13245376
-print(f"{firstnum} + {secondnum} = {firstnum + secondnum}")
-print(f"{firstnum} - {secondnum} = {firstnum - secondnum}")
-print(f"{firstnum} * {secondnum} = {firstnum * secondnum}")
-print(f"{firstnum} / {secondnum} = {firstnum / secondnum}")
-print(f"{firstnum} 整除 {secondnum} , 商为  {firstnum // secondnum}")
-print(f"{firstnum} 整除 {secondnum} ，余数为  {firstnum % secondnum}")
+www  = 1
+wwww = 1
+print(f"{www} + {wwww} = {www + wwww}")
+print(f"{www} - {wwww} = {www - wwww}")
+print(f"{www} * {wwww} = {www * wwww}")
+print(f"{www} / {wwww} = {www / wwww}")
+print(f"{www} 整除 {wwww} , 商为  {www // wwww}")
+print(f"{www} 整除 {wwww} ，余数为  {www % wwww}")
 
 print('\t\t\t888\n\n\n\t\t\t666')
 
@@ -113,4 +114,6 @@ for i in range(1, 10):
         if j ==9:
             print()
 # -
+print('我是一个好学生，\n我爱学习。')
+
 
