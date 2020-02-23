@@ -337,6 +337,7 @@ print(re.findall(r"(?P<id>\d)abc(?=id)", "5abc6"))
 # -
 # #### 从房间链接提取用户名和房间号
 
+import re
 fangtabstr = "2020-02-13 11:27:21	True	搓雀雀(群)白晔峰	Text	http://s0.lgmob.com/h5_whmj_qp/?d=852734"
 namestr = fangtabstr.split('\t')[2]
 ptn = r'\b\w+\b'
@@ -361,6 +362,7 @@ print(dict(d))
 a = ['a1','a2']
 b = ['b1','b2']
 c = [a,b]
+dict(c)
 print(dict(c)) # {'a1': 'a2', 'b1': 'b2'}
 # 相当于遍历子列表，如下
 dit = {}
@@ -384,5 +386,7 @@ print(lst)  # ['name', 'age', 'gender', 'address']
 lst2 = list(dit.values())
 print(lst2)
 # -
+print("Home is hopeful.")
+
 
 
