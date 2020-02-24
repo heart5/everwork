@@ -87,6 +87,7 @@ def splitjs(jsstr: str):
     zhongwuxiaban = getcfpoptionvalue('everinifromnote', 'xingzheng', 'zhongwuxiaban')
     xiawushangban = getcfpoptionvalue('everinifromnote', 'xingzheng', 'xiawushangban')
     xiawuxiaban = getcfpoptionvalue('everinifromnote', 'xingzheng', 'xiawuxiaban')
+    # print(zhongwuxiaban, xiawushangban, xiawuxiaban)
     ptn = re.compile('\\d{2}:\\d{2}')
     findlst = re.findall(ptn, jsstr)
     if len(findlst) == 2:
@@ -169,8 +170,16 @@ def tongjichuqinjishigong(inputs: pd.Series):
     return df['分钟'].count(), df['分钟'].sum(), math.ceil(df['分钟'].sum() / 60)
 
 
-def tongjichuqinixingzheng():
-    pass
+def tongjichuqinixingzheng(inputs: pd.Series):
+    """
+    统计行政岗位出勤统计信息
+    :param inputs: 打卡，Series
+    :return: 出勤天数，未打卡次数，迟到次数
+    """
+    df = pd.DataFrame(inputs)
+    df.columns = ['打卡记录']
+    df['整理'] = df[df.columns[0]].apply(lambda x: splitjs(str(x)) if x else None)
+    print(df)
 
 
 def zonghetongji():
@@ -190,13 +199,15 @@ def zonghetongji():
             chugongtianshu, fenzhongleiji, gongshi = tongjichuqinjishigong(jilusdf[name])
             print(f"计时工\t{name}\t{chugongtianshu}\t{fenzhongleiji}\t{gongshi}")
         elif name in xzlst:
+            tongjichuqinixingzheng(jilusdf[name])
             print(f"行政岗位\t{name}")
         else:
             print(f"正常岗位\t{name}")
     # print(qdlst)
+    return jilusdf
 
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    zonghetongji()
+    jldf = zonghetongji()
     log.info(f'文件{__file__}运行结束')

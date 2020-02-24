@@ -196,20 +196,70 @@ def updateurllst(url):
     return roomid
 
 
+def fixnamealias(inputdf: pd.DataFrame, clname: str):
+    '''
+    更新df中的别名为规范名称
+    :param inputdf:
+    :param clname:
+    :return:
+    '''
+    rstdf: pd.DataFrame = inputdf.copy(deep=True)
+    print(rstdf.dtypes)
+    for name in rstdf.groupby(clname).first().index.values:
+        if namez := getinivaluefromnote('game', name):
+            namedf = rstdf[rstdf[clname] == name]
+            print(name, namez, namedf.shape[0])
+            for ix in namedf.index:
+                rstdf.loc[ix, [clname]] = namez
+
+    return rstdf
+
+
+def showhighscore(rstdf, highbool: bool = True):
+    """
+    统计输入df的赛事单局最高分或最低分对局信息
+    :param rstdf:
+    :param highbool:
+    :return:
+    """
+    highscore = (rstdf['score'].min(), rstdf['score'].max())[highbool]
+    outlst = list()
+    title = ('赛事暗黑', '赛事高亮')[highbool]
+    outlst.append(title)
+    for idh in rstdf[rstdf['score'] == highscore]['roomid'].values:
+        iddf = rstdf[rstdf.roomid == idh]
+        outstr = '赛事时间：'
+        outstr += iddf['time'].max().strftime('%m-%d %H:%M')
+        dayingjialst = iddf[iddf.score == highscore]['guest'].values
+        dayingjiastr = ('大输家', '大赢家')[highbool]
+        outstr += f'，{dayingjiastr}：{dayingjialst}'
+        highstr = ('输的最惨', '赢得高分')[highbool]
+        outstr += f'，{highstr}：{highscore}'
+        tongjuguest = iddf[~iddf['guest'].isin(dayingjialst)]['guest'].values
+        tongjustr = ('同局共坑', '同局共奉')[highbool]
+        outstr += f'，{tongjustr}兄：{tongjuguest}'
+        outlst.append(outstr)
+    outputstr = '\n'.join(outlst)
+
+    return outputstr
+
+
 def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
     recorddf = pd.read_excel(excelpath)
-    rstdf = recorddf
+    rstdf = recorddf.copy(deep=True)
+    rstdf = fixnamealias(rstdf, 'guest')
     rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
     rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
-    print(rstdf.head())
+    # print(rstdf.head())
     # print(rstdf.dtypes)
 
     fangdf = fetchmjfang(ownername)
+    fangdf = fixnamealias(fangdf, 'name')
     # print(fangdf.dtypes)
     fangclosedf = rstdf.groupby('roomid')['time'].max()
     # print(fangclosedf)
-    # 以房号为索引进行数据合并，默认join='uter'
+    # 以房号为索引进行数据合并，默认join='outer'
     fangfinaldf: pd.DataFrame = pd.concat([fangdf, fangclosedf], axis=1).sort_values(by=['mintime'], ascending=False)
     fangfinaldf = fangfinaldf.rename(columns={'time': 'closetime'})
     # print(fangfinaldf) fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(lambda df: int((df['closetime'] - df[
@@ -219,15 +269,33 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     # print(fangfinaldf[fangfinaldf['mintime'].isnull()])
     fangfinaldf.to_csv(csvfile := touchfilepath2depth(getdirmain() / 'data' / 'game' / 'huojiemajiangfang.csv'))
 
+    fangfdf = fangfinaldf.copy(deep=True)
+
+    # 找到那些没有开局链接的局，按照其他局的平均时间赋值，同时更新count、maxtime、mintime、consumemin、name的列值
+
+    # 平均对局时长（分钟）
+    playminmean = int(fangfdf['playmin'].mean())
+    # 没有开局链接的局
+    fangffix = fangfdf[fangfdf['playmin'].isnull() & fangfdf['count'].isnull()]
+
+    for index in fangffix.index:
+        fangfdf.loc[index, ['maxtime']] = fangfdf.loc[index, ['closetime']][0] - pd.to_timedelta(f'{playminmean}min')
+        fangfdf.loc[index, ['mintime']] = fangfdf.loc[index, ['maxtime']][0]
+        fangfdf.loc[index, ['count']] = 1
+        fangfdf.loc[index, ['name']] = rstdf[rstdf.host].set_index('roomid').loc[index, ['guest']][0]
+        fangfdf.loc[index, ['playmin']] = playminmean
+        fangfdf.loc[index, ['consumemin']] = 0
+
+    fangfinaldf = fangfdf.sort_values(['mintime'], ascending=False)
+
     # 根据开关，选择输出当天或者全部数据结果
     if recentday:
         zuijindatestart = pd.to_datetime(rstdf['time'].max().strftime("%Y-%m-%d"))
         rstdf = rstdf[rstdf.time >= zuijindatestart]
-        fangfilter = fangfinaldf.apply(lambda x: x['mintime'] >= zuijindatestart or x['closetime'] >= zuijindatestart,
-                                       axis=1)
+        fangfilter = fangfdf.apply(lambda x: x['mintime'] >= zuijindatestart or x['closetime'] >= zuijindatestart,
+                                   axis=1)
         # print(fangfilter)
-        fangfinaldf = fangfinaldf[fangfilter]
-    print(fangfinaldf[fangfinaldf['mintime'].isnull()])
+        fangfinaldf = fangfdf[fangfilter]
     print(fangfinaldf)
     # print(rstdf)
     outlst = list()
@@ -256,14 +324,6 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     outlst.append(f"最被吐槽的炮王排名：\n{formatdfstr(dianpao[:shownumber])}")
     jingding = rstdf.groupby(['guest']).sum()['jingding'].sort_values(ascending=False)
     outlst.append(f"最有含金量的金顶排名：\n{formatdfstr(jingding[:shownumber])}")
-    shuying = rstdf.groupby(['guest']).sum()['score'].sort_values(ascending=False)
-    shuyingstr = f"大赢家光荣榜：\n{formatdfstr(shuying[:shownumber])}"
-    outlst.append(shuyingstr)
-
-    # 根据开关，输出简版输赢信息
-    if simpledesc:
-        outstr = titlestr + '\n' + shuyingstr
-        return outstr
 
     teams = list(set(rstdf['guest']))
     # print(teams)
@@ -275,6 +335,20 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     playtimedf = pd.DataFrame(playtimelst, columns=['name', 'mins']).sort_values(['mins'], ascending=False)
     print(playtimedf)
     outlst.append(f"劳模榜（作战分钟数）：\n{formatdfstr(playtimedf[['name', 'mins']].reset_index(drop=True)[:shownumber + 1])}")
+
+    outlst.append(f"\n{showhighscore(rstdf, highbool=False)}")
+    outlst.append(f"\n{showhighscore(rstdf)}")
+
+    shuyingdf = rstdf.groupby(['guest']).sum()
+    shuyingdf = shuyingdf[shuyingdf.score > 0]
+    shuying = shuyingdf['score'].sort_values(ascending=False)
+    shuyingstr = f"大赢家光荣榜：\n{formatdfstr(shuying[:shownumber])}"
+    outlst.append(shuyingstr)
+
+    # 根据开关，输出简版输赢信息
+    if simpledesc:
+        outstr = titlestr + '\n' + shuyingstr
+        return outstr
 
     outstr = '\n\n'.join(outlst)
 
