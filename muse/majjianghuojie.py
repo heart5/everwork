@@ -166,6 +166,8 @@ def updateurllst(url):
                 rstdf = recorddf.append(getsinglepage(url))
                 rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
                 rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
+                # 修正用户别名
+                rstdf = fixnamealias(rstdf, 'name')
                 rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
                 excelwriter.close()
                 log.info(f"{rstdf.shape[0]}条记录写入文件\t{excelpath}")
@@ -183,6 +185,8 @@ def updateurllst(url):
         roomid = firstdf.iloc[0, 0]
         if firstdf.shape[0] != 0:
             urlsrecord = [url]
+            # 修正用户别名
+            firstdf = fixnamealias(firstdf, 'name')
             firstdf.to_excel(excelwriter, index=False, encoding='utf-8')
             excelwriter.close()
             log.info(f"{firstdf.shape[0]}条记录写入文件\t{excelpath}")
