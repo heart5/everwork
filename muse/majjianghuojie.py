@@ -300,8 +300,8 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     # print(rstdf)
     outlst = list()
     rgp = rstdf.groupby(['guest']).count()
-    timeend = pd.to_datetime(rstdf['time'].max().strftime("%Y-%m-%d %H:%M:%S"))
-    timestart = pd.to_datetime(rstdf['time'].min().strftime("%Y-%m-%d %H:%M:%S"))
+    timeend = pd.to_datetime(rstdf['time'].max().strftime("%y-%m-%d %H:%M"))
+    timestart = pd.to_datetime(rstdf['time'].min().strftime("%y-%m-%d %H:%M"))
     titlestr = f"战果统计（{timestart}至{timeend}）"
     outlst.append(titlestr)
 
