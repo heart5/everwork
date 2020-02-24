@@ -14,6 +14,12 @@
 #     name: python3
 # ---
 
+# ## 三目表达式
+
+age = 80
+aaa = ('worked', 'retired')[age > 65]
+aaa
+
 # ## math 数学函数
 
 # + [markdown] pycharm={"name": "#%% md\n"}
@@ -388,5 +394,15 @@ print(lst2)
 # -
 print("Home is hopeful.")
 
+# ## configparse
+
+
+# option name是支持包含空格的字符串的
+
+import pathmagic
+with pathmagic.context():
+    from func.logme import log
+    from func.evernttest import getinivaluefromnote
+getinivaluefromnote('game', 'alles gut')
 
 
