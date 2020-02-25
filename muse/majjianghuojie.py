@@ -167,7 +167,7 @@ def updateurllst(url):
                 rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
                 rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
                 # 修正用户别名
-                rstdf = fixnamealias(rstdf, 'name')
+                rstdf = fixnamealias(rstdf, 'guest')
                 rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
                 excelwriter.close()
                 log.info(f"{rstdf.shape[0]}条记录写入文件\t{excelpath}")
@@ -186,7 +186,7 @@ def updateurllst(url):
         if firstdf.shape[0] != 0:
             urlsrecord = [url]
             # 修正用户别名
-            firstdf = fixnamealias(firstdf, 'name')
+            firstdf = fixnamealias(firstdf, 'guest')
             firstdf.to_excel(excelwriter, index=False, encoding='utf-8')
             excelwriter.close()
             log.info(f"{firstdf.shape[0]}条记录写入文件\t{excelpath}")
@@ -209,6 +209,7 @@ def fixnamealias(inputdf: pd.DataFrame, clname: str):
     '''
     rstdf: pd.DataFrame = inputdf.copy(deep=True)
     print(rstdf.dtypes)
+    print(rstdf.groupby(clname).first().index.values)
     for name in rstdf.groupby(clname).first().index.values:
         if namez := getinivaluefromnote('game', name):
             namedf = rstdf[rstdf[clname] == name]
@@ -281,7 +282,7 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     playminmean = int(fangfdf['playmin'].mean())
     # 没有开局链接的局
     fangffix = fangfdf[fangfdf['playmin'].isnull() & fangfdf['count'].isnull()]
-
+    # 用平均用时完善数据集
     for index in fangffix.index:
         fangfdf.loc[index, ['maxtime']] = fangfdf.loc[index, ['closetime']][0] - pd.to_timedelta(f'{playminmean}min')
         fangfdf.loc[index, ['mintime']] = fangfdf.loc[index, ['maxtime']][0]
@@ -301,7 +302,7 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
         # print(fangfilter)
         fangfinaldf = fangfdf[fangfilter]
     print(fangfinaldf)
-    # print(rstdf)
+    print(rstdf)
     outlst = list()
     rgp = rstdf.groupby(['guest']).count()
     timeend = rstdf['time'].max().strftime("%y-%m-%d %H:%M")
@@ -330,10 +331,26 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     outlst.append(f"最有含金量的金顶排名：\n{formatdfstr(jingding[:shownumber])}")
 
     teams = list(set(rstdf['guest']))
-    # print(teams)
+    print(teams)
     playtimelst = []
     for player in teams:
-        ptime = fangfinaldf.loc[rstdf[rstdf.guest == player].roomid].sum()['playmin']
+        # playerindexlst = rstdf[rstdf.guest == player][['roomid']].values
+        # print(playerindexlst)
+        # """
+        # [[498293]
+        #  [891773]
+        #  [891773]
+        #  [800278]
+        #  [800278]]
+        # """
+        # laomoindex = [x for item in playerindexlst for x in item]
+        # # 用多层列表解析解决index提取问题，得到结果：[498293, 891773, 891773, 800278, 800278]
+
+        # 愚蠢谨记！提取列数据时多套了一层方括号
+        laomoindexlst = list(rstdf[rstdf.guest == player]['roomid'])
+        laomofangdf = fangfinaldf.loc[laomoindexlst]
+        print(player, laomoindexlst, laomofangdf)
+        ptime = laomofangdf.sum()['playmin']
         playtimelst.append([player, ptime])
 
     playtimedf = pd.DataFrame(playtimelst, columns=['name', 'mins']).sort_values(['mins'], ascending=False)
@@ -359,39 +376,29 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     return outstr
 
 
-if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
-
-    # sp1 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11"
-    # sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_f6d46cf8836b1898e63f5c0c2ecb699a"
-    # sp3 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_5e2380aff0e95d7003ca59d061f5a76f"
+def updateallurlfromtxt(owner: str):
+    # sp1 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_2ba66d661e4c7712d0e6bcd3a6df255f"
+    # sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_46247683e1b6e744ad956041ab2579a6"
+    # sp3 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_62a635b6dc15b34b74527550cd88d83f"
     # splst = [sp1, sp2, sp3]
-
-    own = '白晔峰'
-
-    # fangdf = fetchmjfang(own)
-    # print(fangdf)
-
-    splst = fetchmjurl(own)
+    splst = fetchmjurl(owner)
     for sp in splst[:4]:
         print(sp)
 
     for sp in splst:
         updateurllst(sp)
 
+
+if __name__ == '__main__':
+    log.info(f'运行文件\t{__file__}')
+
+    own = '白晔峰'
+
+    # fangdf = fetchmjfang(own)
+    # print(fangdf)
+
+    updateallurlfromtxt(own)
     rst = zhanjidesc(own, True, False)
     print(rst)
-
-    # eurl = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eca8b4c6e0bc4313c3a4658fc5b85720"
-    # edf = getsinglepage(eurl)
-    # print(edf)
-
-    # rstdf = pd.DataFrame()
-    # for sp in splst[:20]:
-    #     getinfo = getsinglepage(sp)
-    #     # print(getinfo)
-    #     rstdf = rstdf.append(getinfo)
-    #
-    # print(rstdf.reset_index(drop=True))
 
     log.info(f'文件{__file__}运行结束')
