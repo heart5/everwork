@@ -14,6 +14,86 @@
 #     name: python3
 # ---
 
+# ### 微信延时
+
+# +
+import matplotlib.pyplot as plt
+from pandas.plotting import register_matplotlib_converters
+
+import pathmagic
+with pathmagic.context():
+    from func.logme import log
+    from func.first import getdirmain, touchfilepath2depth
+    from life.wcdelay import getdelaydb
+
+    timedf = getdelaydb()
+register_matplotlib_converters()
+plt.plot(timedf)
+# +
+def delitemfromdb(key):
+    conn = lite.connect(dbname)
+    cursor = conn.cursor()
+    cursor.execute(f"delete from {tablename} where time= {key}")
+    conn.commit()
+    log.info(f"删除\ttime为\t{key}\t的数据记录，{tablename} in {dbname}")
+    conn.close()
+    
+# delitemfromdb(1582683260)
+
+
+# -
+
+
+def inserttimeitem2db(timestr: str):
+    dbname = touchfilepath2depth(getdirmain() / 'data' / 'db' / 'wcdelay.db')
+    conn = lite.connect(dbname)
+    cursor = conn.cursor()
+    tablename = 'wcdelay'
+    def istableindb(tablename: str, dbname: str):
+        cursor.execute("select * from sqlite_master where type='table'")
+        table = cursor.fetchall()
+        print(table)
+        chali = [x for item in table for x in item[1:3]]
+        print(chali)
+
+        return tablename in chali
+    
+    if not istableindb(tablename, dbname):
+        cursor.execute(f'create table {tablename} (time int primary key, delay int)')
+        conn.commit()
+        print(f"数据表：\t{tablename} 被创建成功。")
+        
+    timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
+    timest = time.mktime(timetup)
+    elsmin = (int(time.time()) - time.mktime(ttuple)) // 60
+    cursor.execute(f"insert into {tablename} values(?, ?)", (timest, elsmin))
+    print(f"数据成功写入{dbname}\t{(timest, elsmin)}")
+    conn.commit()
+    conn.close()
+
+
+import datetime
+time.localtime(1582683320)
+
+inserttimeitem2db('2020-02-26 10:15:20')
+
+timestr = '2020-02-26 10:14:20'
+timetuple = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
+timetupledt = datetime.datetime(*timetuple[:6])
+import pandas as pd
+dts = pd.to_datetime(timestr)
+
+ttuple= time.strptime(timestr,'%Y-%m-%d %H:%M:%S')
+time.mktime(ttuple)
+(int(time.time()) - time.mktime(ttuple)) // 60
+
+time.localtime(timestr)
+
+date_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+dte = pd.to_datetime(date_str)
+dtd = dte - dts
+dtd.total_seconds() // 60
+
 # ### 调试麻将战绩统计输出函数
 
 # #### 补充没有开局链接的房间信息
@@ -25,14 +105,23 @@ import re
 from bs4 import BeautifulSoup
 
 import pathmagic
-
 with pathmagic.context():
     from func.logme import log
     from func.evernttest import trycounttimes2, getinivaluefromnote
     from func.first import getdirmain, touchfilepath2depth
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
-    from muse.majjianghuojie import fetchmjfang
+    from muse.majjianghuojie import fetchmjfang, zhanjidesc
 # -
+
+
+teams = list(set(rstdf['guest']))
+print(teams)
+playtimelst = []
+for player in teams:
+    playerindexlst = list(rstdf[rstdf.guest == player]['roomid'])
+    print(player, playerindexlst)
+
+
 
 excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
 recorddf = pd.read_excel(excelpath)
@@ -112,8 +201,31 @@ for id in rstdf[rstdf['score'] == highscore]['roomid'].values:
 
 # #### 关联名称，完善统计信息
 
+excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
+recorddf = pd.read_excel(excelpath)
+rstdf = recorddf.copy(deep=True)
+
+rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
+rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
+rstdf.groupby(['guestid', 'guest']).count()
+
+excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
+excelwriter = pd.ExcelWriter(excelpath)
+rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
+excelwriter.close()
+
+needdf = rstdf[rstdf.guestid == 1080967]
+print(needdf)
+print(needdf[needdf.guest != '徐晓锋'])
+needindexlst = needdf.index
+print(needindexlst)
+rstdf.loc[list(needindexlst), 'guest'] = '徐晓锋'
+pd.DataFrame(rstdf.groupby(['guestid', 'guest']).count().index)
+
 rstdf = fangdf.copy(deep=True)
 rstdf.groupby('name').first().index.values
+
+rstdf
 
 clname = 'name'
 for name in rstdf.groupby(clname).first().index.values:
