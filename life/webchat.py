@@ -79,7 +79,7 @@ def inserttimeitem2db(timestr: str):
 
     timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
     timest = time.mktime(timetup)
-    elsmin = (int(time.time()) - time.mktime(ttuple)) // 60
+    elsmin = (int(time.time()) - time.mktime(timetup)) // 60
     cursor.execute(f"insert into {tablename} values(?, ?)", (timest, elsmin))
     print(f"数据成功写入{dbname}\t{(timest, elsmin)}")
     conn.commit()
