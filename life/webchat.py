@@ -66,16 +66,16 @@ def inserttimeitem2db(timestr: str):
     def istableindb(tablename: str, dbname: str):
         cursor.execute("select * from sqlite_master where type='table'")
         table = cursor.fetchall()
-        print(table)
+        # print(table)
         chali = [x for item in table for x in item[1:3]]
-        print(chali)
+        # print(chali)
 
         return tablename in chali
 
     if not istableindb(tablename, dbname):
         cursor.execute(f'create table {tablename} (time int primary key, delay int)')
         conn.commit()
-        print(f"数据表：\t{tablename} 被创建成功。")
+        log.info(f"数据表：\t{tablename} 被创建成功。")
 
     timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
     timest = time.mktime(timetup)
@@ -116,7 +116,7 @@ def showmsg(msg):
 
 def formatmsg(msg):
     timetuple = time.localtime(msg['CreateTime'])
-    print(msg['CreateTime'], timetuple)
+    # print(msg['CreateTime'], timetuple)
     timestr = time.strftime("%Y-%m-%d %H:%M:%S", timetuple)
     inserttimeitem2db(timestr)
     # owner = itchat.web_init()
