@@ -10,7 +10,6 @@ import itchat.storage
 import re
 import os
 import math
-import sqlite3 as lite
 from itchat.content import *
 from bs4 import BeautifulSoup
 
@@ -30,6 +29,7 @@ with pathmagic.context():
     from work.zymessage import searchcustomer, searchqiankuan, searchpinxiang
     from etc.getid import getdeviceid
     from muse.majjianghuojie import updateurllst, zhanjidesc
+    from life.wcdelay import inserttimeitem2db
 
 
 def newchatnote():
@@ -55,35 +55,6 @@ def get_response(msg):
     txt = msg['Text']
     # print(msg)
     return txt
-
-
-def inserttimeitem2db(timestr: str):
-    dbname = touchfilepath2depth(getdirmain() / 'data' / 'db' / 'wcdelay.db')
-    conn = lite.connect(dbname)
-    cursor = conn.cursor()
-    tablename = 'wcdelay'
-
-    def istableindb(tablename: str, dbname: str):
-        cursor.execute("select * from sqlite_master where type='table'")
-        table = cursor.fetchall()
-        # print(table)
-        chali = [x for item in table for x in item[1:3]]
-        # print(chali)
-
-        return tablename in chali
-
-    if not istableindb(tablename, dbname):
-        cursor.execute(f'create table {tablename} (time int primary key, delay int)')
-        conn.commit()
-        log.info(f"数据表：\t{tablename} 被创建成功。")
-
-    timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
-    timest = time.mktime(timetup)
-    elsmin = (int(time.time()) - time.mktime(timetup)) // 60
-    cursor.execute(f"insert into {tablename} values(?, ?)", (timest, elsmin))
-    print(f"数据成功写入{dbname}\t{(timest, elsmin)}")
-    conn.commit()
-    conn.close()
 
 
 def showmsg(msg):
