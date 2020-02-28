@@ -20,6 +20,15 @@ age = 80
 aaa = ('worked', 'retired')[age > 65]
 aaa
 
+#
+# ```graph TD
+#         A[Christmas] --> B(Go shopping)
+#         C -->C{Let me think}
+#         C -->|One| D[laptop]
+#         C -->|Two| E[iPhone]
+#         C -->|Three| F[Car]
+# ``` 
+
 # ## math 数学函数
 
 # + [markdown] pycharm={"name": "#%% md\n"}
