@@ -4,6 +4,7 @@
 """
 import sqlite3 as lite
 import pandas as pd
+import datetime
 import time
 
 import pathmagic
@@ -49,7 +50,6 @@ def getdelaydb():
     cursor = conn.cursor()
     cursor.execute(f"select * from {tablename}")
     table = cursor.fetchall()
-    print(table[:3])
     conn.close()
 
     timedf = pd.DataFrame(table, columns=['time', 'delay'])
@@ -57,12 +57,14 @@ def getdelaydb():
         lambda x: pd.to_datetime(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(x))))
     timedf.set_index('time', inplace=True)
     timedf.loc[timedf.delay < 0] = 0
-    timedf.iloc[:5]
+    print(timedf.iloc[:2])
+    print(timedf.iloc[-5:])
 
     return timedf
 
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-
+    tdf = getdelaydb()
+    print(tdf.sort_index(ascending=False))
     log.info(f'文件{__file__}运行结束')
