@@ -162,6 +162,13 @@ with pathmagic.context():
 # -
 
 
+excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
+recorddf = pd.read_excel(excelpath)
+rstdf = recorddf.copy(deep=True)
+rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
+rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
+rstdf
+
 teams = list(set(rstdf['guest']))
 print(teams)
 playtimelst = []
@@ -170,13 +177,6 @@ for player in teams:
     print(player, playerindexlst)
 
 
-
-excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
-recorddf = pd.read_excel(excelpath)
-rstdf = recorddf.copy(deep=True)
-rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
-rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
-rstdf
 
 ownername = '白晔峰'
 recetday = True
@@ -257,18 +257,20 @@ rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
 rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
 rstdf.groupby(['guestid', 'guest']).count()
 
+fixguestid = 1083558
+fixguest = '普任鹏'
+needdf = rstdf[rstdf.guestid == fixguestid]
+print(needdf)
+# print(needdf[needdf.guest != '徐晓锋'])
+needindexlst = needdf.index
+print(needindexlst)
+rstdf.loc[list(needindexlst), 'guest'] = fixguest
+pd.DataFrame(rstdf.groupby(['guestid', 'guest']).count().index)
+
 excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
 excelwriter = pd.ExcelWriter(excelpath)
 rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
 excelwriter.close()
-
-needdf = rstdf[rstdf.guestid == 1080967]
-print(needdf)
-print(needdf[needdf.guest != '徐晓锋'])
-needindexlst = needdf.index
-print(needindexlst)
-rstdf.loc[list(needindexlst), 'guest'] = '徐晓锋'
-pd.DataFrame(rstdf.groupby(['guestid', 'guest']).count().index)
 
 rstdf = fangdf.copy(deep=True)
 rstdf.groupby('name').first().index.values
