@@ -209,11 +209,13 @@ def fixnamealias(inputdf: pd.DataFrame, clname: str):
     '''
     rstdf: pd.DataFrame = inputdf.copy(deep=True)
     print(rstdf.dtypes)
-    print(rstdf.groupby(clname).first().index.values)
-    for name in rstdf.groupby(clname).first().index.values:
+    namelst = rstdf.groupby(clname).first().index.values
+    print(namelst)
+    for name in namelst:
         if namez := getinivaluefromnote('game', name):
-            namedf = rstdf[rstdf[clname] == name]
+            namedf = rstdf[rstdf[clname] == name].copy(deep=True)
             print(name, namez, namedf.shape[0])
+            print(namedf)
             for ix in namedf.index:
                 rstdf.loc[ix, [clname]] = namez
 
