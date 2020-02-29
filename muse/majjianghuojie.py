@@ -167,7 +167,7 @@ def updateurllst(url):
                 rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
                 rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
                 # 修正用户别名
-                rstdf = fixnamealias(rstdf, 'guest')
+                rstdf = fixnamebyguestid(rstdf, 'guestid')
                 rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
                 excelwriter.close()
                 log.info(f"{rstdf.shape[0]}条记录写入文件\t{excelpath}")
@@ -186,7 +186,7 @@ def updateurllst(url):
         if firstdf.shape[0] != 0:
             urlsrecord = [url]
             # 修正用户别名
-            firstdf = fixnamealias(firstdf, 'guest')
+            firstdf = fixnamebyguestid(firstdf, 'guestid')
             firstdf.to_excel(excelwriter, index=False, encoding='utf-8')
             excelwriter.close()
             log.info(f"{firstdf.shape[0]}条记录写入文件\t{excelpath}")
@@ -207,19 +207,32 @@ def fixnamealias(inputdf: pd.DataFrame, clname: str):
     :param clname:
     :return:
     '''
-    rstdf: pd.DataFrame = inputdf.copy(deep=True)
-    print(rstdf.dtypes)
-    namelst = rstdf.groupby(clname).first().index.values
+    rstdf1: pd.DataFrame = inputdf.copy(deep=True)
+    print(rstdf1.dtypes)
+    namelst = rstdf1.groupby(clname).first().index.values
     print(namelst)
     for name in namelst:
         if namez := getinivaluefromnote('game', name):
-            namedf = rstdf[rstdf[clname] == name].copy(deep=True)
+            namedf = rstdf1[rstdf1[clname] == name].copy(deep=True)
             print(name, namez, namedf.shape[0])
             print(namedf)
             for ix in namedf.index:
-                rstdf.loc[ix, [clname]] = namez
+                rstdf1.loc[ix, [clname]] = namez
 
-    return rstdf
+    return rstdf1
+
+
+def fixnamebyguestid(inputdf: pd.DataFrame, guestidcl: str):
+    rstdf1: pd.DataFrame = inputdf.copy(deep=True)
+    guestidlst = [str(guestid) for guestid in rstdf1.groupby(guestidcl).first().index.values]
+    print(guestidlst)
+    for nameid in guestidlst:
+        if namez := getinivaluefromnote('game', nameid):
+            needdf = rstdf1[rstdf1.guestid == int(nameid)]
+            print(namez, needdf.shape[0])
+            rstdf1.loc[list(needdf.index), 'guest'] = namez
+
+    return rstdf1
 
 
 def showhighscore(rstdf, highbool: bool = True):
@@ -255,11 +268,13 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf.copy(deep=True)
-    rstdf = fixnamealias(rstdf, 'guest')
+    print(rstdf.groupby(['guestid', 'guest']).count())
+    rstdf = fixnamebyguestid(rstdf, 'guestid')
     rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
     rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
     # print(rstdf.head())
     # print(rstdf.dtypes)
+    print(rstdf.groupby(['guestid', 'guest']).count())
 
     fangdf = fetchmjfang(ownername)
     fangdf = fixnamealias(fangdf, 'name')
