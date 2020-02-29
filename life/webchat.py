@@ -29,7 +29,7 @@ with pathmagic.context():
     from work.zymessage import searchcustomer, searchqiankuan, searchpinxiang
     from etc.getid import getdeviceid
     from muse.majjianghuojie import updateurllst, zhanjidesc
-    from life.wcdelay import inserttimeitem2db
+    from life.wcdelay import inserttimeitem2db, showdelayimg
 
 
 def newchatnote():
@@ -323,6 +323,20 @@ def text_reply(msg):
 
     showfmmsg(innermsg)
 
+    # 特定指令则退出
+    if msg['Text'] == '退出小元宝系统':
+        log.info(f"根据指令退出小元宝系统")
+        itchat.logout()
+
+    # 如何不是指定的数据分析中心，则不进行语义分析
+    thisid = getdeviceid()
+    # print(f"type:{type(thisid)}\t{thisid}")
+    houseid = getinivaluefromnote('webchat', 'datahouse')
+    # print(f"type:{type(houseid)}\t{houseid}")
+    if thisid != str(houseid):
+        print(f"不是数据分析中心，咱不管哦")
+        return
+
     # 处理火界麻将战绩网页
     ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
     msgtxt = msg['Text']
@@ -352,24 +366,9 @@ def text_reply(msg):
                      'fmTime': nowdatetime.strftime("%Y-%m-%d %H:%M:%S"),
                      'fmSend': True, 'fmSender': innermsg['fmSender'],
                      'fmType': 'Text',
-                     # 'fmText': os.path.split(rstfile)[1]
                      'fmText': zhanji
                      }
         showfmmsg(finnalmsg)
-
-    # 特定指令则退出
-    if msg['Text'] == '退出小元宝系统':
-        log.info(f"根据指令退出小元宝系统")
-        itchat.logout()
-
-    # 如何不是指定的数据分析中心，则不进行语义分析
-    thisid = getdeviceid()
-    # print(f"type:{type(thisid)}\t{thisid}")
-    houseid = getinivaluefromnote('webchat', 'datahouse')
-    # print(f"type:{type(houseid)}\t{houseid}")
-    if thisid != str(houseid):
-        print(f"不是数据分析中心，咱不管哦")
-        return
 
     if msg['Text'].find('真元信使') >= 0:
         qrylst = msg['Text'].split('\n')
@@ -386,6 +385,9 @@ def text_reply(msg):
                 else:
                     qrystr = qrylst[1].strip()
                     rstfile, rst = searchcustomer(qrystr.split())
+            elif diyihang[1] == '延时图':
+                imgwcdelay = showdelayimg()
+                itchat.send_image(imgwcdelay, toUserName=msg['FromUserName'])
             elif diyihang[1] == '欠款':
                 qrystr = qrylst[1].strip()
                 rstfile, rst = searchqiankuan(qrystr.split())

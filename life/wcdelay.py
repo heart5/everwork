@@ -4,6 +4,8 @@
 """
 import sqlite3 as lite
 import pandas as pd
+import matplotlib.pyplot as plt
+from pandas.plotting import register_matplotlib_converters
 # import datetime
 import time
 
@@ -86,17 +88,44 @@ def getdelaydb():
     timedf.set_index('time', inplace=True)
 
     if tdfsize := timedf.shape[0] != 0:
-        print(tdfsize)
+        print(f"延时记录共有{tdfsize}条")
         # 增加当前时间，延时值引用最近一次的值，用于做图形展示的右边栏
         timedf = timedf.append(pd.DataFrame([timedf.iloc[-1]], index=[pd.to_datetime(time.ctime())]))
     else:
         log.info(f"数据表{tablename}还没有数据呢")
 
     timedf.loc[timedf.delay < 0] = 0
-    print(timedf.iloc[:2])
-    print(timedf.iloc[-5:])
+    # print(timedf.iloc[:2])
+    print(timedf.iloc[-3:])
 
     return timedf
+
+
+def showdelayimg():
+    timedf = getdelaydb()
+    register_matplotlib_converters()
+
+    plt.figure(figsize=(36, 6))
+    plt.style.use('ggplot')  # 使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
+    tmin = timedf.index.min()
+    tmax = timedf.index.max()
+    shicha = tmax - tmin
+    bianjie = int(shicha.total_seconds() / 40)
+    print(bianjie)
+    # plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
+    plt.xlim(xmin=tmin)
+    plt.xlim(xmax=tmax + pd.Timedelta(f'{bianjie}s'))
+    # plt.vlines(tmin, 0, int(timedf.max() / 2))
+    plt.vlines(tmax, 0, int(timedf.max() / 2))
+    plt.scatter(timedf.index, timedf, s=timedf)
+    plt.scatter(timedf[timedf == 0].index, timedf[timedf == 0], s=0.5)
+    plt.title('信息频率和延时')
+
+    imgwcdelaypath = touchfilepath2depth(getdirmain() / 'img' / 'webchat' / 'wcdelay.png')
+
+    plt.savefig(imgwcdelaypath)
+
+    return imgwcdelaypath
 
 
 if __name__ == '__main__':
