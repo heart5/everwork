@@ -2,6 +2,7 @@
 """
 微信延迟管理文件
 """
+import os
 import sqlite3 as lite
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -101,7 +102,7 @@ def getdelaydb():
     return timedf
 
 
-def showdelayimg():
+def showdelayimg(jingdu: int=300):
     timedf = getdelaydb()
     register_matplotlib_converters()
 
@@ -123,7 +124,8 @@ def showdelayimg():
 
     imgwcdelaypath = touchfilepath2depth(getdirmain() / 'img' / 'webchat' / 'wcdelay.png')
 
-    plt.savefig(imgwcdelaypath)
+    plt.savefig(imgwcdelaypath, dpi=jingdu)
+    print(os.path.relpath(imgwcdelaypath))
 
     return imgwcdelaypath
 
