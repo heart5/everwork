@@ -50,19 +50,19 @@ def ifnotcreate(tablen: str, dbn: str):
         conn.close()
 
 
-def inserttimeitem2db(timestr: str):
+def inserttimeitem2db(timestampinput: int):
     dbname = touchfilepath2depth(getdirmain() / 'data' / 'db' / 'wcdelay.db')
     tablename = 'wcdelay'
     ifnotcreate(tablename, dbname)
 
-    timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
-    timest = time.mktime(timetup)
-    elsmin = (int(time.time()) - time.mktime(timetup)) // 60
+    # timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
+    # timest = time.mktime(timetup)
+    elsmin = (int(time.time()) - timestampinput) // 60
     conn = lite.connect(dbname)
     try:
         cursor = conn.cursor()
-        cursor.execute(f"insert into {tablename} values(?, ?)", (timest, elsmin))
-        print(f"数据成功写入{dbname}\t{(timest, elsmin)}")
+        cursor.execute(f"insert into {tablename} values(?, ?)", (timestampinput, elsmin))
+        print(f"数据成功写入{dbname}\t{(timestampinput, elsmin)}")
         conn.commit()
     except lite.IntegrityError as lie:
         log.critical(f"键值重复错误\t{lie}")

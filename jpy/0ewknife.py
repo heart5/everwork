@@ -27,18 +27,8 @@ with pathmagic.context():
     from life.wcdelay import getdelaydb
 
 timedf = getdelaydb()
-timedf = timedf.append(pd.DataFrame([timedf.iloc[-1]], index=[pd.to_datetime(time.ctime())]))
 print(timedf.shape[0])
 register_matplotlib_converters()
-
-# fig, ax = plt.subplots(1, 1)
-# for label in ax.get_xticklabels():
-#     label.set_visible(False)
-for label in ax.get_xticklabels():
-    label.set_visible(True)
-    label.set_color('red')
-    label.set_rotation(45)
-    label.set_fontsize(8)
 
 plt.figure(figsize=(36, 6))
 plt.style.use('ggplot')   ##使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
@@ -47,9 +37,10 @@ tmax = timedf.index.max()
 shicha = tmax - tmin
 bianjie = int(shicha.total_seconds() / 40)
 print(bianjie)
-plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
+# plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
+plt.xlim(xmin=tmin)
 plt.xlim(xmax=tmax + pd.Timedelta(f'{bianjie}s'))
-plt.vlines(tmin, 0, int(timedf.max() / 2))
+# plt.vlines(tmin, 0, int(timedf.max() / 2))
 plt.vlines(tmax, 0, int(timedf.max() / 2))
 plt.scatter(timedf.index, timedf, s=timedf)
 plt.scatter(timedf[timedf == 0].index, timedf[timedf == 0], s=0.5)

@@ -87,9 +87,9 @@ def showmsg(msg):
 
 def formatmsg(msg):
     timetuple = time.localtime(msg['CreateTime'])
-    # print(msg['CreateTime'], timetuple)
     timestr = time.strftime("%Y-%m-%d %H:%M:%S", timetuple)
-    inserttimeitem2db(timestr)
+    # print(msg['CreateTime'], timetuple, timestr)
+    inserttimeitem2db(msg['CreateTime'])
     # owner = itchat.web_init()
     global meu_wc
     send = (msg['FromUserName'] == meu_wc)

@@ -14,6 +14,19 @@
 #     name: python3
 # ---
 
+# ## 时间
+
+# +
+import datetime
+import time
+
+tstp = time.time()
+print(tstp)
+print(len(str(tstp)))
+print(time.localtime(tstp))
+time.localtime(tstp)
+# -
+
 # ## 三目表达式
 
 age = 80
