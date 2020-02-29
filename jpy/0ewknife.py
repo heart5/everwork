@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.3.3
+#       jupytext_version: 1.3.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -30,7 +30,7 @@ timedf = getdelaydb()
 print(timedf.shape[0])
 register_matplotlib_converters()
 
-plt.figure(figsize=(36, 6))
+plt.figure(figsize=(36, 6), dpi=600)
 plt.style.use('ggplot')   ##使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
 tmin = timedf.index.min()
 tmax = timedf.index.max()
@@ -45,6 +45,8 @@ plt.vlines(tmax, 0, int(timedf.max() / 2))
 plt.scatter(timedf.index, timedf, s=timedf)
 plt.scatter(timedf[timedf == 0].index, timedf[timedf == 0], s=0.5)
 plt.title('信息频率和延时')
+plt.savefig(touchfilepath2depth(getdirmain() / 'img' / 'webchat' / 'wcdelay.png'))
+plt.show()
 
 
 # -
@@ -255,14 +257,16 @@ rstdf = recorddf.copy(deep=True)
 
 rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
 rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
-rstdf.groupby(['guestid', 'guest']).count()
+gidds = rstdf.groupby(['guestid', 'guest']).count().reset_index(['guest'], drop=False).groupby(level='guestid').count()['roomid']
+print(gidds)
+gidds[gidds > 1].index
 
 fixguestid = 1083558
-fixguest = '普任鹏'
+fixguest = '徐晓锋'
 needdf = rstdf[rstdf.guestid == fixguestid]
 print(needdf)
 # print(needdf[needdf.guest != '徐晓锋'])
-needindexlst = needdf.index
+needindexlst = needdf.index[:2]
 print(needindexlst)
 rstdf.loc[list(needindexlst), 'guest'] = fixguest
 pd.DataFrame(rstdf.groupby(['guestid', 'guest']).count().index)
