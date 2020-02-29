@@ -387,7 +387,19 @@ def text_reply(msg):
                     rstfile, rst = searchcustomer(qrystr.split())
             elif diyihang[1] == '延时图':
                 imgwcdelay = showdelayimg()
-                itchat.send_image(imgwcdelay, toUserName=msg['FromUserName'])
+                imgwcdelayrel = os.path.relpath(imgwcdelay)
+                itchat.send_image(imgwcdelayrel, toUserName=msg['FromUserName'])
+                nowtuple = time.time()
+                nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
+                finnalmsg = {'fmId': math.floor(nowtuple),
+                             'fmTime': nowdatetime.strftime("%Y-%m-%d %H:%M:%S"),
+                             'fmSend': True, 'fmSender': innermsg['fmSender'],
+                             'fmType': 'Text',
+                             # 'fmText': os.path.split(rstfile)[1]
+                             'fmText': imgwcdelayrel
+                             }
+                showfmmsg(finnalmsg)
+                return
             elif diyihang[1] == '欠款':
                 qrystr = qrylst[1].strip()
                 rstfile, rst = searchqiankuan(qrystr.split())
