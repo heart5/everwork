@@ -225,7 +225,10 @@ def fixnamealias(inputdf: pd.DataFrame, clname: str):
 def fixnamebyguestid(inputdf: pd.DataFrame, guestidcl: str):
     rstdf1: pd.DataFrame = inputdf.copy(deep=True)
     print(rstdf1.dtypes)
-    guestidlst = [str(guestid) for guestid in rstdf1.groupby(guestidcl).first().index.values]
+    guestidalllst = rstdf1.groupby(guestidcl).first().index.values
+    print(guestidalllst)
+    gidds = rstdf1.groupby(['guestid', 'guest']).count().groupby(level='guestid').count()['roomid']
+    guestidlst = [str(guestid) for guestid in gidds[gidds > 1].index]
     print(guestidlst)
     for nameid in guestidlst:
         if namez := getinivaluefromnote('game', nameid):
