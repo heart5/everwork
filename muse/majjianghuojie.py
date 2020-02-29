@@ -327,17 +327,23 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     titlestr = f"战果统计（{timestart}至{timeend}）"
     outlst.append(titlestr)
 
-    outlst.append(f"参战人数：\t{rgp.shape[0]}")
+    renshu = rgp.shape[0]
+    print(f"人数共有：\t{renshu}")
+    outlst.append(f"参战人数：\t{renshu}")
     fangtotalstr = f"（共开房{fangfinaldf.shape[0]}次）"
     outlst.append(f"进行圈数：\t{rstdf.groupby(['roomid']).count().shape[0]}\t{fangtotalstr}")
 
     def formatdfstr(ddf):
         return '\n'.join(str(ddf).split('\n')[1:-1])
 
-    if shownumber := getinivaluefromnote('game', 'huojieshow'):
-        pass
+    if simpledesc:
+        if shownumber := getinivaluefromnote('game', 'huojieshow'):
+            pass
+        else:
+            shownumber = 3
     else:
-        shownumber = 3
+        shownumber = renshu
+
     kaifang = rstdf[rstdf.host == True].groupby(['guest']).count()['host'].sort_values(ascending=False)
     outlst.append(f"开房积极分子排名：\n{formatdfstr(kaifang[:shownumber])}")
     zimo = rstdf.groupby(['guest']).sum()['zimo'].sort_values(ascending=False)
@@ -366,7 +372,7 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
         # 愚蠢谨记！提取列数据时多套了一层方括号
         laomoindexlst = list(rstdf[rstdf.guest == player]['roomid'])
         laomofangdf = fangfinaldf.loc[laomoindexlst]
-        print(player, laomoindexlst, laomofangdf)
+        # print(player, laomoindexlst, laomofangdf)
         ptime = laomofangdf.sum()['playmin']
         playtimelst.append([player, ptime])
 
@@ -378,7 +384,9 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     outlst.append(f"\n{showhighscore(rstdf)}")
 
     shuyingdf = rstdf.groupby(['guest']).sum()
-    shuyingdf = shuyingdf[shuyingdf.score > 0]
+    # 综合则输出全部输赢信息
+    if simpledesc:
+        shuyingdf = shuyingdf[shuyingdf.score > 0]
     shuying = shuyingdf['score'].sort_values(ascending=False)
     shuyingstr = f"大赢家光荣榜：\n{formatdfstr(shuying[:shownumber])}"
     outlst.append(shuyingstr)
