@@ -17,18 +17,75 @@
 # ### 微信延时
 
 # +
+import time
+import pandas as pd
 import matplotlib.pyplot as plt
 from pandas.plotting import register_matplotlib_converters
 
 import pathmagic
 with pathmagic.context():
-    from func.logme import log
-    from func.first import getdirmain, touchfilepath2depth
     from life.wcdelay import getdelaydb
 
-    timedf = getdelaydb()
+timedf = getdelaydb()
+timedf = timedf.append(pd.DataFrame([timedf.iloc[-1]], index=[pd.to_datetime(time.ctime())]))
+print(timedf.shape[0])
 register_matplotlib_converters()
+
+# fig, ax = plt.subplots(1, 1)
+# for label in ax.get_xticklabels():
+#     label.set_visible(False)
+for label in ax.get_xticklabels():
+    label.set_visible(True)
+    label.set_color('red')
+    label.set_rotation(45)
+    label.set_fontsize(8)
+
+plt.figure(figsize=(36, 6))
+plt.style.use('ggplot')   ##使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
+tmin = timedf.index.min()
+tmax = timedf.index.max()
+shicha = tmax - tmin
+bianjie = int(shicha.total_seconds() / 40)
+print(bianjie)
+plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
+plt.xlim(xmax=tmax + pd.Timedelta(f'{bianjie}s'))
+plt.vlines(tmin, 0, int(timedf.max() / 2))
+plt.vlines(tmax, 0, int(timedf.max() / 2))
+plt.scatter(timedf.index, timedf, s=timedf)
+plt.scatter(timedf[timedf == 0].index, timedf[timedf == 0], s=0.5)
+plt.title('信息频率和延时')
+
+
+# -
+plt.figure(figsize=(12, 6))
+weiyi = 20
+plt.ylim(ymin=(-1) * weiyi)
+plt.ylim(ymax=timedf.max().values[0] + weiyi)
+# plt.plot(timedf[::200])
 plt.plot(timedf)
+
+print(timedf.shape[0])
+itemds = pd.Series([timedf.iloc[-1].values[0]], index=[pd.to_datetime(time.ctime())], name='delay')
+print(itemds.dtypes)
+print(itemds)
+pd.concat([timedf, itemds])
+
+print(time.time())
+print(int(time.time() * 1000))
+
+# +
+import pandas as pd
+import time
+
+endds = pd.Series()
+print(timedf.shape[0])
+timedf.append(pd.DataFrame([timedf.iloc[-1]], index=[pd.to_datetime(time.ctime())]))
+print(timedf.shape[0])
+# -
+
+plt.scatter(timedf.index, timedf)
+
+
 # +
 def delitemfromdb(key):
     conn = lite.connect(dbname)
