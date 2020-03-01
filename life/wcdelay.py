@@ -142,6 +142,7 @@ def showdelayimg(jingdu: int=300):
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
-    tdf = getdelaydb()
+    xinxian, tdf = getdelaydb()
+    print(xinxian)
     print(tdf.sort_index(ascending=False))
     log.info(f'文件{__file__}运行结束')
