@@ -6,36 +6,43 @@
 #     text_representation:
 #       extension: .py
 #       format_name: light
-#       format_version: '1.4'
-#       jupytext_version: 1.2.1
+#       format_version: '1.5'
+#       jupytext_version: 1.3.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python3
 # ---
 
-import pathmagic
-import sys
-sys.path.append('termux_python')
-with pathmagic.context():
-    import termux_python.termux as tm
-    from func.wrapfuncs import timethis
-    from func.profilerlm import lpt_wrapper
-    from func.logme import log
+import os
+import itchat
+from life.wcdelay import showdelayimg
 
+itchat.auto_login(hotReload=True)   #热启动你的微信
 
-@timethis
-@lpt_wrapper()
-def showmsgfromtermux():
-    # print('开工啊')
-    print(sys.path)
-    print(tm.battery_status())
-    print(tm.camera_info())
-    # tm.termux_sms_list()
+#查看你的群
+rooms=itchat.get_chatrooms(update=True)
+for i in range(len(rooms[:2])):
+    for key, value in rooms[i].items():
+        print(f"{key}\t{value}")
+    print('\n')   
 
+#这里输入你好友的名字或备注。
+frd = itchat.search_friends(name=r'')  
+print(frd)
+username = frd['UserName']
+print(username)
+img = showdelayimg()
+print(img)
 
-if __name__ == '__main__':
-    log.info(
-        f'开始运行文件\t{__file__}\t{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co_filename}')
-    showmsgfromtermux()
-    log.info(f"文件\t{__file__}\t执行完毕")
+print(img)
+import os
+imgrelatepath = os.path.relpath(img)
+print(imgrelatepath)
+
+imgwcdelay = 'img/webchat/wcdelay.png'
+try:
+    itchat.send_image(imgrelatepath,toUserName=username)  # 如果是其他文件可以直接send_file
+    print("success")
+except Exception as e:
+    print(f"fail.{e}")

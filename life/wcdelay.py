@@ -2,15 +2,16 @@
 """
 微信延迟管理文件
 """
+import os
 import sqlite3 as lite
 import pandas as pd
 import matplotlib.pyplot as plt
 from pandas.plotting import register_matplotlib_converters
 # import datetime
 import time
+import datetime
 
 import pathmagic
-
 with pathmagic.context():
     from func.logme import log
     from func.first import touchfilepath2depth, getdirmain
@@ -87,43 +88,54 @@ def getdelaydb():
         lambda x: pd.to_datetime(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(x))))
     timedf.set_index('time', inplace=True)
 
-    if tdfsize := timedf.shape[0] != 0:
+    if (tdfsize := timedf.shape[0]) != 0:
         print(f"延时记录共有{tdfsize}条")
         # 增加当前时间，延时值引用最近一次的值，用于做图形展示的右边栏
+#         nowtimestamp = time.ctime()
+#         timedf = timedf.append(pd.DataFrame([timedf.iloc[-1]], index=[pd.to_datetime(time.ctime())]))
         timedf = timedf.append(pd.DataFrame([timedf.iloc[-1]], index=[pd.to_datetime(time.ctime())]))
+        jujinmins = int((timedf.index[-1] - timedf.index[-2]).total_seconds() / 60)
     else:
+        jujinmins = 0
         log.info(f"数据表{tablename}还没有数据呢")
 
     timedf.loc[timedf.delay < 0] = 0
     # print(timedf.iloc[:2])
     print(timedf.iloc[-3:])
 
-    return timedf
+    return jujinmins, timedf
 
 
-def showdelayimg():
-    timedf = getdelaydb()
+def showdelayimg(jingdu: int=300):
+    jujinm, timedf = getdelaydb()
+    print(f"记录新鲜度：出炉了{jujinm}分钟")
+    
     register_matplotlib_converters()
 
     plt.figure(figsize=(36, 6))
     plt.style.use('ggplot')  # 使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
+    
+    # 画出左边界
     tmin = timedf.index.min()
     tmax = timedf.index.max()
     shicha = tmax - tmin
     bianjie = int(shicha.total_seconds() / 40)
-    print(bianjie)
+    print(f"左边界：{bianjie}秒，也就是大约{int(bianjie / 60)}分钟")
     # plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
     plt.xlim(xmin=tmin)
     plt.xlim(xmax=tmax + pd.Timedelta(f'{bianjie}s'))
     # plt.vlines(tmin, 0, int(timedf.max() / 2))
     plt.vlines(tmax, 0, int(timedf.max() / 2))
+    
+    # 绘出主图和标题
     plt.scatter(timedf.index, timedf, s=timedf)
     plt.scatter(timedf[timedf == 0].index, timedf[timedf == 0], s=0.5)
     plt.title('信息频率和延时')
 
     imgwcdelaypath = touchfilepath2depth(getdirmain() / 'img' / 'webchat' / 'wcdelay.png')
 
-    plt.savefig(imgwcdelaypath)
+    plt.savefig(imgwcdelaypath, dpi=jingdu)
+    print(os.path.relpath(imgwcdelaypath))
 
     return imgwcdelaypath
 
