@@ -24,19 +24,24 @@ from pandas.plotting import register_matplotlib_converters
 
 import pathmagic
 with pathmagic.context():
-    from life.wcdelay import getdelaydb
+    from func.first import touchfilepath2depth, getdirmain
+    from life.wcdelay import getdelaydb, showdelayimg
 
-timedf = getdelaydb()
-print(timedf.shape[0])
+
+# -
+showdelayimg()
+
+# +
+jujinm, timedf = getdelaydb()
 register_matplotlib_converters()
 
-plt.figure(figsize=(36, 6), dpi=600)
+plt.figure(figsize=(36, 6), dpi=300)
 plt.style.use('ggplot')   ##使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
 tmin = timedf.index.min()
 tmax = timedf.index.max()
 shicha = tmax - tmin
 bianjie = int(shicha.total_seconds() / 40)
-print(bianjie)
+print(f"左边界：{bianjie}秒，也就是大约{int(bianjie / 60)}分钟")
 # plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
 plt.xlim(xmin=tmin)
 plt.xlim(xmax=tmax + pd.Timedelta(f'{bianjie}s'))

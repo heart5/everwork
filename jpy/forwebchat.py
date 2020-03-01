@@ -23,7 +23,7 @@ from pandas.plotting import register_matplotlib_converters
 import pathmagic
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
-    from life.wcdelay import getdelaydb
+    from life.wcdelay import getdelaydb, showdelayimg
 # -
 
 pklabpath = os.path.relpath(touchfilepath2depth(getdirmain() / 'itchat.pkl'))
@@ -52,7 +52,7 @@ for frd in frdlst[:3]:
         headimg = itchat.get_head_img(frd["UserName"])
         imgfrombytes = Image.open(BytesIO(headimg))
         # 转成array格式——常规
-        imgnp = np.array(imfrombytes)
+        imgnp = np.array(imgfrombytes)
         print(type(headimg), imgfrombytes, imgnp)
         
         # 展示array代表的图像
