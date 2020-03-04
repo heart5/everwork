@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.3.1
+#       jupytext_version: 1.3.4
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -293,7 +293,6 @@ frddf = getwcdffromfrdlst(frdlst)
 cinfolst = frddf.values
 clnames = frddf.columns
 print(list(clnames.values)[:-1])
-print(frddf.loc[ix])
 cinforeadylst = list()
 for ix in frddf.index[:10]:
     cinfocleanlst = list(frddf.loc[ix].values[:-1])
@@ -386,11 +385,11 @@ tablenamehead = "wccheadimg"
 try:
     conn = lite.connect(dbname)
     cursor = conn.cursor()
-    print(f"headimg的内存地址为：\t{memoryview(headimg)}")
     insertsql = f"insert into {tablenamehead} (username, himguuid, headimg) values(?, ?, ?)"
     print(f"插入sql语句：\t{insertsql}")
 #             paratuple = (f"{frd['UserName']}", f"{id}", lite.Binary(headimg),)
-    for item in hionlylst:
+    for item in hionlylst:       
+        print(f"headimg的内存地址为：\t{memoryview(item[2])}")
         cursor.execute(insertsql, item)
 #             print(type(conn), conn)
     print(f"数据表《{tablenamehead}》中有{conn.total_changes}条记录发生变化（增删改）")
@@ -440,6 +439,8 @@ for ix in uimgdf.index:
     plt.show()
     print('\n')
 
+# #### QR图像显示
+
 # +
 import matplotlib.pyplot as plt # plt 用于显示图片
 import matplotlib.image as mpimg # mpimg 用于读取图片
@@ -453,3 +454,6 @@ print(lena.shape) #(512, 512, 3)
 plt.imshow(lena) # 显示图片
 plt.axis('off') # 不显示坐标轴
 plt.show()
+# -
+
+
