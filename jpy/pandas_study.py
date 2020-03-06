@@ -290,7 +290,7 @@ df4 = pd.DataFrame({'B': ['B2', 'B3', 'B6', 'B7'],
 df4
 
 # + [markdown] toc-hr-collapsed=true toc-hr-collapsed=true
-# #### 使用contact
+# #### 使用concat
 # -
 
 # contact的语法形式
