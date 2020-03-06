@@ -26,35 +26,11 @@ import pathmagic
 with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain
     from life.wcdelay import getdelaydb, showdelayimg
-
-
-# -
 showdelayimg()
 
-# +
-jujinm, timedf = getdelaydb()
-register_matplotlib_converters()
-
-plt.figure(figsize=(36, 6), dpi=300)
-plt.style.use('ggplot')   ##使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
-tmin = timedf.index.min()
-tmax = timedf.index.max()
-shicha = tmax - tmin
-bianjie = int(shicha.total_seconds() / 40)
-print(f"左边界：{bianjie}秒，也就是大约{int(bianjie / 60)}分钟")
-# plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
-plt.xlim(xmin=tmin)
-plt.xlim(xmax=tmax + pd.Timedelta(f'{bianjie}s'))
-# plt.vlines(tmin, 0, int(timedf.max() / 2))
-plt.vlines(tmax, 0, int(timedf.max() / 2))
-plt.scatter(timedf.index, timedf, s=timedf)
-plt.scatter(timedf[timedf == 0].index, timedf[timedf == 0], s=0.5)
-plt.title('信息频率和延时')
-plt.savefig(touchfilepath2depth(getdirmain() / 'img' / 'webchat' / 'wcdelay.png'))
-plt.show()
-
 
 # -
+jujinm, timedf = getdelaydb()
 plt.figure(figsize=(12, 6))
 weiyi = 20
 plt.ylim(ymin=(-1) * weiyi)
@@ -169,6 +145,9 @@ with pathmagic.context():
 # -
 
 
+zjstr = zhanjidesc('白晔峰', False, False)
+print(zjstr)
+
 excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
 recorddf = pd.read_excel(excelpath)
 rstdf = recorddf.copy(deep=True)
@@ -181,9 +160,7 @@ print(teams)
 playtimelst = []
 for player in teams:
     playerindexlst = list(rstdf[rstdf.guest == player]['roomid'])
-    print(player, playerindexlst)
-
-
+    print(player, len(playerindexlst))
 
 ownername = '白晔峰'
 recetday = True
@@ -192,20 +169,42 @@ simpledesc = True
 fangdf = fetchmjfang(ownername)
 fangdf.groupby(['name']).first()
 
+# #### 根据对局战绩修正房主信息
+
 fangdf = fetchmjfang(ownername)
-# print(fangdf)
+print(f"{fangdf.shape[0]}")
 fangclosedf = rstdf.groupby('roomid')['time'].max()
-# print(fangclosedf)
+print(fangclosedf.shape[0])
 # 以房号为索引进行数据合并，默认join='outer'
 fangfinaldf: pd.DataFrame = pd.concat([fangdf, fangclosedf], axis=1).sort_values(by=['mintime'], ascending=False)
+print(fangfinaldf.shape[0])
 fangfinaldf = fangfinaldf.rename(columns={'time': 'closetime'})
 # print(fangfinaldf) fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(lambda df: int((df['closetime'] - df[
 # 'maxtime']).total_seconds() / 60) if df['closetime'] else pd.NaT, axis=1)
 fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(
     lambda df: (df['closetime'] - df['maxtime']).total_seconds() // 60 if df['closetime'] else pd.NaT, axis=1)
 # print(fangfinaldf[fangfinaldf['mintime'].isnull()])
-fangfdf = fangfinaldf.copy(deep=True)
-fangfdf
+# 根据对局战绩修正房主信息
+rstdfroomhost = rstdf[rstdf.host].groupby('roomid')['guest'].first()
+print(rstdfroomhost.shape[0])
+for ix in list(rstdfroomhost.index.values):
+    hostname = rstdfroomhost[ix]
+#     print(ix, hostname)
+    fangfinaldf.loc[ix, 'name'] = hostname
+fangdf1 = fangfinaldf.copy(deep=True)
+fangdf1.sort_values('closetime', ascending=False)
+
+rstdfroomhost = rstdf[rstdf.host].groupby('roomid')['guest'].first()
+print(rstdfroomhost)
+fangcom = fangdf1.join(rstdfroomhost).sort_values('closetime', ascending=False)
+fangcomother = fangcom
+fangcomother[fangcomother.name == fangcomother.guest]
+
+rstdfroomhost = rstdf[rstdf.host][['roomid', 'guest']].set_index('roomid')
+print(rstdfroomhost)
+fangcom = fangfdf.join(rstdfroomhost)
+fangcomother = fangcom[fangcom['guest'].notnull()]
+fangcomother[fangcomother.name != fangcomother.guest]
 
 fangfdf[fangfdf['playmin'].notnull()]
 # playmin的平均值
@@ -259,15 +258,17 @@ for id in rstdf[rstdf['score'] == highscore]['roomid'].values:
 excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
 recorddf = pd.read_excel(excelpath)
 rstdf = recorddf.copy(deep=True)
+rstdf
 
 rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
 rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
-gidds = rstdf.groupby(['guestid', 'guest']).count().reset_index(['guest'], drop=False).groupby(level='guestid').count()['roomid']
+# gidds = rstdf.groupby(['guestid', 'guest']).count().reset_index(['guest'], drop=False).groupby(level='guestid').count()['roomid']
+gidds = rstdf.groupby(['guestid', 'guest']).count()
 print(gidds)
 gidds[gidds > 1].index
 
-fixguestid = 1083558
-fixguest = '徐晓锋'
+fixguestid = 1088036
+fixguest = '白晔峰'
 needdf = rstdf[rstdf.guestid == fixguestid]
 print(needdf)
 # print(needdf[needdf.guest != '徐晓锋'])
