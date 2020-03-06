@@ -14,6 +14,104 @@
 #     name: python3
 # ---
 
+# ## uuid库
+
+# 在判断联系人数据记录（包含头像数据）时发现用uuid好像无法约束，同一个联系人会产生不同的uuid。多轮次验证，发现对于`list(frddf2append.columns.values)`，传入uuid获取函数后会出现不同的值；但对于不包含头像的数据记录，uuid又是一样的。初步判断问题可能出在头像数据比较大，不同于一般的短字符串，是不是用了memoryview导致每次的内存地址不同进而引起不同。经过无聊测试，分析对`list(frddf2append.columns.values)`进行截取，在长度768之前都会一致，在768这个点上，多运行几次会出现不同值，但不同值的集合值只有两个；超过了768，则每次都会产生不同的uuid值。
+
+# +
+import uuid
+
+def uuid3hexstr(inputo: object):
+#     inputstr = str(inputo)[:767]
+    inputstr = str(inputo)
+#     print(f"输入对象str化后长度为：{len(inputstr)}")
+    uuidout = uuid.uuid3(uuid.NAMESPACE_URL, inputstr)
+
+    return hex(hash(uuidout))[2:].upper()
+
+strlst4text = [list(), tuple(), '微信', 'heart5', 'blog', '生产力', ['12', '23'], 'blog', '生产力', ('12', '23'), None, None, 123, 321, '12', '12']
+for itm in strlst4text:
+    print(itm, uuid3hexstr(itm))
+# -
+
+# ## sqlite3
+#
+# - SQLite是一个进程内的库，实现了自给自足的、无服务器的、零配置的、事务性的 SQL 数据库引擎。
+# - 它是一个零配置的数据库，这意味着与其他数据库不一样，您不需要在系统中配置。
+# - 就像其他数据库，SQLite 引擎不是一个独立的进程，可以按应用程序需求进行静态或动态连接。SQLite 直接访问其存储文件。
+
+# ### Python sqlite3 模块 API
+
+# #### `connection.total_changes()`
+#
+# 该例程返回自数据库连接打开以来被修改、插入或删除的数据库总行数。
+#
+# **调用的时候带括号`connection.total_changes()`会报错：**
+# ```python
+# TypeError: 'int' object is not callable
+# ```
+# 直接用`connection.total_changes`就行，类型是`int`
+
+# ## 编码
+
+# ### `binascii`模块
+#
+# 包含很多在二进制和二进制表示的各种ASCII码之间转换的方法。 通常情况不会直接使用这些函数，而是使用像 uu ， base64 ，或 binhex 这样的封装模块。 为了执行效率高，binascii 模块含有许多用 C 写的低级函数，这些底层函数被一些高级模块所使用。
+
+# #### `binascii.hexlify(data)`
+# 返回二进制数据 data 的十六进制表示形式。 data 的每个字节都被转换为相应的2位十六进制表示形式。因此返回的字节对象的长度是 data 的两倍。
+# 使用：bytes.hex() 方法也可以方便地实现相似的功能（但仅返回文本字符串）。
+
+# #### `binascii.unhexlify(hexstr)`
+# 返回由十六进制字符串 hexstr 表示的二进制数据。此函数功能与 b2a_hex() 相反。 hexstr 必须包含偶数个十六进制数字（可以是大写或小写），否则会引发 Error 异常。
+#
+# 使用：bytes.fromhex() 类方法也实现相似的功能（仅接受文本字符串参数，不限制其中的空白字符）。
+
+# +
+import time
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from binascii import hexlify, unhexlify
+from PIL import Image
+from pandas.plotting import register_matplotlib_converters
+from io import BytesIO
+
+import pathmagic
+with pathmagic.context():
+    from func.first import touchfilepath2depth, getdirmain
+    
+qrpath = getdirmain() / "QR.png"
+with open(qrpath, 'rb') as fqr:
+    fbytes = fqr.read()
+    print(type(fbytes), f"{fbytes[:20]}\t……")
+    fbyteshfl = hexlify(fbytes).decode()
+    print(f"fbyteshfl:\t{hexlify(fbytes).decode()[:40]}\t……")
+    imgfrombytes = Image.open(BytesIO(fbytes))
+    print(imgfrombytes)
+    imgnp = np.array(imgfrombytes)
+    print(imgnp)
+    # 展示array代表的图像
+    
+    plt.figure(figsize=(10,5)) #设置窗口大小
+    plt.suptitle('bytes字节流恢复图片') # 图片名称
+    plt.subplot(1,2,1), plt.title('QR（原图）')
+    plt.imshow(imgnp), plt.axis('off')
+    plt.subplot(1,2,2), plt.title('QR（恢复）')
+    imgnpreover = np.array(Image.open(BytesIO(unhexlify(fbyteshfl))))
+    plt.imshow(imgnpreover,cmap='gray'), plt.axis('off') #这里显示灰度图要加cmap
+
+    plt.show()
+    
+img = Image.open(qrpath)
+
+plt.figure("QR图形") # 图像窗口名称
+plt.imshow(img)
+plt.axis('on') # 关掉坐标轴为 off
+plt.title('QR') # 图像题目
+plt.show()
+# -
+
 # ## 时间
 
 # +
