@@ -293,6 +293,12 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(
         lambda df: (df['closetime'] - df['maxtime']).total_seconds() // 60 if df['closetime'] else pd.NaT, axis=1)
     # print(fangfinaldf[fangfinaldf['mintime'].isnull()])
+    # 根据对局战绩修正房主信息
+    rstdfroomhost = rstdf[rstdf.host].groupby('roomid')['guest'].first()
+    for ix in list(rstdfroomhost.index.values):
+        hostname = rstdfroomhost[ix]
+        fangfinaldf.loc[ix, 'name'] = hostname
+
     fangfinaldf.to_csv(csvfile := touchfilepath2depth(getdirmain() / 'data' / 'game' / 'huojiemajiangfang.csv'))
 
     fangfdf = fangfinaldf.copy(deep=True)
