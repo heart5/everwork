@@ -14,6 +14,97 @@ jupyter:
     name: python3
 ---
 
+## 各种资源
+
+
+#### anaconda安装清华源
+
+
+https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/
+
+
+## 用atilo安装使用linux
+
+
+### 安装步骤
+
+
+#### 更新apt安装源，并安装curl工具
+
+<!-- #region -->
+```bash
+apt update
+apt install -y curl
+```
+<!-- #endregion -->
+
+#### 安装atilo
+
+
+1.英文版
+
+<!-- #region -->
+```bash
+curl -o $PREFIX/bin/atilo https://raw.githubusercontent.com/YadominJinta/atilo/master/atilo && chmod +x $PREFIX/bin/atilo
+```
+<!-- #endregion -->
+
+2.中文版
+
+<!-- #region -->
+```bash
+curl -o $PREFIX/bin/atilo https://raw.githubusercontent.com/YadominJinta/atilo/master/CN/atilo_cn && chmod +x $PREFIX/bin/atilo
+```
+<!-- #endregion -->
+
+英文版比CN版多了CentOS、OpenSuSE、ParrotOS这3个系统
+
+
+#### 补充必要运行库
+
+<!-- #region -->
+```bash
+pip install tqdm prettytable
+```
+<!-- #endregion -->
+
+### atilo命令
+
+
+```
+atilo [命令] [参数]
+命令:
+images                列出可用的Linux
+remove              移除已安装的Linux
+pull             拉取Linux镜像
+run               运行linux镜像
+clean           清除镜像的tmps
+help                帮助
+```
+
+
+### 运行linux
+
+<!-- #region -->
+```bash
+atilo images #列出可用的linux版本
+atilo pull ubuntults #拉取ubuntu的bionic版本
+atilo run ubuntults #运行，直接进入ubuntults，默认是root
+```
+<!-- #endregion -->
+
+### 安装jupyterhub
+
+
+#### 安装系统工具
+
+<!-- #region -->
+```bash
+apt update #更新安装源
+apt install -y nnn #安装nnn文件管理器，版本好老，1.7.1
+```
+<!-- #endregion -->
+
 ## AlgerNon
 
 
