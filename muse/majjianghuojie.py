@@ -224,12 +224,12 @@ def fixnamealias(inputdf: pd.DataFrame, clname: str):
 
 def fixnamebyguestid(inputdf: pd.DataFrame, guestidcl: str):
     rstdf1: pd.DataFrame = inputdf.copy(deep=True)
-    print(rstdf1.dtypes)
+    # print(rstdf1.dtypes)
     guestidalllst = rstdf1.groupby(guestidcl).first().index.values
-    print(guestidalllst)
+    # print(guestidalllst)
     gidds = rstdf1.groupby(['guestid', 'guest']).count().groupby(level='guestid').count()['roomid']
     guestidlst = [str(guestid) for guestid in gidds[gidds > 1].index]
-    print(guestidlst)
+    # print(guestidlst)
     for nameid in guestidlst:
         if namez := getinivaluefromnote('game', nameid):
             needdf = rstdf1[rstdf1.guestid == int(nameid)]
@@ -272,13 +272,13 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf.copy(deep=True)
-    print(rstdf.groupby(['guestid', 'guest']).count())
+    # print(rstdf.groupby(['guestid', 'guest']).count())
     rstdf = fixnamebyguestid(rstdf, 'guestid')
     rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
     rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
     # print(rstdf.head())
     # print(rstdf.dtypes)
-    print(rstdf.groupby(['guestid', 'guest']).count())
+    # print(rstdf.groupby(['guestid', 'guest']).count())
 
     fangdf = fetchmjfang(ownername)
     fangdf = fixnamealias(fangdf, 'name')
@@ -328,8 +328,8 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
                                    axis=1)
         # print(fangfilter)
         fangfinaldf = fangfdf[fangfilter]
-    print(fangfinaldf)
-    print(rstdf)
+    # print(fangfinaldf)
+    # print(rstdf)
     outlst = list()
     rgp = rstdf.groupby(['guest']).count()
     timeend = rstdf['time'].max().strftime("%y-%m-%d %H:%M")
