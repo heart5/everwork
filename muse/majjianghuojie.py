@@ -406,11 +406,12 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
 
 
 def updateallurlfromtxt(owner: str):
-    # sp1 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_2ba66d661e4c7712d0e6bcd3a6df255f"
-    # sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_46247683e1b6e744ad956041ab2579a6"
-    # sp3 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_62a635b6dc15b34b74527550cd88d83f"
-    # splst = [sp1, sp2, sp3]
-    splst = fetchmjurl(owner)
+    sp1 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_2ba66d661e4c7712d0e6bcd3a6df255f"
+    sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_46247683e1b6e744ad956041ab2579a6"
+    sp3 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_62a635b6dc15b34b74527550cd88d83f"
+    sp4 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_9b8bd588d1d44ae2867aa1319241881b"
+    splst = [sp1, sp2, sp3, sp4]
+    # splst = fetchmjurl(owner)
     for sp in splst[:4]:
         print(sp)
 
