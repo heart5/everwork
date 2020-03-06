@@ -253,9 +253,21 @@ def sharing_reply(msg):
     if re.findall(ptn, msgurl):
         if msgurl.startswith('http'):
             roomid = updateurllst(msgurl)
-            outstr = f"微信【Sharing】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}\t{msgurl}"
+            outstr = f"【Sharing】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}\t{msgurl}"
             log.info(outstr)
             itchat.send_msg(outstr)
+
+    # 处理开房链接
+    # http://s0.lgmob.com/h5_whmj_qp/?d=217426
+    ptnfang = re.compile("http://s0.lgmob.com/h5_whmj_qp/\\?d=(\d+)")
+    if re.findall(ptnfang, msgurl):
+        if msgurl.startswith('http'):
+            outstr = f"【Sharing】信息中发现新的火界麻将开房链接并处理，房间号为：\t{re.findall(ptnfang, msgurl)[0]}"
+            log.info(outstr)
+            itchat.send_msg(outstr)
+            print(innermsg['fmText'])
+            innermsg['fmText'] = msgurl
+
 
     soup, items = soupclean2item(msg['Content'])
 
@@ -343,7 +355,7 @@ def text_reply(msg):
     if re.findall(ptn, msgtxt):
         if msgtxt.startswith('http'):
             roomid = updateurllst(msgtxt)
-            outstr = f"微信【Text】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}\t{msgtxt}"
+            outstr = f"【Text】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}\t{msgtxt}"
             log.info(outstr)
             itchat.send_msg(outstr)
 
