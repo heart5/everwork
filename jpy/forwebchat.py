@@ -7,12 +7,26 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.3.4
+#       jupytext_version: 1.3.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python3
 # ---
+
+# ## 火界
+
+# ### 处理sharing中的开房信息
+
+# +
+import re
+fangurl = "http://s0.lgmob.com/h5_whmj_qp/?d=217426"
+
+ptnfang = re.compile("http://s0.lgmob.com/h5_whmj_qp/\\?d=(\d+)")
+re.findall(ptnfang, fangurl)[0]
+# -
+
+# ## 联系人处理
 
 # ### 库准备
 
@@ -119,25 +133,25 @@ compact_sqlite3_db(dbname)
 
 tablename = "wccheadimg"
 csql = f"create table {tablename} (himgid INTEGER PRIMARY KEY AUTOINCREMENT,username TEXT not null, himguuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, headimg BLOB NOT NULL)"
-conn = lite.connect(dbname)
-cursor = conn.cursor()
-cursor.execute(f'drop table {tablename}')
-# cursor.execute(f'drop table cinfo')
-conn.commit()
-tcs = conn.total_changes
-print(tcs)
-conn.close()
+# conn = lite.connect(dbname)
+# cursor = conn.cursor()
+# cursor.execute(f'drop table {tablename}')
+# # cursor.execute(f'drop table cinfo')
+# conn.commit()
+# tcs = conn.total_changes
+# print(tcs)
+# conn.close()
 ifnotcreate(tablename, csql, dbname)
 
 tablename_cc = "wccontact"
 csql = f"create table {tablename_cc} (id INTEGER PRIMARY KEY AUTOINCREMENT, contactuuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, username TEXT not null, nickname TEXT, contactflag int, remarkname TEXT, sex int, signature TEXT, starfriend int, attrstatus int, province TEXT, city TEXT, snsflag int, keyword TEXT, headimg BLOB)"
-conn = lite.connect(dbname)
-cursor = conn.cursor()
-cursor.execute(f'drop table {tablename_cc}')
-conn.commit()
-tcs = conn.total_changes
-print(tcs)
-conn.close()
+# conn = lite.connect(dbname)
+# cursor = conn.cursor()
+# cursor.execute(f'drop table {tablename_cc}')
+# conn.commit()
+# tcs = conn.total_changes
+# print(tcs)
+# conn.close()
 ifnotcreate(tablename_cc, csql, dbname)
 
 
