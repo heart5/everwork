@@ -116,4 +116,13 @@ for i in range(1, 10):
 # -
 print('我是一个好学生，\n我爱学习。')
 
+try1 = '我是好学生'
+print(try1)
+
+water = "水"
+hot = True
+print(water)
+print(f'{water} is hot ?\t', hot)
+print('\n')
+
 
