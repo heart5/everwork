@@ -411,6 +411,32 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     return outstr
 
 
+def showzhanjiimg(jingdu: int = 300):
+    excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
+    recorddf = pd.read_excel(excelpath)
+    rstdf = recorddf.copy(deep=True)
+    zgridf = rstdf.groupby([pd.to_datetime(rstdf['time'].dt.strftime("%Y-%m-%d")), rstdf.guest]).sum().reset_index('guest', drop=False)[['guest', 'score']].sort_index()
+
+    register_matplotlib_converters()
+    plt.style.use("ggplot")  # 使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
+    for person in set(list(zgridf.guest.values)):
+        pzgr = zgridf[zgridf.guest == person]['score'].cumsum()
+    #     print(person, pzgr)
+        pzgr.name = person
+        pzgr.plot(legend=True)
+
+    plt.title("战绩累积图")
+
+    imgwcdelaypath = touchfilepath2depth(
+        getdirmain() / "img" / "webchat" / "zhanjicum.png"
+    )
+
+    plt.savefig(imgwcdelaypath, dpi=jingdu)
+    print(os.path.relpath(imgwcdelaypath))
+
+    return imgwcdelaypath
+
+
 def updateallurlfromtxt(owner: str):
     sp1 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_2ba66d661e4c7712d0e6bcd3a6df255f"
     sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_46247683e1b6e744ad956041ab2579a6"

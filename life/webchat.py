@@ -28,7 +28,7 @@ with pathmagic.context():
     import evernote.edam.type.ttypes as ttypes
     from work.zymessage import searchcustomer, searchqiankuan, searchpinxiang
     from etc.getid import getdeviceid
-    from muse.majjianghuojie import updateurllst, zhanjidesc
+    from muse.majjianghuojie import updateurllst, zhanjidesc, showzhanjiimg
     from life.wcdelay import inserttimeitem2db, showdelayimg
 
 
@@ -372,6 +372,12 @@ def text_reply(msg):
         zhanji = zhanjidesc(men_wc, recentday, simpledesc)
         itchat.send_msg(f"{zhanji}", toUserName=msg['FromUserName'])
         itchat.send_msg(f"{msg['FromUserName']}\t查询信息：\n{msgtxt}")
+
+        if msgtxt.find('折线图') != -1:
+            imgzhanji = showzhanjiimg()
+            imgzhanjirel = os.path.relpath(imgzhanji)
+            itchat.send_image(imgzhanjirel, toUserName=msg['FromUserName'])
+            zhanji = imgzhanji
         nowtuple = time.time()
         nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
         finnalmsg = {'fmId': math.floor(nowtuple),
