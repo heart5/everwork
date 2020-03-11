@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+t -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -22,7 +22,7 @@ itchat.auto_login(hotReload=True)   #热启动你的微信
 
 #查看你的群
 rooms=itchat.get_chatrooms(update=True)
-for i in range(len(rooms[:2])):
+gor i in range(len(rooms[:2])):
     for key, value in rooms[i].items():
         print(f"{key}\t{value}")
     print('\n')   
