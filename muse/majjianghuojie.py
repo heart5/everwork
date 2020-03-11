@@ -4,6 +4,8 @@
 """
 
 import pandas as pd
+import matplotlib.pyplot as plt
+import os
 import requests
 import re
 from bs4 import BeautifulSoup
@@ -417,7 +419,7 @@ def showzhanjiimg(jingdu: int = 300):
     rstdf = recorddf.copy(deep=True)
     zgridf = rstdf.groupby([pd.to_datetime(rstdf['time'].dt.strftime("%Y-%m-%d")), rstdf.guest]).sum().reset_index('guest', drop=False)[['guest', 'score']].sort_index()
 
-    register_matplotlib_converters()
+    # register_matplotlib_converters()
     plt.style.use("ggplot")  # 使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
     for person in set(list(zgridf.guest.values)):
         pzgr = zgridf[zgridf.guest == person]['score'].cumsum()
@@ -460,7 +462,7 @@ if __name__ == '__main__':
     # print(fangdf)
 
     updateallurlfromtxt(own)
-    rst = zhanjidesc(own, True, False)
+    rst = zhanjidesc(own, False, False)
     print(rst)
 
     log.info(f'文件{__file__}运行结束')
