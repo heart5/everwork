@@ -21,14 +21,14 @@ with pathmagic.context():
 def inserttimeitem2db(timestampinput: int):
     dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "wcdelay.db")
     tablename = "wcdelay"
-    csql = f"create table {tablename} (time int primary key, delay int)"
+    csql = f"create table if not exists {tablename} (time int primary key, delay int)"
     ifnotcreate(tablename, csql, dbname)
 
     # timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
     # timest = time.mktime(timetup)
     elsmin = (int(time.time()) - timestampinput) // 60
-    conn = lite.connect(dbname)
     try:
+        conn = lite.connect(dbname)
         cursor = conn.cursor()
         cursor.execute(
             f"insert into {tablename} values(?, ?)", (timestampinput, elsmin)
@@ -45,7 +45,7 @@ def getdelaydb():
     dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "wcdelay.db")
     tablename = "wcdelay"
 
-    csql = f"create table {tablename} (time int primary key, delay int)"
+    csql = f"create table if not exists {tablename} (time int primary key, delay int)"
     ifnotcreate(tablename, csql, dbname)
 
     conn = lite.connect(dbname)
