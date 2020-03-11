@@ -125,9 +125,9 @@ dte = pd.to_datetime(date_str)
 dtd = dte - dts
 dtd.total_seconds() // 60
 
-# ### 调试麻将战绩统计输出函数
+# ### 火界麻将
 
-# #### 补充没有开局链接的房间信息
+# #### 库准备
 
 # +
 import pandas as pd
@@ -141,19 +141,56 @@ with pathmagic.context():
     from func.evernttest import trycounttimes2, getinivaluefromnote
     from func.first import getdirmain, touchfilepath2depth
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
-    from muse.majjianghuojie import fetchmjfang, zhanjidesc
+    from muse.majjianghuojie import fetchmjfang, zhanjidesc, updateurllst, updateallurlfromtxt
 # -
 
 
-zjstr = zhanjidesc('白晔峰', False, False)
-print(zjstr)
+# %lsmagic
+
+# %who
+
+updateallurlfromtxt('白晔峰')
+# %time
+
+# #### 【漏掉的战绩链接数据直接入库】
+
+# +
+fpath = getdirmain() / 'data' / 'webchat' / 'chatitems(白晔峰).txt'
+print(fpath)
+ptn = re.compile('three')
+with open(fpath) as f:
+    threelst = [ x.strip().split('\t')[-1] for x in f.readlines() if re.findall(ptn, x)]
+
+urllst = [x for x in threelst if x.startswith('http')]
+for url in urllst:
+    updateurllst(url)
+# -
+
+# ##### 从文本库文件中提取链接
+
+specialurl = "updateurllst(url)"
+updateurllst()
+
+# #### 【战绩】
+
+ownername = '白晔峰'
+recetday = True
+simpledesc = False
+zhanji = zhanjidesc(ownername, recetday, simpledesc)
+zhanji
+
+# #### 补充完善房间信息
+
+# ##### 从存储文件中读取最新对局信息并另份存档备用
 
 excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
 recorddf = pd.read_excel(excelpath)
 rstdf = recorddf.copy(deep=True)
 rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
 rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
-rstdf
+rstdf[rstdf.roomid == 631543]
+
+# ##### 列出战友信息，并统计各人对战圈数
 
 teams = list(set(rstdf['guest']))
 print(teams)
@@ -162,12 +199,15 @@ for player in teams:
     playerindexlst = list(rstdf[rstdf.guest == player]['roomid'])
     print(player, len(playerindexlst))
 
+# ##### 命名变量并提取开房信息
+
+# +
 ownername = '白晔峰'
-recetday = True
-simpledesc = True
 
 fangdf = fetchmjfang(ownername)
-fangdf.groupby(['name']).first()
+# 显示各人最近一次开房信息
+fangdf.groupby(['name']).first().sort_values('maxtime', ascending=False)
+# -
 
 # #### 根据对局战绩修正房主信息
 
@@ -194,40 +234,38 @@ for ix in list(rstdfroomhost.index.values):
 fangdf1 = fangfinaldf.copy(deep=True)
 fangdf1.sort_values('closetime', ascending=False)
 
-rstdfroomhost = rstdf[rstdf.host].groupby('roomid')['guest'].first()
-print(rstdfroomhost)
-fangcom = fangdf1.join(rstdfroomhost).sort_values('closetime', ascending=False)
-fangcomother = fangcom
-fangcomother[fangcomother.name == fangcomother.guest]
+# #### 验证房主信息修正
 
 rstdfroomhost = rstdf[rstdf.host][['roomid', 'guest']].set_index('roomid')
 print(rstdfroomhost)
-fangcom = fangfdf.join(rstdfroomhost)
+fangcom = fangfinaldf.join(rstdfroomhost)
 fangcomother = fangcom[fangcom['guest'].notnull()]
 fangcomother[fangcomother.name != fangcomother.guest]
 
+# #### 无开房信息填补
+
+# ##### 找出无开房信息的记录，并计算出既有对局的平均用时
+
+fangfdf = fangfinaldf
 fangfdf[fangfdf['playmin'].notnull()]
 # playmin的平均值
 playminmean = int(fangfdf['playmin'].mean())
 fangffix = fangfdf[fangfdf['playmin'].isnull() & fangfdf['count'].isnull()]
 fangffix
 
-print(fangffix.index)
+# ##### 填充平均对局时长，开房时间，开房人等信息
+
+print(len(fangffix.index))
 for index in fangffix.index:
-    print(fangffix.loc[index, ['closetime']].values - pd.to_timedelta(f'{playminmean}min'))
     fangffix.loc[index, ['maxtime']] = fangffix.loc[index, ['closetime']][0] - pd.to_timedelta(f'{playminmean}min')
     fangffix.loc[index, ['mintime']] = fangffix.loc[index, ['maxtime']][0]
     fangffix.loc[index, ['count']] = 1
-    fangffix.loc[index, ['name']] = rstdf[rstdf.host].set_index('roomid').loc[index, ['guest']][0]
+    hostname = rstdf[rstdf.host].groupby('roomid')['guest'].first()[index]
+#     print(hostname)
+    fangffix.loc[index, ['name']] = hostname
     fangffix.loc[index, ['playmin']] = playminmean
     fangffix.loc[index, ['consumemin']] = 0
-
-print(type(fangffix.loc[index, ['closetime']]))
-print(type(fangffix.loc[index, ['closetime']].values))
-print(type(fangffix.loc[index, ['closetime']].values[0]))
-print(type(fangffix.loc[index, ['closetime']][0]))
-
-fangffix
+fangffix.sort_values('closetime', ascending=False)
 
 # #### 输出最高赢注的局圈信息
 
@@ -253,22 +291,27 @@ for id in rstdf[rstdf['score'] == highscore]['roomid'].values:
     outlst.append(outstr)
 '\n'.join(outlst)
 
-# #### 关联名称，完善统计信息
+# #### 【修正名号关联】
+
+# ##### 从存储文件读出到DataFrame
 
 excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
 recorddf = pd.read_excel(excelpath)
 rstdf = recorddf.copy(deep=True)
-rstdf
+rstdf[rstdf.roomid == 346820]
+# rstdf
+
+# ##### 根据guestid和guest分组，找出对不上的信息
 
 rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
 rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
-# gidds = rstdf.groupby(['guestid', 'guest']).count().reset_index(['guest'], drop=False).groupby(level='guestid').count()['roomid']
 gidds = rstdf.groupby(['guestid', 'guest']).count()
-print(gidds)
-gidds[gidds > 1].index
+gidds
 
-fixguestid = 1088036
-fixguest = '白晔峰'
+# ##### 手工修复guest和guestid对不上的信息记录
+
+fixguestid = 1083452
+fixguest = '普任鹏'
 needdf = rstdf[rstdf.guestid == fixguestid]
 print(needdf)
 # print(needdf[needdf.guest != '徐晓锋'])
@@ -277,15 +320,40 @@ print(needindexlst)
 rstdf.loc[list(needindexlst), 'guest'] = fixguest
 pd.DataFrame(rstdf.groupby(['guestid', 'guest']).count().index)
 
+# ##### 写回数据存储文件
+
 excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
 excelwriter = pd.ExcelWriter(excelpath)
 rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
 excelwriter.close()
 
-rstdf = fangdf.copy(deep=True)
-rstdf.groupby('name').first().index.values
+# ##### 调试名号错位问题
 
-rstdf
+from func.evernttest import trycounttimes2, getinivaluefromnote
+from muse.majjianghuojie import fetchmjurl, getsinglepage, updateurllst, fixnamebyguestid
+
+ownername = "白晔峰"
+zjurllst = fetchmjurl(ownername)
+recentquandf = getsinglepage(zjurllst[0])
+recentquandf
+
+guestidcl = 'guestid'
+rstdf1: pd.DataFrame = recorddf.copy(deep=True)
+# print(rstdf1)
+guestidalllst = rstdf1.groupby(guestidcl).first().index.values
+print(guestidalllst)
+gidds = rstdf1.groupby(['guestid', 'guest']).count().groupby(level='guestid').count()['roomid']
+print(gidds)
+guestidlst = [str(guestid) for guestid in gidds.index]
+print(guestidlst)
+for nameid in guestidlst:
+    if namez := getinivaluefromnote('game', nameid):
+        needdf = rstdf1[rstdf1.guestid == int(nameid)]
+        print(namez, needdf.shape[0])
+        rstdf1.loc[list(needdf.index), 'guest'] = namez
+rstdf1
+
+rstdf1.groupby(['guestid', 'guest']).count()
 
 clname = 'name'
 for name in rstdf.groupby(clname).first().index.values:
@@ -304,6 +372,23 @@ rstdf
 
 rstdf = backdf.copy(deep=True)
 rstdf.groupby(['guest']).sum()
+
+# ### 战果曲线图
+
+excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
+recorddf = pd.read_excel(excelpath)
+rstdf = recorddf.copy(deep=True).sort_values('time', ascending=False)
+rstdf
+
+zgridf = rstdf.groupby([pd.to_datetime(rstdf['time'].dt.strftime("%Y-%m-%d")), rstdf.guest]).sum().reset_index('guest', drop=False)[['guest', 'score']].sort_index()
+zgridf
+
+plt.figure(figsize=(30, 6))
+for person in set(list(zgridf.guest.values)):
+    pzgr = zgridf[zgridf.guest == person]['score'].cumsum()
+#     print(person, pzgr)
+    pzgr.name = person
+    pzgr.plot(legend=True)
 
 # ### 获取笔记本信息
 
