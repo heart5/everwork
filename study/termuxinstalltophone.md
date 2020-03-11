@@ -64,12 +64,35 @@ pkg install proot
 #### vim，上古神之编辑器
 
 
+##### 安装
+
+
 有些插件需要支持python的vim版本，官方源里面有，这里我们直接安装：
 ```zsh
 pkg install vim-python
 ```
 相关库大小有43M，看了下，默认把python也给装好了^_^
 
+
+##### 安装solarized主题
+
+<!-- #region -->
+1.下载主题并解压到vim相应版本的主程序相应目录colors中
+```bash
+cd ~
+cd ..
+cd usr/share/vim/vim82/colors
+wget https://github.com/altercation/vim-colors-solarized/archive/master.zip
+7z l master.zip # 列印压缩包中的文件，看看主题（后缀名是.vim）在哪里
+7z e master.zip vim-colors-solarized-master/colors/solarized.vim # 从压缩包中提取指定文件到当前目录
+```
+2.在`.vimrc`中增加配置行
+```ini
+let g:solarized_termcolors=256 "solarized主题设置在终端下的设置"
+set background=dark "设置背景色"
+colorscheme solarized
+```
+<!-- #endregion -->
 
 #### nnn文件管理器
 
@@ -143,6 +166,145 @@ bind-key r source-file ~/.tmux.conf \; display "Config reloaded.."
 多窗口用起来很爽，但美中不足的是和host操作系统的粘贴板无法贯通，不像putty中鼠标右键粘贴、选中后左键复制来的方便。所以在安装期，想从资料中复制粘贴还是待在putty中的好。
 
 
+### vim设置和插件
+
+
+这个玩意儿配置好了可以上天，所以在此专条讲述
+
+
+#### 下载源码编译使之支持各种性能，如粘贴板等
+
+
+##### 下载源码
+
+<!-- #region -->
+在`home`目录下建立一个专门下载源码的目录`mkdir ghub`后`cd ghub`进入之
+```bash
+git clone https://github.com/vim/vim.git
+```
+进到src里面`cd vim/src`
+
+编译语句：
+```bash
+make clean
+./configure --with-features=huge --enable-python3interp --enable-pythoninterp --with-python-config-dir=/data/data/com.termux/files/usr/lib/python3.8/config-3.8 --enable-rubyinterp --enable-luainterp --enable-perlinterp --with-python-config-dir=/data/data/com.termux/files/usr/lib/python2.7/config --enable-multibyte --enable-cscope --enable-gui=auto  --with-x --prefix=/data/data/com.termux/files/usr
+make install
+```
+~~编译没有成功，放弃了，再说通过其它方式解决了ycm服务无法启动的问题~~
+<!-- #endregion -->
+
+#### leader，是所谓前导键。
+它是在vim中通过按键运行复合命令时率先要按下的键。
+```ini
+let mapleader=";"
+```
+
+
+#### 插件安装配置
+
+
+##### 插件总管Vundle
+
+<!-- #region -->
+需要**手动安装**。
+
+先创建目录
+```bash
+cd ~
+mkdir .vim/bundle
+```
+然后拉库置入
+```bash
+git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+```
+修改`.vimrc`，增加配置内容行
+```ini
+filetype off
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'Lokaltog/vim-powerline'    “用powerline示例，如需其他插件依次增加在begin()和end()之间即可
+call vundle#end()
+filetype on
+filetype plugin indent on
+```
+保存对`.vimrc`的修改退出`:wq`重新进入vim使之生效，然后`:PluginInstall`即可完成安装。
+<!-- #endregion -->
+
+##### YouCompleteMe
+自动补全神器，是一款编译型的插件。
+
+<!-- #region -->
+1.通过Vundle安装
+```ini
+Plugin 'Valloric/YouCompleteMe'
+```
+2.手工编译。需要安装`cmake`，`pkg install cmake`
+```bash
+cd ~/.vim/bundle/YouCompleteMe
+./install.py --clang-completer --system-clang # 安装好多东西，需要一点时间
+```
+*启动vim显示ycm服务无法启动，查看`usr/tmp`下的log文件提示找不到`libbd1.so.2`，google之，在[靠谱的链接](https://github.com/ycm-core/YouCompleteMe/issues/3262)发现是因为The upstream libclang binaries are not compatible with your platform.这样install的时候增加如上`--system-clang`命令就行了。*
+
+3.`.vimrc`中配置。
+```ini
+"默认配置文件路径"
+let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
+"打开vim时不再询问是否加载ycm_extra_conf.py配置"
+let g:ycm_confirm_extra_conf=0
+set completeopt=longest,menu
+"python解释器路径"
+let g:ycm_path_to_python_interpreter='/usr/local/bin/python'
+"是否开启语义补全"
+let g:ycm_seed_identifiers_with_syntax=1
+"是否在注释中也开启补全"
+let g:ycm_complete_in_comments=1
+let g:ycm_collect_identifiers_from_comments_and_strings = 0
+"开始补全的字符数"
+let g:ycm_min_num_of_chars_for_completion=2
+"补全后自动关机预览窗口"
+let g:ycm_autoclose_preview_window_after_completion=1
+" 禁止缓存匹配项,每次都重新生成匹配项"
+let g:ycm_cache_omnifunc=0
+"字符串中也开启补全"
+let g:ycm_complete_in_strings = 1
+"离开插入模式后自动关闭预览窗口"
+autocmd InsertLeave * if pumvisible() == 0|pclose|endif
+```
+4.用法。
+tab键循环选项，shift tab倒着来。
+<!-- #endregion -->
+
+##### taglist，显示程序文件的结构（函数、变量等）方便跳转
+
+<!-- #region -->
+1.安装ctags程序，这是插件依赖的开展工作的玩意儿
+```bash
+pkg instal ctags
+```
+2.`vimrc`里面插件部分中添加
+```ini
+Plugin vim-scripts/taglist.vim.git
+```
+然后，在`vim`中`:`进入命令，`PluginInstall`
+
+3.相关配置行
+```ini
+filetype on
+let g:ctrlp_map='<C-p>'
+let Tlist_Ctags_Cmd = '~/../usr/bin/ctags'    "指定ctags的路径
+let Tlist_Show_One_File = 1        "不同时显示多个文件的tag，只显示当前文件的
+let Tlist_Exit_OnlyWindow = 1      "如果taglist窗口是最后一个窗口，则退出vim
+let Tlist_Use_Right_Window = 1     "在右侧窗口中显示taglist窗口
+let Tlist_GainFous_on_ToggleOpen=1    "taglist小窗口打开，立即切换回主编辑窗口
+map <leader>ct :! ctags -R --languages=python<CR>    "运行ctags程序，生成tags
+map <leader>tt :TlistToggle<CR>    "开关TagList小窗口的快捷键
+```
+<!-- #endregion -->
+
+*`vim`窗口中切换，在tag窗口和主编辑窗口来回切换。__ctrl+w+j/k，通过j/k可以上下切换，或者:ctrl+w加上下左右键，还可以通过快速双击ctrl+w依次切换窗口。__*
+
+
 ## python必要工作库
 
 <!-- #region -->
@@ -176,6 +338,128 @@ apt-get --assume-yes install libxslt openssl-tool
 pip install lxml
 ```
 <!-- #endregion -->
+
+## Jupyterlab安装使用
+
+
+### 插件无法运作
+
+在setting中把扩展配置修改为true后，左侧边栏出现相应按钮，点进去出错：
+```
+Error communicating with server extension. Consult the documentation for how to ensure that it is enabled.
+
+Reason given:
+
+Error: 500 (Internal Server Error)
+```
+对照版本，9X Max的jupyterlab版本是1.2.6，而bs2pro主系统经过一番折腾，已经是2.0.1了。不甘心降回去，上网找找吧。
+
+<!-- #region -->
+安装必要的nodejs：
+```
+pkg install nodejs-lts
+```
+然后运行：
+```
+jupyter labextension list
+```
+输出如下：
+```bash
+Fail to get yarn configuration. 
+Fail to get yarn configuration. 
+JupyterLab v2.0.1
+Known labextensions:
+   app dir: /data/data/com.termux/files/usr/share/jupyter/lab
+        jupyterlab-jupytext v1.1.1  enabled   X
+
+   The following extension are outdated:
+        jupyterlab-jupytext
+        
+   Consider running "jupyter labextension update --all" to check for updates.
+```
+<!-- #endregion -->
+
+```python
+!jupyter labextension update --all
+```
+
+```python
+!jupyter labextension list
+```
+
+```python
+!jupyter lab build
+```
+
+### 解决yarn、nodejs的版本问题
+
+```python
+!node -v
+```
+
+```python
+!npm -v
+```
+
+```python
+!jupyter labextension list
+```
+
+```python
+!jupyter labextension install @jupyter-widgets/jupyterlab-manager
+```
+
+### 神奇的root模式
+
+
+终止jupyter-lab服务重新启动，插件居然可以正常显示了。查看后台还是有`Fail to get yarn configuration. `的出错提示。~~不管那么多了，能用就好~~。我们还是要聚焦要搞的项目，对于平台工具能用就好！
+
+
+实际上还是不行，这个fail犹如梦魇，导致jupyterlab在build时老是失败。网上搜了半天，最终决定还是重装nodejs（因为版本新些）。中间还尝试了解决yarn的问题，需要`termux-chroot`进入root模式。在root模式完成了yarn（不知道有没有用）、nodejs和jupyterlab的安装后退出该模式。运行：
+
+```python
+!jupyter labextension list
+```
+
+```python
+!jupyter labextension update --all
+```
+
+### 关于jupyterlab的版本
+
+
+这是jupyterlab版本和这个插件不兼容的问题。查询了备份机上是1.2.6，而主机上安装自动上了2.0.1
+
+```python
+!pip search jupyterlab extension
+```
+
+```python
+!pkg show nodejs-lts
+```
+
+```python
+!pkg show nodejs
+```
+
+<!-- #region -->
+安装指定版本的jupyterlab
+```bash
+pip install jupyterlab==1.2.6
+```
+会自动删安装好的库，然后装上这个版本。
+<!-- #endregion -->
+
+### 【jupyter labextension 命令】
+
+
+jupyter labextension install @jupyterlab/toc #安装指定插件
+
+jupyter labextension uninstall @jupyterlab/toc #卸载指定插件
+
+jupyter labextension list #列出已安装的所有插件
+
+jupyter labextension update --all # 更新所有已安装插件到最新版本
 
 ```python
 
