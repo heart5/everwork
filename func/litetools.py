@@ -19,6 +19,23 @@ def get_filesize(filepath):
     return round(fsize, 2)
 
 
+def istableindb(tablenin: str, dbname: str):
+    try:
+        conn = lite.connect(dbname)
+        cursor = conn.cursor()
+        cursor.execute("select * from sqlite_master where type='table'")
+        table = cursor.fetchall()
+        # print(table)
+        chali = [x for item in table for x in item[1:3]]
+        # print(chali)
+    except Exception as eee:
+        log.critical(f"查询数据表是否存在时出错。{eee}")
+    finally:
+        conn.close()
+
+    return tablenin in chali
+
+
 def ifnotcreate(tablen: str, createsql: str, dbn: str):
     """
     如果没有相应数据表就创建一个
@@ -26,25 +43,17 @@ def ifnotcreate(tablen: str, createsql: str, dbn: str):
     :param dbn:
     :return:
     """
-    conn = lite.connect(dbn)
+
+    if istableindb(tablen, dbn):
+        return
 
     try:
-
+        conn = lite.connect(dbn)
         cursor = conn.cursor()
 
-        def istableindb(tablenin: str):
-            cursor.execute("select * from sqlite_master where type='table'")
-            table = cursor.fetchall()
-            # print(table)
-            chali = [x for item in table for x in item[1:3]]
-            # print(chali)
-
-            return tablenin in chali
-
-        if not istableindb(tablen):
-            cursor.execute(createsql)
-            conn.commit()
-            log.info(f"数据表：\t{tablen} 被创建成功。\t{createsql}")
+        cursor.execute(createsql)
+        conn.commit()
+        log.info(f"数据表：\t{tablen} 被创建成功。\t{createsql}")
 
     except Exception as eee:
         log.critical(f"操作数据库时出现错误。{dbn}\t{eee}")
