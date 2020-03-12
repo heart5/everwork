@@ -53,7 +53,13 @@ def get_notestore():
     # global log
     # auth_token = token
     # cfp, inipath = getcfp('everwork')
-    auth_token = cfp.get('evernote', 'token')  # 直接提取，唯一使用
+    # auth_token = cfp.get('evernote', 'token')  # 直接提取，唯一使用
+    if (china := getcfpoptionvalue('everwork', 'evernote', 'china')):
+        print(f"china value:\t{china}")
+        auth_token = getcfpoptionvalue('everwork', 'evernote', 'tokenchina')  # 直接提取，唯一使用
+    else:
+        auth_token = getcfpoptionvalue('everwork', 'evernote', 'token')  # 直接提取，唯一使用
+
 
     if auth_token == "your developer token":
         print("Please fill in your developer token\nTo get a developer token, visit "
@@ -65,7 +71,7 @@ def get_notestore():
     # To access production (International) service, set both sandbox and china to False
     # To access production (China) service, set sandbox to False and china to True
     sandbox = False
-    china = False
+    # china = False
 
     # Initial development is performed on our sandbox server. To use the production
     # service, change sandbox=False and replace your
@@ -450,8 +456,15 @@ def p_notebookattributeundertoken(notebook):
     rstdict['更新序列号'] = notebook.updateSequenceNum  # 8285
     rstdict['默认笔记本']: bool = notebook.defaultNotebook  # False
     # print(type(rstdict['默认笔记本']), rstdict['默认笔记本'])
-    rstdict['创建时间'] = pd.to_datetime((int(notebook.serviceCreated / 1000)))  # 2010-09-15 11:37:43
-    rstdict['更新时间'] = pd.to_datetime((int(notebook.serviceUpdated / 1000)))  # 2016-08-29 19:38:24
+    if (china := getcfpoptionvalue('everwork', 'evernote', 'china')):
+        shijianchushu = 1
+    else:
+        shijianchushu = 1000
+    ntsct = notebook.serviceCreated /1000
+    ntsut = notebook.serviceUpdated /1000
+    print(ntsct, ntsut, timestamp2str(ntsct), timestamp2str(ntsut))
+    rstdict['创建时间'] = pd.to_datetime(timestamp2str(ntsct))  # 2010-09-15 11:37:43
+    rstdict['更新时间'] = pd.to_datetime(timestamp2str(ntsut))  # 2016-08-29 19:38:24
     rstdict['笔记本组'] = notebook.stack  # 手机平板
 
     # print('发布中\t', notebook.publishing)     # 这种权限的调用返回None
@@ -665,11 +678,11 @@ if __name__ == '__main__':
     log.info(f'开始运行文件\t{__file__}')
     nost = get_notestore()
     print(nost)
-    readinifromnote()
+    # readinifromnote()
     # writeini()
-    # ntdf = findnotebookfromevernote()
-    # print(ntdf)
-    print(getsampledffromdatahouse('火界'))
+    ntdf = findnotebookfromevernote()
+    print(ntdf)
+    # print(getsampledffromdatahouse('火界'))
 
     # 查找主题包含关键词的笔记
     # notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
