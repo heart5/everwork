@@ -4,6 +4,7 @@
 获取服务器ip并定期更新至相关笔记
 """
 
+from threading import Timer
 import os
 import sys
 import datetime
@@ -13,7 +14,6 @@ import socket
 import requests
 # import urllib2
 import re
-from threading import Timer
 import pathmagic
 import evernote.edam.type.ttypes as ttypes
 
