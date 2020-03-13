@@ -172,7 +172,18 @@ bind-key r source-file ~/.tmux.conf \; display "Config reloaded.."
 这个玩意儿配置好了可以上天，所以在此专条讲述
 
 
-#### 下载源码编译使之支持各种性能，如粘贴板等
+#### 【打包备份】
+
+<!-- #region -->
+全部安装设置好后，进入home目录：
+```bash
+7z a vim.zip .vim/ .vimrc
+```
+
+然后把打包好的vim.zip备份到云盘之类的好地儿，以后需要的时候下载下来解压`7z x vim.zip`即可。
+<!-- #endregion -->
+
+#### ~~下载源码编译使之支持各种性能，如粘贴板等~~
 
 
 ##### 下载源码
@@ -208,16 +219,17 @@ let mapleader=";"
 <!-- #region -->
 需要**手动安装**。
 
-先创建目录
+    1. 先创建目录
 ```bash
 cd ~
 mkdir .vim/bundle
 ```
-然后拉库置入
+
+    2. 然后拉库置入
 ```bash
 git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 ```
-修改`.vimrc`，增加配置内容行
+    3. 修改`.vimrc`，增加配置内容行
 ```ini
 filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -235,18 +247,27 @@ filetype plugin indent on
 自动补全神器，是一款编译型的插件。
 
 <!-- #region -->
-1.通过Vundle安装
+1. 通过Vundle安装
 ```ini
 Plugin 'Valloric/YouCompleteMe'
 ```
-2.手工编译。需要安装`cmake`，`pkg install cmake`
+2. 手工编译。
+
+    1. 需要安装`cmake`和`clang`:
+``` pkg install cmake clang```
+
+    2. 然后进目录编译
 ```bash
 cd ~/.vim/bundle/YouCompleteMe
-./install.py --clang-completer --system-clang # 安装好多东西，需要一点时间
+./install.py --clang-completer # 安装好多东西，需要一点时间
 ```
-*启动vim显示ycm服务无法启动，查看`usr/tmp`下的log文件提示找不到`libbd1.so.2`，google之，在[靠谱的链接](https://github.com/ycm-core/YouCompleteMe/issues/3262)发现是因为The upstream libclang binaries are not compatible with your platform.这样install的时候增加如上`--system-clang`命令就行了。*
+    3. *启动vim显示ycm服务无法启动，查看`usr/tmp`下的log文件提示找不到`libbd1.so.2`，google之，在[靠谱的链接](https://github.com/ycm-core/YouCompleteMe/issues/3262)发现是因为The upstream libclang binaries are not compatible with your platform.这样install的时候增加如上`--system-clang`命令就行了。*
+```bash
+cd ~/.vim/bundle/YouCompleteMe
+./install.py --clang-completer --system-clang
+```
 
-3.`.vimrc`中配置。
+3. `.vimrc`中配置。
 ```ini
 "默认配置文件路径"
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
@@ -271,24 +292,24 @@ let g:ycm_complete_in_strings = 1
 "离开插入模式后自动关闭预览窗口"
 autocmd InsertLeave * if pumvisible() == 0|pclose|endif
 ```
-4.用法。
+4. 用法。
 tab键循环选项，shift tab倒着来。
 <!-- #endregion -->
 
 ##### taglist，显示程序文件的结构（函数、变量等）方便跳转
 
 <!-- #region -->
-1.安装ctags程序，这是插件依赖的开展工作的玩意儿
+1. 安装ctags程序，这是插件依赖的开展工作的玩意儿
 ```bash
 pkg instal ctags
 ```
-2.`vimrc`里面插件部分中添加
+2. `.vimrc`里面插件部分中添加
 ```ini
 Plugin vim-scripts/taglist.vim.git
 ```
 然后，在`vim`中`:`进入命令，`PluginInstall`
 
-3.相关配置行
+3. 相关配置行
 ```ini
 filetype on
 let g:ctrlp_map='<C-p>'
@@ -305,6 +326,142 @@ map <leader>tt :TlistToggle<CR>    "开关TagList小窗口的快捷键
 *`vim`窗口中切换，在tag窗口和主编辑窗口来回切换。__ctrl+w+j/k，通过j/k可以上下切换，或者:ctrl+w加上下左右键，还可以通过快速双击ctrl+w依次切换窗口。__*
 
 
+##### autopep8是PEP8规范自动格式化插件
+
+<!-- #region -->
+1. 需要系统命令autopep8，手动安装
+```bash
+pip install --upgrade autopep8
+```
+
+
+2. `.vimrc`里面插件部分中添加
+```ini
+Plugin tell-k/vim-autopep8
+```
+<!-- #endregion -->
+
+##### lae是异步化运行的代码静态检查插件
+
+<!-- #region -->
+1. 需要python工具包pylint，手动安装
+```bash
+pip install pylint
+```
+
+2. `.vimrc`里面插件部分添加
+```ini
+Plugin w0rp/ale
+```
+
+3. 相关配置内容
+```ini
+"ale
+"是否始终开启标志列
+let g:ale_sign_column_always = 0
+let g:ale_set_highlights = 1
+"自定义error和warning图标
+let g:ale_sign_error = '✗'
+let g:ale_sign_warning = '⚡'
+"在vim自带的状态栏中整合ale
+let g:ale_statusline_format = ['✗ %d', '⚡ %d', '✔ OK']
+"显示Linter名称,出错或警告等相关信息
+let g:ale_echo_msg_error_str = 'E'
+let g:ale_echo_msg_warning_str = 'W'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+"普通模式下，sp前往上一个错误或警告，sn前往下一个错误或警告
+nmap sp <Plug>(ale_previous_wrap)
+nmap sn <Plug>(ale_next_wrap)
+"<Leader>s触发/关闭语法检查。这个超实用，平时关闭即可，必要的时候再打开。
+nmap <Leader>as :ALEToggle<CR>
+"<Leader>d查看错误或警告的详细信息，实测没啥卵用，就是在代码上侧开了个quickfix，并没有显示更进一步的所谓详尽内容
+nmap <Leader>ad :ALEDetail<CR>
+"设置状态栏显示的内容。ale在状态栏上方新开了一行显示，下面配不配置影响也不大，不影响使用
+set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [POS=%l,%v][%p%%]\ %{strftime(\"%d/%m/%y\ -\ %H:%M\")}\ %{ALEGetStatusLine()}
+"文件内容发生变化时不进行检查
+let g:ale_lint_on_text_changed = 'never'
+"打开文件时不进行检查
+let g:ale_lint_on_enter = 0
+```
+<!-- #endregion -->
+
+## termux实用工具
+
+
+### 传输文件，netcat
+
+<!-- #region -->
+#### 先安装netcat工具：
+```bash
+pkg install netcat
+```
+<!-- #endregion -->
+
+#### 单文件传输
+
+<!-- #region -->
+接受文件的电脑运行：（首先运行 `ip addr show` 获取该电脑的内网 ip）
+```bash
+nc -lp 9999 > 2018-8-15.png
+```
+
+发送文件的电脑运行：（将下面的 ip 替换为接收文件电脑的内网 ip）
+
+```bash
+nc 192.168.1.103 9999 < 2018-8-15.png
+```
+
+就是这么简单，使用上很畅快，没有门槛可言。
+<!-- #endregion -->
+
+#### 传输文件夹
+
+<!-- #region -->
+接收电脑
+```bash
+nc -lp 9999 | tar -x
+```
+
+主机（文件所在）
+```bash
+tar -c 一个纯洁的路径 | nc 192.168.1.103 9999
+```
+<!-- #endregion -->
+
+### 压缩解压工具，`7z`
+
+<!-- #region -->
+#### 语法
+```bash
+7z <命令行> [<选项>...] <基本档案名称> [<参数变量>...]
+```
+<!-- #endregion -->
+
+#### 压缩文件
+
+<!-- #region -->
+```bash
+7z a vim.zip vim/ # 压缩包中包含vim目录名称
+7z a vim.zip vim/* -r # 压缩包中不包含vim目录名称
+```
+~~7z a sbasesh.zip *.sh -r # 压缩当前目录和所有子目录下的sh文件，测试存在问题，不能读取所有sh文件，奇怪！~~
+
+<!-- #endregion -->
+
+<!-- #region -->
+#### 更新压缩包
+```bash
+7z u vim.zip vim/ # 只把更新过的文件重新压入
+```
+<!-- #endregion -->
+
+<!-- #region -->
+#### 解压压缩包
+```bash
+7z x vim.zip # 带路径结构一块解压到当前目录下
+```
+<!-- #endregion -->
+
 ## python必要工作库
 
 <!-- #region -->
@@ -316,13 +473,94 @@ pip install cython # 安装line_profiler时需要
 ```
 <!-- #endregion -->
 
-### 安装line_profiler库
+### line_profiler库
+
+
+#### 安装
 
 <!-- #region -->
 ```bash
 git clone https://github.com/rkern/line_profiler.git
 find line_profiler -name '*.pyx' -exec cython {} \;
 cd line_profiler && pip install . --user
+```
+<!-- #endregion -->
+
+#### 关于`kernprof`脚本启用
+
+<!-- #region -->
+不知道咋地，需要手动设置软连接才行。
+```bash
+cd ~/../usr/bin
+ln -s ~/ghub/line_profiler/kernprof.py kernprof
+```
+<!-- #endregion -->
+
+#### 使用
+
+<!-- #region -->
+##### 在函数上面加载装饰器
+```python
+@profile
+def ttt():
+    pass
+```
+
+然后命令行运行
+```bash
+kernprof -l fileincludettt.py
+```
+
+`kernprof`会把分析结果放在`fileincludettt.py.lprof`的二进制文件中
+
+查看分析结果命令如下：
+```bash
+python -m line_profiler fielincludettt.py.lprof
+```
+<!-- #endregion -->
+
+##### `import line_profiler`法
+
+<!-- #region -->
+1. 单个函数
+
+```python
+
+from line_profiler import LineProfiler
+import random
+ 
+def do_stuff(numbers):
+    s = sum(numbers)
+    l = [numbers[i]/43 for i in range(len(numbers))]
+    m = ['hello'+str(numbers[i]) for i in range(len(numbers))]
+ 
+numbers = [random.randint(1,100) for i in range(1000)]
+lp = LineProfiler()
+lp_wrapper = lp(do_stuff)
+lp_wrapper(numbers)
+lp.print_stats()
+```
+
+2. 嵌套函数分别输出（直接使用只能显示被调用函数的总时间）
+
+```python
+from line_profiler import LineProfiler
+import random
+ 
+def do_other_stuff(numbers):
+    s = sum(numbers)
+ 
+def do_stuff(numbers):
+    do_other_stuff(numbers)
+    l = [numbers[i]/43 for i in range(len(numbers))]
+    m = ['hello'+str(numbers[i]) for i in range(len(numbers))]
+ 
+numbers = [random.randint(1,100) for i in range(1000)]
+lp = LineProfiler()
+lp.add_function(do_other_stuff)   # add additional function to profile
+lp_wrapper = lp(do_stuff)
+lp_wrapper(numbers)
+lp.print_stats()
 ```
 <!-- #endregion -->
 
