@@ -11,15 +11,13 @@ import datetime
 from pandas.plotting import register_matplotlib_converters
 
 import pathmagic
-
 with pathmagic.context():
     from func.logme import log
     from func.first import touchfilepath2depth, getdirmain
     from func.litetools import ifnotcreate
 
 
-def inserttimeitem2db(timestampinput: int):
-    dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "wcdelay.db")
+def inserttimeitem2db(dbname: str, timestampinput: int):
     tablename = "wcdelay"
     csql = f"create table if not exists {tablename} (time int primary key, delay int)"
     ifnotcreate(tablename, csql, dbname)
@@ -38,11 +36,11 @@ def inserttimeitem2db(timestampinput: int):
     except lite.IntegrityError as lie:
         log.critical(f"键值重复错误\t{lie}")
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 
-def getdelaydb():
-    dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "wcdelay.db")
+def getdelaydb(dbname: str):
     tablename = "wcdelay"
 
     csql = f"create table if not exists {tablename} (time int primary key, delay int)"
@@ -118,7 +116,8 @@ def showdelayimg(jingdu: int = 300):
 
 if __name__ == "__main__":
     log.info(f"运行文件\t{__file__}")
-    xinxian, tdf = getdelaydb()
+    dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "wcdelay_heart5.db")
+    xinxian, tdf = getdelaydb(dbname)
     print(xinxian)
     print(tdf.sort_index(ascending=False))
     log.info(f"文件{__file__}运行结束")

@@ -89,6 +89,7 @@ def formatmsg(msg):
     timetuple = time.localtime(msg['CreateTime'])
     timestr = time.strftime("%Y-%m-%d %H:%M:%S", timetuple)
     # print(msg['CreateTime'], timetuple, timestr)
+    dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wcdelay_{owner}.db")
     inserttimeitem2db(msg['CreateTime'])
     # owner = itchat.web_init()
     global meu_wc

@@ -58,7 +58,8 @@ def ifnotcreate(tablen: str, createsql: str, dbn: str):
     except Exception as eee:
         log.critical(f"操作数据库时出现错误。{dbn}\t{eee}")
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 
 @timethis
