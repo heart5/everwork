@@ -19,6 +19,7 @@
 # +
 import time
 import pandas as pd
+from line_profiler import LineProfiler
 import matplotlib.pyplot as plt
 from pandas.plotting import register_matplotlib_converters
 
@@ -26,6 +27,12 @@ import pathmagic
 with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain
     from life.wcdelay import getdelaydb, showdelayimg
+    
+# lp = LineProfiler()
+# lp.add_function(getdelaydb)
+# lpwrapper = lp(showdelayimg)
+# lpwrapper()
+# lp.print_stats()
 showdelayimg()
 
 
