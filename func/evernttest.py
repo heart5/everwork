@@ -1,7 +1,8 @@
 # encoding:utf-8
 """
-印象笔记相关功能函数
+evernote或印象笔记相关功能函数
 """
+
 import binascii
 import datetime
 import hashlib
@@ -55,9 +56,10 @@ def get_notestore():
     # cfp, inipath = getcfp('everwork')
     # auth_token = cfp.get('evernote', 'token')  # 直接提取，唯一使用
     if (china := getcfpoptionvalue('everwork', 'evernote', 'china')):
-        print(f"china value:\t{china}")
+        # print(f"china value:\t{china}")
         auth_token = getcfpoptionvalue('everwork', 'evernote', 'tokenchina')  # 直接提取，唯一使用
     else:
+        # print(f"china value:\t{china}")
         auth_token = getcfpoptionvalue('everwork', 'evernote', 'token')  # 直接提取，唯一使用
 
 
@@ -80,7 +82,8 @@ def get_notestore():
 
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
-    @trycounttimes2('evernote服务器')
+    servname = ("印象笔记", 'evernote')[china]
+    @trycounttimes2(f'{servname}服务器')
     def getnotestore():
         global note_store
         if note_store is not None:
@@ -221,7 +224,7 @@ def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True,
     return outstr
 
 
-def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000):
+def findnotefromnotebook(notebookguid, titlefind='', notecount=10000):
     """
     列出笔记本中包含某关键词的笔记信息
     :param tokenfnfn: token
@@ -671,6 +674,7 @@ def enapistartlog():
 
 
 token = getcfpoptionvalue('everwork', 'evernote', 'token')
+# print(token)
 ENtimes, ENAPIlasttime = enapistartlog()
 evernoteapiclearatzero()
 
