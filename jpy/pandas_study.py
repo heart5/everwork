@@ -61,9 +61,41 @@ df2
 
 # + jupyter={"outputs_hidden": false} pycharm={"is_executing": false, "name": "#%%\n"}
 df2.dtypes
+# -
+
+# ## 多重索引
+
+# 多级索引：在一个轴上有多个(两个以上）的索引，能够以低维度形式来表示高维度的数据。单级索引是Index对象，多级索引是MultiIndex对象。
+
+# ### 创建多重索引
+
+# #### 隐式创建，即给DataFrame的index或columns参数传递两个或更多的数组。
+
+# +
+import pandas as pd
+import numpy as np
+df1 = pd.DataFrame(np.random.randint(80, 120, size=(2, 4)),
+                   index= ['girl', 'boy'],
+                   columns=[['English', 'English', 'Chinese', 'Chinese'],
+                         ['like', 'dislike', 'like', 'dislike']])
+
+print(df1)    # 创建多级 列 索引
+# -
+
+# #### 显示创建，推荐使用较简单的pd.MultiIndex.from_product方法
+
+df2 = pd.DataFrame(np.random.randint(80, 120, size=(6, 2)), 
+                   columns= ['girl', 'boy'],
+                   index=pd.MultiIndex.from_product([['English','Chinese'],
+                                                    ['like','dislike', 'ilike']]))
+print(df2)    # 创建多级 行 索引
+
+df1.Chinese.like
+
+df1.loc['girl'].dtypes
 
 # + [markdown] toc-hr-collapsed=true
-# ## DataFrame重置索引df.reset_index()
+# ### DataFrame重置索引df.reset_index()
 # -
 
 # #### 单索引的情况
