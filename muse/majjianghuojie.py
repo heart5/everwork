@@ -28,7 +28,12 @@ def find_class_in_tag(key: str, tags):
 
 @trycounttimes2('火界麻将服务器', 5, 50)
 def getsinglepage(url: str):
-    mjhtml = requests.get(url)
+    try:
+        mjhtml = requests.get(url)
+    except Exception as eee:
+        log.critical(f"获取网页{url}时出现错误。{eee}")
+        return
+
     mjhtml.encoding = mjhtml.apparent_encoding
     log.info(f"网页内容编码为：\t{mjhtml.encoding}")
     soup = BeautifulSoup(mjhtml.text, 'lxml')
@@ -92,16 +97,34 @@ def getsinglepage(url: str):
 
 
 def fetchmjurl(owner):
-    filename = getdirmain() / 'data' / 'webchat' / f"chatitems({owner}).txt"
-    # print(filename)
-    # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
-    ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
-    # rstlst = []
-    with open(filename, "r", encoding='utf-8') as f:
-        filelines = f.readlines()
-        rstlst = [line.split('Text\t')[1].strip() for line in filelines if re.findall(ptn, line)]
+    datapath = getdirmain() / 'data' / 'webchat'
+    datafilelist = os.listdir(datapath)
+    resultlst = list()
+    for filenameinner in datafilelist:
+        if filenameinner.startswith('chatitems'):
+            # print(filenameinner)
+            pass
+        else:
+            # print(f"{filenameinner}不是合格的微信信息数据文件，跳过。")
+            continue
+        filename = datapath / filenameinner
+        print(filename)
+        # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
+        ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
+        rstlst = []
 
-    return list(tuple(rstlst))
+        try:
+            with open(filename, "r", encoding='utf-8') as f:
+                filelines = f.readlines()
+                rstlst = [line.split('Text\t')[1].strip() for line in filelines if re.findall(ptn, line)]
+        except Exception as ee:
+            print(f"{ee}")
+            continue
+
+        resultlst.extend(rstlst)
+
+    print(f"{len(resultlst)}\t{resultlst[:5]}")
+    return list(tuple(resultlst))
 
 
 def getfangitem(line):
@@ -160,7 +183,9 @@ def updateurllst(url):
         # 用\t标记无效的链接，这里做对比的时候需要去掉tab
         urlsrecord = [x.strip('\t') for x in readfrominiurls.split(',')]
         if url not in urlsrecord:
-            rstdf = getsinglepage(url)
+            if (rstdf := getsinglepage(url)) is None:
+                log.info(f"获取失败，跳过该网页\t{url}")
+                return
             roomid = rstdf.iloc[0, 0]
             if rstdf.shape[0] != 0:
                 urlsrecord.insert(0, url)
@@ -183,7 +208,10 @@ def updateurllst(url):
             # log.info(f"此链接已经存在于列表中\t{url}")
             pass
     else:
-        firstdf = getsinglepage(url)
+        if (firstdf := getsinglepage(url)) is None:
+            log.info(f"获取失败，跳过该网页\t{url}")
+            return
+        # firstdf = getsinglepage(url)
         roomid = firstdf.iloc[0, 0]
         if firstdf.shape[0] != 0:
             urlsrecord = [url]
@@ -440,12 +468,12 @@ def showzhanjiimg(jingdu: int = 300):
 
 
 def updateallurlfromtxt(owner: str):
-    sp1 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_2ba66d661e4c7712d0e6bcd3a6df255f"
-    sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_46247683e1b6e744ad956041ab2579a6"
-    sp3 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_62a635b6dc15b34b74527550cd88d83f"
-    sp4 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_9b8bd588d1d44ae2867aa1319241881b"
-    splst = [sp1, sp2, sp3, sp4]
-    # splst = fetchmjurl(owner)
+    # sp1 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_2ba66d661e4c7712d0e6bcd3a6df255f"
+    # sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_46247683e1b6e744ad956041ab2579a6"
+    # sp3 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_62a635b6dc15b34b74527550cd88d83f"
+    # sp4 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_9b8bd588d1d44ae2867aa1319241881b"
+    # splst = [sp1, sp2, sp3, sp4]
+    splst = fetchmjurl(owner)
     for sp in splst[:4]:
         print(sp)
 
@@ -457,6 +485,7 @@ if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
 
     own = '白晔峰'
+    # own = 'heart5'
 
     # fangdf = fetchmjfang(own)
     # print(fangdf)
