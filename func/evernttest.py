@@ -82,7 +82,7 @@ def get_notestore():
 
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
-    servname = ("印象笔记", 'evernote')[china]
+    servname = ("印象笔记", 'evernote')[china is True]
     @trycounttimes2(f'{servname}服务器')
     def getnotestore():
         global note_store
@@ -465,7 +465,7 @@ def p_notebookattributeundertoken(notebook):
         shijianchushu = 1000
     ntsct = notebook.serviceCreated /1000
     ntsut = notebook.serviceUpdated /1000
-    print(ntsct, ntsut, timestamp2str(ntsct), timestamp2str(ntsut))
+    # print(ntsct, ntsut, timestamp2str(ntsct), timestamp2str(ntsut))
     rstdict['创建时间'] = pd.to_datetime(timestamp2str(ntsct))  # 2010-09-15 11:37:43
     rstdict['更新时间'] = pd.to_datetime(timestamp2str(ntsut))  # 2016-08-29 19:38:24
     rstdict['笔记本组'] = notebook.stack  # 手机平板
