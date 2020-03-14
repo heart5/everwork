@@ -31,7 +31,8 @@ def istableindb(tablenin: str, dbname: str):
     except Exception as eee:
         log.critical(f"查询数据表是否存在时出错。{eee}")
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
     return tablenin in chali
 
