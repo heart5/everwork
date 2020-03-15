@@ -191,14 +191,16 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     # nbodylst = [x for x in nbody if ord(x) >= 32]
     # nbody = ''.join(nbodylst)
     note.content = nbody
-    # print (note.content)
+    log.info(f"新构笔记文字部分长度为：\t{len(nbody)}")
+    print(note.content[:100])
 
     # Finally, send the new note to Evernote using the updateNote method
     # The new Note object that is returned will contain server-generated
     # attributes such as the new note's unique GUID.
     @trycounttimes2('evernote服务器。更新笔记。')
     def updatenote(notesrc):
-        updated_note = get_notestore().updateNote(notesrc)
+        nsinner = get_notestore()
+        updated_note = nsinner.updateNote(notesrc)
         evernoteapijiayi()
         log.info('成功更新了笔记《%s》，guid：%s。' %
                  (updated_note.title, updated_note.guid))
@@ -246,11 +248,17 @@ def findnotefromnotebook(notebookguid, titlefind='', notecount=10000):
 
     @trycounttimes2('evernote服务器')
     def findnote():
+        tokenfnfn = getcfpoptionvalue('everwork', 'evernote', 'token')
+        # log.info("I'm here now too.")
         notelist = note_store.findNotesMetadata(
             tokenfnfn, notefilter, 0, notecount, notemetaspec)
+        # log.info("I'm here now three.")
         evernoteapijiayi()
         return notelist
 
+    # log.info(f"目标笔记本guid为：\t{notebookguid}")
+    # log.info(f"笔记搜索关键词为：\t{titlefind}")
+    # log.info("I'm here now.")
     ournotelist = findnote()
 
     # print ourNoteList.notes[-1].title  #测试打印指定note的标题
@@ -616,9 +624,9 @@ def findsomenotest2showornote(nbguid, keyword, newnote=False):
     :param newnote: 是否生成新的笔记来存储显示查询结果
     :return: list，包含[guid, title, updatenum]的list
     """
-    tokenfst = getcfpoptionvalue('everwork', 'evernote', 'token')
-    notesfind = findnotefromnotebook(tokenfst, nbguid, keyword)
+    notesfind = findnotefromnotebook(nbguid, keyword)
     if newnote:
+        tokenfst = getcfpoptionvalue('everwork', 'evernote', 'token')
         makenote(tokenfst, get_notestore(), f"“{keyword}》”记列表", str(notesfind))
     else:
         print(notesfind)
@@ -684,14 +692,15 @@ if __name__ == '__main__':
     print(nost)
     # readinifromnote()
     # writeini()
-    ntdf = findnotebookfromevernote()
-    print(ntdf)
+    # ntdf = findnotebookfromevernote()
+    # print(ntdf)
     # print(getsampledffromdatahouse('火界'))
 
     # 查找主题包含关键词的笔记
-    # notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
-    # shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
-    # findsomenotest2showornote(notification_guid, '补')
+    notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
+    shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
+    findnoteguidlst = findsomenotest2showornote(notification_guid, 'ip')
+    print(findnoteguidlst)
 
     # 显示笔记内容，源码方式
     # '39c0d815-df23-4fcc-928d-d9193d5fff93' 转账
