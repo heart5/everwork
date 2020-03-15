@@ -117,12 +117,15 @@ plt.show()
 # +
 import datetime
 import time
+import pandas as pd
 
 tstp = time.time()
+tstp = 1583489921000 / 1000
 print(tstp)
 print(len(str(tstp)))
 print(time.localtime(tstp))
-time.localtime(tstp)
+mytime = time.localtime(tstp).strftime('%y-%m')
+pd.to_datetime(mytime)
 # -
 
 # ## 三目表达式
