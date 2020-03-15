@@ -16,7 +16,7 @@ with pathmagic.context():
     from func.logme import log
     from func.evernttest import trycounttimes2, getinivaluefromnote
     from func.first import getdirmain, touchfilepath2depth
-    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue, getcfp
 
 
 def find_class_in_tag(key: str, tags):
@@ -108,7 +108,7 @@ def fetchmjurl(owner):
             # print(f"{filenameinner}不是合格的微信信息数据文件，跳过。")
             continue
         filename = datapath / filenameinner
-        print(filename)
+        # print(filename)
         # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
         ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
         rstlst = []
@@ -117,13 +117,23 @@ def fetchmjurl(owner):
             with open(filename, "r", encoding='utf-8') as f:
                 filelines = f.readlines()
                 rstlst = [line.split('Text\t')[1].strip() for line in filelines if re.findall(ptn, line)]
-        except Exception as ee:
-            print(f"{ee}")
+        except Exception as eef:
+            log.critical(eef)
             continue
 
         resultlst.extend(rstlst)
 
-    print(f"{len(resultlst)}\t{resultlst[:5]}")
+    if (urlsnum := getcfpoptionvalue('evermuse', 'huojiemajiang', 'urlsnum')):
+        if urlsnum == len(resultlst):
+            log.info(f"战绩链接数量暂无变化")
+            return
+        else:
+            setcfpoptionvalue('evermuse', 'huojiemajiang', 'urlsnum',
+                              f"{len(resultlst)}")
+    else:
+        urlsnum = len(resultlst)
+        setcfpoptionvalue('evermuse', 'huojiemajiang', 'urlsnum',
+                          f"{len(resultlst)}")
     return list(tuple(resultlst))
 
 
@@ -238,11 +248,14 @@ def fixnamealias(inputdf: pd.DataFrame, clname: str):
     :return:
     '''
     rstdf1: pd.DataFrame = inputdf.copy(deep=True)
-    print(rstdf1.dtypes)
+    # print(rstdf1.dtypes)
     namelst = rstdf1.groupby(clname).first().index.values
-    print(namelst)
+    # print(namelst)
+    cfpini, cfpinipath = getcfp('everinifromnote')
+    gamedict = dict(cfpini.items('game'))
     for name in namelst:
-        if namez := getinivaluefromnote('game', name):
+        if name in gamedict.keys():
+            namez = gamedict[name]
             namedf = rstdf1[rstdf1[clname] == name].copy(deep=True)
             print(name, namez, namedf.shape[0])
             # print(namedf)
@@ -260,10 +273,13 @@ def fixnamebyguestid(inputdf: pd.DataFrame, guestidcl: str):
     gidds = rstdf1.groupby(['guestid', 'guest']).count().groupby(level='guestid').count()['roomid']
     guestidlst = [str(guestid) for guestid in gidds[gidds > 1].index]
     # print(guestidlst)
+    cfpini, cfpinipath = getcfp('everinifromnote')
+    gamedict = dict(cfpini.items('game'))
     for nameid in guestidlst:
-        if namez := getinivaluefromnote('game', nameid):
+        if nameid in gamedict.keys():
+            namez = gamedict[nameid]
             needdf = rstdf1[rstdf1.guestid == int(nameid)]
-            print(namez, needdf.shape[0])
+            print(nameid, namez, needdf.shape[0])
             rstdf1.loc[list(needdf.index), 'guest'] = namez
 
     return rstdf1
@@ -323,11 +339,33 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(
         lambda df: (df['closetime'] - df['maxtime']).total_seconds() // 60 if df['closetime'] else pd.NaT, axis=1)
     # print(fangfinaldf[fangfinaldf['mintime'].isnull()])
+    
     # 根据对局战绩修正房主信息
     rstdfroomhost = rstdf[rstdf.host].groupby('roomid')['guest'].first()
     for ix in list(rstdfroomhost.index.values):
         hostname = rstdfroomhost[ix]
         fangfinaldf.loc[ix, 'name'] = hostname
+
+    # 代开房间房主信息处理
+    dkds = rstdf.groupby(['roomid', 'host']).count()['guest']
+    for r, h in list(dkds[dkds % 4 == 0].index):
+        # 回填战绩df的host栏目
+        luckyguy = rstdf.groupby('roomid').first()['guest'].loc[r]
+        ixforluckguy = rstdf[(rstdf.roomid == r) & (rstdf.guest == luckyguy)].index
+        rstdf.loc[ixforluckguy, 'host'] = True
+        print(ixforluckguy)
+        # 完善开房信息
+        fangfinaldf.loc[r, 'name'] = luckyguy
+        print(f"房间信息数据结构：\t{list(fangfinaldf.columns)}")
+        print(f"代开房间号：\t{r}, 房间信息：\t{list(fangfinaldf.loc[r])}")
+
+    # 中断牌局，只取最终结果
+    zdds = rstdf.groupby('roomid').count()['time']
+    for ix in list(zdds[zdds > 4].index):
+        time2keep = rstdf.groupby('roomid').max()['time'].loc[ix]
+        time2drop = rstdf.groupby('roomid').min()['time'].loc[ix]
+        print(f"续局房号：\t{ix}，记录共有{zdds[ix]}条，需删除时间点\t{time2drop}，保留的终局时间点为：\t{time2keep}")
+        rstdf = rstdf[rstdf.time != time2drop]
 
     fangfinaldf.to_csv(csvfile := touchfilepath2depth(getdirmain() / 'data' / 'game' / 'huojiemajiangfang.csv'))
 
@@ -473,19 +511,20 @@ def updateallurlfromtxt(owner: str):
     # sp3 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_62a635b6dc15b34b74527550cd88d83f"
     # sp4 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_9b8bd588d1d44ae2867aa1319241881b"
     # splst = [sp1, sp2, sp3, sp4]
-    splst = fetchmjurl(owner)
-    for sp in splst[:4]:
-        print(sp)
+    if (splst := fetchmjurl(owner)):
+        for sp in splst[:4]:
+            # print(sp)
+            pass
 
-    for sp in splst:
-        updateurllst(sp)
+        for sp in splst:
+            updateurllst(sp)
 
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
 
-    own = '白晔峰'
-    # own = 'heart5'
+    # own = '白晔峰'
+    own = 'heart5'
 
     # fangdf = fetchmjfang(own)
     # print(fangdf)
