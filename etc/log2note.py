@@ -14,7 +14,7 @@ import pandas as pd
 with pathmagic.context():
     from func.first import getdirmain
     from func.configpr import getcfp
-    from func.evernttest import get_notestore, imglist2note, readinifromnote, token, evernoteapijiayi, makenote
+    from func.evernttest import get_notestore, imglist2note, readinifromnote, token, evernoteapijiayi, makenote, getinivaluefromnote
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_location, termux_telephony_deviceinfo
@@ -42,17 +42,20 @@ def log2note(noteguid, loglimit, levelstr='', notetitle='everwork日志信息'):
         levelstr4title = ''
         countnameinini = 'everlogc'
 
-    # print(getdirmain())
+    # log.info(getdirmain())
     pathlog = getdirmain() / 'log'
     files = os.listdir(str(pathlog))
     loglines = []
     for fname in files[::-1]:
-        # print(fname)
+        # log.info(fname)
         if not fname.startswith('everwork.log'):
             log.warning(f'文件《{fname}》不是合法的日志文件，跳过。')
             continue
         with open(pathlog / fname, 'r', encoding='utf-8') as flog:
-            loglines = loglines + [line.strip()
+            charsnum2showinline = getinivaluefromnote('everlog',
+                                                      'charsnum2showinline')
+            # print(f"log行最大显示字符数量为：\t{charsnum2showinline}")
+            loglines = loglines + [line.strip()[:charsnum2showinline]
                                    for line in flog if line.find(levelstrinner) >= 0]
 
     ptn = re.compile('\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}')
@@ -64,14 +67,14 @@ def log2note(noteguid, loglimit, levelstr='', notetitle='everwork日志信息'):
     # print(logsr.index)
     # print(logsr)
     loglines = list(logsr)
-    # print(loglines[:20])
+    # log.info(loglines[:20])
     # print(len(loglines))
     print(f'日志的{levelstr4title}记录共有{len(loglines)}条，只取时间最近的{loglimit}条')
     if cfp.has_option(namestr, countnameinini):
         everlogc = cfp.getint(namestr, countnameinini)
     else:
         everlogc = 0
-    # print(everlogc)
+    # log.info(everlogc)
     if len(loglines) == everlogc:  # <=调整为==，用来应对log文件崩溃重建的情况
         print(f'暂无新的{levelstr4title}记录，不更新everwork的{levelstr}日志笔记。')
     else:
@@ -80,7 +83,8 @@ def log2note(noteguid, loglimit, levelstr='', notetitle='everwork日志信息'):
         loglinestr = loglinestr.replace('<', '《').replace('>',
                                                           '》').replace('=', '等于').replace('&', '并或')
         loglinestr = "<pre>" + loglinestr + "</pre>"
-        # print(loglinestr)
+        log.info(f"日志字符串长度为：\t{len(loglinestr)}")
+        # log.info(loglinestr[:100])
         try:
             nstore = get_notestore()
             imglist2note(nstore, [], noteguid,
@@ -98,6 +102,7 @@ def log2notes():
     namestr = 'everlog'
     device_id = getdeviceid()
     cfplog, cfplogpath = getcfp(namestr)
+    # log.info(f"{namestr}")
     if not cfplog.has_section(namestr):
         cfplog.add_section(namestr)
         cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
@@ -106,6 +111,7 @@ def log2notes():
         cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
 
     global token
+    # log.info(token)
     if cfplog.has_option(device_id, 'logguid'):
         logguid = cfplog.get(device_id, 'logguid')
     else:
@@ -120,6 +126,7 @@ def log2notes():
         logguid = notelog.guid
         cfplog.set(device_id, 'logguid', logguid)
         cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
+    # log.info(logguid)
 
     if cfplog.has_option(device_id, 'logcguid'):
         logcguid = cfplog.get(device_id, 'logcguid')
@@ -135,6 +142,7 @@ def log2notes():
         logcguid = notelog.guid
         cfplog.set(device_id, 'logcguid', logcguid)
         cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
+    # log.info(logcguid)
 
     readinifromnote()
     cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
@@ -143,10 +151,13 @@ def log2notes():
         loglimitc = cfpfromnote.getint(namestr, 'loglimit')
     else:
         loglimitc = 500
+    # log.info(loglimitc)
+
     if cfpfromnote.has_option('device', device_id):
         servername = cfpfromnote.get('device', device_id)
     else:
         servername = device_id
+    # log.info(servername)
 
     cfpeverwork, cfpeverworkpath = getcfp('everwork')
 
