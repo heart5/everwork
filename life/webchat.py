@@ -148,9 +148,10 @@ def showfmmsg(inputformatmsg):
     msgcontent = msgcontent[:-1]
     print(f"{msgcontent}")
 
-    global men_wc
-    # me = getowner()['User']['NickName']
-    chattxtfilename = str(getdirmain() / 'data' / 'webchat' / f'chatitems({men_wc}).txt')
+    # global men_wc
+    men_wc = getonick()
+    chattxtfilename = str(getdirmain() / 'data' / 'webchat' /
+                          f'chatitems({men_wc}).txt')
     chatitems = readfromtxt(chattxtfilename)
     global note_store
     # webchats.append(chatmsg)
@@ -354,6 +355,7 @@ def text_reply(msg):
         return
 
     # 处理火界麻将战绩网页
+    men_wc = getonick()
     ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
     msgtxt = msg['Text']
     if re.findall(ptn, msgtxt):
@@ -408,7 +410,8 @@ def text_reply(msg):
                     qrystr = qrylst[1].strip()
                     rstfile, rst = searchcustomer(qrystr.split())
             elif diyihang[1] == '延时图':
-                imgwcdelay = showdelayimg()
+                delaydbname = getdirmaia() / 'data' / 'db' / f"wcdelay_{men_wc}.db"
+                imgwcdelay = showdelayimg(delaydbname)
                 imgwcdelayrel = os.path.relpath(imgwcdelay)
                 itchat.send_image(imgwcdelayrel, toUserName=msg['FromUserName'])
                 nowtuple = time.time()
@@ -483,10 +486,18 @@ def getowner():
     return owner
 
 
-def after_login():
+def getonick():
     owner = getowner()
-    # print(owner)
-    loginname = owner['User']['NickName']
+    return owner['User']['NickName']
+
+
+def getouser():
+    owner = getowner()
+    return owner['User']['UserName']
+
+
+def after_login():
+    loginname = getonick() 
     log.info(f"登入《{loginname}》的微信服务")
 
 
@@ -514,8 +525,8 @@ def keepliverun():
     global men_wc, meu_wc
     owner = getowner()
     # showmsg(owner)
-    men_wc = owner['User']['NickName']
-    meu_wc = owner['User']['UserName']
+    men_wc = getonick()
+    meu_wc = getouser()
     # getowner()
     # notechat = newchatnote()
     # listchatrooms()
