@@ -15,10 +15,10 @@ jupyter:
 
 # 安装termux到Android手机并部署python环境
 
-
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true -->
 ## termux和termux-api安装
 termux在谷歌商店的最新版本是0.92。之前一直用的是0.65（2018年），后来升级到0.66（2019年）。因为termux-api不再支持短信读取等涉及个人隐私的功能（谷歌商店限制），担心termux主版本会自动关联这个阉割，就一直没有升级。这次黑鲨升级系统，到论坛看了下貌似整体搬迁到小米（哦，不对，应该是官宣的“将JOYUI的游戏特性与MIUI完美结合”），坛友抱怨甚多，问题反馈集中在易耗电、发热甚至不稳定，所以一直没动。昨天手痒，想着termux大版本都升级那么多，应该有不少好东东，一激动就把termux和termux-api都升级了。麻烦就此来了！
-
+<!-- #endregion -->
 
 先安装`pkg install openssh`（这中间还犯了个输入错误，误输入成openssl，还奇怪怎么没有生成`.ssh`目录呢），添加电脑生成的公匙，然后用putty登录在电脑上操作。按照原来的笔记步骤，要更新成清华源并追加pointless源，速度快些还方便装难以搞定的numpy。但奇怪的是`apt update`并`apt upgrade`后总是莫名出错，不是系统自带命令不见了（连ls都操作不了），就是各种库报错，连apt都用不了了。把termux重装了几次都不行，恨不得怀疑人生。实在耗不过了，突然想就用官方源试试再说（其实速度也还可以，还是在vpn科学上网的状态下），结果一路绿灯，基本系统和工具安装顺利。后面就是各种对装不上pandas的折腾，下文再讲。jupyterlab也装起来，虽然插件因为nodejs的问题一直无法使用，但基本的程序还是可以跑起来的，然后一狠心，就把手机的操作系统也一起升级到JOYUI11，华丽丽的的变化很大，也放到后面讲。试车的时候发现获取位置和ip的脚本老是挂在那里跑不动。python一切正常，那问题就在termux-api上了。
 
@@ -28,9 +28,9 @@ termux在谷歌商店的最新版本是0.92。之前一直用的是0.65（2018�
 
 出于对新版本的艳羡，先从谷歌商店的最新版开始。手机上安装termux（0.92）和termux-api（0.41），然后直接在termux窗口命令行中`pkg install termux-api`，安装成功后试运行`termux-location`，弹出提示无权限。可把我给激动坏了，终于有动静了啊。进入手机设置对termux-pai各种授权，然后回到termux窗口再次运行，哎，输出结果了。然后测试`termux-sms-list`，调试信息显示“谷歌已经不允许读取短信”。心里明白了问题所在（这个硬件相关和系统api接口需要在手机上运行并授权），卸载0.41的api，大胆的安装了termux-api（0.31），再次在手机上运行`termux-sms-list`，okay，显示正确结果。问题彻解于此！
 
-
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true -->
 ### termux-api安装成功操作步骤
-
+<!-- #endregion -->
 
 1.**手机上**安装termux和termux-api的App程序
 
@@ -39,6 +39,59 @@ termux在谷歌商店的最新版本是0.92。之前一直用的是0.65（2018�
 3.在**手机上进入termux终端命令行**：`pkg install termux-api`
 
 4.运行测试命令：`termux-location`，okay
+
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true -->
+### 脚本和系统变量
+<!-- #endregion -->
+
+#### 系统变量
+
+
+##### 当前系统变量
+
+```python
+!echo $PATH
+# /data/data/com.termux/files/home/sbase:/data/data/com.termux/files/home/sbase:/data/data/com.termux/files/usr/bin:/data/data/com.termux/files/usr/bin/applets
+```
+
+##### 临时添加路径
+
+```python
+!export PATH=/data/data/com.termux/files/home/codebase/everwork/:$PATH
+```
+
+用冒号`:`分隔。如果需要，可以添加到`.zshrc`中，这样在shell启动时就启动加上了。
+
+
+#### 脚本
+
+
+开启一个tmux服务运行jupyter-lab
+
+<!-- #region -->
+```bash
+#!/bin/bash
+#jl - start jupyterlab in tmux
+
+sess_name="jupyterlab"
+
+export DISABLE_AUTO_TITLE="true"
+
+cd ~/codebase/everwork
+
+tmux has-session -t $sess_name
+if [ $? = 0 ];then
+	echo $sess_name "already exist. attaching..."
+	tmux attach-session -t $sess_name
+else
+	echo $sess_name "doesn't exist.creating..."
+	tmux new -d -s $sess_name -n home
+	tmux send-keys -t $sess_name:0 "jupyter lab" Enter
+fi
+```
+<!-- #endregion -->
+
+保存后，`chmod +x jl`使之可执行，然后丢到前面已经加入环境路径的脚本目录中，随时随地可调用。
 
 
 ### termux工具集 
@@ -385,8 +438,9 @@ let g:ale_lint_on_enter = 0
 ```
 <!-- #endregion -->
 
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true -->
 ## termux实用工具
-
+<!-- #endregion -->
 
 ### 传输文件，netcat
 
@@ -462,7 +516,9 @@ tar -c 一个纯洁的路径 | nc 192.168.1.103 9999
 ```
 <!-- #endregion -->
 
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true -->
 ## python必要工作库
+<!-- #endregion -->
 
 <!-- #region -->
 ```bash
@@ -698,6 +754,69 @@ jupyter labextension uninstall @jupyterlab/toc #卸载指定插件
 jupyter labextension list #列出已安装的所有插件
 
 jupyter labextension update --all # 更新所有已安装插件到最新版本
+
+
+### 输出所有变量值
+
+
+#### 默认情况下，Code Cell 只输出最后一个可以被 evaluate 的值，用 _ 代表之前刚刚被 evaluate 的值。
+
+```python
+_
+```
+
+#### 为了显示最近 evaluate 的多个值，我们总是不得不使用很多的 print()……
+
+
+##### 在当前notebook默认输出所有变量值，可以在 Cell 最上面写上：
+
+```python
+from IPython.core.interactiveshell import InteractiveShell
+InteractiveShell.ast_node_interactivity = "all"
+```
+
+##### 对所有新打开的notebook生效，则在配置文件增加：
+
+
+```ini
+c.InteractiveShell.ast_node_interactivity = "all"
+```
+
+
+### 魔法函数
+
+
+Jupyterlab 里较为常用的魔法函数整理如下：
+
+魔法函数|	说明|
+:---:|:--
+%lsmagic	|列出所有可被使用的 Jupyter lab 魔法函数
+%run	|在 Cell 中运行 .py 文件：%run file_name
+%who	|列出所有当前 Global Scope 中的变量；类似的还有：%who df，%whos
+%env	|列出当前的环境变量
+%load	|将其他文件内容导入 Cell，%load source，source 可以是文件名，也可以是 URL。
+%time	|返回 Cell 内代码执行的时间，相关的还有 %timeit
+%writefile	|把 Cell 的内容写入文件，%write file_name；%write -a file_name，-a 是追加
+%matplotlib inline	|行内展示 matplotlib 的结果
+%%bash	|运行随后的 shell 命令，比如 %%bash ls；与之类似的还有 %%HTML，%%python2，%%python3，%%ruby，%%perl……
+
+```python
+%env
+```
+
+```python
+%lsmagic
+```
+
+```python
+%pip install conda
+```
+
+```python
+%timeit
+!ps
+%timeit
+```
 
 ```python
 
