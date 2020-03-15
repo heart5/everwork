@@ -3,11 +3,11 @@
 微信延迟管理文件
 """
 import os
+import time
+# import datetime
 import sqlite3 as lite
 import pandas as pd
 import matplotlib.pyplot as plt
-import time
-import datetime
 from pandas.plotting import register_matplotlib_converters
 
 import pathmagic
@@ -18,6 +18,9 @@ with pathmagic.context():
 
 
 def inserttimeitem2db(dbname: str, timestampinput: int):
+    '''
+    insert timestamp to wcdelay db whose table name is wcdelay
+    '''
     tablename = "wcdelay"
     csql = f"create table if not exists {tablename} (time int primary key, delay int)"
     ifnotcreate(tablename, csql, dbname)
@@ -54,7 +57,8 @@ def getdelaydb(dbname: str):
 
     timedf = pd.DataFrame(table, columns=["time", "delay"])
     timedf["time"] = timedf["time"].apply(
-        lambda x: pd.to_datetime(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(x)))
+        lambda x: pd.to_datetime(time.strftime("%Y-%m-%d %H:%M:%S", 
+                                               time.localtime(x)))
     )
     timedf.set_index("time", inplace=True)
 
@@ -62,7 +66,8 @@ def getdelaydb(dbname: str):
         print(f"延时记录共有{tdfsize}条")
         # 增加当前时间，延时值引用最近一次的值，用于做图形展示的右边栏
         #         nowtimestamp = time.ctime()
-        #         timedf = timedf.append(pd.DataFrame([timedf.iloc[-1]], index=[pd.to_datetime(time.ctime())]))
+        #         timedf = timedf.append(pd.DataFrame([timedf.iloc[-1]],
+                                        # index=[pd.to_datetime(time.ctime())]))
         timedf = timedf.append(
             pd.DataFrame([timedf.iloc[-1]], index=[pd.to_datetime(time.ctime())])
         )
@@ -78,8 +83,11 @@ def getdelaydb(dbname: str):
     return jujinmins, timedf
 
 
-def showdelayimg(jingdu: int = 300):
-    jujinm, timedf = getdelaydb()
+def showdelayimg(dbname: str, jingdu: int = 300):
+    '''
+    show the img for wcdelay 
+    '''
+    jujinm, timedf = getdelaydb(dbname)
     print(f"记录新鲜度：出炉了{jujinm}分钟")
 
     register_matplotlib_converters()
@@ -115,9 +123,9 @@ def showdelayimg(jingdu: int = 300):
 
 
 if __name__ == "__main__":
-    log.info(f"运行文件\t{__file__}")
+    log.info("运行文件\t%s" %__file__)
     dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "wcdelay_heart5.db")
     xinxian, tdf = getdelaydb(dbname)
     print(xinxian)
     print(tdf.sort_index(ascending=False))
-    log.info(f"文件{__file__}运行结束")
+    log.info("文件%s运行结束" %(__file__))
