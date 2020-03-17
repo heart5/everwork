@@ -125,7 +125,8 @@ for i in ranslice:
 # #### 构造数据和相应数据表
 
 # +
-dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "wccontact.db")
+owner = 'heart5'
+dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wccontact_{owner}.db")
 from func.litetools import compact_sqlite3_db
 
 compact_sqlite3_db(dbname)
@@ -220,7 +221,7 @@ frddf = getwcdffromfrdlst(frdlst)
 def dfuuid3nohead(inputdf: pd.DataFrame):
     frddf2appendnoimguuid = inputdf.copy(deep=True)
     # ['UserName', 'NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord', 'headimg']
-    clnamescleanlst = list(frddf2appendnoimguuid.columns.values)[:-1]
+    clnamescleanlst = list(frddf2appendnoimguuid.columns.values)[1:-1]
     print(clnamescleanlst)
     frddf2appendnoimguuid['contactuuid'] = frddf2appendnoimguuid[clnamescleanlst].apply(lambda x: uuid3hexstr(list(x.values)), axis=1)
     
@@ -266,7 +267,8 @@ frddf2append
 # ```
 # DataFrame的to_sql()函数中参数if_exists如果是"append"则根据数据表数据结构定义增添新数据
 
-dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "wccontact.db")
+owner = 'heart5'
+dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wccontact_{owner}.db")
 dftablename = 'wccontact'
 conn = lite.connect(dbname)
 frddfready = dfuuid3nohead(getwcdffromfrdlst(frdlst, 'all'))
@@ -275,7 +277,8 @@ conn.close()
 
 # #### 从数据库中读取
 
-dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "wccontact.db")
+owner = 'heart5'
+dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wccontact_{owner}.db")
 dftablename = 'wccontact'
 conn = lite.connect(dbname)
 frddfread = pd.read_sql(f'select * from {dftablename}', con=conn).set_index('id')
@@ -284,7 +287,7 @@ frddfread
 
 # ##### 找出username重复的记录
 
-frdgrpun = frddfread.groupby('username', as_index=False).count()
+frdgrpun = frddfread.groupby('remarkname', as_index=False).count()
 frdtmp = frdgrpun[frdgrpun.contactuuid > 1]
 frdtmp
 
