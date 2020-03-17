@@ -93,9 +93,9 @@ fi
 
 保存后，`chmod +x jl`使之可执行，然后丢到前面已经加入环境路径的脚本目录中，随时随地可调用。
 
-
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true -->
 ### termux工具集 
-
+<!-- #endregion -->
 
 #### 挂接手机系统内部存储空间
 在手机termux窗口命令行（还是考虑授权问题，其实如果做好了各种授权，在ssh登录的远程客户端也是一样）运行：`termux-setup-storage`，home目录下出现storage目录，里面是dcim  downloads  movies  music  pictures  shared等子目录，其中`shared`就是**手机内部存储空间的根目录**，其他几个是为了便捷存取的软连接目录。
@@ -189,7 +189,7 @@ termux-wake-lock # 避免termux睡死
 ```
 
 
-#### tmux，多窗口服务器型 终端
+#### tmux，多窗口服务器型终端
 
 
 ##### 安装
@@ -215,8 +215,73 @@ bind-key r source-file ~/.tmux.conf \; display "Config reloaded.."
 ```
 <!-- #endregion -->
 
+##### 基本概念和操作
+
+
+1. session包含window，window包含panel。
+
+
+2. 启动和退出
+    1. 启动tmux
+        1. 新启动并命名session名称    
+    ```bash
+    tmux new -t everwork
+    ```
+        2. 接入一个已经存在的session
+        ```bash
+        tmux a -t everwork
+        ```
+        3. 直接接入session列表中第一个会话
+        ```bash
+        tmux a
+        ```
+    2. 退出tmux
+        1. 临时退出但不删除，可以通过`tmux a`回来
+        **bind-key d**
+        2. 在会话中退出并删除session（该命令也可以在命令行中使用）
+        **bind-key :kill-session**
+        3. 在会话中并删除所有session（该命令也可以在命令行中使用）
+        **bind-key :kill-server**
+
+
+3. 窗口和窗格中各种按键操作
+    1. 窗口（window）的各种按键操作（在会话界面中）
+        1. **bind-key s** 获取会话列表
+        2. **bind-key c** 创建新的窗口
+        3. **bind-key 1** 跳转到指定窗口
+        4. **bind-key l** 在相邻的两个窗口轮换
+        5. **bind-key n** 跳往下一个窗口
+        6. **bind-key p** 跳往下一个窗口
+        7. **bind-key &** 删除所在窗口，需要yes or no的手工确认
+    2. 窗格（panel）的各种按键操作（在会话界面中）
+        1. **bind-key "** 横切创建新窗格
+        2. **bind-key %** 竖切创建新窗格
+        3. **bind-key o** 在窗格中游走
+        4. **bind-key "** 横切创建新窗格
+        5. **bind-key o** 在窗格中游走
+        6. **bind-key ↑↓←→** 切换到上下左右窗格（一次按一个箭头）
+        7. **bind-key :resize-pane -UDLR** 调整当前窗格的大小，四个方向
+        8. **bind-key x** 删除当前窗格，需要确认
+        9. **bind-key 空格** 切换当前窗口中所有窗格的各种布局（layout）
+        10. **bind-key !** 移动当前窗格道新的窗口，独立啦
+        11. **bind-key :join-pane -t everwork** 移动当前窗格到指定的窗口中
+        12. **bind-key Ctrl+o** 按顺序移动窗格位置，顺时针转一圈
+        13. **bind-key q** 显示当前窗口中所有窗格的编号
+        14. **bind-key t** 在窗格中显示时间
+        15. **bind-key z** 最大化最小化当前窗格，toggle
+
+
+4. 在复制模式中滚动、拷贝、粘贴
+
+    1. ***浏览***。`bind-key [`进入复制模式，然后就可以用整套vim的键码来浏览屏幕缓冲区信息，比如`Ctrl+f`翻页、`/`查找、`gg`到页首等。`Enter`回车键退出复制模式，回归正常的窗格操作。
+    2. ***拷贝***。移动到选择字符，按下`SPACE`空格开始选择，通过移动键选好后按下`Enter`结束选择，所选内容就自动存入`buffer`缓存区了。
+    3. ***粘贴***。`bind-key ]`执行粘贴。（vim中如要粘贴内容不出现缩进混乱，需要进入`paste`模式，命令`:set paste`，一切都好了后再恢复`:set nopaste`）
+
+
 ##### 不足
 多窗口用起来很爽，但美中不足的是和host操作系统的粘贴板无法贯通，不像putty中鼠标右键粘贴、选中后左键复制来的方便。所以在安装期，想从资料中复制粘贴还是待在putty中的好。
+
+【**目前的折中解决方案是用jupyterlab，浏览器端开启terminal，即使在tmux中的窗口好像也是可以接受粘贴复制的。**】
 
 
 ### vim设置和插件
@@ -235,6 +300,16 @@ bind-key r source-file ~/.tmux.conf \; display "Config reloaded.."
 
 然后把打包好的vim.zip备份到云盘之类的好地儿，以后需要的时候下载下来解压`7z x vim.zip`即可。
 <!-- #endregion -->
+
+#### 按键精灵
+
+
+按键|功能
+:--|:--
+u|恢复上次的修改操作
+Ctrl+r|重做，redo
+.|重复上一组修改操作
+
 
 #### ~~下载源码编译使之支持各种性能，如粘贴板等~~
 
@@ -394,18 +469,79 @@ Plugin tell-k/vim-autopep8
 ```
 <!-- #endregion -->
 
-##### lae是异步化运行的代码静态检查插件
+##### ale是异步化运行的代码静态检查插件
 
 <!-- #region -->
-1. 需要python工具包pylint，手动安装
+1. 需要python工具包pylint，手动安装并配置
 ```bash
 pip install pylint
+```
+<!-- #endregion -->
+
+```python
+!pylint --version
+```
+
+    1. 在当前目录下生成配置文件
+
+```python
+!pylint --persistent=n --generate-rcfile > pylint.conf
+```
+
+    2. 配置文件生效的地方
+
+``
+pylintrc in the current working directory
+.pylintrc in the current working directory
+If the current working directory is in a Python module, Pylint searches up the hierarchy of Python modules until it finds a pylintrc file. This allows you to specify coding standards on a module-by-module basis. Of course, a directory is judged to be a Python module if it contains an __init__.py file.
+The file named by environment variable PYLINTRC
+if you have a home directory which isn’t /root:
+.pylintrc in your home directory
+.config/pylintrc in your home directory
+/etc/pylintrc
+``
+
+***记得将生成的`pylint.conf`更改为`pylintrc`才能自动生效***
+
+
+    3. 文档中使用
+
+<!-- #region -->
+        1. 模块级别
+
+```python
+#! usr/bin/python
+#pylint: disable=invalid-name
+ 
+''' Docstring... '''
+```
+        2. 行级别
+```python
+def file_travesal(dirtectory='.', file_list=[]): # pylint: disable=W0102
+    '''
+    Get file list from the directory including files in its subdirectories.
+    '''
+    file_list += [join(dirtectory, f) for f in listdir(dirtectory)
+                if isfile(join(dirtectory, f))]
+    for item in listdir(dirtectory):
+        if isdir(join(dirtectory, item)):
+            file_travesal(join(dirtectory, item), file_list)
+```
+<!-- #endregion -->
+
+```python
+!pylint --rcfile=pylint.conf wiki.py
+```
+
+```python
+!ls
 ```
 
 2. `.vimrc`里面插件部分添加
 ```ini
 Plugin w0rp/ale
 ```
+
 
 3. 相关配置内容
 ```ini
@@ -436,9 +572,8 @@ let g:ale_lint_on_text_changed = 'never'
 "打开文件时不进行检查
 let g:ale_lint_on_enter = 0
 ```
-<!-- #endregion -->
 
-<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true -->
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true -->
 ## termux实用工具
 <!-- #endregion -->
 
@@ -633,6 +768,19 @@ pip install lxml
 ```
 <!-- #endregion -->
 
+### PIL安装
+
+<!-- #region -->
+```bash
+pip install pillow
+```
+
+太大了（有38M），一次性拉下来经常出错，加参数：
+```bash
+pip --default-timeout=500 install -U Pillow
+```
+<!-- #endregion -->
+
 ## Jupyterlab安装使用
 
 
@@ -756,6 +904,13 @@ jupyter labextension list #列出已安装的所有插件
 jupyter labextension update --all # 更新所有已安装插件到最新版本
 
 
+~~**【没事不要安装新插件，不要尝试，管住手】**~~
+
+jupyterlab-lsp就是个大坑，浪费了n多时间！！！
+
+**【能用就是福，且用且珍惜】**
+
+
 ### 输出所有变量值
 
 
@@ -817,6 +972,8 @@ Jupyterlab 里较为常用的魔法函数整理如下：
 !ps
 %timeit
 ```
+
+## 其他
 
 ```python
 
