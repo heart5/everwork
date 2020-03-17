@@ -9,6 +9,7 @@ import itchat
 import itchat.storage
 import re
 import os
+import sys
 import math
 from itchat.content import *
 from bs4 import BeautifulSoup
@@ -355,7 +356,8 @@ def text_reply(msg):
         return
 
     # 处理火界麻将战绩网页
-    men_wc = getonick()
+    # men_wc = getonick()
+    global men_wc
     ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
     msgtxt = msg['Text']
     if re.findall(ptn, msgtxt):
@@ -498,6 +500,7 @@ def getouser():
 
 def after_login():
     loginname = getonick() 
+    log.info(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(men_wc, meu_wc)}")
     log.info(f"登入《{loginname}》的微信服务")
 
 
@@ -527,6 +530,7 @@ def keepliverun():
     # showmsg(owner)
     men_wc = getonick()
     meu_wc = getouser()
+    log.info(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(men_wc, meu_wc)}")
     # getowner()
     # notechat = newchatnote()
     # listchatrooms()
