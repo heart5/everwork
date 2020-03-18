@@ -8,4 +8,5 @@ from func.first import getdirmain
 
 if __name__ == '__main__':
     dm = getdirmain()
+    print(f"I am strong", end='\n\n')
     print(dm)

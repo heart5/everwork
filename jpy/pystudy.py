@@ -16,6 +16,8 @@
 
 # ## uuid库
 
+# !jt -t onedork
+
 # 在判断联系人数据记录（包含头像数据）时发现用uuid好像无法约束，同一个联系人会产生不同的uuid。多轮次验证，发现对于`list(frddf2append.columns.values)`，传入uuid获取函数后会出现不同的值；但对于不包含头像的数据记录，uuid又是一样的。初步判断问题可能出在头像数据比较大，不同于一般的短字符串，是不是用了memoryview导致每次的内存地址不同进而引起不同。经过无聊测试，分析对`list(frddf2append.columns.values)`进行截取，在长度768之前都会一致，在768这个点上，多运行几次会出现不同值，但不同值的集合值只有两个；超过了768，则每次都会产生不同的uuid值。
 
 # +
@@ -121,11 +123,12 @@ import pandas as pd
 
 tstp = time.time()
 tstp = 1583489921000 / 1000
+tstp = 1584465493
 print(tstp)
 print(len(str(tstp)))
 print(time.localtime(tstp))
-mytime = time.localtime(tstp).strftime('%y-%m')
-pd.to_datetime(mytime)
+# mytime = time.localtime(tstp).strftime('%y-%m')
+# pd.to_datetime(mytime)
 # -
 
 # ## 三目表达式

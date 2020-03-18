@@ -33,11 +33,14 @@ with pathmagic.context():
 # lpwrapper = lp(showdelayimg)
 # lpwrapper()
 # lp.print_stats()
-showdelayimg()
+men_wc = 'heart5'
+men_wc = '白晔峰'
+dbname = getdirmain() / 'data' / 'db' / f"wcdelay_{men_wc}.db"
+showdelayimg(dbname)
 
 
 # -
-jujinm, timedf = getdelaydb()
+jujinm, timedf = getdelaydb(dbname)
 plt.figure(figsize=(12, 6))
 weiyi = 20
 plt.ylim(ymin=(-1) * weiyi)
@@ -137,6 +140,9 @@ dtd.total_seconds() // 60
 # #### 库准备
 
 # +
+from IPython.core.interactiveshell import InteractiveShell
+InteractiveShell.ast_node_interactivity = "all"
+
 import pandas as pd
 import requests
 import re
@@ -152,18 +158,16 @@ with pathmagic.context():
 # -
 
 
-# %lsmagic
-
-# %who
-
 updateallurlfromtxt('白晔峰')
 # %time
 
 # #### 【漏掉的战绩链接数据直接入库】
 
 # +
-fpath = getdirmain() / 'data' / 'webchat' / 'chatitems(白晔峰).txt'
-print(fpath)
+owner = '白晔峰'
+# owner = 'heart5'
+fpath = getdirmain() / 'data' / 'webchat' / f'chatitems({owner}).txt'
+fpath
 ptn = re.compile('three')
 with open(fpath) as f:
     threelst = [ x.strip().split('\t')[-1] for x in f.readlines() if re.findall(ptn, x)]
@@ -173,18 +177,20 @@ for url in urllst:
     updateurllst(url)
 # -
 
-# ##### 从文本库文件中提取链接
+# ##### ~~从文本库文件中提取链接~~
 
 specialurl = "updateurllst(url)"
 updateurllst()
 
 # #### 【战绩】
 
+ownername = 'heart5'
 ownername = '白晔峰'
 recetday = True
 simpledesc = False
 zhanji = zhanjidesc(ownername, recetday, simpledesc)
-zhanji
+
+print(zhanji)
 
 # #### 补充完善房间信息
 
@@ -195,7 +201,7 @@ recorddf = pd.read_excel(excelpath)
 rstdf = recorddf.copy(deep=True)
 rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
 rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
-rstdf[rstdf.roomid == 631543]
+rstdf
 
 # ##### 列出战友信息，并统计各人对战圈数
 
@@ -208,15 +214,15 @@ for player in teams:
 
 # ##### 命名变量并提取开房信息
 
-# +
+ownername = 'heart5'
 ownername = '白晔峰'
-
 fangdf = fetchmjfang(ownername)
 # 显示各人最近一次开房信息
 fangdf.groupby(['name']).first().sort_values('maxtime', ascending=False)
-# -
 
 # #### 根据对局战绩修正房主信息
+
+# ##### 按照基本逻辑修正
 
 fangdf = fetchmjfang(ownername)
 print(f"{fangdf.shape[0]}")
@@ -239,7 +245,40 @@ for ix in list(rstdfroomhost.index.values):
 #     print(ix, hostname)
     fangfinaldf.loc[ix, 'name'] = hostname
 fangdf1 = fangfinaldf.copy(deep=True)
-fangdf1.sort_values('closetime', ascending=False)
+
+# ##### 代开房间处理
+
+# +
+import random
+
+dkds = rstdf.groupby(['roomid', 'host']).count()['guest']
+type(dkds)
+dkds[dkds % 4 == 0]
+dkds[dkds % 4 == 0].index
+dstuplelst = list(dkds[dkds % 4 == 0].index)
+for r, h in dstuplelst:
+    rstdf.groupby('roomid').nth(random.randint(0 ,3))['guest'].loc[r]
+# -
+
+daikaidf = rstdf.groupby(['roomid', 'host']).count()
+daikaidf[daikaidf.score % 4 == 0]
+daikaidf[daikaidf.score > 3]
+
+rstdf[rstdf.roomid == 549300]
+
+# ##### 中断牌局处理
+
+rstdf[rstdf.roomid == 916781]
+
+zdds = rstdf.groupby(['roomid']).count()['time']
+zdds[zdds > 4]
+list(zdds[zdds > 4].index)
+for ix in list(zdds[zdds > 4].index):
+    zdds[ix]
+    time2drop = rstdf.groupby('roomid').min()['time'].loc[ix]
+    rstdf = rstdf[rstdf.time != time2drop]
+
+rstdf[rstdf.roomid == 916781]
 
 # #### 验证房主信息修正
 
@@ -339,10 +378,33 @@ excelwriter.close()
 from func.evernttest import trycounttimes2, getinivaluefromnote
 from muse.majjianghuojie import fetchmjurl, getsinglepage, updateurllst, fixnamebyguestid
 
-ownername = "白晔峰"
+ownername = "heart5"
 zjurllst = fetchmjurl(ownername)
 recentquandf = getsinglepage(zjurllst[0])
 recentquandf
+
+# 一次读取所有game下的items用于名称替换，避免一次次读取文件读取网络的效率损耗，也即为减少IO
+from func.configpr import getcfp
+cfpme, cfpmepath = getcfp('everinifromnote')
+gamedict = dict(cfpme.items('game'))
+gamedict
+'1088457' in gamedict.keys()
+
+guestidcl = 'guestid'
+rstdf1: pd.DataFrame = recorddf.copy(deep=True)
+# print(rstdf1)
+guestidalllst = rstdf1.groupby(guestidcl).first().index.values
+print(guestidalllst)
+gidds = rstdf1.groupby(['guestid', 'guest']).count().groupby(level='guestid').count()['roomid']
+print(gidds)
+guestidlst = [str(guestid) for guestid in gidds.index]
+print(guestidlst)
+for nameid in guestidlst:
+    if nameid in gamedict.keys():
+        needdf = rstdf1[rstdf1.guestid == int(nameid)]
+        print(nameid, gamedict[nameid], needdf.shape[0])
+        rstdf1.loc[list(needdf.index), 'guest'] = gamedict[nameid]
+rstdf1
 
 guestidcl = 'guestid'
 rstdf1: pd.DataFrame = recorddf.copy(deep=True)
@@ -406,8 +468,12 @@ import pandas as pd
 import pathmagic
 with pathmagic.context():
     from func.first import dirmainpath
-    from func.evernttest import getsampledffromdatahouse
+    from func.evernttest import getsampledffromdatahouse, findsomenotest2showornote, findnotebookfromevernote
 # -
+ntdf = findnotebookfromevernote()
+
+ntdf[ntdf['笔记本组'] == 'softnet']
+
 # ### 从evernote获取火界麻将数据集
 
 ntdf = getsampledffromdatahouse('火界')

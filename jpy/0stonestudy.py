@@ -125,4 +125,7 @@ print(water)
 print(f'{water} is hot ?\t', hot)
 print('\n')
 
+stone = 1/2/3/4/5/6/7/8/9
+print(stone)
+
 

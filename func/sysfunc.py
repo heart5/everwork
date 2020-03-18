@@ -12,18 +12,24 @@ import uuid
 import pathmagic
 with pathmagic.context():
     from func.logme import log
-    
 
-# execute command, and return the output  
-def execcmd(cmd):  
-    r = os.popen(cmd)  
-    text = r.read()  
-    r.close()  
-    return text  
+
+def uuid3hexstr(inputo: object):
+    inputstr = str(inputo)
+
+    return hex(hash(uuid.uuid3(uuid.NAMESPACE_URL, inputstr)))[2:].upper()
+
+
+def execcmd(cmd):
+    r = os.popen(cmd)
+    text = r.read()
+    r.close()
+    return text
 
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     outgetstr = execcmd("uname -a")
     print(outgetstr.strip("\n"))
+    print(uuid3hexstr(outgetstr))
     log.info(f'文件\t{__file__}\t测试完毕。')
