@@ -123,11 +123,12 @@ import pandas as pd
 
 tstp = time.time()
 tstp = 1583489921000 / 1000
+tstp = 1584465493
 print(tstp)
 print(len(str(tstp)))
 print(time.localtime(tstp))
-mytime = time.localtime(tstp).strftime('%y-%m')
-pd.to_datetime(mytime)
+# mytime = time.localtime(tstp).strftime('%y-%m')
+# pd.to_datetime(mytime)
 # -
 
 # ## 三目表达式
