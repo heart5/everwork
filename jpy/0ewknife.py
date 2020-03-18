@@ -14,6 +14,10 @@
 #     name: python3
 # ---
 
+# 显示所有变量值
+from IPython.core.interactiveshell import InteractiveShell
+InteractiveShell.ast_node_interactivity = "all"
+
 # ### 微信延时
 
 # +
@@ -40,6 +44,10 @@ showdelayimg(dbname)
 
 
 # -
+# ?pd.to_datetime
+
+pd.to_datetime([1, 2, 3], unit='D', origin=pd.Timestamp('1976-10-6'))
+
 jujinm, timedf = getdelaydb(dbname)
 plt.figure(figsize=(12, 6))
 weiyi = 20
