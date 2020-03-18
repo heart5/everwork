@@ -18,9 +18,10 @@ import pathmagic
 
 with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain, dirmainpath
-    # from func.configpr import getcfp
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.logme import log
     from func.nettools import trycounttimes2
+    from func.sysfunc import uuid3hexstr
     from func.evernttest import token, get_notestore, makenote, imglist2note, \
         evernoteapijiayi, getinivaluefromnote
     from func.datatools import readfromtxt, write2txt
@@ -90,13 +91,12 @@ def formatmsg(msg):
     timetuple = time.localtime(msg['CreateTime'])
     timestr = time.strftime("%Y-%m-%d %H:%M:%S", timetuple)
     # print(msg['CreateTime'], timetuple, timestr)
-    oname = getowner()['User']['NickName']
-    # print(oname)
+    men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
     dbname = touchfilepath2depth(getdirmain() / "data" / "db" /
-                                 f"wcdelay_{oname}.db")
+                                 f"wcdelay_{men_wc}.db")
     inserttimeitem2db(dbname, msg['CreateTime'])
     # owner = itchat.web_init()
-    global meu_wc
+    meu_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_username')
     send = (msg['FromUserName'] == meu_wc)
     if 'NickName' in msg["User"].keys():
         showname = msg['User']['NickName']
@@ -149,8 +149,7 @@ def showfmmsg(inputformatmsg):
     msgcontent = msgcontent[:-1]
     print(f"{msgcontent}")
 
-    # global men_wc
-    men_wc = getonick()
+    men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
     chattxtfilename = str(getdirmain() / 'data' / 'webchat' /
                           f'chatitems({men_wc}).txt')
     chatitems = readfromtxt(chattxtfilename)
@@ -167,9 +166,9 @@ def showfmmsg(inputformatmsg):
 
     # readinifromnote()
     # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
-    # print(f"{men_wc}")
-    # if len(men_wc) ==0 :
-    # log.critical(f"登录名为空！！！")
+    if len(men_wc) ==0 :
+        log.critical(f"登录名为空！！！")
+        return
     chatnoteguid = getinivaluefromnote('webchat', men_wc).lower()
     updatefre = getinivaluefromnote('webchat', 'updatefre')
     showitemscount = getinivaluefromnote('webchat', 'showitems')
@@ -356,8 +355,7 @@ def text_reply(msg):
         return
 
     # 处理火界麻将战绩网页
-    # men_wc = getonick()
-    global men_wc
+    men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
     ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
     msgtxt = msg['Text']
     if re.findall(ptn, msgtxt):
@@ -412,7 +410,7 @@ def text_reply(msg):
                     qrystr = qrylst[1].strip()
                     rstfile, rst = searchcustomer(qrystr.split())
             elif diyihang[1] == '延时图':
-                delaydbname = getdirmaia() / 'data' / 'db' / f"wcdelay_{men_wc}.db"
+                delaydbname = getdirmain() / 'data' / 'db' / f"wcdelay_{men_wc}.db"
                 imgwcdelay = showdelayimg(delaydbname)
                 imgwcdelayrel = os.path.relpath(imgwcdelay)
                 itchat.send_image(imgwcdelayrel, toUserName=msg['FromUserName'])
@@ -482,36 +480,22 @@ def listchatrooms():
         print(cr)
 
 
-def getowner():
-    owner = itchat.web_init()
-    # showmsg(owner)
-    return owner
-
-
-def getonick():
-    owner = getowner()
-    return owner['User']['NickName']
-
-
-def getouser():
-    owner = getowner()
-    return owner['User']['UserName']
-
-
 def after_login():
-    loginname = getonick() 
-    log.info(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(men_wc, meu_wc)}")
-    log.info(f"登入《{loginname}》的微信服务")
+    men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
+    log.info(f"登入《{men_wc}》的微信服务")
 
 
 def after_logout():
-    global men_wc
+    men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
     try:
         termux_sms_send(f"微信({men_wc})登录已退出，如有必要请重新启动")
     except Exception as e:
         log.critical(f"尝试发送退出提醒短信失败。{e}")
-        pass
     log.critical(f'退出微信({men_wc})登录')
+
+
+def get_host_uuid():
+    return uuid3hexstr(os.path.abspath(itchat.originInstance.hotReloadDir))
 
 
 @trycounttimes2('微信服务器', 200, 50)
@@ -525,13 +509,31 @@ def keepliverun():
     itchat.auto_login(hotReload=True, loginCallback=after_login, exitCallback=after_logout)
     # itchat.auto_login(hotReload=True)
 
-    global men_wc, meu_wc
-    owner = getowner()
-    # showmsg(owner)
-    men_wc = getonick()
-    meu_wc = getouser()
-    log.info(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(men_wc, meu_wc)}")
-    # getowner()
+    init_info = itchat.web_init()
+    # showmsg(init_info)
+    if init_info['BaseResponse']['Ret'] == 0:
+        log.info(f"微信初始化信息成功返回，获取登录用户信息")
+        host_nickname = init_info['User']['NickName']
+        host_username = init_info['User']['UserName']
+        log.info(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(host_nickname, host_username)}")
+        if len(host_username) > 0:
+            setcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname',
+                              host_nickname)
+            setcfpoptionvalue('everwebchat', get_host_uuid(), 'host_username',
+                              host_username)
+    elif (itchat.originInstance.loginInfo):
+        log.info(f"从itchat.originInstance.loginInfo中获取登录用户信息")
+        host_nickname = dict(itchat.originInstance.loginInfo['User'])['NickName']
+        host_username = dict(itchat.originInstance.loginInfo['User'])['UserName']
+        log.info(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(host_nickname, host_username)}")
+        if len(host_username) > 0:
+            setcfpoptionvalue('everwebchat', get_host_uuid, 'host_nickname',
+                              host_username)
+            setcfpoptionvalue('everwebchat', get_host_uuid, 'host_username',
+                              host_username)
+    else:
+        log.info(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(host_nickname, host_username)}")
+
     # notechat = newchatnote()
     # listchatrooms()
     # listfriends()
@@ -543,8 +545,6 @@ if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
 
     note_store = get_notestore()
-    men_wc = ''
-    meu_wc = ''
     keepliverun()
 
     log.info(f'{__file__}\t运行结束！')
