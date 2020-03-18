@@ -15,7 +15,7 @@ jupyter:
 
 # 安装termux到Android手机并部署python环境
 
-<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true -->
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true -->
 ## termux和termux-api安装
 termux在谷歌商店的最新版本是0.92。之前一直用的是0.65（2018年），后来升级到0.66（2019年）。因为termux-api不再支持短信读取等涉及个人隐私的功能（谷歌商店限制），担心termux主版本会自动关联这个阉割，就一直没有升级。这次黑鲨升级系统，到论坛看了下貌似整体搬迁到小米（哦，不对，应该是官宣的“将JOYUI的游戏特性与MIUI完美结合”），坛友抱怨甚多，问题反馈集中在易耗电、发热甚至不稳定，所以一直没动。昨天手痒，想着termux大版本都升级那么多，应该有不少好东东，一激动就把termux和termux-api都升级了。麻烦就此来了！
 <!-- #endregion -->
@@ -40,7 +40,7 @@ termux在谷歌商店的最新版本是0.92。之前一直用的是0.65（2018�
 
 4.运行测试命令：`termux-location`，okay
 
-<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true -->
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true -->
 ### 脚本和系统变量
 <!-- #endregion -->
 
@@ -93,7 +93,7 @@ fi
 
 保存后，`chmod +x jl`使之可执行，然后丢到前面已经加入环境路径的脚本目录中，随时随地可调用。
 
-<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true -->
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true -->
 ### termux工具集 
 <!-- #endregion -->
 
@@ -283,9 +283,9 @@ bind-key r source-file ~/.tmux.conf \; display "Config reloaded.."
 
 【**目前的折中解决方案是用jupyterlab，浏览器端开启terminal，即使在tmux中的窗口好像也是可以接受粘贴复制的。**】
 
-
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true -->
 ### vim设置和插件
-
+<!-- #endregion -->
 
 这个玩意儿配置好了可以上天，所以在此专条讲述
 
@@ -652,8 +652,155 @@ tar -c 一个纯洁的路径 | nc 192.168.1.103 9999
 <!-- #endregion -->
 
 <!-- #region toc-hr-collapsed=true toc-nb-collapsed=true -->
-## python必要工作库
+## python的各种必须工作库
 <!-- #endregion -->
+
+### numpy、pandas、scipy和jupyter等等
+
+
+每次重装termux到了这一步都是痛苦的不要不要的，压根儿搞不懂pandas等必要库是否能够安装成功，这次也不例外。numpy可以直接`pip install numpy`，版本到了1.18.1。安装pandas时又是各种满屏的红色错误提示。重复了好几次，都没有办法按照原来成功的路径搞定。再次搜索，终于在[Installing-ML-In-Termux-Python](https://github.com/sanheensethi/Installing-ML-In-Termux-Python "把机器学习环境装入termux")找到了一个解决办法。虽然是机器学习相关，但是和我这种还没到那一步的还是密切相关紧密关联的，其中numpy、pandas、matplotlib和jupyter的安装需求是一样一样的。
+
+git clone下来，运行脚本，一屏一屏的信息（居然还是彩色的，看来作者是个讲究人儿）。看到编译numpy时慢慢腾腾的劲儿，我估计是稳了，因为前面直接安装时一般都是运行没有一下就出错终止了。首次运行，没有完全安装成功，但关键的pandas倒是装好了。进去脚本看看内容，做了些调整，感觉是找对地方了。于是，再次重装termux，然后运行修改后的脚本。okay！
+
+
+【**成功运行并安装成功的脚本内容如下**】
+
+```python jupyter={"source_hidden": true}
+# %load /data/data/com.termux/files/home/gitbase/Installing-ML-In-Termux-Python/ml-install.sh
+# Regular.          # Bold.             # Underline.        # High Intensity.   # BoldHigh Intens.  # Background.       # High Intensity Backgrounds
+Bla='\033[0;30m';     BBla='\033[1;30m';    UBla='\033[4;30m';    IBla='\033[0;90m';    BIBla='\033[1;90m';   On_Bla='\033[40m';    On_IBla='\033[0;100m';
+Red='\033[0;31m';     BRed='\033[1;31m';    URed='\033[4;31m';    IRed='\033[0;91m';    BIRed='\033[1;91m';   On_Red='\033[41m';    On_IRed='\033[0;101m';
+Gre='\033[0;32m';     BGre='\033[1;32m';    UGre='\033[4;32m';    IGre='\033[0;92m';    BIGre='\033[1;92m';   On_Gre='\033[42m';    On_IGre='\033[0;102m';
+Yel='\033[0;33m';     BYel='\033[1;33m';    UYel='\033[4;33m';    IYel='\033[0;93m';    BIYel='\033[1;93m';   On_Yel='\033[43m';    On_IYel='\033[0;103m';
+Blu='\033[0;34m';     BBlu='\033[1;34m';    UBlu='\033[4;34m';    IBlu='\033[0;94m';    BIBlu='\033[1;94m';   On_Blu='\033[44m';    On_IBlu='\033[0;104m';
+Pur='\033[0;35m';     BPur='\033[1;35m';    UPur='\033[4;35m';    IPur='\033[0;95m';    BIPur='\033[1;95m';   On_Pur='\033[45m';    On_IPur='\033[0;105m';
+Cya='\033[0;36m';     BCya='\033[1;36m';    UCya='\033[4;36m';    ICya='\033[0;96m';    BICya='\033[1;96m';   On_Cya='\033[46m';    On_ICya='\033[0;106m';
+Whi='\033[0;37m';     BWhi='\033[1;37m';    UWhi='\033[4;37m';    IWhi='\033[0;97m';    BIWhi='\033[1;97m';   On_Whi='\033[47m';    On_IWhi='\033[0;107m';
+
+echo "${Pur}Hello !";
+echo "${Pur}This is Sanheen Sethi(备注：脚本原作者)";
+echo "${Pur}We are Installing ML-Libraries in Android.";
+
+echo "${Blu}Updating Termux Files(更新termux安装源并自动升级所有程序，顺手解决对存储设备的访问权限)";
+echo "${Red}";
+apt update -y
+apt upgrade -y
+termux-setup-storage
+echo "";
+
+echo "${Red}Installing Libraries to install Python and  Python ML Pakages(开始安装机器学习相关库和工具)";
+echo "${Gre}";
+echo "";
+
+echo "${Blu}Installing Clang";
+echo "${Gre}";
+apt install clang -y
+echo "";
+
+echo "${Blu}Installing Git";
+echo "${Gre}";
+apt install git -y
+echo "";
+
+echo "${Blu}Installing Python";
+echo "${Gre}";
+apt install python -y
+echo "";
+
+echo "${Blu}Installing fftw";
+echo "${Gre}";
+apt install fftw -y
+echo "";
+
+echo "${Blu}Installing libzmq";
+echo "${Gre}";
+apt install libzmq -y
+echo "";
+
+echo "${Blu}Installing freetype";
+echo "${Gre}";
+apt install freetype -y
+echo "";
+
+echo "${Blu}Installing libpng";
+echo "${Gre}";
+apt install libpng -y
+echo "";
+
+echo "${Blu}Installing pkg-config";
+echo "${Gre}";
+apt install pkg-config -y
+echo "";
+
+echo "${Blu}Updating PIP";
+echo "${Gre}";
+pip install --upgrade pip
+echo "";
+
+echo "${Blu}Installing Numpy";
+echo "${Gre}";
+LDFLAGS=" -lm -lcompiler_rt" pip install numpy
+echo "";
+
+echo "${Blu}Installing Zlib Zlib-dev";
+echo "${Gre}";
+apt install zlib zlib-dev
+echo ""
+
+echo "${Blu}Installing Matplotlib";
+echo "${Gre}";
+LDFLAGS=" -lm -lcompiler_rt" pip install matplotlib
+echo "";
+
+echo "${Blu}Installing Pandas";
+echo "${Gre}";
+LDFLAGS=" -lm -lcompiler_rt" pip install pandas
+echo "";
+
+echo "${Blu}Installing Jupyter";
+echo "${Gre}";
+LDFLAGS=" -lm -lcompiler_rt" pip install jupyter
+echo "";
+
+echo "${Blu}Installing Wget";
+echo "${Gre}";
+apt install wget -y
+echo "";
+
+echo "${Blu}Installing Scipy(这里直接借用了pointless的资源)";
+echo "${Gre}";
+$PREFIX/bin/wget https://its-pointless.github.io/setup-pointless-repo.sh 
+bash setup-pointless-repo.sh
+apt install scipy -y
+echo "";
+
+echo "${Blu}Installing OPEN-CV";
+echo "${Gre}";
+apt install opencv -y
+echo "";
+
+pip install jupyter
+pip install numpy
+pip install matplotlib
+pip install pandas
+
+echo "${Pur}Instructions to Use :";
+echo "";
+echo "${Red}Using Jupyter type in shell : jupyter notebook (Press-Enter)";
+echo "";
+echo "${Red}Using MatplotLib in jupyter type : ";
+echo "${Red}import matplotlib";
+echo "${Red}%matplotlib inline";
+echo ""
+
+
+```
+
+```python
+!vim --version | grep clipboard
+```
+
+### everwork相关
 
 <!-- #region -->
 ```bash
@@ -920,15 +1067,17 @@ jupyterlab-lsp就是个大坑，浪费了n多时间！！！
 _
 ```
 
-#### 为了显示最近 evaluate 的多个值，我们总是不得不使用很多的 print()……
+为了显示最近 evaluate 的多个值，我们总是不得不使用很多的 print()……为了避免这种情况，我们用如下方式解决。
 
 
 ##### 在当前notebook默认输出所有变量值，可以在 Cell 最上面写上：
 
+<!-- #region -->
 ```python
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_node_interactivity = "all"
 ```
+<!-- #endregion -->
 
 ##### 对所有新打开的notebook生效，则在配置文件增加：
 
@@ -937,6 +1086,44 @@ InteractiveShell.ast_node_interactivity = "all"
 c.InteractiveShell.ast_node_interactivity = "all"
 ```
 
+
+```ini
+InteractiveShell.ast_node_interactivity
+```
+
+【**关于配置文件**】
+1. jupyter和jupyterlab都基于IPython。上面说的配置文件指的就是IPython的[配置文件](https://ipython.readthedocs.io/en/stable/config/intro.html "IPython配置文件官方指南")。
+    
+2. 生成ipython配置文件。`ipython profile create`，会在目录`~/.ipython/profile_default/`中自动生成默认的配置文件`ipython_config.py`和`ipython_kernel_config.py`
+    
+3. 修改完善配置文件内容。下面是官方示例配置文档。【**注意拼写检查和其他设置，IPython处理配置文件时会自动忽略错误行而不做任何提示**】
+```ini
+        c = get_config() # 获得root（顶级）配置对象，以便进行调整
+        c.TerminalIPythonApp.display_banner = True
+        c.InteractiveShellApp.log_level = 20
+        c.InteractiveShellApp.extensions = [
+            'myextension'
+        ]
+        c.InteractiveShellApp.exec_lines = [
+            'import numpy',
+            'import scipy'
+        ]
+        c.InteractiveShellApp.exec_files = [
+            'mycode.py',
+            'fancy.ipy'
+        ]
+        c.InteractiveShell.colors = 'LightBG'
+        c.InteractiveShell.confirm_exit = False
+        c.InteractiveShell.editor = 'vim'
+        c.InteractiveShell.xmode = 'Context'
+
+        c.PrefilterManager.multi_line_specials = True
+
+        c.AliasManager.user_aliases = [
+         ('la', 'ls -al')
+        ]
+```
+4. [有用的相关讨论](https://stackoverflow.com/questions/36786722/how-to-display-full-output-in-jupyter-not-only-last-result "来自stackoverflow")
 
 ### 魔法函数
 
