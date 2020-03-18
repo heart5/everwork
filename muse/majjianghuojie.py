@@ -96,10 +96,12 @@ def getsinglepage(url: str):
     return rstdf
 
 
-def fetchmjurl(owner):
+def fetchmjurl():
     datapath = getdirmain() / 'data' / 'webchat'
     datafilelist = os.listdir(datapath)
     resultlst = list()
+    # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
+    ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
     for filenameinner in datafilelist:
         if filenameinner.startswith('chatitems'):
             # print(filenameinner)
@@ -109,17 +111,22 @@ def fetchmjurl(owner):
             continue
         filename = datapath / filenameinner
         # print(filename)
-        # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
-        ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
         rstlst = []
 
-        try:
-            with open(filename, "r", encoding='utf-8') as f:
-                filelines = f.readlines()
-                rstlst = [line.split('Text\t')[1].strip() for line in filelines if re.findall(ptn, line)]
-        except Exception as eef:
-            log.critical(eef)
-            continue
+        decode_set = ['utf-8', 'gb18030', 'ISO-8859-2', 'gb2312', 'gbk', 'Error']
+        for dk in decode_set:
+            try:
+                with open(filename, "r", encoding='utf-8') as f:
+                    filelines = f.readlines()
+                    rstlst = [line.split('Text\t')[1].strip() for line in filelines if re.findall(ptn, line)]
+                    print(filename, dk)
+                    break
+            except UnicodeDecodeError as eef:
+                continue
+            except LookupError as eel:
+                if dk == 'Error':
+                    print(f"{filename}没办法用预设的集中字符集正确打开")
+                break
 
         resultlst.extend(rstlst)
 
@@ -147,23 +154,55 @@ def getfangitem(line):
 
 def fetchmjfang(owner):
     """
-    从文本档案库中提取开房信息（发布时间和房号）
+    从数据目录中符合命名标准的文本档案库中提取开房信息（发布时间和房号）
     :param owner: 文本档案库的所属主人
     :return: DataFrame 开房信息df
     """
-    filename = getdirmain() / 'data' / 'webchat' / f"chatitems({owner}).txt"
-    # print(filename)
+    datapath = getdirmain() / 'data' / 'webchat'
+    datafilelist = os.listdir(datapath)
+    resultlst = list()
     # http://s0.lgmob.com/h5_whmj_qp/?d=217426
     ptn = re.compile("h5_whmj_qp/\\?d=(\\d+)")
-    # line in txt
-    # 2020-02-13 11:27:21	True	搓雀雀(群)白晔峰	Text	http://s0.lgmob.com/h5_whmj_qp/?d=852734
-    with open(filename, "r", encoding='utf-8') as f:
-        filelines = f.readlines()
-        fanglst = [line.strip() for line in filelines if re.search(ptn, line)]
-        rstlst = [[pd.to_datetime(lnspt[0]), re.findall(r'\b\w+\b', lnspt[2])[-1], int(lnspt[-1].split('=')[-1])] for
-                  line in fanglst if (lnspt := line.split('\t'))]
+    for filenameinner in datafilelist:
+        if not filenameinner.startswith('chatitems'):
+            continue
 
-    rstdf = pd.DataFrame(rstlst, columns=['time', 'name', 'roomid'])
+        filename = datapath / filenameinner
+        rstlst = []
+
+        decode_set = ['utf-8', 'gb18030', 'ISO-8859-2', 'gb2312', 'gbk', 'Error']
+        for dk in decode_set:
+            try:
+                with open(filename, "r", encoding=dk) as f:
+                    filelines = f.readlines()
+                    # 2020-02-13 11:27:21	True	搓雀雀(群)白晔峰	Text	http://s0.lgmob.com/h5_whmj_qp/?d=852734
+                    fanglst = [line.strip() for line in filelines if re.search(ptn, line)]
+                    rstlst = [[pd.to_datetime(lnspt[0]), re.findall(r'\b\w+\b', lnspt[2])[-1], int(lnspt[-1].split('=')[-1])] for
+                          line in fanglst if (lnspt := line.split('\t'))]
+                    print(filename, dk)
+                    break
+            except UnicodeDecodeError as eef:
+                continue
+            except LookupError as eel:
+                if dk == 'Error':
+                    print(f"{filename}没办法用预设的集中字符集正确打开")
+                break
+
+        resultlst.extend(rstlst)
+
+    if (urlsnum := getcfpoptionvalue('evermuse', 'huojiemajiang', 'fangsnum')):
+        if urlsnum == len(resultlst):
+            log.info(f"战绩链接数量暂无变化")
+        else:
+            setcfpoptionvalue('evermuse', 'huojiemajiang', 'fangsnum',
+                              f"{len(resultlst)}")
+    else:
+        urlsnum = len(resultlst)
+        setcfpoptionvalue('evermuse', 'huojiemajiang', 'fangsnum',
+                          f"{len(resultlst)}")
+
+
+    rstdf = pd.DataFrame(resultlst, columns=['time', 'name', 'roomid'])
     # print(rstdf)
     # 房号发布次数
     countdf = rstdf.groupby('roomid')['time'].count()
@@ -513,7 +552,7 @@ def updateallurlfromtxt(owner: str):
     # sp3 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_62a635b6dc15b34b74527550cd88d83f"
     # sp4 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_9b8bd588d1d44ae2867aa1319241881b"
     # splst = [sp1, sp2, sp3, sp4]
-    if splst := fetchmjurl(owner):
+    if splst := fetchmjurl():
         for sp in splst[:4]:
             # print(sp)
             pass
