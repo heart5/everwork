@@ -31,6 +31,9 @@ re.findall(ptnfang, fangurl)[0]
 # ### 库准备
 
 # +
+from IPython.core.interactiveshell import InteractiveShell
+InteractiveShell.ast_node_interactivity = "all"
+
 import uuid
 import os
 import random
@@ -101,8 +104,9 @@ def showtablesindb(dbname: str):
     tcs = conn.total_changes
     print(tcs)
     conn.close()
-    
-dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "wccontact.db")
+
+owner = '白晔峰'
+dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wccontact_{owner}.db")
 showtablesindb(dbname)
 # -
 
@@ -112,11 +116,69 @@ pklabpath = os.path.relpath(touchfilepath2depth(getdirmain() / 'itchat.pkl'))
 print(pklabpath)
 itchat.auto_login(hotReload=True, statusStorageDir=pklabpath)   #热启动你的微信
 
+# ##### `itchat.web_init()`
+
+# 初始化，成功则返回值为0，内容包括：
+
+#     1. BaseResponse。0是成功，返回的错误信息为空字符串；否则
+#     2. Count。待显示的最近联系人数量。
+#     3. ContactList。最近联系人信息。
+#     4. SyncKey。同步口令。有数量count，还有信息id？
+#     5. User。登录者信息。
+#     6. Chatset。聊天集？
+#     7. 'SKey': '@crypt_8dc3f7b8_e63df55a027c431016c33d3135f2d9fa'
+#     8. 'ClientVersion': 654314551,
+#     9. 'SystemTime': 1584465493,
+#     10. 'GrayScale': 1,
+#     11. 'InviteStartCount': 40,
+#     12. 'MPSubscribeMsgCount': 4, 待显示的公众号数量
+#     13. 'MPSubscribeMsgList': 公众号信息列表
+#     14. 'ClickReportInterval': 600000
+
+# + jupyter={"outputs_hidden": true}
+itchat.web_init()
+# -
+
+# ##### `itchat.get_contact()`
+
+# 群列表。好像是所有群，就是不知道是按照什么顺序排列的，还是随意排？！
+
+# + jupyter={"outputs_hidden": true}
+ctlst = itchat.get_contact(update=True)
+len(ctlst)
+# [ct for ct in ctlst if ct['NickName'] == '白晔峰']
+ctlst
+# -
+
+# ##### `itchat.originInstance.HotReloadDir`
+
+# 热启动的pkg文件地址。
+
+itchat.originInstance.hotReloadDir
+
+os.path.abspath(itchat.originInstance.hotReloadDir)
+
+uuid3hexstr(os.path.abspath(itchat.originInstance.hotReloadDir))
+
+itchat.originInstance.receivingRetryCount
+
+itchat.originInstance.loginInfo
+
+dict(itchat.originInstance.loginInfo['User'])
+
+itchat.originInstance.loginInfo
+
+itchat.load_login_status('../itchat.pkl')
+
+
+
 # #### 获取联系人列表
 # 随机显示几个
 
 frdlst = itchat.get_friends()
 print(len(frdlst))
+[fd for fd in frdlst if fd['NickName'] == 'heart5']
+print('\n')
 ranslice = random.sample(range(len(frdlst)), 5)
 print(ranslice)
 for i in ranslice:
@@ -126,6 +188,7 @@ for i in ranslice:
 
 # +
 owner = 'heart5'
+owner = '白晔峰'
 dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wccontact_{owner}.db")
 from func.litetools import compact_sqlite3_db
 
