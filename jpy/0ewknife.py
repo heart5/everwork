@@ -34,6 +34,7 @@ with pathmagic.context():
 # lpwrapper()
 # lp.print_stats()
 men_wc = 'heart5'
+men_wc = '白晔峰'
 dbname = getdirmain() / 'data' / 'db' / f"wcdelay_{men_wc}.db"
 showdelayimg(dbname)
 
@@ -164,7 +165,7 @@ updateallurlfromtxt('白晔峰')
 
 # +
 owner = '白晔峰'
-owner = 'heart5'
+# owner = 'heart5'
 fpath = getdirmain() / 'data' / 'webchat' / f'chatitems({owner}).txt'
 fpath
 ptn = re.compile('three')
@@ -184,6 +185,7 @@ updateurllst()
 # #### 【战绩】
 
 ownername = 'heart5'
+ownername = '白晔峰'
 recetday = True
 simpledesc = False
 zhanji = zhanjidesc(ownername, recetday, simpledesc)
@@ -212,13 +214,11 @@ for player in teams:
 
 # ##### 命名变量并提取开房信息
 
-# +
 ownername = 'heart5'
-
+ownername = '白晔峰'
 fangdf = fetchmjfang(ownername)
 # 显示各人最近一次开房信息
 fangdf.groupby(['name']).first().sort_values('maxtime', ascending=False)
-# -
 
 # #### 根据对局战绩修正房主信息
 
