@@ -124,7 +124,10 @@ def showdelayimg(dbname: str, jingdu: int = 300):
 
 if __name__ == "__main__":
     log.info("运行文件\t%s" %__file__)
-    dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "wcdelay_heart5.db")
+    # owner = 'heart5'
+    owner = '白晔峰'
+    dbname = touchfilepath2depth(getdirmain() / "data" / "db" /
+                                 f"wcdelay_{owner}.db")
     xinxian, tdf = getdelaydb(dbname)
     print(xinxian)
     print(tdf.sort_index(ascending=False))
