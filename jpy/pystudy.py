@@ -14,6 +14,17 @@
 #     name: python3
 # ---
 
+import sys
+import os
+import pandas as pd
+
+# ?pd.DataFrame.to_sql
+
+# ## os相关
+
+import os
+os.popen('ifconfig').read()
+
 # ## uuid库
 
 # !jt -t onedork
