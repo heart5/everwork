@@ -57,15 +57,30 @@ with pathmagic.context():
     from func.litetools import ifnotcreate
     from func.wrapfuncs import timethis, logit
     from func.logme import log
-
-
+    from func.sysfunc import uuid3hexstr
+    from life.wccontact import updatectdf, getctdf
 # -
+
+# #### 【更新联系人信息，输出】
+
+# +
+import pathmagic
+with pathmagic.context():
+    from life.wccontact import updatectdf, getctdf
+    
+updatectdf()
+# -
+
+frdfromdb = getctdf()
+fstar = frdfromdb.loc[:, 'starfriend']
+fstar[fstar != 0]
+frdfromdb.loc[1600]
+
 
 # #### 小函数
 
 # ##### 输出输入对象的UUID
 
-# +
 def uuid3hexstr(inputo: object):
 #     inputstr = str(inputo)[:767]
     inputstr = str(inputo)
@@ -74,16 +89,19 @@ def uuid3hexstr(inputo: object):
 
     return hex(hash(uuidout))[2:].upper()
 
+
+# + jupyter={"outputs_hidden": true}
 strlst4text = [list(), tuple(), '微信', 'heart5', 'blog', '生产力', ['12', '23'], 'blog', '生产力', ('12', '23'), None, None, 123, 321, '12', '12']
 for itm in strlst4text:
     pass
-# -
 
 uuidnsulst = ['heart5.com', 'python.com', 'jing.com']
 for item in strlst4text:
     for nsu in uuidnsulst:
         print(nsu, item, uuid.uuid3(uuid.NAMESPACE_URL, str(item)))
 
+
+# -
 
 # ##### 显示数据库文件中数据表信息
 
@@ -116,78 +134,27 @@ pklabpath = os.path.relpath(touchfilepath2depth(getdirmain() / 'itchat.pkl'))
 print(pklabpath)
 itchat.auto_login(hotReload=True, statusStorageDir=pklabpath)   #热启动你的微信
 
-# ##### `itchat.web_init()`
-
-# 初始化，成功则返回值为0，内容包括：
-
-#     1. BaseResponse。0是成功，返回的错误信息为空字符串；否则
-#     2. Count。待显示的最近联系人数量。
-#     3. ContactList。最近联系人信息。
-#     4. SyncKey。同步口令。有数量count，还有信息id？
-#     5. User。登录者信息。
-#     6. Chatset。聊天集？
-#     7. 'SKey': '@crypt_8dc3f7b8_e63df55a027c431016c33d3135f2d9fa'
-#     8. 'ClientVersion': 654314551,
-#     9. 'SystemTime': 1584465493,
-#     10. 'GrayScale': 1,
-#     11. 'InviteStartCount': 40,
-#     12. 'MPSubscribeMsgCount': 4, 待显示的公众号数量
-#     13. 'MPSubscribeMsgList': 公众号信息列表
-#     14. 'ClickReportInterval': 600000
-
-# + jupyter={"outputs_hidden": true}
-itchat.web_init()
-# -
-
-# ##### `itchat.get_contact()`
-
-# 群列表。好像是所有群，就是不知道是按照什么顺序排列的，还是随意排？！
-
-# + jupyter={"outputs_hidden": true}
-ctlst = itchat.get_contact(update=True)
-len(ctlst)
-# [ct for ct in ctlst if ct['NickName'] == '白晔峰']
-ctlst
-# -
-
-# ##### `itchat.originInstance.HotReloadDir`
-
-# 热启动的pkg文件地址。
-
-itchat.originInstance.hotReloadDir
-
-os.path.abspath(itchat.originInstance.hotReloadDir)
+# #### 生成uuid区分不同的登录（按照pkl的存放地儿）
 
 uuid3hexstr(os.path.abspath(itchat.originInstance.hotReloadDir))
-
-itchat.originInstance.receivingRetryCount
-
-itchat.originInstance.loginInfo
-
-dict(itchat.originInstance.loginInfo['User'])
-
-itchat.originInstance.loginInfo
-
-itchat.load_login_status('../itchat.pkl')
-
-
 
 # #### 获取联系人列表
 # 随机显示几个
 
 frdlst = itchat.get_friends()
-print(len(frdlst))
+len(frdlst)
 [fd for fd in frdlst if fd['NickName'] == 'heart5']
-print('\n')
 ranslice = random.sample(range(len(frdlst)), 5)
-print(ranslice)
+ranslice
 for i in ranslice:
     print(frdlst[i], '\n')
 
 # #### 构造数据和相应数据表
 
+# ##### 压缩数据库文件
+
 # +
-owner = 'heart5'
+# owner = 'heart5'
 owner = '白晔峰'
 dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wccontact_{owner}.db")
 from func.litetools import compact_sqlite3_db
@@ -195,8 +162,10 @@ from func.litetools import compact_sqlite3_db
 compact_sqlite3_db(dbname)
 # -
 
+# ##### 构造数据表
+
 tablename = "wccheadimg"
-csql = f"create table {tablename} (himgid INTEGER PRIMARY KEY AUTOINCREMENT,username TEXT not null, himguuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, headimg BLOB NOT NULL)"
+csql = f"create table if not exists {tablename} (himgid INTEGER PRIMARY KEY AUTOINCREMENT,username TEXT not null, himguuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, headimg BLOB NOT NULL)"
 # conn = lite.connect(dbname)
 # cursor = conn.cursor()
 # cursor.execute(f'drop table {tablename}')
@@ -208,7 +177,7 @@ csql = f"create table {tablename} (himgid INTEGER PRIMARY KEY AUTOINCREMENT,user
 ifnotcreate(tablename, csql, dbname)
 
 tablename_cc = "wccontact"
-csql = f"create table {tablename_cc} (id INTEGER PRIMARY KEY AUTOINCREMENT, contactuuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, username TEXT not null, nickname TEXT, contactflag int, remarkname TEXT, sex int, signature TEXT, starfriend int, attrstatus int, province TEXT, city TEXT, snsflag int, keyword TEXT, headimg BLOB)"
+csql = f"create table if not exists {tablename_cc} (id INTEGER PRIMARY KEY AUTOINCREMENT, contactuuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, nickname TEXT, contactflag int, remarkname TEXT, sex int, signature TEXT, starfriend int, attrstatus int, province TEXT, city TEXT, snsflag int, keyword TEXT, appendtime datatime)"
 # conn = lite.connect(dbname)
 # cursor = conn.cursor()
 # cursor.execute(f'drop table {tablename_cc}')
@@ -222,8 +191,20 @@ ifnotcreate(tablename_cc, csql, dbname)
 # #### 查验数据并提取有用信息到list以及DataFrame中
 
 # +
-def getwcdffromfrdlst(frdlst: list, howmany: str = 'fixed'):
-    if howmany.lower() == 'random':
+def getwcdffromfrdlst(frdlst: list, howmany: str = 'fixed', haveheadimg = False):
+    
+    def yieldrange(startnum: int, width: int = 20):
+        endnum = (startnum + width, len(frdlst))[len(frdlst) < startnum + width]
+        return range(startnum, endnum)
+    
+    if type(howmany) is int:
+        rang = yieldrange(howmany)
+    elif type(howmany) is tuple:
+        if len(howmany) == 1:
+            rang = yieldrange(howmany[0])
+        elif len(howmany) >= 2:
+            rang = yieldrange(howmany[0], howmany[1])
+    elif howmany.lower() == 'random':
         rang = random.sample(range(len(frdlst)), 5)
     elif howmany.lower() == 'fixed':
         rang = range(0, 5)
@@ -232,7 +213,7 @@ def getwcdffromfrdlst(frdlst: list, howmany: str = 'fixed'):
     else:
         log.critical(f"{howmany}不是合法的参数")
         return
-    
+    print(rang)
     frdinfolst = list()
     attrlst = ['UserName', 'NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord']
     for ix in rang:
@@ -250,52 +231,67 @@ def getwcdffromfrdlst(frdlst: list, howmany: str = 'fixed'):
                 log.critical(f"第【{ix}/{len(frdlst)}】条记录存在问题。{frd['NickName']}\t{frd['UserName']}\t{eeee}")
                 continue
 
-            headimg = itchat.get_head_img(frd["UserName"])
-            frdinfouuiswithnohead = uuid3hexstr(frdinfo)
-            print(f"【{ix}/{len(frdlst)}】【{frdinfouuiswithnohead}】{frd['NickName']}\t{frd['RemarkName']}\t{frd['UserName']}\theadimg的长度为：\t{len(headimg)}。", end='\t')
-            frdinfo.append(headimg)
-#             frdinfo.append(hexlify(headimg).decode())
+            if haveheadimg:
+                headimg = itchat.get_head_img(frd["UserName"])
+                frdinfouuiswithnohead = uuid3hexstr(frdinfo)
+    #             print(f"【{ix}/{len(frdlst)}】【{frdinfouuiswithnohead}】{frd['NickName']}\t{frd['RemarkName']}\t{frd['UserName']}\theadimg的长度为：\t{len(headimg)}。", end='\t')
+    #             frdinfo.insert(0, frdinfouuiswithnohead)
+    #             frdinfo.append(uuid3hexstr(headimg[:600]))
+                frdinfo.append(headimg)
+    #             frdinfo.append(pd.Timestamp.now())
+    #             frdinfo.append(hexlify(headimg).decode())
 
-            if (iblen := len(headimg)) == 0:
-                print(f"图像获取失败！")
-                pass
-            else:
-#                 print(f"内容示意：\t{headimg[:15]}")
-                print()
-                pass
+                if (iblen := len(headimg)) == 0:
+                    print(f"{frd['NickName']}\t图像获取失败！")
+                    pass
+                else:
+    #                 print(f"内容示意：\t{headimg[:15]}")
+    #                 print()
+                    pass
+    
             frdinfolst.append(frdinfo)
         else:
             print(f'不存在UserName键值')
     print(f"{len(frdinfolst)}")
-    attrlst.append('headimg')
+#     attrlst.insert(0, 'contactuuid')
+    if haveheadimg:
+        attrlst.extend(['headimg'])
+#     attrlst.extend(['imguuid', 'headimg', 'appendtime'])
 #     print(attrlst)
     frddf = pd.DataFrame(frdinfolst, columns=attrlst)
     
     return frddf
 
-frddf = getwcdffromfrdlst(frdlst)
-
-
+getwcdffromfrdlst(frdlst)
+# getwcdffromfrdlst(frdlst, (len(frdlst) - 8, 3))
+# getwcdffromfrdlst(frdlst, (2400, 3))
 # -
 # #### 联系人信息存入数据库中相应数据表
 
 # ##### 不包含headimg的其他列生成uuid
 
 def dfuuid3nohead(inputdf: pd.DataFrame):
-    frddf2appendnoimguuid = inputdf.copy(deep=True)
     # ['UserName', 'NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord', 'headimg']
-    clnamescleanlst = list(frddf2appendnoimguuid.columns.values)[1:-1]
-    print(clnamescleanlst)
+    frddf2append = inputdf.copy(deep=True)
+    # [NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord']
+    clnamescleanlst = [cl for cl in list(frddf2append.columns.values) if cl.lower() not in ['username', 'headimg']]
+#     print(clnamescleanlst)
+    frddf2appendnoimguuid = frddf2append.loc[:, clnamescleanlst]
     frddf2appendnoimguuid['contactuuid'] = frddf2appendnoimguuid[clnamescleanlst].apply(lambda x: uuid3hexstr(list(x.values)), axis=1)
+    # ['UserName', 'NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord', 'headimg', 'appendtime']
+    frddf2appendnoimguuid['appendtime'] = pd.Timestamp.now()
     
     return frddf2appendnoimguuid
+# %time
 dfuuid3nohead(getwcdffromfrdlst(frdlst))
 
 
 # ##### 所有列（包含headimg）生成uuid（变动）
 
+# + [markdown] jupyter={"source_hidden": true}
 # 小函数测试uuid从多少长度开始变异
 
+# + jupyter={"source_hidden": true}
 def testuuidlen(inputdf: pd.DataFrame):
     frddf2append = inputdf.copy(deep=True)
     # frddf2append = frddf
@@ -303,50 +299,78 @@ def testuuidlen(inputdf: pd.DataFrame):
     print(frddf2append[['NickName', 'contactuuid']])
 
 
+# + [markdown] jupyter={"source_hidden": true}
 # 传入获取的同一个DataFrame时不会出现uuid异常
 
+# + jupyter={"outputs_hidden": true, "source_hidden": true}
 frdwithimguuid = getwcdffromfrdlst(frdlst)
 testuuidlen(frdwithimguuid)
 testuuidlen(frdwithimguuid)
 
+# + [markdown] jupyter={"source_hidden": true}
 # 但是，如果每次都生成一个新的DataFrame则结果就不一样了
 
-# +
+# + jupyter={"source_hidden": true, "outputs_hidden": true}
 frdwithimguuid = getwcdffromfrdlst(frdlst)
 testuuidlen(frdwithimguuid)
 
 testuuidlen(getwcdffromfrdlst(frdlst))
-# -
 
+# + [markdown] jupyter={"source_hidden": true}
 # ##### 所有列（包含headimg）生成uuid（参照）
 
+# + jupyter={"source_hidden": true, "outputs_hidden": true}
 frddf2append = frddf.copy(deep=True)
 frddf2append['contactuuid'] = frddf2append.apply(lambda x: uuid3hexstr(list(x.values)), axis=1)
 frddf2append
+# -
 
 # ##### DataFrame写入相应数据库，依赖数据表定义约束记录唯一
 # ```sql
-# create table wccontact (id INTEGER PRIMARY KEY AUTOINCREMENT, contactuuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, username TEXT not null, nickname TEXT, contactflag int, remarkname TEXT, sex int, signature TEXT, starfriend int, attrstatus int, province TEXT, city TEXT, snsflag int, keyword TEXT, headimg BLOB)
+# create table wccontact (id INTEGER PRIMARY KEY AUTOINCREMENT, contactuuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, nickname TEXT, contactflag int, remarkname TEXT, sex int, signature TEXT, starfriend int, attrstatus int, province TEXT, city TEXT, snsflag int, keyword TEXT, appendtime datetime)
 # ```
 # DataFrame的to_sql()函数中参数if_exists如果是"append"则根据数据表数据结构定义增添新数据
 
-owner = 'heart5'
+owner = '白晔峰'
 dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wccontact_{owner}.db")
 dftablename = 'wccontact'
 conn = lite.connect(dbname)
-frddfready = dfuuid3nohead(getwcdffromfrdlst(frdlst, 'all'))
+frddfready = dfuuid3nohead(getwcdffromfrdlst(frdlst, len(frdlst) - 10))
 frddfready.to_sql(dftablename, con=conn, if_exists='append', index=False)
 conn.close()
 
+# ##### 【遍历所有联系人并判断存入】
+
+# 【生成数据段】
+
+width = 150
+spllst = [(i * width, width) for i in range((len(frdlst) // width) +1)]
+spllst
+
+# 【存入数据，按照分好的段】
+
+owner = '白晔峰'
+dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wccontact_{owner}.db")
+dftablename = 'wccontact'
+# %time
+for sltuple in spllst[3:]:
+    conn = lite.connect(dbname)
+    frddfready = dfuuid3nohead(getwcdffromfrdlst(frdlst, sltuple))
+    frddfready.to_sql(dftablename, con=conn, if_exists='append', index=False)
+    conn.close()
+# %time
+
 # #### 从数据库中读取
 
-owner = 'heart5'
+owner = '白晔峰'
 dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wccontact_{owner}.db")
 dftablename = 'wccontact'
 conn = lite.connect(dbname)
 frddfread = pd.read_sql(f'select * from {dftablename}', con=conn).set_index('id')
 conn.close()
 frddfread
+
+str(frddfread[list(frddfread)[1:]].tail(10).values)
 
 # ##### 找出username重复的记录
 
