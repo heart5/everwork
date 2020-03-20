@@ -32,6 +32,9 @@ with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain
     from life.wcdelay import getdelaydb, showdelayimg
     
+
+
+# -
 # lp = LineProfiler()
 # lp.add_function(getdelaydb)
 # lpwrapper = lp(showdelayimg)
@@ -42,8 +45,6 @@ men_wc = '白晔峰'
 dbname = getdirmain() / 'data' / 'db' / f"wcdelay_{men_wc}.db"
 showdelayimg(dbname)
 
-
-# -
 # ?pd.to_datetime
 
 pd.to_datetime([1, 2, 3], unit='D', origin=pd.Timestamp('1976-10-6'))
@@ -467,7 +468,9 @@ for person in set(list(zgridf.guest.values)):
     pzgr.name = person
     pzgr.plot(legend=True)
 
-# ### 获取笔记本信息
+# ### 获取笔记本或笔记信息
+
+# #### 获取笔记本
 
 # +
 import sqlite3 as lite
@@ -481,6 +484,10 @@ with pathmagic.context():
 ntdf = findnotebookfromevernote()
 
 ntdf[ntdf['笔记本组'] == 'softnet']
+
+# #### 查找包含某关键词的某指定笔记本下的笔记列表
+
+findsomenotest2showornote('4524187f-c131-4d7d-b6cc-a1af20474a7f', '标题')
 
 # ### 从evernote获取火界麻将数据集
 
