@@ -2,11 +2,11 @@
 检查crontab是否更新，有更新就更新相应笔记并并开关设置发送邮件
 """
 
+from pathlib import Path
 import os
 import re
-import pathmagic
-from pathlib import Path
 
+import pathmagic
 with pathmagic.context():
     # from func.first import dirmainpath
     from func.logme import log
@@ -14,11 +14,16 @@ with pathmagic.context():
 
 
 def findnewcronthenupdate():
+    """
+    查看当前登录用户的cron自动运行配置表是否有更新（修改时间），并视情况更新
+    """
 
     # 获取用户名，方便适配不同的运行平台
     r = os.popen('whoami')
     me = r.read()[:-1]
     print(me)
+
+    # 打开配置表，过滤掉注释并简单检查（由6部分构成）是否符合规范
     cronfile = f'/data/data/com.termux/files/usr/var/spool/cron/crontabs/{me}'
     cfl = open(cronfile, 'r').readlines()
     # print(f"{cfl}")
@@ -30,22 +35,24 @@ def findnewcronthenupdate():
         if not clean:
             break
 
-    print(clean)
+    # 进入更新判断处置环节
     if clean:
         findnewthenupdatenote(cronfile, 'eversys', 'everwork', 'cron', 'cron自动运行排期表')
     else:
-        log.critical(f"自动运行排表有误，请检查。{len(cflen)}\t{cflen}")
-
-    # print(f"cron检查更新函数运行结束")
+        logstr = f"自动运行排表有误，请检查。{len(cflen)}\t{cflen}"
+        log.critical(logstr)
 
 
 def findcronlogthenupdate():
+    """
+    构建待处理的目标日志或配置文件列表并处理之
+    """
     logpath = "/data/data/com.termux/files/usr/var/log"
     # logpath = dirmainpath / 'log'
     logfiles = os.listdir(logpath)
     ptn = re.compile("ew_")
     # ptn = re.compile("ever")
-    ewlogfiles = [ x for x in logfiles if re.match(ptn, x) and x.endswith('.log')]
+    ewlogfiles = [x for x in logfiles if re.match(ptn, x) and x.endswith('.log')]
     ewlogfiles.append('.zshrc')
     ewlogfiles.append('.vimrc')
     ewlogfiles.append('.tmux.conf')
