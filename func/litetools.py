@@ -63,6 +63,21 @@ def ifnotcreate(tablen: str, createsql: str, dbn: str):
             conn.close()
 
 
+def droptablefromdb(dbname: str, tablename: str, confirm=False):
+    if not confirm:
+        logstr = f"【警告】：数据表{tablename}将从{dbname}中删除，请确认！！！"
+        log.critical(logstr)
+    else:
+        conn = lite.connect(dbname)
+        cursor = conn.cursor()
+        cursor.execute(f'drop table {tablename}')
+        # cursor.execute(f'drop table cinfo')
+        conn.commit()
+        tcs = conn.total_changes
+        print(tcs)
+        conn.close()
+
+
 @timethis
 def compact_sqlite3_db(dbpath):
     sizebefore = get_filesize(dbpath)
@@ -73,10 +88,12 @@ def compact_sqlite3_db(dbpath):
 
 
 if __name__ == "__main__":
-    log.info(f"运行文件\t{__file__}")
+    logstr = f"运行文件\t{__file__}\t……"
+    log.info(logstr)
     # print(get_filesize(dbpathquandan))
     compact_sqlite3_db(dbpathquandan)
     compact_sqlite3_db(dbpathworkplan)
     compact_sqlite3_db(dbpathdingdanmingxi)
 
-    print("Done.完毕。")
+    logstr = f"文件\t{__file__}\t运行完毕。"
+    log.info(logstr)
