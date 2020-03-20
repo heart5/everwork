@@ -93,7 +93,7 @@ fi
 
 保存后，`chmod +x jl`使之可执行，然后丢到前面已经加入环境路径的脚本目录中，随时随地可调用。
 
-<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true -->
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true -->
 ### termux工具集 
 <!-- #endregion -->
 
@@ -283,7 +283,7 @@ bind-key r source-file ~/.tmux.conf \; display "Config reloaded.."
 
 【**目前的折中解决方案是用jupyterlab，浏览器端开启terminal，即使在tmux中的窗口好像也是可以接受粘贴复制的。**】
 
-<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true -->
+<!-- #region toc-hr-collapsed=true toc-nb-collapsed=true toc-hr-collapsed=true toc-nb-collapsed=true -->
 ### vim设置和插件
 <!-- #endregion -->
 
