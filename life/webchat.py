@@ -32,6 +32,7 @@ with pathmagic.context():
     from etc.getid import getdeviceid
     from muse.majjianghuojie import updateurllst, zhanjidesc, showzhanjiimg
     from life.wcdelay import inserttimeitem2db, showdelayimg
+    from life.wccontact import updatectdf, getctdf
 
 
 def newchatnote():
@@ -377,7 +378,9 @@ def text_reply(msg):
             simpledesc = False
         zhanji = zhanjidesc(men_wc, recentday, simpledesc)
         itchat.send_msg(f"{zhanji}", toUserName=msg['FromUserName'])
-        itchat.send_msg(f"{msg['FromUserName']}\t查询信息：\n{msgtxt}")
+        # sendernick = itchat.search_friends(userName=msg['FromUserName'])
+        sendernick = itchat.search_friends(name=msg['FromUserName'])
+        itchat.send_msg(f"{sendernick}\t查询信息：\n{msgtxt}")
 
         if msgtxt.find('折线图') != -1:
             imgzhanji = showzhanjiimg()
@@ -424,6 +427,16 @@ def text_reply(msg):
                              'fmText': imgwcdelayrel
                              }
                 showfmmsg(finnalmsg)
+                return
+            elif diyihang[1] == '连更':
+                updatectdf()
+                return
+            elif diyihang[1] == '连显':
+                frddfread = getctdf()
+                dftail = str(frddfread[list(frddfread)[1:]].tail(6).values)
+                toshowstr = dftail
+                print(toshowstr)
+                itchat.send_msg(msg=f"{toshowstr}")
                 return
             elif diyihang[1] == '欠款':
                 qrystr = qrylst[1].strip()
@@ -478,6 +491,14 @@ def listchatrooms():
     chatrooms = itchat.get_chatrooms(update=True)
     for cr in chatrooms:
         print(cr)
+
+
+@itchat.msg_register(FRIENDS)
+def add_friend(msg):
+    msg.user.verify()
+    msg.user.send('Nice to meet you!')
+    showfmmsg(msg)
+    log.info(msg)
 
 
 def after_login():
