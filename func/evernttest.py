@@ -191,8 +191,8 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     # nbodylst = [x for x in nbody if ord(x) >= 32]
     # nbody = ''.join(nbodylst)
     note.content = nbody
-    log.info(f"新构笔记文字部分长度为：\t{len(nbody)}")
-    print(note.content[:100])
+    # log.info(f"新构笔记文字部分长度为：\t{len(nbody)}")
+    # print(note.content[:100])
 
     # Finally, send the new note to Evernote using the updateNote method
     # The new Note object that is returned will contain server-generated
