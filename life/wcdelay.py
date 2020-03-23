@@ -34,7 +34,7 @@ def inserttimeitem2db(dbname: str, timestampinput: int):
         cursor.execute(
             f"insert into {tablename} values(?, ?)", (timestampinput, elsmin)
         )
-        print(f"数据成功写入{dbname}\t{(timestampinput, elsmin)}")
+#         print(f"数据成功写入{dbname}\t{(timestampinput, elsmin)}")
         conn.commit()
     except lite.IntegrityError as lie:
         log.critical(f"键值重复错误\t{lie}")
@@ -88,30 +88,36 @@ def showdelayimg(dbname: str, jingdu: int = 300):
     show the img for wcdelay 
     '''
     jujinm, timedf = getdelaydb(dbname)
+#     timedf.iloc[-1]
     print(f"记录新鲜度：出炉了{jujinm}分钟")
 
     register_matplotlib_converters()
 
-    plt.figure(figsize=(36, 6))
+    plt.figure(figsize=(36, 12))
     plt.style.use("ggplot")  # 使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
 
-    # 画出左边界
-    tmin = timedf.index.min()
-    tmax = timedf.index.max()
-    shicha = tmax - tmin
-    bianjie = int(shicha.total_seconds() / 40)
-    print(f"左边界：{bianjie}秒，也就是大约{int(bianjie / 60)}分钟")
-    # plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
-    plt.xlim(xmin=tmin)
-    plt.xlim(xmax=tmax + pd.Timedelta(f"{bianjie}s"))
-    # plt.vlines(tmin, 0, int(timedf.max() / 2))
-    plt.vlines(tmax, 0, int(timedf.max() / 2))
+    def drawdelayimg(pos, timedfinner):
+        # 画出左边界
+        tmin = timedfinner.index.min()
+        tmax = timedfinner.index.max()
+        shicha = tmax - tmin
+        bianjie = int(shicha.total_seconds() / 40)
+        print(f"左边界：{bianjie}秒，也就是大约{int(bianjie / 60)}分钟")
+        # plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
+        plt.subplot(pos)
+        plt.xlim(xmin=tmin)
+        plt.xlim(xmax=tmax + pd.Timedelta(f"{bianjie}s"))
+        # plt.vlines(tmin, 0, int(timedf.max() / 2))
+        plt.vlines(tmax, 0, int(timedfinner.max() / 2))
 
-    # 绘出主图和标题
-    plt.scatter(timedf.index, timedf, s=timedf)
-    plt.scatter(timedf[timedf == 0].index, timedf[timedf == 0], s=0.5)
-    plt.title("信息频率和延时")
+        # 绘出主图和标题
+        plt.scatter(timedfinner.index, timedfinner, s=timedfinner)
+        plt.scatter(timedfinner[timedfinner == 0].index, timedfinner[timedfinner == 0], s=0.5)
+        plt.title("信息频率和延时")
 
+    drawdelayimg(211, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')])
+    drawdelayimg(212, timedf)
+        
     imgwcdelaypath = touchfilepath2depth(
         getdirmain() / "img" / "webchat" / "wcdelay.png"
     )
@@ -120,7 +126,6 @@ def showdelayimg(dbname: str, jingdu: int = 300):
     print(os.path.relpath(imgwcdelaypath))
 
     return imgwcdelaypath
-
 
 if __name__ == "__main__":
     log.info("运行文件\t%s" %__file__)
