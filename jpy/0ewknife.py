@@ -20,8 +20,11 @@ InteractiveShell.ast_node_interactivity = "all"
 
 # ### 微信延时
 
+# #### 库准备
+
 # +
 import time
+import os
 import pandas as pd
 from line_profiler import LineProfiler
 import matplotlib.pyplot as plt
@@ -31,13 +34,12 @@ import pathmagic
 with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain
     from life.wcdelay import getdelaydb, showdelayimg
-    
-
-
 # -
+# #### 【显示延时图】
+
 # lp = LineProfiler()
-# lp.add_function(getdelaydb)
-# lpwrapper = lp(showdelayimg)
+# # lp.add_function(getdelaydb)
+# lpwrapper = lp(showdelayimg(dbname))
 # lpwrapper()
 # lp.print_stats()
 men_wc = 'heart5'
@@ -45,7 +47,56 @@ men_wc = '白晔峰'
 dbname = getdirmain() / 'data' / 'db' / f"wcdelay_{men_wc}.db"
 showdelayimg(dbname)
 
-# ?pd.to_datetime
+
+# #### 画图函数
+
+# +
+def showdelayimg(dbname: str, jingdu: int = 300):
+    '''
+    show the img for wcdelay 
+    '''
+    jujinm, timedf = getdelaydb(dbname)
+#     timedf.iloc[-1]
+    print(f"记录新鲜度：出炉了{jujinm}分钟")
+
+    register_matplotlib_converters()
+
+    plt.figure(figsize=(36, 12))
+    plt.style.use("ggplot")  # 使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
+
+    def drawdelayimg(pos, timedfinner):
+        # 画出左边界
+        tmin = timedfinner.index.min()
+        tmax = timedfinner.index.max()
+        shicha = tmax - tmin
+        bianjie = int(shicha.total_seconds() / 40)
+        print(f"左边界：{bianjie}秒，也就是大约{int(bianjie / 60)}分钟")
+        # plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
+        plt.subplot(pos)
+        plt.xlim(xmin=tmin)
+        plt.xlim(xmax=tmax + pd.Timedelta(f"{bianjie}s"))
+        # plt.vlines(tmin, 0, int(timedf.max() / 2))
+        plt.vlines(tmax, 0, int(timedfinner.max() / 2))
+
+        # 绘出主图和标题
+        plt.scatter(timedfinner.index, timedfinner, s=timedfinner)
+        plt.scatter(timedfinner[timedfinner == 0].index, timedfinner[timedfinner == 0], s=0.5)
+        plt.title("信息频率和延时")
+
+    drawdelayimg(211, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')])
+    drawdelayimg(212, timedf)
+        
+    imgwcdelaypath = touchfilepath2depth(
+        getdirmain() / "img" / "webchat" / "wcdelay.png"
+    )
+
+    plt.savefig(imgwcdelaypath, dpi=jingdu)
+    print(os.path.relpath(imgwcdelaypath))
+
+    return imgwcdelaypath
+
+showdelayimg(dbname)
+# -
 
 pd.to_datetime([1, 2, 3], unit='D', origin=pd.Timestamp('1976-10-6'))
 
@@ -164,6 +215,7 @@ with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from muse.majjianghuojie import fetchmjfang, zhanjidesc, updateurllst, updateallurlfromtxt
+    from life.wccontact import getownername
 # -
 
 
@@ -173,7 +225,7 @@ updateallurlfromtxt('白晔峰')
 # #### 【漏掉的战绩链接数据直接入库】
 
 # +
-owner = '白晔峰'
+owner = getownername()
 # owner = 'heart5'
 fpath = getdirmain() / 'data' / 'webchat' / f'chatitems({owner}).txt'
 fpath
@@ -193,8 +245,8 @@ updateurllst()
 
 # #### 【战绩】
 
-ownername = 'heart5'
-ownername = '白晔峰'
+ownername = getownername()
+# ownername = '白晔峰'
 recetday = True
 simpledesc = False
 zhanji = zhanjidesc(ownername, recetday, simpledesc)
