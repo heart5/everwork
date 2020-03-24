@@ -4,31 +4,38 @@
 """
 
 from pathlib import Path
-# import os
-import sys
+from io import BytesIO
+import time
 import random
 # import numpy as np
 import sqlite3 as lite
+from PIL import Image
+# import os
+import sys
 import pandas as pd
+import numpy as np
 import itchat
 # from binascii import hexlify, unhexlify
 
 import pathmagic
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
-    from func.litetools import ifnotcreate
+    from func.litetools import ifnotcreate, droptablefromdb
     from func.wrapfuncs import timethis
     from func.logme import log
-    from func.sysfunc import uuid3hexstr
+    from func.sysfunc import uuid3hexstr, sha2hexstr
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
 
 
 def getownername():
+    """
+    获取登录用户的昵称（NickName），当然默认登录微信
+    """
     # pklabpath = os.path.relpath(touchfilepath2depth(getdirmain() / 'itchat.pkl'))
     pklabpath = getdirmain() / 'itchat.pkl'
     # print(pklabpath)
     if itchat.originInstance.alive:
-        print(f"微信处于登录状态……")
+        log.info(f"微信处于正常登录状态……")
     else:
         itchat.auto_login(hotReload=True, statusStorageDir=pklabpath)   #热启动你的微信sg['FromUserName']
         if not itchat.originInstance.alive:
@@ -46,22 +53,34 @@ def checktable(dbpath: str, ownername: str):
     if not (ifcreated := getcfpoptionvalue('everwebchat', 'wcdb', ownername)):
         print(ifcreated)
         dbnameinner = getdbname(dbpath, ownername)
-        tablename = "wccheadimg"
+        tablename = "wcheadimg"
+        
+        # 删表操作，危险，谨慎操作
+        droptablefromdb(dbnameinner, tablename, confirm=True)        
         csql = f"create table if not exists {tablename} (himgid INTEGER PRIMARY KEY AUTOINCREMENT,username TEXT not null, himguuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, headimg BLOB NOT NULL)"
         ifnotcreate(tablename, csql, dbnameinner)
+        logstr = f"数据表{tablename}于{dbnameinner}中被删除并完成重构"
+        log.critical(logstr)
 
         tablename_cc = "wccontact"
-        csql = f"create table if not exists {tablename_cc} (id INTEGER PRIMARY KEY AUTOINCREMENT, contactuuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, nickname TEXT, contactflag int, remarkname TEXT, sex int, signature TEXT, starfriend int, attrstatus int, province TEXT, city TEXT, snsflag int, keyword TEXT, appendtime datatime)"
+        
+        # 删表操作，危险，谨慎操作
+        droptablefromdb(dbnameinner, tablename_cc, confirm=True)        
+        csql = f"create table if not exists {tablename_cc} (id INTEGER PRIMARY KEY AUTOINCREMENT, contactuuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, nickname TEXT, contactflag int, remarkname TEXT, sex int, signature TEXT, starfriend int, attrstatus int, province TEXT, city TEXT, snsflag int, keyword TEXT, imguuid text, appendtime datatime)"
         ifnotcreate(tablename_cc, csql, dbnameinner)
-
+        logstr = f"数据表{tablename_cc}于{dbnameinner}中被删除并完成重构"
+        log.critical(logstr)
+        
         setcfpoptionvalue('everwebchat', 'wcdb', ownername, str(True))
-    else:
-        # print(ifcreated)
-        # print(f"{ownername}的联系人数据库和相关数据表已经存在。")
-        pass
 
 
-def getwcdffromfrdlst(frdlst: list, howmany: str='fixed', haveheadimg=False):
+def getimguuid(inputbytes: bytes):
+    imgfrombytes = Image.open(BytesIO(inputbytes))
+    
+    return sha2hexstr(np.array(imgfrombytes))
+
+        
+def getwcdffromfrdlst(frdlst: list, howmany: str='fixed', needheadimg=False):
 
     def yieldrange(startnum: int, width: int = 20):
         endnum = (startnum + width, len(frdlst))[len(frdlst) < startnum + width]
@@ -103,60 +122,58 @@ def getwcdffromfrdlst(frdlst: list, howmany: str='fixed', haveheadimg=False):
                 log.critical(f"第【{ix}/{len(frdlst)}】条记录存在问题。{frd['NickName']}\t{frd['UserName']}\t{eeee}")
                 continue
 
-            if haveheadimg:
+            if needheadimg:
                 headimg = itchat.get_head_img(frd["UserName"])
-                # frdinfouuiswithnohead = uuid3hexstr(frdinfo)
-    #             print(f"【{ix}/{len(frdlst)}】【{frdinfouuiswithnohead}】{frd['NickName']}\t{frd['RemarkName']}\t{frd['UserName']}\theadimg的长度为：\t{len(headimg)}。", end='\t')
-    #             frdinfo.insert(0, frdinfouuiswithnohead)
-    #             frdinfo.append(uuid3hexstr(headimg[:600]))
-                frdinfo.append(headimg)
-    #             frdinfo.append(pd.Timestamp.now())
-    #             frdinfo.append(hexlify(headimg).decode())
-
+#                 print(str(headimg)[:100])
                 if (iblen := len(headimg)) == 0:
-                    print(f"{frd['NickName']}\t图像字节长度为：{iblen}\t图像获取失败！")
+                    print(f"{frd['NickName']}\t图像获取失败！")
+                    frdimguuid = None
                 else:
     #                 print(f"内容示意：\t{headimg[:15]}")
     #                 print()
-                    pass
+                    frdimguuid = getimguuid(headimg)
+
+                frdinfo.append(frdimguuid)
+                frdinfo.append(headimg)
 
             frdinfolst.append(frdinfo)
         else:
-            print(f'不存在UserName键值')
-    # print(f"{len(frdinfolst)}")
-#     attrlst.insert(0, 'contactuuid')
-    if haveheadimg:
-        attrlst.extend(['headimg'])
-#     attrlst.extend(['imguuid', 'headimg', 'appendtime'])
-#     print(attrlst)
-    frddf = pd.DataFrame(frdinfolst, columns=attrlst)
+            print(f'不存在UserName键值。\t{frd}')
 
+    print(f"{len(frdinfolst)}")
+
+    if needheadimg:
+        attrlst.extend(['imguuid', 'headimg'])
+
+    frddf = pd.DataFrame(frdinfolst, columns=attrlst)
+    
     return frddf
 
 
-def dfuuid3nohead(inputdf: pd.DataFrame):
-    # ['UserName', 'NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord', 'headimg']
+def dfsha2noimg(inputdf: pd.DataFrame):
+    # ['UserName', 'NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord', 'imguuid' 'headimg']
     frddf2append = inputdf.copy(deep=True)
-    # [NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord']
-    clnamescleanlst = [cl for cl in list(frddf2append.columns.values) if cl.lower() not in ['username', 'headimg']]
+    # [NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord', 'imguuid']
+    clnamescleanlst = [cl for cl in list(frddf2append.columns.values) if cl.lower() not in ['username', 'imguuid' , 'headimg', 'appendtime', 'contactuuid']]
 #     print(clnamescleanlst)
-    frddf2appendnoimguuid = frddf2append.loc[:, clnamescleanlst]
-    frddf2appendnoimguuid['contactuuid'] = frddf2appendnoimguuid[clnamescleanlst].apply(lambda x: uuid3hexstr(list(x.values)), axis=1)
+#     frddf2appendnoimguuid = frddf2append.loc[:, clnamescleanlst]
+    frddf2append['contactuuid'] = frddf2append[clnamescleanlst].apply(lambda x: sha2hexstr(list(x.values)), axis=1)
     # ['UserName', 'NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord', 'headimg', 'appendtime']
-    frddf2appendnoimguuid['appendtime'] = pd.Timestamp.now()
+    frddf2append['appendtime'] = pd.Timestamp.now()
     
-    return frddf2appendnoimguuid
+    return frddf2append
 
 
 @timethis
-def updatectdf(howmuch: str = "all"):
+def updatectdf(howmuch: str = "all", haveimg=False):
     owner = getownername()
     dbpath = Path("data")/ 'db'
     dbname = getdbname(dbpath, owner)
+    checktable(dbpath, owner)
 
     frdlst = itchat.get_friends(update=True)
 
-    width = 150
+    width = 250
     spllst = [(i * width, width) for i in range((len(frdlst) // width) +1)]
 
     if howmuch == 'tail':
@@ -168,11 +185,27 @@ def updatectdf(howmuch: str = "all"):
 
     dftablename = 'wccontact'
     for sltuple in spllst[startpos:]:
-        print(sltuple, '/', len(frdlst))
+        print(sltuple, '/', len(frdlst), end='\t')
         conn = lite.connect(dbname)
-        frddfready = dfuuid3nohead(getwcdffromfrdlst(frdlst, sltuple))
-        frddfready.to_sql(dftablename, con=conn, if_exists='append', index=False)
+        readdf = getwcdffromfrdlst(frdlst, sltuple, needheadimg=haveimg)
+        
+        frddfready = dfsha2noimg(readdf)
+        outcls = [cl for cl in list(frddfready.columns.values) if cl.lower() not in ['username', 'headimg']]
+        frddfready[outcls].to_sql(dftablename, con=conn, if_exists='append', index=False)
+        
+        if haveimg:
+            dftablenameimg = 'wcheadimg'
+            frddfreadyforimg = readdf[readdf.imguuid.notnull()][['RemarkName', 'imguuid', 'headimg']]
+            frddfreadyforimg.to_sql(dftablenameimg, con=conn, if_exists='append', index=False)
+        
+            # 如果涉及到拉取图片，避免系统认为有意干扰，每个间隔随机休息几秒
+            sleepsecs = random.randint(0, 15)
+            # print(f"{time.localtime()}随机休息{sleepsecs}秒……")
+            time.sleep(sleepsecs)
+        
         conn.close()
+
+    print()
 
 
 def just4test():
@@ -193,7 +226,7 @@ def getctdf():
     dbname = getdbname(dbpath, owner)
     dftablename = 'wccontact'
     conn = lite.connect(dbname)
-    frddfread = pd.read_sql(f'select * from {dftablename}', con=conn).set_index('id')
+    frddfread = pd.read_sql(f'select * from {dftablename}', con=conn, parse_dates=['appendtime']).set_index('id')
     conn.close()
 
     return frddfread
