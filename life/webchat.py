@@ -259,9 +259,10 @@ def sharing_reply(msg):
     if re.findall(ptn, msgurl):
         if msgurl.startswith('http'):
             roomid = updateurllst(msgurl)
-            outstr = f"【Sharing】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}\t{msgurl}"
+            outstr = f"【Sharing】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}"
             log.info(outstr)
             itchat.send_msg(outstr)
+            makemsg2write(innermsg, outstr)
 
     # 处理开房链接
     # http://s0.lgmob.com/h5_whmj_qp/?d=217426
@@ -271,6 +272,7 @@ def sharing_reply(msg):
             outstr = f"【Sharing】信息中发现新的火界麻将开房链接并处理，房间号为：\t{re.findall(ptnfang, msgurl)[0]}"
             log.info(outstr)
             itchat.send_msg(outstr)
+            makemsg2write(innermsg, outstr)
             print(innermsg['fmText'])
             innermsg['fmText'] = msgurl
 
@@ -323,6 +325,18 @@ def sharing_reply(msg):
     showfmmsg(innermsg)
 
 
+def makemsg2write(innermsg, inputtext=''):
+    nowtuple = time.time()
+    nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
+    finnalmsg = {'fmId': math.floor(nowtuple),
+                 'fmTime': nowdatetime.strftime("%Y-%m-%d %H:%M:%S"),
+                 'fmSend': True, 'fmSender': innermsg['fmSender'],
+                 'fmType': 'Text',
+                 'fmText': f"{inputtext}"
+                }
+    showfmmsg(finnalmsg)
+
+
 @itchat.msg_register([TEXT], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def text_reply(msg):
     innermsg = formatmsg(msg)
@@ -362,9 +376,10 @@ def text_reply(msg):
     if re.findall(ptn, msgtxt):
         if msgtxt.startswith('http'):
             roomid = updateurllst(msgtxt)
-            outstr = f"【Text】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}\t{msgtxt}"
+            outstr = f"【Text】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}"
             log.info(outstr)
             itchat.send_msg(outstr)
+            makemsg2write(innermsg, outstr)
 
     # 根据口令显示火界麻将战绩综合统计结果
     if msg['Text'].startswith('火界麻将战果统计') or msg['Text'].startswith('麻果'):
@@ -377,25 +392,31 @@ def text_reply(msg):
         if msgtxt.find('综合') != -1:
             simpledesc = False
         zhanji = zhanjidesc(men_wc, recentday, simpledesc)
+        # 发回给查询者
         itchat.send_msg(f"{zhanji}", toUserName=msg['FromUserName'])
+        makemsg2write(innermsg, zhanji)
         # sendernick = itchat.search_friends(userName=msg['FromUserName'])
-        sendernick = itchat.search_friends(name=msg['FromUserName'])
-        itchat.send_msg(f"{sendernick}\t查询信息：\n{msgtxt}")
+        if msg['FromUserName'].startswith('@@'):
+            qun = itchat.search_chatrooms(userName=msg['FromUserName'])
+            sendernick = qun['NickName'] + '(群)' + msg['ActualNickName']
+        else:
+            senderuser = itchat.search_friends(userName=msg['FromUserName'])
+            if len(senderuser['RemarkName']) == 0:
+                sendernick = senderuser['NickName']
+            else:
+                sendernick = senderuser['RemarkName']
+        # sendernick = itchat.search_friends(userName=msg['FromUserName'])['NickName']
+        outstr = f"{sendernick}\t查询信息：\n{msgtxt}"
+        # 查询记录发给自己一份备档
+        itchat.send_msg(outstr)
+        makemsg2write(innermsg, outstr)
 
         if msgtxt.find('折线图') != -1:
             imgzhanji = showzhanjiimg()
             imgzhanjirel = os.path.relpath(imgzhanji)
             itchat.send_image(imgzhanjirel, toUserName=msg['FromUserName'])
-            zhanji = imgzhanji
-        nowtuple = time.time()
-        nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
-        finnalmsg = {'fmId': math.floor(nowtuple),
-                     'fmTime': nowdatetime.strftime("%Y-%m-%d %H:%M:%S"),
-                     'fmSend': True, 'fmSender': innermsg['fmSender'],
-                     'fmType': 'Text',
-                     'fmText': zhanji
-                     }
-        showfmmsg(finnalmsg)
+            # 折线图发送记录备档
+            makemsg2write(innermsg, imgzhanjirel)
 
     if msg['Text'].find('真元信使') >= 0:
         qrylst = msg['Text'].split('\n')
@@ -417,16 +438,7 @@ def text_reply(msg):
                 imgwcdelay = showdelayimg(delaydbname)
                 imgwcdelayrel = os.path.relpath(imgwcdelay)
                 itchat.send_image(imgwcdelayrel, toUserName=msg['FromUserName'])
-                nowtuple = time.time()
-                nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
-                finnalmsg = {'fmId': math.floor(nowtuple),
-                             'fmTime': nowdatetime.strftime("%Y-%m-%d %H:%M:%S"),
-                             'fmSend': True, 'fmSender': innermsg['fmSender'],
-                             'fmType': 'Text',
-                             # 'fmText': os.path.split(rstfile)[1]
-                             'fmText': imgwcdelayrel
-                             }
-                showfmmsg(finnalmsg)
+                # 延时图发送记录备档
                 return
             elif diyihang[1] == '连更':
                 updatectdf()
@@ -437,6 +449,7 @@ def text_reply(msg):
                 toshowstr = dftail
                 print(toshowstr)
                 itchat.send_msg(msg=f"{toshowstr}")
+                makemsg2write(innermsg, toshowstr)
                 return
             elif diyihang[1] == '欠款':
                 qrystr = qrylst[1].strip()
@@ -448,35 +461,18 @@ def text_reply(msg):
                 rstfile, rst = None, None
 
             itchat.send_msg(rst, toUserName=msg['FromUserName'])
-            nowtuple = time.time()
-            nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
-            finnalmsg = {'fmId': math.floor(nowtuple),
-                         'fmTime': nowdatetime.strftime("%Y-%m-%d %H:%M:%S"),
-                         'fmSend': True, 'fmSender': innermsg['fmSender'],
-                         'fmType': 'Text',
-                         # 'fmText': os.path.split(rstfile)[1]
-                         'fmText': rst
-                         }
-            showfmmsg(finnalmsg)
+            # 查询结果文件路径备档
+            makemsg2write(innermsg, rst)
 
             if rstfile:
                 # rstfile必须是绝对路径，并且不能包含中文字符
                 itchat.send_file(rstfile, toUserName=msg['FromUserName'])
                 # 发给自己一份存档
-                nowtuple = time.time()
-                nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
-                finnalmsg = {'fmId': math.floor(nowtuple),
-                             'fmTime': nowdatetime.strftime("%Y-%m-%d %H:%M:%S"),
-                             'fmSend': True, 'fmSender': innermsg['fmSender'],
-                             'fmType': 'File',
-                             # 'fmText': os.path.split(rstfile)[1]
-                             'fmText':
-                                 rstfile.replace(os.path.abspath(dirmainpath), '')[1:]
-                             }
-                showfmmsg(finnalmsg)
+                makemsg2write(innermsg,rstfile.replace(os.path.abspath(dirmainpath)))
                 itchat.send_file(rstfile)
                 infostr = f"成功发送查询结果文件：{os.path.split(rstfile)[1]}给{innermsg['fmSender']}"
                 itchat.send_msg(infostr)
+                makemsg2write(innermsg, infostr)
                 log.info(infostr)
             # return rst
 
