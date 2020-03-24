@@ -14,6 +14,12 @@
 #     name: python3
 # ---
 
+# ## 判断变量名是否定义过
+
+nnn = 123
+'conn' in locals() or 'conn' in globals()
+'nnn' in locals()
+
 import sys
 import os
 import pandas as pd
@@ -517,7 +523,7 @@ print(dit)
 
 # +
 dit = {'name':'zxf',
-       'age':'22',
+       'age':22,
        'gender':'male',
        'address':'shanghai'}
  
@@ -529,6 +535,12 @@ print(lst)  # ['name', 'age', 'gender', 'address']
 lst2 = list(dit.values())
 print(lst2)
 # -
+# ### 列印字典中的值
+
+# 显示所有key和value
+for key, value in dit.items():
+    print(key, type(value), value)
+
 print("Home is hopeful.")
 
 # ## configparse
