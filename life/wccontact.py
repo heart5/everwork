@@ -20,7 +20,7 @@ import itchat
 import pathmagic
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
-    from func.litetools import ifnotcreate, droptablefromdb
+    from func.litetools import ifnotcreate, droptablefromdb, istableindb
     from func.wrapfuncs import timethis
     from func.logme import log
     from func.sysfunc import uuid3hexstr, sha2hexstr
@@ -53,19 +53,20 @@ def checktable(dbpath: str, ownername: str):
     if not (ifcreated := getcfpoptionvalue('everwebchat', 'wcdb', ownername)):
         print(ifcreated)
         dbnameinner = getdbname(dbpath, ownername)
+
         tablename = "wcheadimg"
-        
-        # 删表操作，危险，谨慎操作
-        droptablefromdb(dbnameinner, tablename, confirm=True)        
+        if istableindb(tablename, dbnameinner):
+            # 删表操作，危险，谨慎操作
+            droptablefromdb(dbnameinner, tablename, confirm=True)        
         csql = f"create table if not exists {tablename} (himgid INTEGER PRIMARY KEY AUTOINCREMENT,username TEXT not null, himguuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, headimg BLOB NOT NULL)"
         ifnotcreate(tablename, csql, dbnameinner)
         logstr = f"数据表{tablename}于{dbnameinner}中被删除并完成重构"
         log.critical(logstr)
 
         tablename_cc = "wccontact"
-        
-        # 删表操作，危险，谨慎操作
-        droptablefromdb(dbnameinner, tablename_cc, confirm=True)        
+        if istableindb(tablename_cc, dbnameinner):
+            # 删表操作，危险，谨慎操作
+            droptablefromdb(dbnameinner, tablename_cc, confirm=True)        
         csql = f"create table if not exists {tablename_cc} (id INTEGER PRIMARY KEY AUTOINCREMENT, contactuuid TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, nickname TEXT, contactflag int, remarkname TEXT, sex int, signature TEXT, starfriend int, attrstatus int, province TEXT, city TEXT, snsflag int, keyword TEXT, imguuid text, appendtime datatime)"
         ifnotcreate(tablename_cc, csql, dbnameinner)
         logstr = f"数据表{tablename_cc}于{dbnameinner}中被删除并完成重构"
