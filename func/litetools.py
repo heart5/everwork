@@ -5,8 +5,9 @@ sqlite数据库相关应用函数
 
 import sqlite3 as lite
 import os
-import pathmagic
+import re
 
+import pathmagic
 with pathmagic.context():
     from func.logme import log
     from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi
@@ -31,7 +32,7 @@ def istableindb(tablenin: str, dbname: str):
     except Exception as eee:
         log.critical(f"查询数据表是否存在时出错。{eee}")
     finally:
-        if conn:
+        if 'conn' in locals():
             conn.close()
 
     return tablenin in chali
@@ -59,9 +60,59 @@ def ifnotcreate(tablen: str, createsql: str, dbn: str):
     except Exception as eee:
         log.critical(f"操作数据库时出现错误。{dbn}\t{eee}")
     finally:
-        if conn:
+        if 'conn' in locals():
             conn.close()
 
+
+def ifclexists(dbin, tb, cl):
+    conn = lite.connect(dbin)
+    cursor = conn.cursor()
+    structsql = f"SELECT sql FROM sqlite_master WHERE type = 'table' AND tbl_name = '{tb}';"
+    tablefd = cursor.execute(structsql).fetchall()
+    # [('CREATE TABLE heart5 (id integer primary key autoincrement, name text, age int, imguuid text)',)]
+    conn.commit()
+    tcs = conn.total_changes
+    print(tcs)
+    conn.close()
+
+    if len(tablefd) == 0:
+        print(f"数据表{tb}不存在")
+        return False
+              
+    createsql =  [name for x in tablefd for name in x][0]
+    print(createsql)
+    ptn = re.compile("\((.+)\)")
+    print(re.findall(ptn, createsql)[0])
+    rstsplst = re.findall(ptn, createsql)[0].split(',')
+    print([x.strip() for x in rstsplst])
+    finallst = [x.strip().split()[:2] for x in rstsplst]
+    print(finallst)
+    targetdict = dict(finallst)
+    if cl in targetdict:
+        print(f"列{cl}已经在数据表{tb}中存在")
+        return True
+    else:
+        print(f"列{cl}在数据表{tb}中尚未存在，可以新增")
+        return False
+
+    
+def showtablesindb(dbname: str):
+    conn = lite.connect(dbname)
+    cursor = conn.cursor()
+    tbnsql = f"SELECT tbl_name FROM sqlite_master WHERE type = 'table';"
+    tablefd = cursor.execute(tbnsql).fetchall()
+#     print(tablefd)
+    tablesnamelst = [name for x in tablefd for name in x]
+    print(tablesnamelst)
+    for tname in tablesnamelst:
+        structsql = f"SELECT sql FROM sqlite_master WHERE type = 'table' AND tbl_name = '{tname}';"
+        tablefd = cursor.execute(structsql).fetchall()
+        print(tname+":\t", [name for x in tablefd for name in x][0])
+    conn.commit()
+    tcs = conn.total_changes
+    print(tcs)
+    conn.close()
+    
 
 def droptablefromdb(dbname: str, tablename: str, confirm=False):
     if not confirm:
@@ -73,8 +124,9 @@ def droptablefromdb(dbname: str, tablename: str, confirm=False):
         cursor.execute(f'drop table {tablename}')
         # cursor.execute(f'drop table cinfo')
         conn.commit()
-        tcs = conn.total_changes
-        print(tcs)
+        logstr = f"【警告】：数据表{tablename}已经从{dbname}中删除，谨以记！！！"
+        log.critical(logstr)
+
         conn.close()
 
 
