@@ -14,6 +14,59 @@
 #     name: python3
 # ---
 
+# ## 判断字符串是否包含
+
+# ### 使用成员操作符 `in`
+
+mother = 'I have a litte boy. boy is fine. boy is little.'
+child = 'boy'
+child in mother
+child not in mother
+
+# ### 使用str模块的find / rfind方法
+
+# 找不到则返回 `-1`
+
+str.find(mother, child) != -1
+str.rfind(mother, child) != -1
+str.find(mother, child) # 最近结果
+str.rfind(mother, child) # 最远结果
+
+# ### 使用str的index / rindex方法
+
+# 找不到则抛出异常 `ValueError`
+
+str.index(mother, child)
+str.rindex(mother, child)
+try:
+    str.index(mother, 'me')
+except ValueError as ve:
+    print(ve)
+
+# ### 使用字符串对象的find()/rfind()、index()/rindex()和count()方法
+
+mother.find(child)
+mother.rfind(child)
+mother.index(child)
+mother.rindex(child)
+mother.count(child)
+
+# +
+childother = 'uu'
+
+mother.find(childother)
+mother.rfind(childother)
+
+try:
+    mother.index(childother)
+    mother.rindex(childother)
+except ValueError as ve:
+    print(ve)
+    
+# 找不到则返回 0
+mother.count(childother)
+# -
+
 # ## 判断变量名是否定义过
 
 nnn = 123
