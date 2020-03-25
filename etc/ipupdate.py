@@ -59,6 +59,7 @@ def iprecord():
             wifi = wifiinfo['ssid']
             if wifi.find('unknown ssid') >= 0:
                 log.warning(f'WIFI处于假连状态：{wifi}\t{ipinner}')
+                wifi = None
                 continue
             wifiid = wifiinfo['bssid']
         ip = ipinner
