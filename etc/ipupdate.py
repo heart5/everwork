@@ -73,7 +73,6 @@ def evalnone(input):
         return input
 
 
-# @profile
 def showiprecords():
     namestr = 'everip'
     ip, wifi, wifiid, tun, device_id = iprecord()
@@ -121,10 +120,12 @@ def showiprecords():
         print(txtfilename)
         nowstr = datetime.datetime.now().strftime('%F %T')
         itemread = readfromtxt(txtfilename)
-        print(itemread)
+        itemclean = [x for x in itemread if 'unknown' not in x]
+        itempolluted = [x for x in itemread if 'unknown' in x]
+        log.info(f"不合法记录列表：\t{itempolluted}")
         itemnewr = [
             f'{ipr}\t{wifir}\t{wifiidr}\t{tunr}\t{startr}\t{nowstr}']
-        itemnewr.extend(itemread)
+        itemnewr.extend(itemclean)
         print(itemnewr)
         write2txt(txtfilename, itemnewr)
         itemnew = [
