@@ -20,6 +20,7 @@ import itchat
 import pathmagic
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
+    from func.evernttest import getinivaluefromnote
     from func.litetools import ifnotcreate, droptablefromdb, istableindb
     from func.wrapfuncs import timethis
     from func.logme import log
@@ -227,10 +228,28 @@ def getctdf():
     dbname = getdbname(dbpath, owner)
     dftablename = 'wccontact'
     conn = lite.connect(dbname)
-    frddfread = pd.read_sql(f'select * from {dftablename}', con=conn, parse_dates=['appendtime']).set_index('id')
+    frdfromdb = pd.read_sql(f'select * from {dftablename}', con=conn, parse_dates=['appendtime']).set_index('id')
     conn.close()
 
-    return frddfread
+    return frdfromdb
+
+
+def showwcsimply(inputdb: pd.DataFrame):
+    frdfromdb = inputdb.copy(deep=True)
+    # 用nickname填充remarkname为空的记录
+    frdfromdb['remarkname'] = frdfromdb[['nickname', 'remarkname']].apply(lambda x: x.nickname if x.remarkname == '' else x.remarkname, axis=1)
+    # 找出最近n天内有过更改的联系人清单，n从动态配置文件中获取，不成功则设置-1
+    if (wcrecentdays := getinivaluefromnote('webchat', 'wcrecentdays')):
+        pass
+    else:
+        wcrecentdays = -1
+    startpoint = pd.Timestamp.now() + pd.Timedelta(f'{wcrecentdays}d')
+    dsfortime = frdfromdb.groupby('remarkname').last()['appendtime']
+    outready = frdfromdb.loc[frdfromdb['remarkname'].isin(list(dsfortime[dsfortime > startpoint].index))]
+    outready['appendtime'] = outready['appendtime'].apply(lambda x: pd.to_datetime(x).strftime("%y-%m-%d %H:%M"))
+    outdone = outready.groupby(['remarkname', 'appendtime']).first().sort_index(ascending=[True, False])
+    
+    return outdone[list(outdone)[1:-1]]
 
 
 if __name__ == '__main__':
@@ -245,7 +264,7 @@ if __name__ == '__main__':
 
     dfread = getctdf()
     print(dfread.shape[0])
-    logstr = dfread[list(dfread)[1:]].tail(30)
+    logstr = showwcsimply(dfread).tail(30)
     log.info(logstr)
 
     # owner = getownername()
