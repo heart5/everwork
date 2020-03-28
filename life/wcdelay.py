@@ -15,6 +15,22 @@ with pathmagic.context():
     from func.logme import log
     from func.first import touchfilepath2depth, getdirmain
     from func.litetools import ifnotcreate
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
+
+
+def checkwcdelaytable(dbname: str, tablename: str):
+    """
+    检查和dbname（绝对路径）相对应的延时数据表是否已经构建，设置相应的ini值避免重复打开关闭数据库文件进行检查
+    """
+    if not (wcdelaycreated := getcfpoptionvalue('everwebchat',
+                                                os.path.abspath(dbname), 'wcdelay')):
+        print(wcdelaycreated)
+        csql = f"create table if not exists {tablename} (time int primary key, delay int)"
+        ifnotcreate(tablename, csql, dbname)
+        setcfpoptionvalue('everwebchat', os.path.abspath(dbname), 'wcdelay',
+                          str(True))
+        logstr = f"数据表{tablename}在数据库{dbname}中构建成功"
+        log.info(logstr)
 
 
 def inserttimeitem2db(dbname: str, timestampinput: int):
@@ -22,12 +38,12 @@ def inserttimeitem2db(dbname: str, timestampinput: int):
     insert timestamp to wcdelay db whose table name is wcdelay
     '''
     tablename = "wcdelay"
-    csql = f"create table if not exists {tablename} (time int primary key, delay int)"
-    ifnotcreate(tablename, csql, dbname)
+    checkwcdelaytable(dbname, tablename)
 
     # timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
     # timest = time.mktime(timetup)
     elsmin = (int(time.time()) - timestampinput) // 60
+    conn = False
     try:
         conn = lite.connect(dbname)
         cursor = conn.cursor()
@@ -37,17 +53,19 @@ def inserttimeitem2db(dbname: str, timestampinput: int):
 #         print(f"数据成功写入{dbname}\t{(timestampinput, elsmin)}")
         conn.commit()
     except lite.IntegrityError as lie:
-        log.critical(f"键值重复错误\t{lie}")
+        logstr = f"键值重复错误\t{lie}"
+        log.critical(logstr)
     finally:
         if conn:
             conn.close()
 
 
 def getdelaydb(dbname: str):
+    """
+    从延时数据表提取数据（DataFrame），返回最近延时值和df
+    """
     tablename = "wcdelay"
-
-    csql = f"create table if not exists {tablename} (time int primary key, delay int)"
-    ifnotcreate(tablename, csql, dbname)
+    checkwcdelaytable(dbname, tablename)
 
     conn = lite.connect(dbname)
     cursor = conn.cursor()
@@ -57,8 +75,7 @@ def getdelaydb(dbname: str):
 
     timedf = pd.DataFrame(table, columns=["time", "delay"])
     timedf["time"] = timedf["time"].apply(
-        lambda x: pd.to_datetime(time.strftime("%Y-%m-%d %H:%M:%S", 
-                                               time.localtime(x)))
+        lambda x: pd.to_datetime(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(x)))
     )
     timedf.set_index("time", inplace=True)
 
@@ -74,7 +91,8 @@ def getdelaydb(dbname: str):
         jujinmins = int((timedf.index[-1] - timedf.index[-2]).total_seconds() / 60)
     else:
         jujinmins = 0
-        log.info(f"数据表{tablename}还没有数据呢")
+        logstr = f"数据表{tablename}还没有数据呢"
+        log.info(logstr)
 
     timedf.loc[timedf.delay < 0] = 0
     # print(timedf.iloc[:2])
@@ -85,7 +103,7 @@ def getdelaydb(dbname: str):
 
 def showdelayimg(dbname: str, jingdu: int = 300):
     '''
-    show the img for wcdelay 
+    show the img for wcdelay
     '''
     jujinm, timedf = getdelaydb(dbname)
 #     timedf.iloc[-1]
@@ -117,7 +135,7 @@ def showdelayimg(dbname: str, jingdu: int = 300):
 
     drawdelayimg(211, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')])
     drawdelayimg(212, timedf)
-        
+
     imgwcdelaypath = touchfilepath2depth(
         getdirmain() / "img" / "webchat" / "wcdelay.png"
     )
@@ -128,12 +146,13 @@ def showdelayimg(dbname: str, jingdu: int = 300):
     return imgwcdelaypath
 
 if __name__ == "__main__":
-    log.info("运行文件\t%s" %__file__)
+    logstrouter = "运行文件\t%s" %__file__
+    log.info(logstrouter)
     # owner = 'heart5'
     owner = '白晔峰'
-    dbname = touchfilepath2depth(getdirmain() / "data" / "db" /
-                                 f"wcdelay_{owner}.db")
-    xinxian, tdf = getdelaydb(dbname)
+    dbnameouter = touchfilepath2depth(getdirmain() / "data" / "db" / f"wcdelay_{owner}.db")
+    xinxian, tdf = getdelaydb(dbnameouter)
     print(xinxian)
     print(tdf.sort_index(ascending=False))
-    log.info("文件%s运行结束" %(__file__))
+    logstrouter = "文件%s运行结束" %(__file__)
+    log.info(logstrouter)
