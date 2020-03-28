@@ -5,12 +5,12 @@
 
 import time
 import datetime
-import itchat
-import itchat.storage
 import re
 import os
 import sys
 import math
+import itchat
+import itchat.storage
 from itchat.content import *
 from bs4 import BeautifulSoup
 
@@ -531,10 +531,14 @@ def keepliverun():
     itchat.auto_login(hotReload=True, loginCallback=after_login, exitCallback=after_logout)
     # itchat.auto_login(hotReload=True)
 
+    # 设定获取信息时重试的次数，默认是5，设定为50，不知道是否能够起作用
+    itchat.originInstance.receivingRetryCount = 50
+
     init_info = itchat.web_init()
     # showmsg(init_info)
     if init_info['BaseResponse']['Ret'] == 0:
-        log.info(f"微信初始化信息成功返回，获取登录用户信息")
+        logstr = f"微信初始化信息成功返回，获取登录用户信息"
+        log.info(logstr)
         host_nickname = init_info['User']['NickName']
         host_username = init_info['User']['UserName']
         log.info(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(host_nickname, host_username)}")
