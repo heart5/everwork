@@ -10,6 +10,7 @@ import random
 import platform
 import os
 import re
+import itchat
 # from requests.packages.urllib3 import HTTPConnectionPool
 from evernote.edam.error.ttypes import EDAMSystemException
 from urllib3.exceptions import *
@@ -24,7 +25,40 @@ import pathmagic
 with pathmagic.context():
     from func.logme import log
     from func.termuxtools import termux_sms_send
+    from func.first import getdirmain
     # from func.evernttest import getinivaluefromnote
+
+    
+def isitchat(pklabpath):
+    """
+    判断itchat是否已经运行，没有则热启动之。
+    如果成功则返回True，否则直接退出运行。
+    """
+
+    inputpklpath = os.path.abspath(pklabpath)
+#     print(inputpklpath)
+        
+    if itchat.originInstance.alive:
+        # 转换成绝对路径方便对比
+
+        loginpklpath = os.path.abspath(itchat.originInstance.hotReloadDir)
+        if inputpklpath == loginpklpath:
+            log.info(f"微信处于正常登录状态，pkl路径为：\t{loginpklpath}……")
+        else:
+            logstr = f"当前登录的pkl路径为{loginpklpath}，不同于传入的参数路径：\t{inputpklpath}"
+            log.critical(logstr)
+            sys.exit(1)
+    else:
+        itchat.auto_login(hotReload=True, statusStorageDir=pklabpath)   #热启动你的微信
+        if not itchat.originInstance.alive:
+            log.critical("微信未能热启动，仍处于未登陆状态，退出！")
+            sys.exit(1)
+        else:
+            loginpklpath = os.path.abspath(itchat.originInstance.hotReloadDir)
+            logstr = f"微信热启动成功\t{loginpklpath}"
+            log.info(logstr)
+            
+    return True
 
 
 def get_ip(*args):
@@ -246,6 +280,9 @@ if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
 
     # print(get_ip4alleth('wlan0'))
+    pklpath = getdirmain() / 'itchat.pkl'
+    print(pklpath)
+    isitchat(pklpath)
     print(get_ip4alleth())
     # print(get_host_ip())
     # tst4trycounttimes2()
