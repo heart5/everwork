@@ -21,6 +21,7 @@ def get_filesize(filepath):
 
 
 def istableindb(tablenin: str, dbname: str):
+    result = False
     try:
         conn = lite.connect(dbname)
         cursor = conn.cursor()
@@ -29,13 +30,14 @@ def istableindb(tablenin: str, dbname: str):
         # print(table)
         chali = [x for item in table for x in item[1:3]]
         # print(chali)
+        result = tablenin in chali
     except Exception as eee:
         log.critical(f"查询数据表是否存在时出错。{eee}")
     finally:
         if 'conn' in locals():
             conn.close()
 
-    return tablenin in chali
+    return result
 
 
 def ifnotcreate(tablen: str, createsql: str, dbn: str):
