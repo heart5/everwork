@@ -26,6 +26,7 @@ with pathmagic.context():
     from func.logme import log
     from func.sysfunc import uuid3hexstr, sha2hexstr
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
+    from func.nettools import isitchat
 
 
 def getownername():
@@ -34,16 +35,8 @@ def getownername():
     """
     # pklabpath = os.path.relpath(touchfilepath2depth(getdirmain() / 'itchat.pkl'))
     pklabpath = getdirmain() / 'itchat.pkl'
-    # print(pklabpath)
-    if itchat.originInstance.alive:
-        log.info(f"微信处于正常登录状态……")
-    else:
-        itchat.auto_login(hotReload=True, statusStorageDir=pklabpath)   #热启动你的微信sg['FromUserName']
-        if not itchat.originInstance.alive:
-            log.critical("微信未能热启动，仍处于未登陆状态，退出！")
-            sys.exit(1)
-
-    return itchat.search_friends()['NickName']
+    if isitchat(pklabpath):
+        return itchat.search_friends()['NickName']
 
 
 def getdbname(dbpath: str, ownername: str):
@@ -238,6 +231,8 @@ def showwcsimply(inputdb: pd.DataFrame):
     frdfromdb = inputdb.copy(deep=True)
     # 用nickname填充remarkname为空的记录
     frdfromdb['remarkname'] = frdfromdb[['nickname', 'remarkname']].apply(lambda x: x.nickname if x.remarkname == '' else x.remarkname, axis=1)
+    # 只保留明白含义的列值
+    frdfromdb.drop_duplicates(['nickname', 'remarkname', 'contactflag', 'signature', 'starfriend', 'province', 'city'], keep='first', inplace=True)
     # 找出最近n天内有过更改的联系人清单，n从动态配置文件中获取，不成功则设置-1
     if (wcrecentdays := getinivaluefromnote('webchat', 'wcrecentdays')):
         pass
@@ -248,8 +243,9 @@ def showwcsimply(inputdb: pd.DataFrame):
     outready = frdfromdb.loc[frdfromdb['remarkname'].isin(list(dsfortime[dsfortime > startpoint].index))]
     outready['appendtime'] = outready['appendtime'].apply(lambda x: pd.to_datetime(x).strftime("%y-%m-%d %H:%M"))
     outdone = outready.groupby(['remarkname', 'appendtime']).first().sort_index(ascending=[True, False])
+    outslim = outdone[['nickname', 'contactflag', 'signature', 'province', 'city']]
     
-    return outdone[list(outdone)[1:-1]]
+    return outslim
 
 
 if __name__ == '__main__':
