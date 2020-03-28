@@ -32,7 +32,8 @@ with pathmagic.context():
     from etc.getid import getdeviceid
     from muse.majjianghuojie import updateurllst, zhanjidesc, showzhanjiimg
     from life.wcdelay import inserttimeitem2db, showdelayimg
-    from life.wccontact import updatectdf, getctdf
+    from life.wccontact import updatectdf, getctdf, showwcsimply
+    from func.pdtools import db2img, lststr2img
 
 
 def newchatnote():
@@ -393,8 +394,12 @@ def text_reply(msg):
             simpledesc = False
         zhanji = zhanjidesc(men_wc, recentday, simpledesc)
         # 发回给查询者
-        itchat.send_msg(f"{zhanji}", toUserName=msg['FromUserName'])
-        makemsg2write(innermsg, zhanji)
+#         itchat.send_msg(f"{zhanji}", toUserName=msg['FromUserName'])
+#         makemsg2write(innermsg, zhanji)
+        imgzhanji = lststr2img(zhanji)
+        imgwcrel = os.path.relpath(imgzhanji)
+        itchat.send_image(imgwcrel, toUserName=msg['FromUserName'])
+        makemsg2write(innermsg, imgwcrel)
         # sendernick = itchat.search_friends(userName=msg['FromUserName'])
         if msg['FromUserName'].startswith('@@'):
             qun = itchat.search_chatrooms(userName=msg['FromUserName'])
@@ -438,6 +443,7 @@ def text_reply(msg):
                 imgwcdelay = showdelayimg(delaydbname)
                 imgwcdelayrel = os.path.relpath(imgwcdelay)
                 itchat.send_image(imgwcdelayrel, toUserName=msg['FromUserName'])
+                makemsg2write(innermsg, imgwcdelayrel)
                 # 延时图发送记录备档
                 return
             elif diyihang[1] == '连更':
@@ -445,11 +451,10 @@ def text_reply(msg):
                 return
             elif diyihang[1] == '连显':
                 frddfread = getctdf()
-                dftail = str(frddfread[list(frddfread)[1:]].tail(6).values)
-                toshowstr = dftail
-                print(toshowstr)
-                itchat.send_msg(msg=f"{toshowstr}")
-                makemsg2write(innermsg, toshowstr)
+                imgwc = db2img(showwcsimply(frddfread))
+                imgwcrel = os.path.relpath(imgwc)
+                itchat.send_image(imgwcrel, toUserName=msg['FromUserName'])
+                makemsg2write(innermsg, imgwcrel)
                 return
             elif diyihang[1] == '欠款':
                 qrystr = qrylst[1].strip()
