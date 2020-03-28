@@ -14,10 +14,10 @@ from configparser import ConfigParser
 from pandas.tseries.offsets import *
 from numpy import float64, int64, dtype
 from pylab import plt, FuncFormatter
-
+from PIL import Image, ImageFont, ImageDraw
+# import matplotlib.pyplot as plt
 
 import pathmagic
-
 with pathmagic.context():
     from func.evernttest import evernoteapijiayi, makenote
     from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
@@ -31,6 +31,53 @@ with pathmagic.context():
 # plot中显示中文
 # mpl.rcParams['font.sans-serif'] = ['SimHei']
 # mpl.rcParams['axes.unicode_minus'] = False
+
+def db2img(inputdf: pd.DataFrame, dpi=300):
+    dflines = inputdf.to_string(justify='left', show_dimensions=True).split('\n')
+    
+    return lststr2img(dflines, dpi=dpi)
+
+    
+def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', fontsize=12, dpi=300) :
+    if type(inputcontent) == str:
+        dflines = inputcontent.split('\n')
+    elif type(inputcontent) == list:
+        dflines = inputcontent
+    else:
+        logstr = f"传入参数类型为：\t{type(inputcontent)}，既不是str也不是list，暂不做处理返回None"
+        log.critical(logstr)
+        return 
+    
+    rows = len(dflines)
+    collenmax = max([len(x) for x in dflines])
+    print(f"行数和行最长长度（字符）：\t{(rows, collenmax)}")
+    font = ImageFont.truetype(str(fontpath), fontsize)
+    print(str(fontpath))
+    colwidthmax = max([font.getsize(x)[0] for x in dflines])
+    rowwidth = max([font.getsize(x)[1] for x in dflines])
+    print(f"行高度、所有行总高度和所有列宽度（像素）：\t{(rowwidth, rowwidth * len(dflines), colwidthmax)}")
+
+    print(f"画布宽高：\t{(colwidthmax, rowwidth * len(dflines))}")
+    im = Image.new("RGB", (colwidthmax, rowwidth * len(dflines)), (255, 255, 255))
+    dr = ImageDraw.Draw(im)
+
+    i = 0
+    for line in dflines:
+        dr.text((0, 0 + rowwidth * i), line, font=font, fill="#000000")
+        i += 1
+
+    # im.show()
+    plt.figure(dpi=dpi)
+    plt.axis('off') 
+    # font = ImageFont.truetype("../msyh.ttf", 12)
+    plt.title("联系人信息变更记录")
+    plt.imshow(im)
+    imgtmppath = dirmainpath / 'img'/ 'dbimgtmp.png'
+    plt.axis('off') 
+    plt.savefig(imgtmppath, dpi=dpi)
+    plt.close()
+    
+    return imgtmppath
 
 
 # 显示DataFrame或Series的轮廓信息
