@@ -1,4 +1,5 @@
 /.idea
+/.virtual_documents
 /data
 /databs2pro
 /img
@@ -7,6 +8,8 @@
 .ttxfolder
 *.ipynb
 *.log
+*.bak
+*.swo
 *.swp
 *.ipynb_checkpoints*
 *__pycache__*
