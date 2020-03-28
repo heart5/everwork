@@ -33,6 +33,16 @@ git config --global credential.helper store
 print("I am git.")
 ```
 
+### `git mv`移动文件
+
+<!-- #region -->
+```bash
+git mv aaa.py bbb.py
+```
+
+操作之后需要commit生效
+<!-- #endregion -->
+
 ```python
 
 ```
