@@ -14,17 +14,263 @@
 #     name: python3
 # ---
 
-# ## 火界
-
-# ### 处理sharing中的开房信息
+# ## 字符串化后输出成图片
 
 # +
-import re
-fangurl = "http://s0.lgmob.com/h5_whmj_qp/?d=217426"
+import os
+from PIL import Image, ImageFont, ImageDraw
+import matplotlib.pyplot as plt
+from pandas.plotting import register_matplotlib_converters
 
-ptnfang = re.compile("http://s0.lgmob.com/h5_whmj_qp/\\?d=(\d+)")
-re.findall(ptnfang, fangurl)[0]
+import pathmagic
+with pathmagic.context():
+    from func.first import getdirmain, dirmainpath
+    from func.pdtools import db2img, lststr2img
+    from life.wccontact import getctdf, showwcsimply
 # -
+
+lststr2img("我的祖国", dpi=100)
+# lststr2img("我的祖国", fontpath=dirmainpath / 'font' / 'msyh.ttf')
+
+outdone = showwcsimply(getctdf())
+
+outdonestr1 = outdone.to_string(justify='left', show_dimensions=True)[:1500]
+print(outdonestr1)
+print()
+outdonestr2 = str(outdone.to_string())[:1500]
+print(outdonestr2)
+
+outdone
+
+db2img(outdone)
+
+# +
+text = u"这是一段测试文本，test 123。"
+register_matplotlib_converters()
+
+font = ImageFont.truetype("../simhei.ttf", 12)
+# fontpath = str(getdirmain() / "simhei.ttf")
+# fontpath
+# os.path.abspath(fontpath)
+# font = ImageFont.load(os.path.abspath(fontpath))
+# font = ImageFont.load_default()
+text2 = "甲天下的是不是桂林？City guilin"
+font.getsize(text)
+# font.getsize(text2)
+# dr.text((10, 5), text, font=font, fill="#000000")
+# dr.text((10, 5), text, font=font, fill="#000000")
+# dr.text((10, 20), text2, font=font, fill="#000000")
+dflines = outdone[['nickname', 'sex', 'signature', 'province', 'city']].to_string(justify='left', show_dimensions=True).split('\n')
+rows = len(dflines)
+collenmax = max([len(x) for x in dflines])
+print(rows, collenmax)
+colwidthmax = max([font.getsize(x)[0] for x in dflines])
+rowwidth = max([font.getsize(x)[1] for x in dflines])
+print(rowwidth, colwidthmax)
+print(rowwidth * len(dflines), colwidthmax)
+
+im = Image.new("RGB", (colwidthmax, rowwidth * len(dflines)), (255, 255, 255))
+dr = ImageDraw.Draw(im)
+
+i = 0
+for line in dflines:
+    dr.text((0, 0 + rowwidth * i), line, font=font, fill="#000000")
+    i += 1
+
+# im.show()
+plt.figure(dpi=600)
+plt.axis('off') 
+# font = ImageFont.truetype("../msyh.ttf", 12)
+plt.title("联系人信息变更记录")
+plt.imshow(im)
+# -
+
+# ## 消息处理
+
+
+global innermsg
+@itchat.msg_register([TEXT, PICTURE, MAP, CARD, SHARING, RECORDING, ATTACHMENT, VIDEO])
+def handler_receive_msg(msg):
+    global innermsg
+    innermsg = msg
+
+
+# ## 微信延时
+
+# #### 库准备
+
+# +
+import time
+import os
+import pandas as pd
+from line_profiler import LineProfiler
+import matplotlib.pyplot as plt
+from pandas.plotting import register_matplotlib_converters
+
+import pathmagic
+with pathmagic.context():
+    from func.first import touchfilepath2depth, getdirmain
+    from life.wcdelay import getdelaydb, showdelayimg
+# -
+# #### 【显示延时图】
+
+# lp = LineProfiler()
+# # lp.add_function(getdelaydb)
+# lpwrapper = lp(showdelayimg(dbname))
+# lpwrapper()
+# lp.print_stats()
+men_wc = 'heart5'
+men_wc = '白晔峰'
+dbname = getdirmain() / 'data' / 'db' / f"wcdelay_{men_wc}.db"
+showdelayimg(dbname)
+
+
+# #### 画图函数
+
+# +
+def showdelayimg(dbname: str, jingdu: int = 300):
+    '''
+    show the img for wcdelay 
+    '''
+    jujinm, timedf = getdelaydb(dbname)
+#     timedf.iloc[-1]
+    print(f"记录新鲜度：出炉了{jujinm}分钟")
+
+    register_matplotlib_converters()
+
+    plt.figure(figsize=(36, 12))
+    plt.style.use("ggplot")  # 使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
+
+    def drawdelayimg(pos, timedfinner):
+        # 画出左边界
+        tmin = timedfinner.index.min()
+        tmax = timedfinner.index.max()
+        shicha = tmax - tmin
+        bianjie = int(shicha.total_seconds() / 40)
+        print(f"左边界：{bianjie}秒，也就是大约{int(bianjie / 60)}分钟")
+        # plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
+        plt.subplot(pos)
+        plt.xlim(xmin=tmin)
+        plt.xlim(xmax=tmax + pd.Timedelta(f"{bianjie}s"))
+        # plt.vlines(tmin, 0, int(timedf.max() / 2))
+        plt.vlines(tmax, 0, int(timedfinner.max() / 2))
+
+        # 绘出主图和标题
+        plt.scatter(timedfinner.index, timedfinner, s=timedfinner)
+        plt.scatter(timedfinner[timedfinner == 0].index, timedfinner[timedfinner == 0], s=0.5)
+        plt.title("信息频率和延时")
+
+    drawdelayimg(211, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')])
+    drawdelayimg(212, timedf)
+        
+    imgwcdelaypath = touchfilepath2depth(
+        getdirmain() / "img" / "webchat" / "wcdelay.png"
+    )
+
+    plt.savefig(imgwcdelaypath, dpi=jingdu)
+    print(os.path.relpath(imgwcdelaypath))
+
+    return imgwcdelaypath
+
+showdelayimg(dbname)
+# -
+
+pd.to_datetime([1, 2, 3], unit='D', origin=pd.Timestamp('1976-10-6'))
+
+jujinm, timedf = getdelaydb(dbname)
+plt.figure(figsize=(12, 6))
+weiyi = 20
+plt.ylim(ymin=(-1) * weiyi)
+plt.ylim(ymax=timedf.max().values[0] + weiyi)
+# plt.plot(timedf[::200])
+plt.plot(timedf)
+
+print(timedf.shape[0])
+itemds = pd.Series([timedf.iloc[-1].values[0]], index=[pd.to_datetime(time.ctime())], name='delay')
+print(itemds.dtypes)
+print(itemds)
+pd.concat([timedf, itemds])
+
+print(time.time())
+print(int(time.time() * 1000))
+
+# +
+import pandas as pd
+import time
+
+endds = pd.Series()
+print(timedf.shape[0])
+timedf.append(pd.DataFrame([timedf.iloc[-1]], index=[pd.to_datetime(time.ctime())]))
+print(timedf.shape[0])
+# -
+
+plt.scatter(timedf.index, timedf)
+
+
+# +
+def delitemfromdb(key):
+    conn = lite.connect(dbname)
+    cursor = conn.cursor()
+    cursor.execute(f"delete from {tablename} where time= {key}")
+    conn.commit()
+    log.info(f"删除\ttime为\t{key}\t的数据记录，{tablename} in {dbname}")
+    conn.close()
+    
+# delitemfromdb(1582683260)
+
+
+# -
+
+
+def inserttimeitem2db(timestr: str):
+    dbname = touchfilepath2depth(getdirmain() / 'data' / 'db' / 'wcdelay.db')
+    conn = lite.connect(dbname)
+    cursor = conn.cursor()
+    tablename = 'wcdelay'
+    def istableindb(tablename: str, dbname: str):
+        cursor.execute("select * from sqlite_master where type='table'")
+        table = cursor.fetchall()
+        print(table)
+        chali = [x for item in table for x in item[1:3]]
+        print(chali)
+
+        return tablename in chali
+    
+    if not istableindb(tablename, dbname):
+        cursor.execute(f'create table {tablename} (time int primary key, delay int)')
+        conn.commit()
+        print(f"数据表：\t{tablename} 被创建成功。")
+        
+    timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
+    timest = time.mktime(timetup)
+    elsmin = (int(time.time()) - time.mktime(ttuple)) // 60
+    cursor.execute(f"insert into {tablename} values(?, ?)", (timest, elsmin))
+    print(f"数据成功写入{dbname}\t{(timest, elsmin)}")
+    conn.commit()
+    conn.close()
+
+
+import datetime
+time.localtime(1582683320)
+
+inserttimeitem2db('2020-02-26 10:15:20')
+
+timestr = '2020-02-26 10:14:20'
+timetuple = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
+timetupledt = datetime.datetime(*timetuple[:6])
+import pandas as pd
+dts = pd.to_datetime(timestr)
+
+ttuple= time.strptime(timestr,'%Y-%m-%d %H:%M:%S')
+time.mktime(ttuple)
+(int(time.time()) - time.mktime(ttuple)) // 60
+
+time.localtime(timestr)
+
+date_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+dte = pd.to_datetime(date_str)
+dtd = dte - dts
+dtd.total_seconds() // 60
 
 # ## 联系人处理
 
@@ -54,12 +300,13 @@ from itchat.content import *
 import pathmagic
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
+    from func.evernttest import getinivaluefromnote
     from life.wcdelay import getdelaydb, showdelayimg
     from func.litetools import ifnotcreate, showtablesindb, droptablefromdb, compact_sqlite3_db
     from func.wrapfuncs import timethis, logit
     from func.logme import log
     from func.sysfunc import uuid3hexstr, sha2hexstr
-    from life.wccontact import updatectdf, getctdf, getownername
+    from life.wccontact import updatectdf, getctdf, getownername, showwcsimply
 # -
 
 # #### 函数准备
@@ -139,19 +386,23 @@ sha3hexstr('微信' *10000000 +"titch")
 # ##### 更新记录集
 
 # +
+import pandas as pd
+
 import pathmagic
 with pathmagic.context():
     from life.wccontact import updatectdf, getctdf
-    
-updatectdf()
+    from func.first import getdirmain, touchfilepath2depth
+    from func.evernttest import getinivaluefromnote
 # -
+
+updatectdf()
 
 # ##### 提取所有数据用于分析（留个备份）
 
 frdfromdbrecords = getctdf()
 frdfromdbrecords.shape[0]
 frdfromdbrecords.dtypes
-frdfromdbforfix = frdfromdbrecords.copy(deep=True)
+# frdfromdbforfix = frdfromdbrecords.copy(deep=True)
 
 
 # + [markdown] toc-hr-collapsed=true toc-nb-collapsed=true
@@ -162,20 +413,22 @@ frdfromdbforfix = frdfromdbrecords.copy(deep=True)
 frdfromdb = frdfromdbrecords.copy(deep=True)
 frdfromdb
 
-# + [markdown] toc-hr-collapsed=true toc-nb-collapsed=true jupyter={"source_hidden": true}
+# + [markdown] toc-hr-collapsed=true toc-nb-collapsed=true jupyter={"source_hidden": true} toc-hr-collapsed=true toc-nb-collapsed=true
 # #### *剔除无效数据，只保留有用的历史记录，并回填数据库中相应的数据表*
-# -
 
+# + [markdown] jupyter={"source_hidden": true}
 # ##### 抛开变动列（contactuuid、appendtime和imguuid）根据前列去重，保留最早的记录
 
+# + jupyter={"source_hidden": true, "outputs_hidden": true}
 list(frdfromdb)[1:-2]
 frddfafterdropduplites = frdfromdb.drop_duplicates(list(frdfromdb)[1:-2], keep='first')
 frddfafterdropduplites
 
 
+# + [markdown] jupyter={"source_hidden": true}
 # ##### 更新contactuuid
 
-# +
+# + jupyter={"source_hidden": true, "outputs_hidden": true}
 def dfsha2udpatecontactuuid(inputdf: pd.DataFrame):
     # ['contactuuid', 'NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord', 'appendtime', 'imguuid']
     frddf2append = inputdf.copy()
@@ -190,18 +443,21 @@ def dfsha2udpatecontactuuid(inputdf: pd.DataFrame):
 
 dfcleanafterupdatecontactuuid = dfsha2udpatecontactuuid(frddfafterdropduplites)
 dfcleanafterupdatecontactuuid
-# -
 
+# + [markdown] jupyter={"source_hidden": true}
 # ##### 【删除该数据表，按结构重构】
 
+# + [markdown] jupyter={"source_hidden": true}
 # ##### 回填数据
 
+# + jupyter={"source_hidden": true}
 owner = getownername()
 dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wccontact_{owner}.db")
 dftablename = 'wccontact'
 conn = lite.connect(dbname)
 dfcleanafterupdatecontactuuid.to_sql(dftablename, con=conn, if_exists='append', index=False)
 conn.close()
+# -
 
 # #### 处理结果并输出简版的结果
 
@@ -212,29 +468,29 @@ frdfromdb['remarkname'] = frdfromdb[['nickname', 'remarkname']].apply(lambda x: 
 outdfraw = frdfromdb.copy(deep=True)
 outdfraw
 
-# ##### ~~过滤出有更改（appendtime有不止一个记录）的记录~~
+# ##### 暂时只保留能看懂的列值
 
-# + [markdown] jupyter={"source_hidden": true}
-# 逻辑失误，要先查找n天内有痕迹的记录就行，不用刻意判断是否有多条记录（当然，这个在数据初始化刚开始产生新记录时刻意降低一些冗余显示，但那又是另外一套逻辑了）
-
-# + jupyter={"source_hidden": true, "outputs_hidden": true}
-havechanged = outdfraw.groupby('remarkname').nunique()['appendtime'] > 2
-# havechanged
-hcds = havechanged[havechanged]
-# hcds.index
-outdfmulti = outdfraw.loc[outdfraw['remarkname'].isin(list(hcds.index))].copy(deep=True)
-outdfmulti
-# -
+outdfraw.drop_duplicates(['nickname', 'remarkname', 'contactflag', 'signature', 'starfriend', 'province', 'city'], keep='first', inplace=True)
+outdfraw
 
 # ##### 过滤出最近一次修改是n天内发生的更改记录
 
+# +
 id(outdfraw)
 outdfmulti = outdfraw.copy(deep=True)
-startpoint = pd.Timestamp.now() + pd.Timedelta('-1d')
+
+# 找出最近n天内有过更改的联系人清单，n从动态配置文件中获取，不成功则设置-1
+if (wcrecentdays := getinivaluefromnote('webchat', 'wcrecentdays')):
+    pass
+else:
+    wcrecentdays = -1
+wcrecentdays
+startpoint = pd.Timestamp.now() + pd.Timedelta(f'{wcrecentdays}d')
 startpoint
 dsfortime = outdfmulti.groupby('remarkname').last()['appendtime']
 outready = outdfmulti.loc[outdfmulti['remarkname'].isin(list(dsfortime[dsfortime > startpoint].index))]
 outready
+# -
 
 # ##### 排序输出结果
 
@@ -258,9 +514,13 @@ outready
 #     7. 102439
 #     
 
+outready['appendtime'] = outready['appendtime'].apply(lambda x: pd.to_datetime(x).strftime("%y-%m-%d %H:%M"))
 outclean = outready.groupby(['remarkname', 'appendtime']).first().sort_index(ascending=[True, False])
 # outclean.dtypes
-outclean[list(outclean)[1:-1]]
+outdone = outclean[list(outclean)[1:-1]]
+outdone
+
+# ##### 各种测试
 
 # frdfromdb.groupby('contactflag').agg(['unique'])
 frdfromdb.groupby('contactflag').nunique()
@@ -270,6 +530,20 @@ frdfromdb[frdfromdb.contactflag == 515]
 frdfromdb[frdfromdb.remarkname == '张玉']
 frdfromdb[frdfromdb.nickname == 'KI']
 frdfromdb[frdfromdb.starfriend == 1]
+
+# ##### ~~过滤出有更改（appendtime有不止一个记录）的记录~~
+
+# + [markdown] jupyter={"source_hidden": true}
+# 逻辑失误，要先查找n天内有痕迹的记录就行，不用刻意判断是否有多条记录（当然，这个在数据初始化刚开始产生新记录时刻意降低一些冗余显示，但那又是另外一套逻辑了）
+
+# + jupyter={"outputs_hidden": true, "source_hidden": true}
+havechanged = outdfraw.groupby('remarkname').nunique()['appendtime'] > 2
+# havechanged
+hcds = havechanged[havechanged]
+# hcds.index
+outdfmulti = outdfraw.loc[outdfraw['remarkname'].isin(list(hcds.index))].copy(deep=True)
+outdfmulti
+# -
 
 # ### 处理联系人信息入库
 
@@ -881,19 +1155,3 @@ print(lena.shape) #(512, 512, 3)
 plt.imshow(lena) # 显示图片
 plt.axis('off') # 不显示坐标轴
 plt.show()
-# -
-# ## 消息处理
-
-
-global innermsg
-@itchat.msg_register([TEXT, PICTURE, MAP, CARD, SHARING, RECORDING, ATTACHMENT, VIDEO])
-def handler_receive_msg(msg):
-    global innermsg
-    innermsg = msg
-
-
-itchat.run()
-
-innermsg
-
-
