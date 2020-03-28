@@ -18,183 +18,6 @@
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_node_interactivity = "all"
 
-# ### 微信延时
-
-# #### 库准备
-
-# +
-import time
-import os
-import pandas as pd
-from line_profiler import LineProfiler
-import matplotlib.pyplot as plt
-from pandas.plotting import register_matplotlib_converters
-
-import pathmagic
-with pathmagic.context():
-    from func.first import touchfilepath2depth, getdirmain
-    from life.wcdelay import getdelaydb, showdelayimg
-# -
-# #### 【显示延时图】
-
-# lp = LineProfiler()
-# # lp.add_function(getdelaydb)
-# lpwrapper = lp(showdelayimg(dbname))
-# lpwrapper()
-# lp.print_stats()
-men_wc = 'heart5'
-men_wc = '白晔峰'
-dbname = getdirmain() / 'data' / 'db' / f"wcdelay_{men_wc}.db"
-showdelayimg(dbname)
-
-
-# #### 画图函数
-
-# +
-def showdelayimg(dbname: str, jingdu: int = 300):
-    '''
-    show the img for wcdelay 
-    '''
-    jujinm, timedf = getdelaydb(dbname)
-#     timedf.iloc[-1]
-    print(f"记录新鲜度：出炉了{jujinm}分钟")
-
-    register_matplotlib_converters()
-
-    plt.figure(figsize=(36, 12))
-    plt.style.use("ggplot")  # 使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
-
-    def drawdelayimg(pos, timedfinner):
-        # 画出左边界
-        tmin = timedfinner.index.min()
-        tmax = timedfinner.index.max()
-        shicha = tmax - tmin
-        bianjie = int(shicha.total_seconds() / 40)
-        print(f"左边界：{bianjie}秒，也就是大约{int(bianjie / 60)}分钟")
-        # plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
-        plt.subplot(pos)
-        plt.xlim(xmin=tmin)
-        plt.xlim(xmax=tmax + pd.Timedelta(f"{bianjie}s"))
-        # plt.vlines(tmin, 0, int(timedf.max() / 2))
-        plt.vlines(tmax, 0, int(timedfinner.max() / 2))
-
-        # 绘出主图和标题
-        plt.scatter(timedfinner.index, timedfinner, s=timedfinner)
-        plt.scatter(timedfinner[timedfinner == 0].index, timedfinner[timedfinner == 0], s=0.5)
-        plt.title("信息频率和延时")
-
-    drawdelayimg(211, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')])
-    drawdelayimg(212, timedf)
-        
-    imgwcdelaypath = touchfilepath2depth(
-        getdirmain() / "img" / "webchat" / "wcdelay.png"
-    )
-
-    plt.savefig(imgwcdelaypath, dpi=jingdu)
-    print(os.path.relpath(imgwcdelaypath))
-
-    return imgwcdelaypath
-
-showdelayimg(dbname)
-# -
-
-pd.to_datetime([1, 2, 3], unit='D', origin=pd.Timestamp('1976-10-6'))
-
-jujinm, timedf = getdelaydb(dbname)
-plt.figure(figsize=(12, 6))
-weiyi = 20
-plt.ylim(ymin=(-1) * weiyi)
-plt.ylim(ymax=timedf.max().values[0] + weiyi)
-# plt.plot(timedf[::200])
-plt.plot(timedf)
-
-print(timedf.shape[0])
-itemds = pd.Series([timedf.iloc[-1].values[0]], index=[pd.to_datetime(time.ctime())], name='delay')
-print(itemds.dtypes)
-print(itemds)
-pd.concat([timedf, itemds])
-
-print(time.time())
-print(int(time.time() * 1000))
-
-# +
-import pandas as pd
-import time
-
-endds = pd.Series()
-print(timedf.shape[0])
-timedf.append(pd.DataFrame([timedf.iloc[-1]], index=[pd.to_datetime(time.ctime())]))
-print(timedf.shape[0])
-# -
-
-plt.scatter(timedf.index, timedf)
-
-
-# +
-def delitemfromdb(key):
-    conn = lite.connect(dbname)
-    cursor = conn.cursor()
-    cursor.execute(f"delete from {tablename} where time= {key}")
-    conn.commit()
-    log.info(f"删除\ttime为\t{key}\t的数据记录，{tablename} in {dbname}")
-    conn.close()
-    
-# delitemfromdb(1582683260)
-
-
-# -
-
-
-def inserttimeitem2db(timestr: str):
-    dbname = touchfilepath2depth(getdirmain() / 'data' / 'db' / 'wcdelay.db')
-    conn = lite.connect(dbname)
-    cursor = conn.cursor()
-    tablename = 'wcdelay'
-    def istableindb(tablename: str, dbname: str):
-        cursor.execute("select * from sqlite_master where type='table'")
-        table = cursor.fetchall()
-        print(table)
-        chali = [x for item in table for x in item[1:3]]
-        print(chali)
-
-        return tablename in chali
-    
-    if not istableindb(tablename, dbname):
-        cursor.execute(f'create table {tablename} (time int primary key, delay int)')
-        conn.commit()
-        print(f"数据表：\t{tablename} 被创建成功。")
-        
-    timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
-    timest = time.mktime(timetup)
-    elsmin = (int(time.time()) - time.mktime(ttuple)) // 60
-    cursor.execute(f"insert into {tablename} values(?, ?)", (timest, elsmin))
-    print(f"数据成功写入{dbname}\t{(timest, elsmin)}")
-    conn.commit()
-    conn.close()
-
-
-import datetime
-time.localtime(1582683320)
-
-inserttimeitem2db('2020-02-26 10:15:20')
-
-timestr = '2020-02-26 10:14:20'
-timetuple = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
-timetupledt = datetime.datetime(*timetuple[:6])
-import pandas as pd
-dts = pd.to_datetime(timestr)
-
-ttuple= time.strptime(timestr,'%Y-%m-%d %H:%M:%S')
-time.mktime(ttuple)
-(int(time.time()) - time.mktime(ttuple)) // 60
-
-time.localtime(timestr)
-
-date_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-dte = pd.to_datetime(date_str)
-dtd = dte - dts
-dtd.total_seconds() // 60
-
 # ### 火界麻将
 
 # #### 库准备
@@ -405,7 +228,7 @@ for id in rstdf[rstdf['score'] == highscore]['roomid'].values:
 excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
 recorddf = pd.read_excel(excelpath)
 rstdf = recorddf.copy(deep=True)
-rstdf[rstdf.roomid == 346820]
+rstdf.sort_values(['time'], ascending=False)
 # rstdf
 
 # ##### 根据guestid和guest分组，找出对不上的信息
@@ -417,7 +240,7 @@ gidds
 
 # ##### 手工修复guest和guestid对不上的信息记录
 
-fixguestid = 1083452
+fixguestid = 1083558
 fixguest = '普任鹏'
 needdf = rstdf[rstdf.guestid == fixguestid]
 print(needdf)
