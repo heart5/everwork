@@ -19,7 +19,7 @@ from PIL import Image, ImageFont, ImageDraw
 
 import pathmagic
 with pathmagic.context():
-    from func.evernttest import evernoteapijiayi, makenote
+    from func.evernttest import evernoteapijiayi, makenote, getinivaluefromnote
     from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
     from func.logme import log
     from func.nettools import trycounttimes2
@@ -32,13 +32,14 @@ with pathmagic.context():
 # mpl.rcParams['font.sans-serif'] = ['SimHei']
 # mpl.rcParams['axes.unicode_minus'] = False
 
-def db2img(inputdf: pd.DataFrame, dpi=300):
+
+def db2img(inputdf: pd.DataFrame, title=None, showincell=True, fontsize=12, dpi=300, debug=False):
     dflines = inputdf.to_string(justify='left', show_dimensions=True).split('\n')
     
-    return lststr2img(dflines, dpi=dpi)
+    return lststr2img(dflines, title=title, dpi=dpi, showincell=showincell, fontsize=fontsize, debug=debug)
 
-    
-def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', fontsize=12, dpi=300) :
+
+def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=None, showincell=False, fontsize=12, dpi=300, debug=False) :
     if type(inputcontent) == str:
         dflines = inputcontent.split('\n')
     elif type(inputcontent) == list:
@@ -57,7 +58,7 @@ def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', fontsiz
     rowwidth = max([font.getsize(x)[1] for x in dflines])
     print(f"行高度、所有行总高度和所有列宽度（像素）：\t{(rowwidth, rowwidth * len(dflines), colwidthmax)}")
 
-    print(f"画布宽高：\t{(colwidthmax, rowwidth * len(dflines))}")
+    print(f"画布宽高（像素）：\t{(colwidthmax, rowwidth * len(dflines))}")
     im = Image.new("RGB", (colwidthmax, rowwidth * len(dflines)), (255, 255, 255))
     dr = ImageDraw.Draw(im)
 
@@ -66,16 +67,26 @@ def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', fontsiz
         dr.text((0, 0 + rowwidth * i), line, font=font, fill="#000000")
         i += 1
 
+    if not debug:
+        if (notedpi := getinivaluefromnote('webchat', 'imgdpi')):
+            dpi = notedpi
+        
     # im.show()
-    plt.figure(dpi=dpi)
+    figdefaultdpi = plt.rcParams.get('figure.dpi')
+    figwinchs = round(colwidthmax * (dpi / figdefaultdpi) / figdefaultdpi / 10, 3)
+    fighinchs = round(rowwidth * len(dflines) * (dpi / figdefaultdpi) / figdefaultdpi / 10, 3)
+    print(f"输出图片的画布宽高（英寸）：\t{(figwinchs, fighinchs)}")
+    plt.figure(figsize=(figwinchs, fighinchs),dpi=dpi)
     plt.axis('off') 
     # font = ImageFont.truetype("../msyh.ttf", 12)
-    plt.title("联系人信息变更记录")
+    if title:
+        plt.title(title)
     plt.imshow(im)
     imgtmppath = dirmainpath / 'img'/ 'dbimgtmp.png'
     plt.axis('off') 
-    plt.savefig(imgtmppath, dpi=dpi)
-    plt.close()
+    plt.savefig(imgtmppath)
+    if not showincell:
+        plt.close()
     
     return imgtmppath
 
