@@ -18,6 +18,7 @@
 
 # +
 import os
+import pandas as pd
 from PIL import Image, ImageFont, ImageDraw
 import matplotlib.pyplot as plt
 from pandas.plotting import register_matplotlib_converters
@@ -29,8 +30,21 @@ with pathmagic.context():
     from life.wccontact import getctdf, showwcsimply
 # -
 
-lststr2img("我的祖国", dpi=100)
-# lststr2img("我的祖国", fontpath=dirmainpath / 'font' / 'msyh.ttf')
+# lststr2img("我的祖国", showincell=True)
+lststr2img("我的祖国", fontpath=dirmainpath / 'font' / 'msyh.ttf')
+
+# ### `plt`参数默认值
+
+fig = plt.figure()
+size = fig.get_size_inches()*fig.dpi # size in pixels
+size[1]
+
+plt.rcParams.get('figure.figsize')
+plt.rcParams.get('figure.dpi')
+
+# + jupyter={"outputs_hidden": true}
+plt.rcParams
+# -
 
 outdone = showwcsimply(getctdf())
 
@@ -38,6 +52,7 @@ outdonestr1 = outdone.to_string(justify='left', show_dimensions=True)[:1500]
 print(outdonestr1)
 print()
 outdonestr2 = str(outdone.to_string())[:1500]
+outdonestr2
 print(outdonestr2)
 
 outdone
@@ -48,7 +63,7 @@ db2img(outdone)
 text = u"这是一段测试文本，test 123。"
 register_matplotlib_converters()
 
-font = ImageFont.truetype("../simhei.ttf", 12)
+font = ImageFont.truetype("../font/simhei.ttf", 12)
 # fontpath = str(getdirmain() / "simhei.ttf")
 # fontpath
 # os.path.abspath(fontpath)
@@ -60,7 +75,7 @@ font.getsize(text)
 # dr.text((10, 5), text, font=font, fill="#000000")
 # dr.text((10, 5), text, font=font, fill="#000000")
 # dr.text((10, 20), text2, font=font, fill="#000000")
-dflines = outdone[['nickname', 'sex', 'signature', 'province', 'city']].to_string(justify='left', show_dimensions=True).split('\n')
+dflines = outdone.to_string(justify='left', show_dimensions=True).split('\n')
 rows = len(dflines)
 collenmax = max([len(x) for x in dflines])
 print(rows, collenmax)
@@ -83,7 +98,73 @@ plt.axis('off')
 # font = ImageFont.truetype("../msyh.ttf", 12)
 plt.title("联系人信息变更记录")
 plt.imshow(im)
+
+
 # -
+
+def lststr2img_test(inputcontent, fontpath=dirmainpath / 'font' / 'simhei.ttf', title=None, showincell=False, fontsize=12, dpi=300) :
+    if type(inputcontent) == str:
+        dflines = inputcontent.split('\n')
+    elif type(inputcontent) == list:
+        dflines = inputcontent
+    else:
+        logstr = f"传入参数类型为：\t{type(inputcontent)}，既不是str也不是list，暂不做处理返回None"
+        log.critical(logstr)
+        return 
+    
+    rows = len(dflines)
+    collenmax = max([len(x) for x in dflines])
+    print(f"行数和行最长长度（字符）：\t{(rows, collenmax)}")
+    font = ImageFont.truetype(str(fontpath), fontsize)
+    print(str(fontpath))
+    colwidthmax = max([font.getsize(x)[0] for x in dflines])
+    rowwidth = max([font.getsize(x)[1] for x in dflines])
+    print(f"行高度、所有行总高度和所有列宽度（像素）：\t{(rowwidth, rowwidth * len(dflines), colwidthmax)}")
+
+    print(f"画布宽高（像素）：\t{(colwidthmax, rowwidth * len(dflines))}")
+    im = Image.new("RGB", (colwidthmax, rowwidth * len(dflines)), (255, 255, 255))
+    dr = ImageDraw.Draw(im)
+
+    i = 0
+    for line in dflines:
+        dr.text((0, 0 + rowwidth * i), line, font=font, fill="#000000")
+        i += 1
+
+    # im.show()
+    figdefaultdpi = plt.rcParams.get('figure.dpi')
+    figwinchs = round(colwidthmax * (dpi / figdefaultdpi) / figdefaultdpi / 10, 3)
+    fighinchs = round(rowwidth * len(dflines) * (dpi / figdefaultdpi) / figdefaultdpi / 10, 3)
+    print(f"输出图片的画布宽高（英寸）：\t{(figwinchs, fighinchs)}")
+    plt.figure(figsize=(figwinchs, fighinchs),dpi=dpi)
+    plt.axis('off') 
+    # font = ImageFont.truetype("../msyh.ttf", 12)
+    if title:
+        plt.title(title)
+    plt.imshow(im)
+    imgtmppath = dirmainpath / 'img'/ 'dbimgtmp.png'
+    plt.axis('off') 
+    plt.savefig(imgtmppath)
+    if not showincell:
+        plt.close()
+    
+    return imgtmppath
+
+
+# + jupyter={"outputs_hidden": true}
+samplestr = "今天是三月最后一天。据说4月8日，也就是壹周之后，武汉要解封了！"
+lststr2img_test(samplestr, fontsize=12, showincell=True)
+lststr2img_test(samplestr, fontsize=12, showincell=True, dpi=72)
+
+
+# -
+
+def db2img_test(inputdf: pd.DataFrame, title=None, showincell=True, fontsize=12, dpi=300):
+    dflines = inputdf.to_string(justify='left', show_dimensions=True).split('\n')
+    
+    return lststr2img_test(dflines, title=title, dpi=dpi, showincell=showincell, fontsize=fontsize)
+
+
+db2img_test(outdone, dpi=600)
 
 # ## 消息处理
 
@@ -103,6 +184,7 @@ def handler_receive_msg(msg):
 import time
 import os
 import pandas as pd
+import sqlite3 as lite
 from line_profiler import LineProfiler
 import matplotlib.pyplot as plt
 from pandas.plotting import register_matplotlib_converters
@@ -111,6 +193,7 @@ import pathmagic
 with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain
     from life.wcdelay import getdelaydb, showdelayimg
+    from func.litetools import droptablefromdb, ifnotcreate
 # -
 # #### 【显示延时图】
 
@@ -124,6 +207,48 @@ men_wc = '白晔峰'
 dbname = getdirmain() / 'data' / 'db' / f"wcdelay_{men_wc}.db"
 showdelayimg(dbname)
 
+# #### 重构数据表
+
+# ##### 重构数据结构
+
+# ###### 构建新数据表
+
+tablename_wcdelay_new = "wcdelaynew"
+csql = f"create table if not exists {tablename_wcdelay_new} (id INTEGER PRIMARY KEY AUTOINCREMENT, msgtime int, delay int)"
+ifnotcreate(tablename_wcdelay_new, csql, dbname)
+
+# ###### 【删除新表】用于新数据表构建时的调试
+
+droptablefromdb(dbname, tablename=tablename_wcdelay_new, confirm=True)
+
+# ###### 从原数据表读入所有数据写入新的数据表
+
+fresh, dfold = getdelaydb(dbname, tablename="wcdelay")
+
+# 去掉附加的最后一条记录（提取数据时的时间和实际的最后一条延时），重置index回数据列
+dffromold = dfold.iloc[:-1, :].reset_index()
+
+# 赋值列名，匹配数据表的列名
+dffromold.columns = ['msgtime', 'delay']
+dffromold
+dffromold.dtypes
+
+from datetime import datetime
+dfolddone = dffromold.copy(deep=True)
+dfolddone['msgtime'] = dfolddone['msgtime'].apply(lambda x: datetime.timestamp(x))
+dfolddone
+print(f"{dfolddone.iloc[0, 0]}")
+
+# +
+dbname
+# conn.close()
+conn = lite.connect(dbname)
+
+dfolddone.to_sql(tablename_wcdelay_new, con=conn, if_exists='replace', index=False)
+conn.close()
+
+
+# -
 
 # #### 画图函数
 
@@ -175,6 +300,8 @@ def showdelayimg(dbname: str, jingdu: int = 300):
 showdelayimg(dbname)
 # -
 
+# #### 函数学习调试
+
 pd.to_datetime([1, 2, 3], unit='D', origin=pd.Timestamp('1976-10-6'))
 
 jujinm, timedf = getdelaydb(dbname)
@@ -207,6 +334,10 @@ print(timedf.shape[0])
 plt.scatter(timedf.index, timedf)
 
 
+# #### 功能函数
+
+# ##### 删除条目
+
 # +
 def delitemfromdb(key):
     conn = lite.connect(dbname)
@@ -221,6 +352,100 @@ def delitemfromdb(key):
 
 # -
 
+
+# ##### 插入条目
+
+# ###### **新库函数3.0**
+
+def inserttimeitem2db(dbname: str, timestampinput: int):
+    '''
+    insert timestamp to wcdelay db whose table name is wcdelay
+    '''
+    tablename = "wcdelaynew"
+    checkwcdelaytable(dbname, tablename)
+
+    # timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
+    # timest = time.mktime(timetup)
+    elsmin = (int(time.time()) - timestampinput) // 60
+    conn = False
+    try:
+        conn = lite.connect(dbname)
+        cursor = conn.cursor()
+        cursor.execute(
+            f"insert into {tablename} values(?, ?)", (timestampinput, elsmin)
+        )
+#         print(f"数据成功写入{dbname}\t{(timestampinput, elsmin)}")
+        conn.commit()
+    except lite.IntegrityError as lie:
+        logstr = f"键值重复错误\t{lie}"
+        log.critical(logstr)
+    finally:
+        if conn:
+            conn.close()
+
+
+
+def checkwcdelaytable(dbname: str, tablename: str):
+    """
+    检查和dbname（绝对路径）相对应的延时数据表是否已经构建，设置相应的ini值避免重复打开关闭数据库文件进行检查
+    """
+    if not (wcdelaycreated := getcfpoptionvalue('everwebchat',
+                                                os.path.abspath(dbname), 'wcdelay')):
+        print(wcdelaycreated)
+        csql = f"create table if not exists {tablename} (id INTEGER PRIMARY KEY AUTOINCREMENT, msgtime datatime, delay int)"
+        ifnotcreate(tablename, csql, dbname)
+        setcfpoptionvalue('everwebchat', os.path.abspath(dbname), 'wcdelay',
+                          str(True))
+        logstr = f"数据表{tablename}在数据库{dbname}中构建成功"
+        log.info(logstr)
+
+
+# ###### ~~老库函数2.0~~
+
+def checkwcdelaytable(dbname: str, tablename: str):
+    """
+    检查和dbname（绝对路径）相对应的延时数据表是否已经构建，设置相应的ini值避免重复打开关闭数据库文件进行检查
+    """
+    if not (wcdelaycreated := getcfpoptionvalue('everwebchat',
+                                                os.path.abspath(dbname), 'wcdelay')):
+        print(wcdelaycreated)
+        csql = f"create table if not exists {tablename} (time int primary key, delay int)"
+        ifnotcreate(tablename, csql, dbname)
+        setcfpoptionvalue('everwebchat', os.path.abspath(dbname), 'wcdelay',
+                          str(True))
+        logstr = f"数据表{tablename}在数据库{dbname}中构建成功"
+        log.info(logstr)
+
+
+def inserttimeitem2db(dbname: str, timestampinput: int):
+    '''
+    insert timestamp to wcdelay db whose table name is wcdelay
+    '''
+    tablename = "wcdelay"
+    checkwcdelaytable(dbname, tablename)
+
+    # timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
+    # timest = time.mktime(timetup)
+    elsmin = (int(time.time()) - timestampinput) // 60
+    conn = False
+    try:
+        conn = lite.connect(dbname)
+        cursor = conn.cursor()
+        cursor.execute(
+            f"insert into {tablename} values(?, ?)", (timestampinput, elsmin)
+        )
+#         print(f"数据成功写入{dbname}\t{(timestampinput, elsmin)}")
+        conn.commit()
+    except lite.IntegrityError as lie:
+        logstr = f"键值重复错误\t{lie}"
+        log.critical(logstr)
+    finally:
+        if conn:
+            conn.close()
+    conn.close()
+
+
+# ###### ~~老库函数1.0~~
 
 def inserttimeitem2db(timestr: str):
     dbname = touchfilepath2depth(getdirmain() / 'data' / 'db' / 'wcdelay.db')
