@@ -25,7 +25,7 @@ def checkwcdelaytable(dbname: str, tablename: str):
     if not (wcdelaycreated := getcfpoptionvalue('everwebchat',
                                                 os.path.abspath(dbname), 'wcdelay')):
         print(wcdelaycreated)
-        csql = f"create table if not exists {tablename} (time int primary key, delay int)"
+        csql = f"create table if not exists {tablename} (id INTEGER PRIMARY KEY AUTOINCREMENT, msgtime int, delay int)"
         ifnotcreate(tablename, csql, dbname)
         setcfpoptionvalue('everwebchat', os.path.abspath(dbname), 'wcdelay',
                           str(True))
@@ -37,7 +37,7 @@ def inserttimeitem2db(dbname: str, timestampinput: int):
     '''
     insert timestamp to wcdelay db whose table name is wcdelay
     '''
-    tablename = "wcdelay"
+    tablename = "wcdelaynew"
     checkwcdelaytable(dbname, tablename)
 
     # timetup = time.strptime(timestr, "%Y-%m-%d %H:%M:%S")
@@ -60,11 +60,11 @@ def inserttimeitem2db(dbname: str, timestampinput: int):
             conn.close()
 
 
-def getdelaydb(dbname: str):
+def getdelaydb(dbname: str, tablename="wcdelaynew"):
     """
     从延时数据表提取数据（DataFrame），返回最近延时值和df
     """
-    tablename = "wcdelay"
+#     tablename = "wcdelaynew"
     checkwcdelaytable(dbname, tablename)
 
     conn = lite.connect(dbname)
@@ -72,33 +72,44 @@ def getdelaydb(dbname: str):
     cursor.execute(f"select * from {tablename}")
     table = cursor.fetchall()
     conn.close()
+    
+    tmpdf = pd.DataFrame(table)
+    if len(tmpdf.columns) == 3:
+        timedf = pd.DataFrame(table, columns=["id", "time", "delay"], index='id')
+        timedf["time"] = timedf["time"].apply(
+            lambda x: pd.to_datetime(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(x)))
+        )
+        timdfgrp = timedf.groupby('time').sum()
+    #     timedf.set_index("time", inplace=True)
+    elif len(tmpdf.columns) == 2:
+        timedf = pd.DataFrame(table, columns=["time", "delay"])
+        timedf["time"] = timedf["time"].apply(
+            lambda x: pd.to_datetime(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(x)))
+        )
+        timedfgrp = timedf.set_index("time")     
+    else:
+        return
 
-    timedf = pd.DataFrame(table, columns=["time", "delay"])
-    timedf["time"] = timedf["time"].apply(
-        lambda x: pd.to_datetime(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(x)))
-    )
-    timedf.set_index("time", inplace=True)
-
-    if (tdfsize := timedf.shape[0]) != 0:
+    if (tdfsize := timedfgrp.shape[0]) != 0:
         print(f"延时记录共有{tdfsize}条")
         # 增加当前时间，延时值引用最近一次的值，用于做图形展示的右边栏
         #         nowtimestamp = time.ctime()
         #         timedf = timedf.append(pd.DataFrame([timedf.iloc[-1]],
                                         # index=[pd.to_datetime(time.ctime())]))
-        timedf = timedf.append(
-            pd.DataFrame([timedf.iloc[-1]], index=[pd.to_datetime(time.ctime())])
+        timedfgrp = timedfgrp.append(
+            pd.DataFrame([timedfgrp.iloc[-1]], index=[pd.to_datetime(time.ctime())])
         )
-        jujinmins = int((timedf.index[-1] - timedf.index[-2]).total_seconds() / 60)
+        jujinmins = int((timedfgrp.index[-1] - timedfgrp.index[-2]).total_seconds() / 60)
     else:
         jujinmins = 0
         logstr = f"数据表{tablename}还没有数据呢"
         log.info(logstr)
 
-    timedf.loc[timedf.delay < 0] = 0
+    timedfgrp.loc[timedfgrp.delay < 0] = 0
     # print(timedf.iloc[:2])
     print(timedf.iloc[-3:])
 
-    return jujinmins, timedf
+    return jujinmins, timedfgrp
 
 
 def showdelayimg(dbname: str, jingdu: int = 300):
