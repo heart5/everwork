@@ -309,7 +309,7 @@ plt.figure(figsize=(12, 6))
 weiyi = 20
 plt.ylim(ymin=(-1) * weiyi)
 plt.ylim(ymax=timedf.max().values[0] + weiyi)
-# plt.plot(timedf[::200])
+# plt.plot(timedf[::200
 plt.plot(timedf)
 
 print(timedf.shape[0])
