@@ -203,8 +203,9 @@ with pathmagic.context():
 # lpwrapper()
 # lp.print_stats()
 men_wc = 'heart5'
-men_wc = '白晔峰'
+# men_wc = '白晔峰'
 dbname = getdirmain() / 'data' / 'db' / f"wcdelay_{men_wc}.db"
+
 showdelayimg(dbname)
 
 # #### 重构数据表
