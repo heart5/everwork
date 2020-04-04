@@ -125,7 +125,7 @@ def showdelayimg(dbname: str, jingdu: int = 300):
     plt.figure(figsize=(36, 12))
     plt.style.use("ggplot")  # 使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
 
-    def drawdelayimg(pos, timedfinner):
+    def drawdelayimg(pos, timedfinner, title):
         # 画出左边界
         tmin = timedfinner.index.min()
         tmax = timedfinner.index.max()
@@ -142,16 +142,20 @@ def showdelayimg(dbname: str, jingdu: int = 300):
         # 绘出主图和标题
         plt.scatter(timedfinner.index, timedfinner, s=timedfinner)
         plt.scatter(timedfinner[timedfinner == 0].index, timedfinner[timedfinner == 0], s=0.5)
-        plt.title("信息频率和延时")
+        plt.title(title, fontsize=40)
+        plt.tight_layout()
 
-    drawdelayimg(211, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')])
-    drawdelayimg(212, timedf)
-
+    drawdelayimg(211, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')], "信息频率和延时（分钟，最近两天）")
+    drawdelayimg(212, timedf, "信息频率和延时（分钟，全部）")
+    fig1 = plt.gcf()
+    
+#     plt.show()
+    
     imgwcdelaypath = touchfilepath2depth(
         getdirmain() / "img" / "webchat" / "wcdelay.png"
     )
 
-    plt.savefig(imgwcdelaypath, dpi=jingdu)
+    fig1.savefig(imgwcdelaypath, dpi=jingdu)
     print(os.path.relpath(imgwcdelaypath))
 
     return imgwcdelaypath
