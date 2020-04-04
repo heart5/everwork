@@ -33,6 +33,7 @@ with pathmagic.context():
     from muse.majjianghuojie import updateurllst, zhanjidesc, showzhanjiimg
     from life.wcdelay import inserttimeitem2db, showdelayimg
     from life.wccontact import updatectdf, getctdf, showwcsimply
+    from life.phonecontact import showphoneinfoimg
     from etc.battery_manage import showbattinfoimg
     from func.pdtools import db2img, lststr2img
 
@@ -453,6 +454,13 @@ def text_reply(msg):
                 imgbattinforel = os.path.relpath(imgbattinfo)
                 itchat.send_image(imgbattinforel, toUserName=msg['FromUserName'])
                 makemsg2write(innermsg, imgbattinforel)
+                # 延时图发送记录备档
+                return
+            elif diyihang[1] == '联系人':
+                contactinfo = showphoneinfoimg()
+                imgcontactinforel = os.path.relpath(contactinfo)
+                itchat.send_image(imgcontactinforel, toUserName=msg['FromUserName'])
+                makemsg2write(innermsg, imgcontactinforel)
                 # 延时图发送记录备档
                 return
             elif diyihang[1] == '连更':
