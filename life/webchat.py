@@ -33,6 +33,7 @@ with pathmagic.context():
     from muse.majjianghuojie import updateurllst, zhanjidesc, showzhanjiimg
     from life.wcdelay import inserttimeitem2db, showdelayimg
     from life.wccontact import updatectdf, getctdf, showwcsimply
+    from etc.battery_manage import showbattinfoimg
     from func.pdtools import db2img, lststr2img
 
 
@@ -444,6 +445,14 @@ def text_reply(msg):
                 imgwcdelayrel = os.path.relpath(imgwcdelay)
                 itchat.send_image(imgwcdelayrel, toUserName=msg['FromUserName'])
                 makemsg2write(innermsg, imgwcdelayrel)
+                # 延时图发送记录备档
+                return
+            elif diyihang[1] == '电量图':
+                delaydbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"batteryinfo.db")
+                imgbattinfo = showbattinfoimg(delaydbname)
+                imgbattinforel = os.path.relpath(imgbattinfo)
+                itchat.send_image(imgbattinforel, toUserName=msg['FromUserName'])
+                makemsg2write(innermsg, imgbattinforel)
                 # 延时图发送记录备档
                 return
             elif diyihang[1] == '连更':
