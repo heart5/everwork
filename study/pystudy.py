@@ -14,6 +14,66 @@
 #     name: python3
 # ---
 
+# ## 运行时间管理
+
+# ### `signal`，适用于linux操作系统
+
+# +
+# coding=utf-8
+import signal
+import time
+import platform
+ 
+def set_timeout(num, callback):
+    
+    def wrap(func):
+        def handle(signum, frame):  # 收到信号 SIGALRM 后的回调函数，第一个参数是信号的数字，第二个参数是the interrupted stack frame.
+            raise RuntimeError
+
+        def to_do(*args, **kwargs):
+            try:
+                if (sysstr := platform.system()) == "Linux":
+                    print(sysstr)
+                    signal.signal(signal.SIGALRM, handle)  # 设置信号和回调函数
+                    signal.alarm(num)  # 设置 num 秒的闹钟
+                    print('start alarm signal.')
+                    r = func(*args, **kwargs)
+                    print('close alarm signal.')
+                    signal.alarm(0)  # 关闭闹钟
+                    return r
+                else:
+                    r = func(*args, **kwargs)
+                    print(sysstr)
+                    print('非linux系统，啥也没做。')
+                    return r
+                    
+            except RuntimeError as e:
+                callback()
+
+        return to_do
+ 
+    return wrap
+ 
+def after_timeout():  # 超时后的处理函数
+    print("Time out!")
+
+
+
+# -
+
+@set_timeout(2, after_timeout)  # 限时 2 秒超时
+def connect(strtest: str = "I\'m just a test."):  # 要执行的函数
+    time.sleep(3)  # 函数执行时间，写大于2的值，可测试超时
+    print(strtest)
+    print('Finished without timeout.')
+ 
+
+
+connect()
+
+if __name__ == '__main__':
+    connect()
+
 # ## 判断字符串是否包含
 
 # ### 使用成员操作符 `in`
