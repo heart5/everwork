@@ -8,6 +8,7 @@ import pathmagic
 with pathmagic.context():
     from func.common import utils
     from func.logme import log
+    from func.sysfunc import set_timeout, after_timeout
 
 
 """
@@ -28,6 +29,7 @@ def evaloutput(output):
     return eval(out)
 
 
+@set_timeout(40, after_timeout)
 def battery_status():
     out, rc, err = utils.execute('termux-battery-status')
     if rc:
@@ -112,6 +114,7 @@ def termux_infrared_transmit():
     return out
 
 
+@set_timeout(90, after_timeout)
 def termux_location():
     out, rc, err = utils.execute('termux-location')
     if rc:
@@ -176,6 +179,7 @@ def termux_share():
     return out
 
 
+@set_timeout(90, after_timeout)
 def termux_sms_list():
     out, rc, err = utils.execute('termux-sms-list')
     if rc:
@@ -183,6 +187,7 @@ def termux_sms_list():
     return out
 
 
+@set_timeout(90, after_timeout)
 def termux_sms_send(msg='hi'):
     cmdlist = ['termux-sms-send', '-n', '15387182166', f'{msg}']
     out, rc, err = utils.execute(cmdlist)
