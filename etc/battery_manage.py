@@ -99,7 +99,7 @@ def getbattinfodb(dbname: str, tablename="battinfo"):
 
 def showbattinfoimg(dbname: str, jingdu: int = 300):
     '''
-    show the img for wcdelay
+    show the img for battery info
     '''
     jujinm, battinfodf = getbattinfodb(dbname)
     print(f"充电记录新鲜度：刚过去了{jujinm}分钟")
@@ -121,28 +121,35 @@ def showbattinfoimg(dbname: str, jingdu: int = 300):
         plt.xlim(xmin=tmin)
         plt.xlim(xmax=tmax + pd.Timedelta(f"{bianjie}s"))
         # plt.vlines(tmin, 0, int(timedf.max() / 2))
-        plt.vlines(tmax, 0, int(timedfinner.max() / 2))
+    #     plt.vlines(tmax, 0, int(timedfinner.max() / 2))
 
         # 绘出主图和标题
         plt.scatter(timedfinner.index, timedfinner, s=timedfinner)
         plt.scatter(timedfinner[timedfinner == 0].index, timedfinner[timedfinner == 0], s=0.5)
-        plt.title(title)
+        plt.title(title, fontsize=40)
+        plt.tight_layout()
 
     timedf = battinfodf['percentage']
-    drawdelayimg(411, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')], "电量信息（最近两天）")
-    drawdelayimg(412, timedf, "电量信息（全部）")
-    imgwcdelaypath = touchfilepath2depth(getdirmain() / "img" / "hard" / "battinfo.png")
-    
+    drawdelayimg(321, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')], "电量（%，最近两天）")
+    plt.ylim(0, 110)
+    drawdelayimg(312, timedf, "电量（%，全部）")
+    plt.ylim(0, 110)
+#     imgwcdelaypath = touchfilepath2depth(getdirmain() / "img" / "hard" / "battinfo.png")
+
     timedf = battinfodf['temperature']
-    drawdelayimg(413, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')], "温度信息（最近两天）")
-    drawdelayimg(414, timedf, "温度信息（全部）")
+    drawdelayimg(322, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')], "温度（℃，最近两天）")
+    plt.ylim(20, 40)
+    drawdelayimg(313, timedf, "温度（℃，全部）")
+    plt.ylim(20, 40)
+    fig1 = plt.gcf()
 
     imgwcdelaypath = touchfilepath2depth(getdirmain() / "img" / "hard" / "batttempinfo.png")
-
-    plt.savefig(imgwcdelaypath, dpi=jingdu)
+#     plt.show()
+    fig1.savefig(imgwcdelaypath, dpi=jingdu)
     print(os.path.relpath(imgwcdelaypath))
 
     return imgwcdelaypath
+
 
 if __name__ == "__main__":
     logstrouter = "运行文件\t%s" %__file__
