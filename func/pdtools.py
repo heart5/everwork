@@ -76,7 +76,7 @@ def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=N
     figwinchs = round(colwidthmax * (dpi / figdefaultdpi) / figdefaultdpi / 10, 3)
     fighinchs = round(rowwidth * len(dflines) * (dpi / figdefaultdpi) / figdefaultdpi / 10, 3)
     print(f"输出图片的画布宽高（英寸）：\t{(figwinchs, fighinchs)}")
-    plt.figure(figsize=(figwinchs, fighinchs),dpi=dpi)
+    plt.figure(figsize=(figwinchs, fighinchs), dpi=dpi)
     plt.axis('off') 
     # font = ImageFont.truetype("../msyh.ttf", 12)
     if title:
