@@ -332,7 +332,32 @@ make install
 ~~编译没有成功，放弃了，再说通过其它方式解决了ycm服务无法启动的问题~~
 <!-- #endregion -->
 
-#### leader，是所谓前导键。
+#### `.vimrc`设置文件
+
+
+##### 高亮设置
+
+
+```ini
+highlight Visual ctermfg=yellow # 设置可视模式选择范围的前景色
+highlight Function cterm=bold,underline ctermbg=black ctermfg=green # 设置函数（function）的字体style和背景色、前景色
+```
+
+
+设置后保存，因为配置文件末尾有`autocmd BufWritePost $MYVIMRC source $MYVIMRC`使之即时生效，所以上面高亮配置就起作用了。但是，每次启动vim并不能让这些设定生效。查了些资料，以及在vim中`:help highlight`，通过自动命令`autocommand`把以上设置置入针对python文件类型的设置中，可以正常工作了。
+
+
+```ini
+" 配置Function高亮，可视模式选择范围的前景色设置成yellow
+au Filetype python highlight Function cterm=Bold,underline ctermbg=black ctermfg=green
+au Filetype python highlight Visual ctermfg=yellow
+"一旦一行的字符超出80个的话就把那些字符的背景设为红色"
+au Filetype python highlight OverLength ctermbg=red ctermfg=white guibg=#592929
+au Filetype python match OverLength /\%81v.\+/
+```
+
+
+##### leader，是所谓前导键。
 它是在vim中通过按键运行复合命令时率先要按下的键。
 ```ini
 let mapleader=";"
@@ -665,7 +690,7 @@ git clone下来，运行脚本，一屏一屏的信息（居然还是彩色的�
 
 【**成功运行并安装成功的脚本内容如下**】
 
-```python jupyter={"source_hidden": true}
+```python
 # %load /data/data/com.termux/files/home/gitbase/Installing-ML-In-Termux-Python/ml-install.sh
 # Regular.          # Bold.             # Underline.        # High Intensity.   # BoldHigh Intens.  # Background.       # High Intensity Backgrounds
 Bla='\033[0;30m';     BBla='\033[1;30m';    UBla='\033[4;30m';    IBla='\033[0;90m';    BIBla='\033[1;90m';   On_Bla='\033[40m';    On_IBla='\033[0;100m';
@@ -930,6 +955,33 @@ pip --default-timeout=500 install -U Pillow
 
 ## Jupyterlab安装使用
 
+<!-- #region -->
+#### 安装指定版本的jupyter，目前已知的有1.2.6和2.0.1
+
+```bash
+pip install jupyterlab==1.2.6
+```
+<!-- #endregion -->
+
+### 插件安装
+
+
+##### `toc`
+
+<!-- #region -->
+```bash
+jupyter labextension install @jupyterlab/toc
+```
+<!-- #endregion -->
+
+#### `git`
+
+<!-- #region -->
+```bash
+pip install --upgrade jupyterlab-git
+jupyter lab build
+```
+<!-- #endregion -->
 
 ### 插件无法运作
 
