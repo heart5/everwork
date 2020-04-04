@@ -58,6 +58,12 @@ pklabpath = os.path.relpath(touchfilepath2depth(getdirmain() / 'itchat.pkl'))
 print(pklabpath)
 
 # %%
+# isitchat??
+
+# %%
+# itchat.auto_login??
+
+# %%
 itchat.auto_login(hotReload=True, statusStorageDir=pklabpath)   #热启动你的微信
 
 # %% [markdown]
@@ -169,7 +175,7 @@ uuid3hexstr(os.path.abspath(itchat.originInstance.hotReloadDir))
 # ##### `itchat.originInstance.receivingRetryCount`
 
 # %% [markdown]
-# 接收信息时重试的次数（默认值是5），还以赋值设定
+# 接收信息时重试的次数（默认值是5），还可以赋值设定
 
 # %%
 itchat.originInstance.receivingRetryCount
