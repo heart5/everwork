@@ -16,7 +16,7 @@ from pylab import *
 
 import pathmagic
 with pathmagic.context():
-    from func.configpr import getcfp
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.first import getdirmain, dirmainpath, touchfilepath2depth
     from func.datatools import readfromtxt, write2txt
     from func.evernttest import token, get_notestore, imglist2note, \
@@ -40,24 +40,14 @@ def geodistance(lng1, lat1, lng2, lat2):
 @timethis
 def foot2show():
     namestr = 'everloc'
-    cfp, cfppath = getcfp(namestr)
-    if not cfp.has_section(namestr):
-        cfp.add_section(namestr)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
-    if cfp.has_option(namestr, 'device_id'):
-        device_id = cfp.get(namestr, 'device_id')
+    if (device_id := getcfpoptionvalue(namestr, namestr, 'device_id')):
+        device_id = str(device_id)
     else:
-        # outputdict = termux_telephony_deviceinfo()
-        # device_id = outputdict["device_id"].strip()
         device_id = getdeviceid()
-        cfp.set(namestr, 'device_id', device_id)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
-        log.info(f'获取device_id:\t{device_id}，并写入ini文件:\t{cfppath}')
-    if not cfp.has_section(device_id):
-        cfp.add_section(device_id)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
-    if cfp.has_option(device_id, 'guid'):
-        guid = cfp.get(device_id, 'guid')
+        setcfpoptionvalue(namestr, namestr, 'device_id', device_id)
+        
+    if (guid := getcfpoptionvalue(namestr, device_id, 'guid')):
+        pass
     else:
         global token
         note_store = get_notestore()
@@ -71,8 +61,7 @@ def foot2show():
         note = makenote(token, note_store, title, notebody='',
                         parentnotebook=parentnotebook)
         guid = note.guid
-        cfp.set(device_id, 'guid', guid)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
+        setcfpoptionvalue(namestr, device_id, 'guid', guid)
 
     txtfilename = str(dirmainpath / 'data' / 'ifttt' /
                       f'location_{device_id}.txt')
@@ -145,13 +134,12 @@ def foot2show():
     plt.close()
     imglst.append(str(imgpathdays))
     print(imglst)
-    readinifromnote()
-    cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
-    namestr = 'device'
-    if cfpfromnote.has_option(namestr, device_id):
-        device_name = cfpfromnote.get(namestr, device_id)
+        
+    if (device_name := getinivaluefromnote('device', device_id)):
+        pass
     else:
         device_name = device_id
+        
     tlst = ['datetime', 'latitude', 'longitude', 'altitude', 'accuracy',
             'bearing', 'speed', 'elapsedMs', 'provider']
     tlstitem = ["\t".join(tlst)]

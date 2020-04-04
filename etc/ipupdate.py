@@ -25,7 +25,7 @@ with pathmagic.context():
     from func.evernttest import get_notestore, imglist2note, timestamp2str, makenote, token, evernoteapijiayi, readinifromnote
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
-    from func.termuxtools import termux_telephony_deviceinfo, termux_telephony_cellinfo, termux_wifi_connectioninfo, termux_wifi_scaninfo
+    from func.termuxtools import termux_telephony_deviceinfo, termux_telephony_cellinfo, termux_wifi_connectioninfo, termux_wifi_scaninfo, battery_status
     from etc.getid import getdeviceid
 
 
@@ -127,12 +127,12 @@ def showiprecords():
         itemnewr = [
             f'{ipr}\t{wifir}\t{wifiidr}\t{tunr}\t{startr}\t{nowstr}']
         itemnewr.extend(itemclean)
-        print(itemnewr)
+#         print(itemnewr)
         write2txt(txtfilename, itemnewr)
         itemnew = [
             f'{ip}\t{wifi}\t{wifiid}\t{tun}\t{nowstr}']
         itemnew.extend(itemnewr)
-        print(itemnew)
+#         print(itemnew)
         readinifromnote()
         device_name = getcfpoptionvalue('everinifromnote', 'device', device_id)
         if not device_name:
@@ -151,6 +151,9 @@ def showiprecords():
 if __name__ == '__main__':
     log.info(
         f'开始运行文件\t{__file__}\t{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co_filename}')
-    showiprecords()
+    if (bsdict := battery_status())['percentage'] >= 20:
+        showiprecords()
+    else:
+        log.warning("手机电量低于20%，跳过ip轮询")
     # print(f"{self.__class__.__name__}")
     log.info(f'文件\t{__file__}\t执行完毕')
