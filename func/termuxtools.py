@@ -180,8 +180,15 @@ def termux_share():
 
 
 @set_timeout(90, after_timeout)
-def termux_sms_list():
-    out, rc, err = utils.execute('termux-sms-list')
+def termux_sms_list(timecreated:bool=True, num:int=10, shownumber:bool=True,
+                    where:str="all"):
+    cmdlst = ['termux-termux_sms_list']
+    if timecreated:
+        cmdlst.append('-d')
+    cmdlst.extend(['-l', num])
+    cmdlst.append('-n')
+    cmdlst.extend(['-t', where])
+    out, rc, err = utils.execute(cmdlst)
     if rc:
         raise Exception(err)
     return out
