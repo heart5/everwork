@@ -70,7 +70,8 @@ updateurllst()
 
 ownername = getownername()
 # ownername = '白晔峰'
-recetday = True
+
+recetday = False
 simpledesc = False
 zhanji = zhanjidesc(ownername, recetday, simpledesc)
 
