@@ -28,8 +28,22 @@ with pathmagic.context():
     from life.wcdelay import showdelayimg
     from life.phonecontact import getphoneinfodb
     from func.pdtools import lststr2img
+    from func.sysfunc import sha2hexstr, set_timeout, after_timeout
     from func.termuxtools import *
+
+
 # -
+
+# ### 时间耗尽测试
+
+@set_timeout(6, after_timeout)
+def runever():
+    while 1:
+        print("i am a ever...")
+        time.sleep(2)
+
+
+runever()
 
 # ### termuxtools各种功能函数
 
@@ -108,6 +122,48 @@ from collections import Counter
 namecounter = Counter(ctphonelst)
 {key:value for key, value in namecounter.items() if value > 1}
 
+# #### 短信
+
+smslst = termux_sms_list(num=10000)
+
+smsdf = pd.DataFrame(smslst)
+smsdf
+
+smsdf.groupby('type').count().index
+smsdfclean = smsdf[smsdf.type != 'failed']
+
+smsdf[smsdf.type == 'sent']
+
+# +
+import re
+ptn = re.compile("^\+86")
+smsdfclean['sent'] = smsdfclean['type'].apply(lambda x: True if x =='sent' else False)
+smsdfclean['number'] = smsdfclean['number'].apply(lambda x: re.sub(ptn, '', x))
+
+
+smsdfdone = smsdfclean[['sent', 'sender', 'number', 'received', 'body']]
+smsdfdone['smsuuid'] = smsdfdone.apply(lambda x: sha2hexstr(list(x.values)), axis=1)
+smsdfdone.columns = ['sent', 'sender', 'number', 'time', 'content', 'smsuuid']
+# -
+
+smsdfdone.sort_values('time', ascending=False)
+
+smsdfdone
+
+# #### 提醒消息列表
+
+termux_notification()
+
+# #### 电话信息
+
+termux_telephony_cellinfo()
+
+termux_telephony_deviceinfo()
+
+termuxinfostr = termux_info()
+
+print(termuxinfostr)
+
 # #### 电池
 
 # ##### 【电池电量模块调用】
@@ -155,6 +211,11 @@ def drawdelayimg(pos, timedfinner, title):
     plt.scatter(timedfinner.index, timedfinner, s=timedfinner)
     plt.scatter(timedfinner[timedfinner == 0].index, timedfinner[timedfinner == 0], s=0.5)
     plt.title(title, fontsize=40)
+    
+    plt.tick_params(labelsize=20)
+#     fontlabel = {'size' : 20}
+#     plt.xlabel("时间", fontlabel)
+#     plt.xlabel(font=fontlabel)
     plt.tight_layout()
 
 timedf = battinfodf['percentage']
