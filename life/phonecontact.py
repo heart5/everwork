@@ -1,9 +1,10 @@
 # encoding:utf-8
 """
-手机联系人信息管理管理
+手机联系人信息管理
 """
 import os
 import time
+import re
 # import datetime
 import sqlite3 as lite
 import pandas as pd
@@ -16,27 +17,75 @@ with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain
     from func.litetools import ifnotcreate
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
-    from func.termuxtools import termux_contact_list
+    from func.termuxtools import termux_contact_list, termux_sms_list
     from etc.getid import getdeviceid
     from func.pdtools import lststr2img
+    from func.sysfunc import sha2hexstr
 
 
-def checkphoneinfotable(dbname: str, tablename: str):
+def checkphoneinfotable(dbname: str):
     """
-    检查联系人数据表是否已经构建，设置相应的ini值避免重复打开关闭数据库文件进行检查
+    检查联系人和短信数据表是否已经构建，设置相应的ini值避免重复打开关闭数据库文件进行检查
     """
-    if not (phonecontactdb := getcfpoptionvalue('everpim', str(getdeviceid()), 'phonecontactdb')):
-        print(phonecontactdb)
+    # 联系人数据表检查构建
+    if not (phonecontactdb := getcfpoptionvalue('everpim', str(getdeviceid()), 'phonecontacttable')):
+        tablename = "phone"
+        print(phonecontactdb, tablename)
         csql = f"create table if not exists {tablename} (number str PRIMARY KEY not null unique on conflict ignore, name str, appendtime datetime)"
         ifnotcreate(tablename, csql, dbname)
-        setcfpoptionvalue('everpim', str(getdeviceid()), 'phonecontactdb', str(True))
+        setcfpoptionvalue('everpim', str(getdeviceid()), 'phonecontacttable', str(True))
         logstr = f"数据表{tablename}在数据库{dbname}中构建成功"
         log.info(logstr)
+        
+    # 短信数据表检查构建
+    if not (phonecontactdb := getcfpoptionvalue('everpim', str(getdeviceid()), 'phonesmstable')):
+        tablename = "sms"
+        print(phonecontactdb, tablename)
+        # smsdfdone.columns = ['sent', 'sender', 'number', 'time', 'content', 'smsuuid']
+        csql = f"create table if not exists {tablename} (sent bool, sender str, number str, time datetime, content str,smsuuid str PRIMARY KEY not null unique on conflict ignore)"
+        ifnotcreate(tablename, csql, dbname)
+        setcfpoptionvalue('everpim', str(getdeviceid()), 'phonesmstable', str(True))
+        logstr = f"数据表{tablename}在数据库{dbname}中构建成功"
+        log.info(logstr)
+        
 
-
-def phone2db():
+def phonesms2db():
+    """
+    手机短信数据入库
+    """
+    if not (phonecontactdb := getcfpoptionvalue('everpim', str(getdeviceid()), 'smsfirstrun')):
+        readnum = 10000
+    else:
+        readnum = 500
+    smslst = termux_sms_list(num=readnum)
+    smsdf = pd.DataFrame(smslst)
+    smsdfclean = smsdf[smsdf.type != 'failed']
+    ptn = re.compile("^\+86")
+    smsdfclean['sent'] = smsdfclean['type'].apply(lambda x: True if x =='sent' else False)
+    smsdfclean['number'] = smsdfclean['number'].apply(lambda x: re.sub(ptn, '', x))
+    smsdfdone = smsdfclean[['sent', 'sender', 'number', 'received', 'body']]
+    smsdfdone['smsuuid'] = smsdfdone.apply(lambda x: sha2hexstr(list(x.values)), axis=1)
+    smsdfdone.columns = ['sent', 'sender', 'number', 'time', 'content', 'smsuuid']
+    
+    tablename = "sms"
     dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "phonecontact.db")
+    checkphoneinfotable(dbname)
     conn = lite.connect(dbname)
+    recordctdf = pd.read_sql(f"select * from {tablename}", con=conn)
+    smsdfdone.to_sql(tablename, con=conn, if_exists="append", index=False)
+    afterinsertctdf = pd.read_sql(f"select * from {tablename}", con=conn)
+    conn.close()
+    logstr = f"短信记录既有数量：\t{recordctdf.shape[0]}，" + f"待添加的短信记录数量为：\t{smsdfdone.shape[0]}，" + f"添加后的短信记录数量总计为：\t{afterinsertctdf.shape[0]}"
+    log.info(logstr)
+    
+    if not (phonecontactdb := getcfpoptionvalue('everpim', str(getdeviceid()), 'smsfirstrun')):
+        setcfpoptionvalue('everpim', str(getdeviceid()), 'smsfirstrun', str(True))
+
+
+def phonecontact2db():
+    """
+    手机联系人数据入库
+    """
     ctstr = termux_contact_list()
     ctlst = eval(ctstr)
     ctdf = pd.DataFrame(ctlst)
@@ -45,7 +94,9 @@ def phone2db():
     ctdf['appendtime'] = time.time()
     print(ctdf.shape[0])
     tablename = "phone"
-    checkphoneinfotable(dbname, tablename)
+    dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "phonecontact.db")
+    checkphoneinfotable(dbname)
+    conn = lite.connect(dbname)
     recordctdf = pd.read_sql(f"select * from {tablename}", con=conn)
     ctdf.to_sql(tablename, con=conn, if_exists="append", index=False)
     afterinsertctdf = pd.read_sql(f"select * from {tablename}", con=conn)
@@ -61,7 +112,7 @@ def getphoneinfodb():
 #     tablename = "wcdelaynew"
     dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "phonecontact.db")
     tablename="phone"
-    checkphoneinfotable(dbname, tablename)
+    checkphoneinfotable(dbname)
 
     conn = lite.connect(dbname)
     recordctdf = pd.read_sql(f"select * from {tablename}", con=conn)
@@ -109,7 +160,8 @@ def showphoneinfoimg(jingdu: int = 300):
 if __name__ == "__main__":
     logstrouter = "运行文件\t%s" %__file__
     log.info(logstrouter)
-    phone2db()
+    phonecontact2db()
+    phonesms2db()
     xinxian, tdf = getphoneinfodb()
     print(xinxian)
     print(tdf.sort_index(ascending=False))
