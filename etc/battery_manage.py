@@ -127,6 +127,7 @@ def showbattinfoimg(dbname: str, jingdu: int = 300):
         plt.scatter(timedfinner.index, timedfinner, s=timedfinner)
         plt.scatter(timedfinner[timedfinner == 0].index, timedfinner[timedfinner == 0], s=0.5)
         plt.title(title, fontsize=40)
+        plt.tick_params(labelsize=20)
         plt.tight_layout()
 
     timedf = battinfodf['percentage']

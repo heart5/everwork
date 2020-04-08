@@ -143,6 +143,7 @@ def showdelayimg(dbname: str, jingdu: int = 300):
         plt.scatter(timedfinner.index, timedfinner, s=timedfinner)
         plt.scatter(timedfinner[timedfinner == 0].index, timedfinner[timedfinner == 0], s=0.5)
         plt.title(title, fontsize=40)
+        plt.tick_params(labelsize=20)
         plt.tight_layout()
 
     drawdelayimg(211, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')], "信息频率和延时（分钟，最近两天）")
