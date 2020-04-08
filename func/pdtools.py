@@ -1,6 +1,6 @@
 # encoding:utf-8
 """
-功能描述
+DataFrame功能应用函数库
 """
 import os
 import evernote.edam.type.ttypes as ttypes
