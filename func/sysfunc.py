@@ -4,6 +4,8 @@
 """
 
 import os
+import traceback
+import inspect
 import sys
 import platform
 import signal
@@ -49,6 +51,12 @@ def set_timeout(num, callback):
 
 
 def after_timeout():  # 超时后的处理函数
+#     log.critical(sys._getframe().f_code.co_name)
+#     log.critical(sys._getframe().f_back.f_lineno)
+#     log.critical(sys._getframe().f_code.co_filename)
+#     log.critical(traceback.extract_stack()[-2][2])
+    log.critical(traceback.extract_stack())
+#     log.critical(inspect.stack())
     log.critical("运行超出预设时间，退出!")
     
     
