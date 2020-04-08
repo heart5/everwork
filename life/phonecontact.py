@@ -1,6 +1,6 @@
 # encoding:utf-8
 """
-手机联系人管理
+手机联系人信息管理管理
 """
 import os
 import time
