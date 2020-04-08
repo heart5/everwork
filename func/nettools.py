@@ -114,12 +114,12 @@ def get_ip4alleth(*args):
         ethinfo = os.popen("ifconfig -a | grep -A 0 'flags'").read()
         ptn = re.compile(r"^(?P<name>\w+)\W+", re.M)
         ethlst = re.findall(ptn, ethinfo)
-        # print(ethlst)
+        print(ethlst)
         ethlst2test = [x for x in ethlst if x != "lo"]
         for ethitem in ethlst2test:
             my_addr = os.popen(
                 "ifconfig | grep -A 1 %s|tail -1| awk '{print $2}'" % ethitem).read()
-            # print(my_addr)
+            print(my_addr)
             ipfind = re.search(r'(?<![\.\d])(?:25[0-5]\.|2[0-4]\d\.|[01]?\d\d?\.)'
                                r'{3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?![\.\d])', my_addr)
             #  print(ipfind)
