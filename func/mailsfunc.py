@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfp, getcfpoptionvalue, setcfpoptionvalue
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.first import dirmainpath, getdirmain
     from func.logme import log
     from func.datatools import getfilepathnameext
@@ -349,9 +349,9 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
         log.info("《%s-%s》现有%d条记录。" % (mingmu, fenleistr, len(itemsr)))
         return itemsr
 
-    hostg = cfp.get('gmail', 'host')
-    usernameg = cfp.get('gmail', 'username')
-    passwordg = cfp.get('gmail', 'password')
+    hostg = getcfpoptionvalue('everwork', 'gmail', 'host')
+    usernameg = getcfpoptionvalue('everwork', 'gmail', 'username')
+    passwordg = getcfpoptionvalue('everwork', 'gmail', 'password')
     mailitemsjilu = []
     try:
         mailitemsjilu = getmail(hostg, usernameg, passwordg, debug=False, dirtarget=direc, unseen=True, topic=topic)

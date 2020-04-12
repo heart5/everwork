@@ -13,8 +13,8 @@ import pandas as pd
 
 with pathmagic.context():
     from func.first import getdirmain
-    from func.configpr import getcfp
-    from func.evernttest import get_notestore, imglist2note, readinifromnote, token, evernoteapijiayi, makenote, getinivaluefromnote
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
+    from func.evernttest import get_notestore, imglist2note, readinifromnote, evernoteapijiayi, makenote, getinivaluefromnote
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_location, termux_telephony_deviceinfo
@@ -28,10 +28,6 @@ with pathmagic.context():
 # @profile
 def log2note(noteguid, loglimit, levelstr='', notetitle='everwork日志信息'):
     namestr = 'everlog'
-    cfp, cfppath = getcfp(namestr)
-    if not cfp.has_section(namestr):
-        cfp.add_section(namestr)
-        cfp.write(open(cfppath, 'w', encoding='utf-8'))
 
     if levelstr == 'CRITICAL':
         levelstrinner = levelstr + ':'
@@ -70,9 +66,7 @@ def log2note(noteguid, loglimit, levelstr='', notetitle='everwork日志信息'):
     # log.info(loglines[:20])
     # print(len(loglines))
     print(f'日志的{levelstr4title}记录共有{len(loglines)}条，只取时间最近的{loglimit}条')
-    if cfp.has_option(namestr, countnameinini):
-        everlogc = cfp.getint(namestr, countnameinini)
-    else:
+    if not (everlogc := getcfpoptionvalue(namestr, namestr, countnameinini)):
         everlogc = 0
     # log.info(everlogc)
     if len(loglines) == everlogc:  # <=调整为==，用来应对log文件崩溃重建的情况
@@ -89,8 +83,7 @@ def log2note(noteguid, loglimit, levelstr='', notetitle='everwork日志信息'):
             nstore = get_notestore()
             imglist2note(nstore, [], noteguid,
                          notetitle, loglinestr)
-            cfp.set(namestr, countnameinini, f'{len(loglines)}')
-            cfp.write(open(cfppath, 'w', encoding='utf-8'))
+            setcfpoptionvalue(namestr, namestr, countnameinini, f'{len(loglines)}')
             print(f'新的log{levelstr4title}信息成功更新入笔记')
         except Exception as eeee:
             errmsg = f'处理新的log{levelstr4title}信息到笔记时出现未名错误。{eeee}'
@@ -101,36 +94,23 @@ def log2note(noteguid, loglimit, levelstr='', notetitle='everwork日志信息'):
 def log2notes():
     namestr = 'everlog'
     device_id = getdeviceid()
-    cfplog, cfplogpath = getcfp(namestr)
-    # log.info(f"{namestr}")
-    if not cfplog.has_section(namestr):
-        cfplog.add_section(namestr)
-        cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
-    if not cfplog.has_section(device_id):
-        cfplog.add_section(device_id)
-        cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
 
-    global token
+    token = getcfpoptionvalue('everwork', 'evernote', 'token')
     # log.info(token)
-    if cfplog.has_option(device_id, 'logguid'):
-        logguid = cfplog.get(device_id, 'logguid')
-    else:
+    if not (logguid := getcfpoptionvalue(namestr, device_id, 'logguid')):
         note_store = get_notestore()
         parentnotebook = note_store.getNotebook(
             '4524187f-c131-4d7d-b6cc-a1af20474a7f')
         evernoteapijiayi()
         note = ttypes.Note()
         note.title = f'服务器_{device_id}_日志信息'
+
         notelog = makenote(token, note_store, note.title,
                            notebody='', parentnotebook=parentnotebook)
         logguid = notelog.guid
-        cfplog.set(device_id, 'logguid', logguid)
-        cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
-    # log.info(logguid)
+        setcfpoptionvalue(namestr, device_id, 'logguid', logguid)
 
-    if cfplog.has_option(device_id, 'logcguid'):
-        logcguid = cfplog.get(device_id, 'logcguid')
-    else:
+    if not (logcguid := getcfpoptionvalue(namestr, device_id, 'logcguid')):
         note_store = get_notestore()
         parentnotebook = note_store.getNotebook(
             '4524187f-c131-4d7d-b6cc-a1af20474a7f')
@@ -140,28 +120,15 @@ def log2notes():
         notelog = makenote(token, note_store, note.title,
                            notebody='', parentnotebook=parentnotebook)
         logcguid = notelog.guid
-        cfplog.set(device_id, 'logcguid', logcguid)
-        cfplog.write(open(cfplogpath, 'w', encoding='utf-8'))
-    # log.info(logcguid)
+        setcfpoptionvalue(namestr, device_id, 'logcguid', logcguid)
 
-    readinifromnote()
-    cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
-    namestr = 'everlog'
-    if cfpfromnote.has_option(namestr, 'loglimit'):
-        loglimitc = cfpfromnote.getint(namestr, 'loglimit')
-    else:
+    if not (loglimitc := getinivaluefromnote(namestr, 'loglimit')):
         loglimitc = 500
-    # log.info(loglimitc)
 
-    if cfpfromnote.has_option('device', device_id):
-        servername = cfpfromnote.get('device', device_id)
-    else:
+    if not (servername := getinivaluefromnote('device', device_id)):
         servername = device_id
-    # log.info(servername)
 
-    cfpeverwork, cfpeverworkpath = getcfp('everwork')
-
-    if cfpfromnote.has_option(namestr, 'critical') and (cfpfromnote.getboolean(namestr, 'critical') == True):
+    if getinivaluefromnote(namestr, 'critical') == 1:
         levelstrc = 'CRITICAL'
         # noteguidc = cfpeverwork.get('evernote', 'lognotecriticalguid')
         log2note(logcguid, loglimitc, levelstrc,

@@ -23,7 +23,7 @@ from pathlib import Path
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfp, cfpzysm, inizysmpath, getcfpoptionvalue, setcfpoptionvalue
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     # from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
     from func.logme import log
     from func.first import dirmainpath, dbpathquandan, dbpathdingdanmingxi
@@ -106,15 +106,12 @@ def chulidataindir_orderdetails(pathorder: Path):
         log.info('%s数据表%s不存在，将创建之。' % (notestr, tablename_order))
         dfresult = pd.DataFrame()
 
-    if cfpzysm.has_section(notestr) is False:
-        cfpzysm.add_section(notestr)
-        cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
     files = os.listdir(str(pathorder))
     for fname in files:
         if fname.startswith(notestr) and (fname.endswith('xls') or fname.endswith('xlsx')):
             yichulifilelist = list()
-            if cfpzysm.has_option(notestr, '已处理文件清单'):
-                yichulifilelist = cfpzysm.get(notestr, '已处理文件清单').split()
+            if (yichulifile := getcfpoptionvalue('everzysm', notestr, '已处理文件清单')):
+                yichulifilelist = yichulifile.split()
             if fname in yichulifilelist:
                 continue
             print(fname, end='\t')
@@ -125,8 +122,7 @@ def chulidataindir_orderdetails(pathorder: Path):
             print(dffname.shape[0], end='\t')
             print(dfresult.shape[0])
             yichulifilelist.append(fname)
-            cfpzysm.set(notestr, '已处理文件清单', '%s' % '\n'.join(yichulifilelist))
-            cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+            setcfpoptionvalue('everzysm', notestr, '已处理文件清单', '%s' % '\n'.join(yichulifilelist))
 
     # dfresult.drop_duplicates(['单据编号', '日期', '订单编号', '客户名称', '业务人员', '订单金额', '部门'], inplace=True)
     print(f'除重前有{dfresult.shape[0]}条记录，', end='\t')
@@ -136,15 +132,12 @@ def chulidataindir_orderdetails(pathorder: Path):
     datezhiyu = max(dfresult['日期'])
     log.info(f'除重后{notestr}数据有{dfresult.shape[0]}条记录；数据起于{dateqiyu.strftime("%F")}，止于{datezhiyu.strftime("%F")}')
     dfttt = dfresult.drop_duplicates()
-    if cfpzysm.has_option(notestr, '记录数'):
-        jilucont = cfpzysm.getint(notestr, '记录数')
-    else:
+    if not (jilucont := getcfpoptionvalue('everzysm', notestr, '记录数')):
         jilucont = 0
     if dfttt.shape[0] > jilucont:
         dfttt.to_sql(tablename_order, cnxp, index=False, if_exists='replace')
         cnxp.close()
-        cfpzysm.set(notestr, '记录数', '%d' % dfttt.shape[0])
-        cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
+        setcfpoptionvalue('everzysm', notestr, '记录数', '%d' % dfttt.shape[0])
         log.info('增加有效%s数据%d条。' % (notestr, dfttt.shape[0] - jilucont))
         hasnewrecords = True
     else:

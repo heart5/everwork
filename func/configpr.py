@@ -39,7 +39,7 @@ def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
         print(f"option {optionname} is not exists.")
         return
 
-    targetvalue = cfpin.get(sectionname, optionname)
+    targetvalue = str(cfpin.get(sectionname, optionname))
 
     # 处理布尔值
     if targetvalue.strip().lower() == 'true':
@@ -73,7 +73,7 @@ cfp, inifilepath = getcfp('everwork')
 cfpdata, inidatanotefilepath = getcfp('everdatanote')
 cfplife, inilifepath = getcfp('everlife')
 cfpzysm, inizysmpath = getcfp('everzysm')
-cfpworkplan, iniworkplanpath = getcfp('everworkplan')
+# cfpworkplan, iniworkplanpath = getcfp('everworkplan')
 
 
 if __name__ == '__main__':

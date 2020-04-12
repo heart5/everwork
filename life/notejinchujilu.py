@@ -48,7 +48,7 @@ from pandas.tseries.offsets import *
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfplife, inilifepath
+    from func.configpr import getcfp, getcfpoptionvalue, setcfpoptionvalue
     from func.evernttest import get_notestore, evernoteapijiayi, tablehtml2evernote, imglist2note
     from func.logme import log
     from func.mailsfunc import jilugmail
@@ -61,7 +61,7 @@ def jilugooglefile(filepath):
     print(filelist)
     dfout = None
     for i in range(len(filelist)):
-        df = pd.read_excel(str(filepath / filelist[i]), sheetname='工作表1',
+        df = pd.read_excel(str(filepath / filelist[i]), sheet_name='工作表1',
                            header=None, index_col=0, parse_dates=True)
         if df.shape[0] == 0:
             log.info('%s 无进出记录' % filelist[i])
@@ -188,10 +188,8 @@ def wifitodf(itemstr, noteinfolistw):
         dfnotename = dfwifi[['entered', 'shuxing', 'address']]
         dfwificount = dfwifi.shape[0]  # shape[0]获得行数，shape[1]则是列数
         print(dfwificount, end='\t')
-        # global cfp, inifilepath
-        if cfplife.has_option('wifi', 'itemnumber'):
-            ntupdatenum = dfwificount > cfplife.getint(
-                'wifi', 'itemnumber')  # 新数据集记录数和存档比较
+        if (dfwificountini := getcfpoptionvalue('everlife', 'wifi', 'itemnumber')):  # 新数据集记录数和存档比较
+            ntupdatenum = dfwificount > dfwificountini
         else:
             ntupdatenum = True
         print(ntupdatenum, end='\t')
@@ -218,8 +216,7 @@ def wifitodf(itemstr, noteinfolistw):
             imglist2note(notestore, [], '971f14c0-dea9-4f13-9a16-ee6e236e25be', 'WIFI连接统计表',
                          wifitongjinametablestr + wifijilutablestr + wifitongjialltablestr)
 
-            cfplife.set('wifi', 'itemnumber', '%d' % dfwificount)
-            cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
+            setcfpoptionvalue('everlife', 'wifi', 'itemnumber', '%d' % dfwificount)
     except Exception as eee:
         log.critical('更新WIFI连接统计笔记时出现错误。%s' % str(eee))
 
@@ -347,7 +344,7 @@ def jinchustat(jinchujiluall, noteinfos):
 
 
 def jinchustatdo():
-    items = cfplife.items('impinfolist')
+    items = getcfp('everlife')[0].items('impinfolist')
     noteinfolistinside = []
     for address, infoslicelist in items:
         infoslist = [*args, wifilist] = infoslicelist.split('\n')
@@ -396,9 +393,8 @@ def jinchustatdo():
             dfjinchuitem.sort_index(ascending=False, inplace=True)
             dfjinchucount = dfjinchuitem.shape[0]  # shape[0]获得行数，shape[1]则是列数
             print(dfjinchucount, end='\t')
-            if cfplife.has_option('jinchu', noteinfo[1]):
-                ntupdatenum = dfjinchucount > cfplife.getint(
-                    'jinchu', noteinfo[1])  # 新数据集记录数和存档比较
+            if (dfjinchucountini :=getcfpoptionvalue('everlife', 'jinchu', noteinfo[1])):  # 新数据集记录数和存档比较
+                ntupdatenum = dfjinchucount > dfjinchucountini
             else:
                 ntupdatenum = True
             print(ntupdatenum, end='\t')
@@ -408,8 +404,7 @@ def jinchustatdo():
             if ntupdatenum:  # or True:
                 # print(dfjinchu.head(5))
                 jinchustat(dfjinchuitem, noteinfo[1:])
-                cfplife.set('jinchu', noteinfo[1], '%d' % dfjinchucount)
-                cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
+                setcfpoptionvalue('everlife', 'jinchu', noteinfo[1], '%d' % dfjinchucount)
                 log.info('%s成功更新入图表统计笔记' % noteinfo)
     except Exception as eee:
         log.critical('读取系列进出笔记并更新统计信息时出现未名错误。%s' % str(eee))

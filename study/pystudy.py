@@ -66,7 +66,7 @@ def connect(strtest: str = "I\'m just a test."):  # 要执行的函数
     time.sleep(3)  # 函数执行时间，写大于2的值，可测试超时
     print(strtest)
     print('Finished without timeout.')
- 
+
 
 
 connect()

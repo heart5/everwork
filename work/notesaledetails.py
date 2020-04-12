@@ -11,8 +11,8 @@ from threading import Timer
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfpdata, inidatanotefilepath, getcfp
-    from func.evernttest import getinivaluefromnote, imglist2note, get_notestore, token, readinifromnote 
+    from func.configpr import cfpdata, inidatanotefilepath, getcfp, getcfpoptionvalue
+    from func.evernttest import getinivaluefromnote, imglist2note, get_notestore, readinifromnote 
     from func.first import dbpathquandan, dbpathdingdanmingxi
     from func.pdtools import dataokay, dfin2imglist, updatesection, readinisection2df
     from func.wrapfuncs import timethis
@@ -189,6 +189,7 @@ def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
     brandlist.append('')
     print(brandlist)
     note_store = get_notestore()
+    token = getcfpoptionvalue('everwork', 'evernote', 'token')
     for br in brandlist:
         log.info('第%d个品牌：%s，共有%d个品牌' %
                  (brandlist.index(br) + 1, br, len(brandlist)))

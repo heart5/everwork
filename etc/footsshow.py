@@ -19,7 +19,7 @@ with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.first import getdirmain, dirmainpath, touchfilepath2depth
     from func.datatools import readfromtxt, write2txt
-    from func.evernttest import token, get_notestore, imglist2note, \
+    from func.evernttest import get_notestore, imglist2note, \
         evernoteapijiayi, makenote, readinifromnote, getinivaluefromnote
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
@@ -49,7 +49,7 @@ def foot2show():
     if (guid := getcfpoptionvalue(namestr, device_id, 'guid')):
         pass
     else:
-        global token
+        token = getcfpoptionvalue('everwork', 'evernote', 'token')
         note_store = get_notestore()
         parentnotebook = note_store.getNotebook(
             '4524187f-c131-4d7d-b6cc-a1af20474a7f')

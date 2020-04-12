@@ -22,7 +22,7 @@ with pathmagic.context():
     from func.logme import log
     from func.nettools import trycounttimes2
     from func.sysfunc import uuid3hexstr
-    from func.evernttest import token, get_notestore, makenote, imglist2note, \
+    from func.evernttest import get_notestore, makenote, imglist2note, \
         evernoteapijiayi, getinivaluefromnote
     from func.datatools import readfromtxt, write2txt
     from func.termuxtools import termux_sms_send
@@ -50,6 +50,7 @@ def newchatnote():
     note.title = f"微信（{getowner()['User']['NickName']}）记录:" \
                  f"{time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time()))}"
     print(note.title)
+    token = getcfpoptionvalue('everwork', 'evernote', 'token')
     notechat = makenote(token, note_store, note.title, notebody='',
                         parentnotebook=parentnotebook)
 

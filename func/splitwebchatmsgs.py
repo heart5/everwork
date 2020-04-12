@@ -9,7 +9,7 @@ import pandas as pd
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfp, inifilepath, getcfp
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.evernttest import get_notestore, imglist2note, tablehtml2evernote, getinivaluefromnote
@@ -17,13 +17,7 @@ with pathmagic.context():
 
 def finance2note(srccount, rstdf, mingmu, mingmu4ini, title):
     noteguid = getinivaluefromnote('webchat', mingmu)
-    cfpcw, cfpcwpath = getcfp('everwebchat')
-    if not cfpcw.has_section('finance'):
-        cfpcw.add_section('finance')
-        cfpcw.write(open(cfpcwpath, 'w', encoding='utf-8'))
-    if cfpcw.has_option('finance', mingmu4ini):
-        count_zdzz = cfpcw.getint('finance', mingmu4ini)
-    else:
+    if not (count_zdzz := getcfpoptionvalue('everwebchat', 'finance', mingmu4ini)):
         count_zdzz = 0
     # print(f"{count_zdzz}")
 
@@ -38,8 +32,8 @@ def finance2note(srccount, rstdf, mingmu, mingmu4ini, title):
     print(f"{type(finance2note4debug)}\t{finance2note4debug}")
     if (srccount != count_zdzz) or finance2note4debug:
         imglist2note(get_notestore(), [], noteguid, title, notecontent)
-        cfpcw.set('finance', mingmu4ini, f"{srccount}")
-        cfpcw.write(open(cfpcwpath, 'w', encoding='utf-8'))
+        setcfpoptionvalue('everwebchat', 'finance', mingmu4ini, f"{srccount}")
+        
         log.info(f"成功更新《{title}》，记录共有{rstdf.shape[0]}条")
 
 

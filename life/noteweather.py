@@ -24,7 +24,7 @@ from pylab import *
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import cfp, cfplife, inilifepath, getcfpoptionvalue, setcfpoptionvalue
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.evernttest import get_notestore, imglist2note
     from func.first import dirmainpath, touchfilepath2depth
     from func.logme import log
@@ -57,9 +57,9 @@ def getweatherfromevernote():
 
 
 def getweatherfromgmail():
-    host = cfp.get('gmail', 'host')
-    username = cfp.get('gmail', 'username')
-    password = cfp.get('gmail', 'password')
+    host = getcfpoptionvalue('everwork', 'gmail', 'host')
+    username = getcfpoptionvalue('everwork', 'gmail', 'username')
+    password = getcfpoptionvalue('everwork', 'gmail', 'password')
     mailitems = getmail(host, username, password,
                         dirtarget='Ifttt/Weather', unseen=True, topic='武汉每日天气 @行政管理 +')
     if mailitems is False:
@@ -319,9 +319,8 @@ def fetchweatherinfo_from_gmail(weathertxtfilename):
             write2txt(weathertxtfilename, items)
             weathertxtlastestday = time.strftime('%F', time.strptime(
                 items[0].split(' ：')[0], '%B %d, %Y at %I:%M%p'))
-            cfplife.set('天气', '存储数据最新日期', '%s' % weathertxtlastestday)
-            cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
-
+            setcfpoptionvalue('everlife', '天气', '存储数据最新日期', '%s' % weathertxtlastestday)
+            
 
 def isweatherupdate(weathertxtfilename):
     # print(weathertoday, end='\t')
@@ -342,10 +341,9 @@ def isweatherupdate(weathertxtfilename):
 
     items = readfromtxt(weathertxtfilename)
     print(len(items))
-    if cfplife.has_option('天气', '统计天数'):
-        dycountini = cfplife.getint('天气', '统计天数')
-    else:
+    if not (dycountini := getcfpoptionvalue('everlife', '天气', '统计天数')):
         dycountini = 0
+        
     if len(items) > dycountini:
         return items
     else:
@@ -411,9 +409,8 @@ def fetchweatherinfo_from_googledrive():
             log.info('通过读Google drive表格，获取天气信息%d条。' % df.shape[0])
             print(df['date'].max())
             weathertxtlastestday = df['date'].max().strftime('%F')
-            cfplife.set('天气', '存储数据最新日期', '%s' % weathertxtlastestday)
-            cfplife.write(open(inilifepath, 'w', encoding='utf-8'))
-            # print(df)
+            setcfpoptionvalue('everlife', '天气', '存储数据最新日期', '%s' % weathertxtlastestday)
+            
             return df
 
 

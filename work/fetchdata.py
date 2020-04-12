@@ -16,7 +16,7 @@ with pathmagic.context():
     from func.first import dbpathworkplan
     from func.pdtools import descdb
     from func.logme import log
-    from func.configpr import cfp, cfpworkplan, iniworkplanpath, getcfpoptionvalue, setcfpoptionvalue
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.mailsfunc import getmail
     from func.wrapfuncs import timethis
     from func.profilerlm import lpt_wrapper
@@ -65,9 +65,7 @@ def chuliholidayleave_note(zhuti: list):
     note = getnote(guid)
     # print(timestamp2str(int(note.updated/1000)))
     # print(note.updateSequenceNum)
-    if cfpworkplan.has_option('行政管理', f'{zhuti[0]}updatenum'):
-        updatenumold = cfpworkplan.getint('行政管理', f'{zhuti[0]}updatenum')
-    else:
+    if not (updatenumold := getcfpoptionvalue('everworkplan', '行政管理', f'{zhuti[0]}updatenum')):
         updatenumold = 0
     if note.updateSequenceNum <= updatenumold:
         log.info(f'{zhuti[0]}笔记内容无更新。')
@@ -170,7 +168,7 @@ def chuliholidayleave_note(zhuti: list):
                 if numfloat > numfloor:
                     xtian = numfloat - numfloor
                     # print(f'{numfloat}\t{numceil}\t{numfloor}\t{mingmu}\t{xingzhi}\t{tian}\t{xtian}')
-                    dfresult.ix[-1, ['tianshu']] = xtian
+                    dfresult.iloc[-1, -1] = xtian
             else:
                 dftmp = pd.DataFrame(index=driminfor)
                 dftmp['mingmu'] = mingmu
@@ -180,7 +178,7 @@ def chuliholidayleave_note(zhuti: list):
                 if numfloat > numfloor:
                     xtian = numfloat - numfloor
                     # print(f'{numfloat}\t{numceil}\t{numfloor}\t{mingmu}\t{xingzhi}\t{tian}\t{xtian}')
-                    dftmp.ix[-1, ['tianshu']] = xtian
+                    dftmp.iloc[-1, -1] = xtian
                 dfresult = dfresult.append(dftmp)
         dfresult.sort_index(ascending=False, inplace=True)
         dfresult['date'] = dfresult.index

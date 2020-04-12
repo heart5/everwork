@@ -19,10 +19,10 @@ import evernote.edam.type.ttypes as ttypes
 
 with pathmagic.context():
     from func.first import getdirmain, dirmainpath
-    from func.configpr import getcfp, getcfpoptionvalue, setcfpoptionvalue
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.nettools import get_host_ip, get_ip, get_ip4alleth
     from func.datatools import readfromtxt, write2txt
-    from func.evernttest import get_notestore, imglist2note, timestamp2str, makenote, token, evernoteapijiayi, readinifromnote
+    from func.evernttest import get_notestore, imglist2note, timestamp2str, makenote, evernoteapijiayi, readinifromnote
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_telephony_deviceinfo, termux_telephony_cellinfo, termux_wifi_connectioninfo, termux_wifi_scaninfo, battery_status
@@ -81,9 +81,8 @@ def showiprecords():
         log.critical('无效ip，可能是没有处于联网状态')
         exit(1)
     print(f'{ip}\t{wifi}\t{wifiid}\t{tun}\t{device_id}')
-    guid = getcfpoptionvalue(namestr, device_id, 'guid')
-    if not guid:
-        global token
+    if not (guid := getcfpoptionvalue(namestr, device_id, 'guid')):
+        token = getcfpoptionvalue('everwork', 'evernote', 'token')
         note_store = get_notestore()
         parentnotebook = note_store.getNotebook(
             '4524187f-c131-4d7d-b6cc-a1af20474a7f')
