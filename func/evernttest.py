@@ -10,6 +10,8 @@ import hashlib
 import re
 import time
 # import nltk
+import traceback
+import inspect
 import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -26,6 +28,7 @@ with pathmagic.context():
     from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.nettools import trycounttimes2
+    from func.sysfunc import convertframe2dic
     # from etc.getid import getid
 
 # print(f"{__file__} is loading now...")
@@ -197,10 +200,11 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     # Finally, send the new note to Evernote using the updateNote method
     # The new Note object that is returned will contain server-generated
     # attributes such as the new note's unique GUID.
-    @trycounttimes2('evernote服务器。更新笔记。')
+    @trycounttimes2('evernote服务器，更新笔记。')
     def updatenote(notesrc):
         nsinner = get_notestore()
-        updated_note = nsinner.updateNote(notesrc)
+        token = getcfpoptionvalue('everwork', 'evernote', 'token')
+        updated_note = nsinner.updateNote(token, notesrc)
         evernoteapijiayi()
         log.info('成功更新了笔记《%s》，guid：%s。' %
                  (updated_note.title, updated_note.guid))
@@ -349,29 +353,62 @@ def timestamp2str(timestamp):
 
 
 def evernoteapijiayi():
+#     calllink = [re.findall("^《FrameSummary file (.+), line (\d+) in (.+)》$", line) for line in traceback.extract_stack()]
+#     calllinks = str(calllink[:-1])
+#     print(calllinks)
     note_store = get_notestore()
     nsstr4ini = str(id(note_store))
     nowtime = datetime.datetime.now()
     nowmin = nowtime.minute
-    nowhourini = getcfpoptionvalue('everwork', 'apitimes', "hour")
+    nowhourini = getcfpoptionvalue('everapi', 'apitimes', "hour")
     # ns首次启动和整点重启（用小时判断）
-    if (not (apitimes := getcfpoptionvalue('everwork', 'apitimes', nsstr4ini)) or ((nowmin == 0) and (nowhourini != nowtime.hour))):
+    if (not (apitimes := getcfpoptionvalue('everapi', 'apitimes', nsstr4ini)) or ((nowmin == 0) and (nowhourini != nowtime.hour))):
         if nowmin == 0:
             log.critical(f"Evernote API\t{nsstr4ini} 调用次数整点重启^_^")
         else:
-            log.critical(f"Evernote API\t{nsstr4ini} 新生^_^")
+            log.critical(f"Evernote API\t{nsstr4ini} 新生^_^{inspect.stack()[-1]}")
+#             log.critical(f"Evernote API\t{nsstr4ini} 新生^_^{inspect.stack()[-1]}")
         apitimes = 0
     if nowhourini != nowtime.hour:
-        setcfpoptionvalue('everwork', 'apitimes', "hour", str(nowtime.hour))
+        setcfpoptionvalue('everapi', 'apitimes', "hour", str(nowtime.hour))
     apitimes += 1
     log.debug(f'动用Evernote API({note_store})次数：\t {apitimes} ')
-    setcfpoptionvalue('everwork', 'apitimes', nsstr4ini, str(apitimes))
+    setcfpoptionvalue('everapi', 'apitimes', nsstr4ini, str(apitimes))
     if apitimes >= 290:
         sleepsecs = np.random.randint(0, 50)
         time.sleep(sleepsecs)
         note_store = None
         note_store = get_notestore(forcenew=True)
         log.critical(f'休息{sleepsecs:d}秒，重新构造了一个服务器连接{note_store}继续干……')
+        
+
+def evernoteapijiayi_test():
+    calllink = [re.findall("^《FrameSummary file (.+), line (\d+) in (.+)》$", line) for line in traceback.extract_stack()]
+    calllinks = str(calllink[:-1])
+    print(calllinks)
+    note_store = get_notestore()
+    nsstr4ini = str(id(note_store))
+    nowtime = datetime.datetime.now()
+    nowmin = nowtime.minute
+    nowhourini = getcfpoptionvalue('everapi', 'apitimes', "hour")
+    # ns首次启动和整点重启（用小时判断）
+    if (not (apitimes := getcfpoptionvalue('everapi', 'apitimes', nsstr4ini)) or ((nowmin == 0) and (nowhourini != nowtime.hour))):
+        if nowmin == 0:
+            log.critical(f"Evernote API\t{nsstr4ini} 调用次数整点重启^_^{calllinks}")
+        else:
+            log.critical(f"Evernote API\t{nsstr4ini} 新生^_^{calllinks}")
+        apitimes = 0
+    if nowhourini != nowtime.hour:
+        setcfpoptionvalue('everapi', 'apitimes', "hour", str(nowtime.hour))
+    apitimes += 1
+    log.debug(f'动用Evernote API({note_store})次数：\t {apitimes} ')
+    setcfpoptionvalue('everapi', 'apitimes', nsstr4ini, str(apitimes))
+    if apitimes >= 290:
+        sleepsecs = np.random.randint(0, 50)
+        time.sleep(sleepsecs)
+        note_store = None
+        note_store = get_notestore(forcenew=True)
+        log.critical(f'休息{sleepsecs:d}秒，重新构造了一个服务器连接{note_store}继续干……{calllinks}')
         
 
 # @use_logging()
