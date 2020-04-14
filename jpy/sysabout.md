@@ -14,6 +14,87 @@ jupyter:
     name: python3
 ---
 
+## 系统相关功能调试
+
+
+### `inspect`
+
+
+[
+FrameInfo(
+    frame=<frame at 0x7a43f94800, file './func/evernttest.py', line 369, code evernoteapijiayi>, 
+    filename='./func/evernttest.py', 
+    lineno=369, 
+    function='evernoteapijiayi', 
+    code_context=['            log.critical(f"Evernote API\\t{nsstr4ini} 新生^_^{inspect.stack()}")\n'], 
+    index=0), 
+FrameInfo(
+    frame=<frame at 0x7a43f8a040, file './func/evernttest.py', line 106, code getnotestore>, 
+    filename='./func/evernttest.py', 
+    lineno=106, function='getnotestore', 
+    code_context=['        evernoteapijiayi()\n'], 
+    index=0), 
+FrameInfo(
+    frame=<frame at 0x7a4571b810, file './func/nettools.py', line 191, code wrapper>, 
+    filename='./func/nettools.py', 
+    lineno=191, 
+    function='wrapper', 
+    code_context=['                    result = jutifunc(*args, **kwargs)\n'], 
+    index=0), 
+FrameInfo(
+    frame=<frame at 0x7a4588d610, file './func/evernttest.py', line 110, code get_notestore>, 
+    filename='./func/evernttest.py', 
+    lineno=110, 
+    function='get_notestore', 
+    code_context=['    return getnotestore(forcenew)\n'], 
+    index=0), 
+FrameInfo(
+    frame=<frame at 0x7a44a55c40, file './func/evernttest.py', line 538, code readinifromnote>, 
+    filename='./func/evernttest.py', 
+    lineno=538, 
+    function='readinifromnote', 
+    code_context=['    note_store = get_notestore()\n'], 
+    index=0), 
+FrameInfo(
+    frame=<frame at 0x7a47b36710, file './func/nettools.py', line 191, code wrapper>, 
+    filename='./func/nettools.py', 
+    lineno=191, 
+    function='wrapper', 
+    code_context=['                    result = jutifunc(*args, **kwargs)\n'], 
+    index=0), 
+FrameInfo(
+    frame=<frame at 0x7a44dc7c10, file './func/evernttest.py', line 566, code getinivaluefromnote>, 
+    filename='./func/evernttest.py', 
+    lineno=566, 
+    function='getinivaluefromnote', 
+    code_context=['    readinifromnote()\n'], 
+    index=0), 
+FrameInfo(
+    frame=<frame at 0x7a47f29e40, file './func/wrapfuncs.py', line 27, code with_logging>, 
+    filename='./func/wrapfuncs.py', 
+    lineno=27, 
+    function='with_logging', 
+    code_context=["        if getinivaluefromnote('everwork', 'logdetails'):\n"], 
+    index=0), 
+FrameInfo(
+    frame=<frame at 0x7a4b189440, file 'etc/footstrack.py', line 54, code <module>>, 
+    filename='etc/footstrack.py', 
+    lineno=54, 
+    function='<module>', 
+    code_context=['        foot2record()\n'], 
+    index=0)
+    ]
+
+```python
+inspectout = """[FrameInfo(frame=<frame at 0x7a43f94800, file './func/evernttest.py', line 369, code evernoteapijiayi>, filename='./func/evernttest.py', lineno=369, function='evernoteapijiayi', code_context=['            log.critical(f"Evernote API\\t{nsstr4ini} 新生^_^{inspect.stack()}")\n'], index=0), FrameInfo(frame=<frame at 0x7a43f8a040, file './func/evernttest.py', line 106, code getnotestore>, filename='./func/evernttest.py', lineno=106, function='getnotestore', code_context=['        evernoteapijiayi()\n'], index=0), FrameInfo(frame=<frame at 0x7a4571b810, file './func/nettools.py', line 191, code wrapper>, filename='./func/nettools.py', lineno=191, function='wrapper', code_context=['                    result = jutifunc(*args, **kwargs)\n'], index=0), FrameInfo(frame=<frame at 0x7a4588d610, file './func/evernttest.py', line 110, code get_notestore>, filename='./func/evernttest.py', lineno=110, function='get_notestore', code_context=['    return getnotestore(forcenew)\n'], index=0), FrameInfo(frame=<frame at 0x7a44a55c40, file './func/evernttest.py', line 538, code readinifromnote>, filename='./func/evernttest.py', lineno=538, function='readinifromnote', code_context=['    note_store = get_notestore()\n'], index=0), FrameInfo(frame=<frame at 0x7a47b36710, file './func/nettools.py', line 191, code wrapper>, filename='./func/nettools.py', lineno=191, function='wrapper', code_context=['                    result = jutifunc(*args, **kwargs)\n'], index=0), FrameInfo(frame=<frame at 0x7a44dc7c10, file './func/evernttest.py', line 566, code getinivaluefromnote>, filename='./func/evernttest.py', lineno=566, function='getinivaluefromnote', code_context=['    readinifromnote()\n'], index=0), FrameInfo(frame=<frame at 0x7a47f29e40, file './func/wrapfuncs.py', line 27, code with_logging>, filename='./func/wrapfuncs.py', lineno=27, function='with_logging', code_context=["        if getinivaluefromnote('everwork', 'logdetails'):\n"], index=0), FrameInfo(frame=<frame at 0x7a4b189440, file 'etc/footstrack.py', line 54, code <module>>, filename='etc/footstrack.py', lineno=54, function='<module>', code_context=['        foot2record()\n'], index=0)]"""
+
+len(inspectout)
+```
+
+```python
+eval(inspectout)
+```
+
 ## 各种资源
 
 
