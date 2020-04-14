@@ -69,10 +69,10 @@ def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
     return targetvalue
 
 
-cfp, inifilepath = getcfp('everwork')
-cfpdata, inidatanotefilepath = getcfp('everdatanote')
-cfplife, inilifepath = getcfp('everlife')
-cfpzysm, inizysmpath = getcfp('everzysm')
+# cfp, inifilepath = getcfp('everwork')
+# cfpdata, inidatanotefilepath = getcfp('everdatanote')
+# cfplife, inilifepath = getcfp('everlife')
+# cfpzysm, inizysmpath = getcfp('everzysm')
 # cfpworkplan, iniworkplanpath = getcfp('everworkplan')
 
 
