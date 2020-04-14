@@ -11,6 +11,7 @@ import platform
 import signal
 import time
 import uuid
+import re
 from hashlib import sha256
 # import wmi_client_wrapper as wmi
 
@@ -19,6 +20,15 @@ with pathmagic.context():
     from func.logme import log
 
     
+def convertframe2dic(frame):
+    framestr = str(frame)
+    filename = re.findall("filename=(.+)\s", framestr)[0].strip()
+    lineno = re.findall("lineno=(.+)\s", framestr)[0].strip()
+    code_context = [line.strip() for line in eval(re.findall("code_context=(.+)\s", framestr)[0].strip())]
+    
+    return filename, lineno, code_context
+
+
 def set_timeout(num, callback):
     
     def wrap(func):
