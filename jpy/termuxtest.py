@@ -168,6 +168,81 @@ smsdfdone.sort_values('time', ascending=False)
 
 smsdfdone
 
+# ##### evernote中《mysms》笔记本中短信存档信息入库
+
+# ###### 库准备
+
+from bs4 import BeautifulSoup
+import re
+import random
+import pandas as pd
+import sqlite3 as lite
+import pathmagic
+with pathmagic.context():
+    from func.evernttest import findnotefromnotebook, get_notestore, evernoteapijiayi
+    from func.logme import log
+    from func.nettools import trycounttimes2
+
+# ###### 提取ini数据，用于对比
+
+guidchuli = getcfpoptionvalue('everpim', "noteguid", 'noteguid')
+len(guidchuli.split(','))
+
+# ###### 获取笔记列表
+
+notelst = findnotefromnotebook("39625f3f-8ee7-486b-ab73-e6ca4f325be6", titlefind= "", notecount=300)
+len(notelst)
+
+ns = get_notestore()
+ntguid = notelst[5][0]
+
+nttitle = ns.getNote(ntguid, False, False, False, False).title
+evernoteapijiayi()
+ntcontent = ns.getNoteContent(ntguid)
+evernoteapijiayi()
+
+nttitle
+ntcontent
+
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:left;background-color:#FBFBFB;background-image: -webkit-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -moz-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -o-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: linear-gradient(to bottom, #FBFBFB, #DBDBDB);margin:7px 4px 7px 8px;\'><b>范小华: </b>冰箱里的一条鱼拿出来放着 <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>11:07 AM, 11/23/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:right;background-color:#EEF8FB;background-image: -webkit-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: -moz-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: -o-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: linear-gradient(to bottom, #EEF8FB, #D8EEF6);margin:7px 8px 7px 4px;\'><b>Me: </b>现在正忙，请稍后来电。 <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>9:17 AM, 11/18/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:right;background-color:#EEF8FB;background-image: -webkit-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: -moz-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: -o-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: linear-gradient(to bottom, #EEF8FB, #D8EEF6);margin:7px 8px 7px 4px;\'><b>Me: </b>抱歉，我正在开会。 <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>12:00 PM, 11/17/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:left;background-color:#FBFBFB;background-image: -webkit-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -moz-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -o-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: linear-gradient(to bottom, #FBFBFB, #DBDBDB);margin:7px 4px 7px 8px;\'><b>范小华: </b>幸亏把假休了，公司改制度了，以后武汉不算探亲了，视同大冶黄石了，少了15天假噢 <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>9:51 AM, 11/17/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:left;background-color:#FBFBFB;background-image: -webkit-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -moz-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -o-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: linear-gradient(to bottom, #FBFBFB, #DBDBDB);margin:7px 4px 7px 8px;\'><b>范小华: </b>到姐家，早餐结束，洗澡睡觉 <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>8:09 AM, 11/8/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:left;background-color:#FBFBFB;background-image: -webkit-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -moz-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -o-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: linear-gradient(to bottom, #FBFBFB, #DBDBDB);margin:7px 4px 7px 8px;\'><b>范小华: </b>【邮储银行】范小华女士，您尾号0593的储蓄账户11月7日8时0分活期余额290.94元，将于11月10日扣还个人综合消费贷款本息3721.98元，请在11月10日16：00之前补存3431.04元，以免影响信用记录。如遇人民银行调整贷款利率，实际扣款金额将有所调整。详询95580。感谢您的理解和支持！  <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>1:24 PM, 11/7/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:left;background-color:#FBFBFB;background-image: -webkit-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -moz-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -o-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: linear-gradient(to bottom, #FBFBFB, #DBDBDB);margin:7px 4px 7px 8px;\'><b>范小华: </b>好 <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>1:41 PM, 11/6/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:right;background-color:#EEF8FB;background-image: -webkit-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: -moz-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: -o-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: linear-gradient(to bottom, #EEF8FB, #D8EEF6);margin:7px 8px 7px 4px;\'><b>Me: </b>两百 <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>1:41 PM, 11/6/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:left;background-color:#FBFBFB;background-image: -webkit-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -moz-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -o-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: linear-gradient(to bottom, #FBFBFB, #DBDBDB);margin:7px 4px 7px 8px;\'><b>范小华: </b>贺汉斌生了儿子，我正在刘静家，上不上人情，上的话多少 <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>1:34 PM, 11/6/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:left;background-color:#FBFBFB;background-image: -webkit-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -moz-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -o-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: linear-gradient(to bottom, #FBFBFB, #DBDBDB);margin:7px 4px 7px 8px;\'><b>范小华: </b>老公，想你！睡觉了！ <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>10:25 PM, 11/5/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:right;background-color:#EEF8FB;background-image: -webkit-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: -moz-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: -o-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: linear-gradient(to bottom, #EEF8FB, #D8EEF6);margin:7px 8px 7px 4px;\'><b>Me: </b>抱歉，我正在开会。 <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>9:30 PM, 11/5/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:right;background-color:#EEF8FB;background-image: -webkit-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: -moz-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: -o-linear-gradient(top, #EEF8FB, #D8EEF6);background-image: linear-gradient(to bottom, #EEF8FB, #D8EEF6);margin:7px 8px 7px 4px;\'><b>Me: </b>现在不方便，稍后给您电话。 <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>4:56 PM, 11/5/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:left;background-color:#FBFBFB;background-image: -webkit-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -moz-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -o-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: linear-gradient(to bottom, #FBFBFB, #DBDBDB);margin:7px 4px 7px 8px;\'><b>范小华: </b>人家预算制定规则我们不知道，投入管控方式要变了我们也不知道，我们不懂业务了，还管什么数据啊？ <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>10:58 AM, 11/5/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:left;background-color:#FBFBFB;background-image: -webkit-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -moz-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -o-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: linear-gradient(to bottom, #FBFBFB, #DBDBDB);margin:7px 4px 7px 8px;\'><b>范小华: </b>自从岗位划到这个部门了，职责全淡了，刘时礼时刻提醒我，我们就只是弄数据的。每年做预算忙，半年调预算忙，上周开会，领导都在，后来说到半年要调预算了，问哪个部门负责，李慧兰提醒他职责是我们的，他不接话，我也就不能吭声，后来领导说那各品牌部自己管理。现在全自己搞，通知我们都不知道，刘说你只管数据就行了。窝火得很。 <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>10:57 AM, 11/5/14</span></div>
+#
+# <div style=\'clear:both;border:1px solid #9E9E9E;box-shadow:#CCC 1px 1px 3px;padding:8px;min-width:50%;max-width:70%;word-wrap:break-word;border-radius:5px;float:left;background-color:#FBFBFB;background-image: -webkit-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -moz-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: -o-linear-gradient(top, #FBFBFB, #DBDBDB);background-image: linear-gradient(to bottom, #FBFBFB, #DBDBDB);margin:7px 4px 7px 8px;\'><b>范小华: </b>石头两双鞋，等下还要给他买几件衣服 <span style=\'font-size:0.8em;font-weight:bold;color:#666;white-space:nowrap\'>5:38 PM, 11/3/14</span></div>
+
+nclines = BeautifulSoup(ntcontent, 'lxml').find('en-note')
+nclines.find_all('div')
+
+nttitle
+for item in nclines.find_all('div'):
+    re.findall("float:(left|right)", item.attrs['style']), item.text
+
+[item for item in notelst if item[1] == '李红亮']
+
 # ##### evernote中《SMS》笔记本中短信存档信息入库
 
 # ###### 库准备
@@ -190,7 +265,7 @@ len(guidchuli.split(','))
 
 # ###### 获取笔记列表
 
-notelst = findnotefromnotebook("25f718c1-cb76-47f6-bdd7-b7b5ee09e445", titlefind='李', notecount=10000)
+notelst = findnotefromnotebook("39625f3f-8ee7-486b-ab73-e6ca4f325be6", titlefind='李', notecount=10000)
 len(notelst)
 
 [item for item in notelst if item[1] == '李红亮']
