@@ -20,7 +20,7 @@ jupyter:
 termux在谷歌商店的最新版本是0.92。之前一直用的是0.65（2018年），后来升级到0.66（2019年）。因为termux-api不再支持短信读取等涉及个人隐私的功能（谷歌商店限制），担心termux主版本会自动关联这个阉割，就一直没有升级。这次黑鲨升级系统，到论坛看了下貌似整体搬迁到小米（哦，不对，应该是官宣的“将JOYUI的游戏特性与MIUI完美结合”），坛友抱怨甚多，问题反馈集中在易耗电、发热甚至不稳定，所以一直没动。昨天手痒，想着termux大版本都升级那么多，应该有不少好东东，一激动就把termux和termux-api都升级了。麻烦就此来了！
 <!-- #endregion -->
 
-先安装`pkg install openssh`（这中间还犯了个输入错误，误输入成openssl，还奇怪怎么没有生成`.ssh`目录呢），添加电脑生成的公匙，然后用putty登录在电脑上操作。按照原来的笔记步骤，要更新成清华源并追加pointless源，速度快些还方便装难以搞定的numpy。但奇怪的是`apt update`并`apt upgrade`后总是莫名出错，不是系统自带命令不见了（连ls都操作不了），就是各种库报错，连apt都用不了了。把termux重装了几次都不行，恨不得怀疑人生。实在耗不过了，突然想就用官方源试试再说（其实速度也还可以，还是在vpn科学上网的状态下），结果一路绿灯，基本系统和工具安装顺利。后面就是各种对装不上pandas的折腾，下文再讲。jupyterlab也装起来，虽然插件因为nodejs的问题一直无法使用，但基本的程序还是可以跑起来的，然后一狠心，就把手机的操作系统也一起升级到JOYUI11，华丽丽的的变化很大，也放到后面讲。试车的时候发现获取位置和ip的脚本老是挂在那里跑不动。python一切正常，那问题就在termux-api上了。
+先安装`pkg install openssh`（这中间还犯了个输入错误，误输入成openssl，还奇怪怎么没有生成`.ssh`目录呢），启动sshd服务，然后添加电脑生成的公匙（把客户端生成的公匙内容追加到服务器端`~/.ssh/authorized_keys`文件中），然后用putty登录在电脑上操作。按照原来的笔记步骤，要更新成清华源并追加pointless源，速度快些还方便装难以搞定的numpy。但奇怪的是`apt update`并`apt upgrade`后总是莫名出错，不是系统自带命令不见了（连ls都操作不了），就是各种库报错，连apt都用不了了。把termux重装了几次都不行，恨不得怀疑人生。实在耗不过了，突然想就用官方源试试再说（其实速度也还可以，还是在vpn科学上网的状态下），结果一路绿灯，基本系统和工具安装顺利。后面就是各种对装不上pandas的折腾，下文再讲。jupyterlab也装起来，虽然插件因为nodejs的问题一直无法使用，但基本的程序还是可以跑起来的，然后一狠心，就把手机的操作系统也一起升级到JOYUI11，华丽丽的的变化很大，也放到后面讲。试车的时候发现获取位置和ip的脚本老是挂在那里跑不动。python一切正常，那问题就在termux-api上了。
 
 
 在终端中运行`termux-location`等命令，挂起无反应，怀疑是版本不匹配的问题。termux-api最新的版本是0.41，手里还有0.31（还支持短信等敏感操作）和0.32（从这个版本其就不支持敏感操作了）。把三个版本逐次试了下，按照之前的经验，先要在终端中卸载`pkg uninstall termux-api`，每次更改termux-api版本安装后再次`pkg install termux-api`，状况依旧，还是挂起没商量。然后在新版本系统的手机上对termux和termux-api授予各种权限，没有任何反应。静下来仔细想了下，决定从头来过，用轮换的方法把各个组合都试一下。
@@ -103,7 +103,7 @@ fi
 
 #### 工具箱预备
 
-`pkg install curl wget p7zip htop git`
+`pkg install curl wget p7zip htop git nnn`
 
 
 #### proot，给termux一个root权限的入口
@@ -679,6 +679,18 @@ tar -c 一个纯洁的路径 | nc 192.168.1.103 9999
 <!-- #region toc-hr-collapsed=true toc-nb-collapsed=true -->
 ## python的各种必须工作库
 <!-- #endregion -->
+
+### 更换pip安装源
+
+
+修改~/.pip/pip.conf（如果没有此文件，可以创建此文件夹和文件）
+
+```ini
+index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+[install]
+trusted-host = pypi.tuna.tsinghua.edu.cn
+```
+
 
 ### numpy、pandas、scipy和jupyter等等
 
