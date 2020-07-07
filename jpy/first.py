@@ -2,12 +2,13 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_json: true
 #     formats: ipynb,py:light
 #     text_representation:
 #       extension: .py
 #       format_name: light
-#       format_version: '1.4'
-#       jupytext_version: 1.2.1
+#       format_version: '1.5'
+#       jupytext_version: 1.5.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -15,7 +16,7 @@
 # ---
 
 import datetime, os
-print('hih8hh')
+print('hih8hhoo')
 print(datetime.datetime.now().strftime('%F %T'))
 
 # +
@@ -28,9 +29,12 @@ A = [[62, 22, 37, 149],
 [[r[c] for r in A] for c in range(len(A[0]))]
 
 sr = pd.Series(A[0], index=['a', 'b', 'c', 'd'])
-sr.name = 'heart5\'home'
+sr.name = 'heart5\'home家目录'
 sr.plot(kind='pie')
+# -
 
+
+print(os.getcwd())
 
 # + {"code_folding": [21]}
 # # %load ../etc/log2note.py
@@ -48,7 +52,7 @@ import pathmagic
 with pathmagic.context():
     from func.first import getdirmain
     from func.configpr import getcfp
-    from func.evernt import get_notestore, imglist2note
+    from func.evernttest import get_notestore, imglist2note
     from func.logme import log
     from func.wrapfuncs import timethis
 
