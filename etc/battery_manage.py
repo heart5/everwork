@@ -156,6 +156,7 @@ if __name__ == "__main__":
     logstrouter = "运行文件\t%s" %__file__
     log.info(logstrouter)
     dbnameouter = touchfilepath2depth(getdirmain() / "data" / "db" / f"batteryinfo.db")
+    # batteryrecord2db(dbnameouter)
     xinxian, tdf = getbattinfodb(dbnameouter)
     print(xinxian)
     print(tdf.sort_index(ascending=False))
