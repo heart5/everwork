@@ -31,7 +31,7 @@ with pathmagic.context():
 # -
 
 # lststr2img("我的祖国", showincell=True)
-lststr2img("我的祖国", fontpath=dirmainpath / 'font' / 'msyh.ttf')
+lststr2img("武汉市金真心食品有限公司", fontpath=dirmainpath / 'font' / 'msyh.ttf', showincell=True)
 
 # ### `plt`参数默认值
 
@@ -645,7 +645,7 @@ frdfromdb
 # + [markdown] jupyter={"source_hidden": true}
 # ##### 抛开变动列（contactuuid、appendtime和imguuid）根据前列去重，保留最早的记录
 
-# + jupyter={"source_hidden": true, "outputs_hidden": true}
+# + jupyter={"outputs_hidden": true, "source_hidden": true}
 list(frdfromdb)[1:-2]
 frddfafterdropduplites = frdfromdb.drop_duplicates(list(frdfromdb)[1:-2], keep='first')
 frddfafterdropduplites
@@ -654,7 +654,7 @@ frddfafterdropduplites
 # + [markdown] jupyter={"source_hidden": true}
 # ##### 更新contactuuid
 
-# + jupyter={"source_hidden": true, "outputs_hidden": true}
+# + jupyter={"outputs_hidden": true, "source_hidden": true}
 def dfsha2udpatecontactuuid(inputdf: pd.DataFrame):
     # ['contactuuid', 'NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord', 'appendtime', 'imguuid']
     frddf2append = inputdf.copy()
@@ -997,7 +997,7 @@ def showpngimgfrombytes(inputbytes: bytes):
     print(sha3hexstr(np.array(Image.open(imgtmppath)))) # 非得写入文件，再提取回来序列值就一样了，唉
 
 
-# + jupyter={"source_hidden": true, "outputs_hidden": true}
+# + jupyter={"outputs_hidden": true, "source_hidden": true}
 showpngimgfrombytes(imgforsample)
 showpngimgfrombytes(imgforsample1)
 showpngimgfrombytes(imgforsample2)
@@ -1005,7 +1005,7 @@ showpngimgfrombytes(imgforsample2)
 # + [markdown] jupyter={"source_hidden": true}
 # ##### 强力再参
 
-# + jupyter={"source_hidden": true, "outputs_hidden": true}
+# + jupyter={"outputs_hidden": true, "source_hidden": true}
 showpngimgfrombytes(imgforsample)
 showpngimgfrombytes(imgforsample1)
 showpngimgfrombytes(imgforsample2)
@@ -1013,7 +1013,7 @@ showpngimgfrombytes(imgforsample2)
 # + [markdown] jupyter={"source_hidden": true}
 # ##### 老规矩，留参
 
-# + jupyter={"source_hidden": true, "outputs_hidden": true}
+# + jupyter={"outputs_hidden": true, "source_hidden": true}
 showpngimgfrombytes(imgforsample)
 showpngimgfrombytes(imgforsample1)
 showpngimgfrombytes(imgforsample2)
@@ -1121,7 +1121,7 @@ testuuidlen(getwcdffromfrdlst(frdlst))
 # + [markdown] jupyter={"source_hidden": true}
 # ##### 所有列（包含headimg）生成uuid（参照）
 
-# + jupyter={"source_hidden": true, "outputs_hidden": true}
+# + jupyter={"outputs_hidden": true, "source_hidden": true}
 frddf2append = frddf.copy(deep=True)
 frddf2append['contactuuid'] = frddf2append.apply(lambda x: uuid3hexstr(list(x.values)), axis=1)
 frddf2append
