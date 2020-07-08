@@ -18,7 +18,7 @@ from bs4 import BeautifulSoup
 from evernote.api.client import EvernoteClient
 from evernote.edam.error.ttypes import EDAMNotFoundException, EDAMSystemException, EDAMUserException, EDAMErrorCode
 from evernote.edam.notestore.NoteStore import NoteFilter, NotesMetadataResultSpec
-from evernote.edam.type.ttypes import Note, Resource, Data
+from evernote.edam.type.ttypes import Note, Resource, Data, Notebook
 from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_MINOR
 
 import pathmagic
@@ -32,6 +32,17 @@ with pathmagic.context():
     # from etc.getid import getid
 
 # print(f"{__file__} is loading now...")
+
+
+def gettoken():
+    if (china := getcfpoptionvalue('everwork', 'evernote', 'china')):
+        # print(f"china value:\t{china}")
+        auth_token = getcfpoptionvalue('everwork', 'evernote', 'tokenchina')  # 直接提取，唯一使用
+    else:
+        # print(f"china value:\t{china}")
+        auth_token = getcfpoptionvalue('everwork', 'evernote', 'token')  # 直接提取，唯一使用
+        
+    return auth_token
 
 
 def get_notestore(forcenew=False):
@@ -58,13 +69,9 @@ def get_notestore(forcenew=False):
     # auth_token = token
     # cfp, inipath = getcfp('everwork')
     # auth_token = cfp.get('evernote', 'token')  # 直接提取，唯一使用
-    if (china := getcfpoptionvalue('everwork', 'evernote', 'china')):
-        # print(f"china value:\t{china}")
-        auth_token = getcfpoptionvalue('everwork', 'evernote', 'tokenchina')  # 直接提取，唯一使用
-    else:
-        # print(f"china value:\t{china}")
-        auth_token = getcfpoptionvalue('everwork', 'evernote', 'token')  # 直接提取，唯一使用
-
+    # print("start debugging for evernttest")
+    auth_token = gettoken()
+    # print(auth_token)
 
     if auth_token == "your developer token":
         print("Please fill in your developer token\nTo get a developer token, visit "
@@ -83,27 +90,36 @@ def get_notestore(forcenew=False):
     # developer token above with a token from
     # https://www.evernote.com/api/DeveloperToken.action
 
+    china = getcfpoptionvalue('everwork', 'evernote', 'china')
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
     servname = ("印象笔记", 'evernote')[china is True]
     @trycounttimes2(f'{servname}服务器')
     def getnotestore(forcenewinner):
         global note_store
+        # print(note_store)
         if (note_store is not None) and (not forcenewinner):
             # log.info(f'note_store已健壮存在：{note_store}')
             return note_store
         userstore = client.get_user_store()
+        # print(userstore)
         # evernoteapijiayi()
+        # print("I'm here now.")
+        # print(EDAM_VERSION_MAJOR, EDAM_VERSION_MINOR)
         version_ok = userstore.checkVersion(
+            # "Evernote EDAMTest (Python)",
             "Evernote EDAMTest (Python)",
             EDAM_VERSION_MAJOR,
             EDAM_VERSION_MINOR
         )
+        # print("I'm here second.")
+        # print(version_ok)
         if not version_ok:
             log.critical('Evernote API版本过时，请更新之！程序终止并退出！！！')
             exit(1)
         # print("Is my Evernote API version up to date? ", str(version_ok))
         note_store = client.get_note_store()
+        # print(note_store)
         evernoteapijiayi()
         log.info(f'成功连接Evernote服务器！构建notestore：{note_store}')
         return note_store
@@ -203,7 +219,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     @trycounttimes2('evernote服务器，更新笔记。')
     def updatenote(notesrc):
         nsinner = get_notestore()
-        token = getcfpoptionvalue('everwork', 'evernote', 'token')
+        token = gettoken()
         updated_note = nsinner.updateNote(token, notesrc)
         evernoteapijiayi()
         log.info('成功更新了笔记《%s》，guid：%s。' %
@@ -252,7 +268,7 @@ def findnotefromnotebook(notebookguid, titlefind='', notecount=10000):
 
     @trycounttimes2('evernote服务器')
     def findnote(startnum: int = 0, maxnum: int = 250):
-        tokenfnfn = getcfpoptionvalue('everwork', 'evernote', 'token')
+        tokenfnfn = gettoken()
         # log.info("I'm here now too.")
         notelist = note_store.findNotesMetadata(
             tokenfnfn, notefilter, startnum, maxnum, notemetaspec)
@@ -297,6 +313,14 @@ def getnotecontent(guid: str):
     return soup
 
 
+def createnotebook(nbname: str, stack='fresh'):
+    notebook = Notebook()
+    notebook.name = nbname
+    notebook.stack = stack
+    
+    return get_notestore().createNotebook(gettoken(), notebook)
+    
+
 def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
     """
     创建一个note
@@ -318,6 +342,8 @@ def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲�
     ournote.content = nbody
 
     # parentNotebook is optional; if omitted, default notebook is used
+    if type(parentnotebook) is str:
+        parentnotebook = notestore.getNotebook(gettoken(), parentnotebook)
     if parentnotebook and hasattr(parentnotebook, 'guid'):
         ournote.notebookGuid = parentnotebook.guid
 
@@ -362,7 +388,7 @@ def evernoteapijiayi():
     nowmin = nowtime.minute
     nowhourini = getcfpoptionvalue('everapi', 'apitimes', "hour")
     # ns首次启动和整点重启（用小时判断）
-    if (not (apitimes := getcfpoptionvalue('everapi', 'apitimes', nsstr4ini)) or ((nowmin == 0) and (nowhourini != nowtime.hour))):
+    if (not (apitimes := getcfpoptionvalue('everapi', 'notestore', nsstr4ini)) or ((nowmin == 0) and (nowhourini != nowtime.hour))):
         if nowmin == 0:
             log.critical(f"Evernote API\t{nsstr4ini} 调用次数整点重启^_^")
         else:
@@ -373,7 +399,7 @@ def evernoteapijiayi():
         setcfpoptionvalue('everapi', 'apitimes', "hour", str(nowtime.hour))
     apitimes += 1
     log.debug(f'动用Evernote API({note_store})次数：\t {apitimes} ')
-    setcfpoptionvalue('everapi', 'apitimes', nsstr4ini, str(apitimes))
+    setcfpoptionvalue('everapi', 'notestore', nsstr4ini, str(apitimes))
     if apitimes >= 290:
         sleepsecs = np.random.randint(0, 50)
         time.sleep(sleepsecs)
