@@ -15,9 +15,13 @@ import pathmagic
 
 with pathmagic.context():
     from func.evernttest import imglist2note, get_notestore, tablehtml2evernote
-    from func.first import dbpathdingdanmingxi, dirmainpath
+    from func.first import dbpathdingdanmingxi, dirmainpath, getdirmain, touchfilepath2depth
     from func.logme import log
-    from func.configpr import cfpzysm, inizysmpath
+    from func.configpr import getcfp
+
+
+def getdbname(dbpath: str, ownername: str, title='wccontact'):
+    return touchfilepath2depth(getdirmain() / dbpath / f"{title}_{ownername}.db")
 
 
 def gettopicfilefromgoogledrive(topic:str, neirong:str):
@@ -83,6 +87,7 @@ def chulidataindir(cnxp, tablename, mingmu, fnstart, notestr, pathorder: Path, c
         dfresult = pd.DataFrame()
 
     # print(dfresult)
+    cfpzysm, inizysmpath = getcfp('everzysm')
     if cfpzysm.has_section(notestr) is False:
         cfpzysm.add_section(notestr)
         cfpzysm.write(open(inizysmpath, 'w', encoding='utf-8'))
@@ -129,6 +134,7 @@ def chulidataindir(cnxp, tablename, mingmu, fnstart, notestr, pathorder: Path, c
 
 
 def fenliu2note(dfall):
+    cfpzysm, inizysmpath = getcfp('everzysm')
     zhfromini = [[x, cfpzysm.get('支付宝账户', x).split()] for x in cfpzysm.options('支付宝账户')]
     # print(zhfromini)
     zhonlyone = [x for x in zhfromini if len(x[1][0].split(',')) == 1]
@@ -190,6 +196,7 @@ def alipay2note():
 
     financesection = '财务流水账'
     item = '支付宝白晔峰流水条目'
+    cfpzysm, inizysmpath = getcfp('everzysm')
     if not cfpzysm.has_option(financesection, item):
         count = 0
     else:
