@@ -103,8 +103,87 @@ fi
 
 #### 工具箱预备
 
-`pkg install curl wget p7zip htop git nnn`
+`pkg install curl wget p7zip htop git nnn openssh`
 
+
+#### ssh，远程登陆、管理（上传下载等）
+
+
+##### 安装
+
+<!-- #region -->
+```bash
+pkg install openssh
+```
+<!-- #endregion -->
+
+安装完成候会自动生成密匙对。
+
+
+##### 启动服务
+
+<!-- #region -->
+```bash
+sshd
+```
+<!-- #endregion -->
+
+##### 公匙登陆（服务器端设置）
+
+
+启动服务后就可以接受客户端的接入请求了。
+
+
+如果是公匙方式登陆，需要提前把客户端生成密匙对的公匙传进来，写入`~/.ssh/authorized_keys`文件（每个公匙占用一行）
+
+
+**`~/.ssh`、`athorized_keys`和公匙密匙文件的权限必须是600，其他可能出错并且错的莫名其妙**
+
+
+##### 公匙i登陆（客户端设置）
+
+
+客户端可以配置`~/.ssh/config`方便登陆
+
+```ini
+Host termux-bs2pro
+    HostName 192.168.31.191
+    Port 8022
+    IdentityFile ~/.ssh/id_rsa # 和传入服务器端的相应密匙文件地址
+    PreferredAuthentications publickey # 指定登陆方式仅为密匙对
+    User u0_a133
+```
+
+
+##### 上传下载
+
+
+以`~/.ssh/config`配置好为前提。
+
+
+###### 下载文件
+
+<!-- #region -->
+```bash
+scp termux-bs2pro:~/sbase.zip . # 下载sbase.zip到当前目录。经测试，同局域网内下载速度为726KB/s
+```
+<!-- #endregion -->
+
+###### 上传文件
+
+<!-- #region -->
+```bash
+scp testforscp.txt termux-bs2pro:~/testfromscpfrom_8xmax.txt
+```
+<!-- #endregion -->
+
+###### 下载目录
+
+<!-- #region -->
+```bash
+scp -r termux-bs2pro:~/ghub ghub
+```
+<!-- #endregion -->
 
 #### proot，给termux一个root权限的入口
 ```
@@ -173,21 +252,24 @@ colorscheme solarized
 ##### 修改完善配置
 
 
-配置文件地址：`~/.zshrc`
+**配置文件地址：`~/.zshrc`**
 
-
-给系统指定编辑器（很多程序会默认调用，比如nnn、apt edit-sources），在合适的位置添加一行：
-```
+<!-- #region -->
+1. 给系统指定编辑器（很多程序会默认调用，比如nnn、apt edit-sources），在合适的位置添加一行：
+```ini
 export EDITOR=vim
 ```
-
-在配置文件尾部添加几行：
-```zsh
+2. 添加脚本库目录到环境变量
+```ini
+export PATH=~/sbase:$PATH
+```
+3. 个性化脚本和必要服务、设置，在配置文件尾部添加几行：
+```bash
 ~/sbase/startcronserver.sh    # 启动cron服务器且通过脚本确保仅启动一次
 sshd # 启动ssh服务，接受远程登录
 termux-wake-lock # 避免termux睡死
 ```
-
+<!-- #endregion -->
 
 #### tmux，多窗口服务器型终端
 
@@ -676,21 +758,59 @@ tar -c 一个纯洁的路径 | nc 192.168.1.103 9999
 ```
 <!-- #endregion -->
 
+### `git`
+
+<!-- #region -->
+1. 配置git用户名和邮箱
+```bash
+git config --global user.name "heart5"
+git config --global user.email "baiyefeng@gmail.com"
+```
+在config后加上 --global 即可全局设置用户名和邮箱
+
+2. 生成ssh key
+`ssh-keygen -t rsa -C "baiyefeng@gmail.com"`
+
+    默认在~/.ssh 目录下生成id_rsa和id_rsa.pub两个文件。如果更改了默认名称，则在当前目录下生成相应的两个文件。
+    *需要给公匙私匙设置适合的文件权限600才能正确读取使用*
+```bash
+chmod -777 id_rsa_github*
+chmod +600 id_rsa_github*
+```
+3. 上传key到github
+    1. 复制id_rsa.pub中文本内容（也就是key）到粘贴板。`python etc/mailfun.py ~/.ssh/id_rsa_github.pub -to note`
+    2. 登录github
+    3. 右上方Accounting setting
+    4. 选择SSH 和 GPG keys
+    5. 点击Add SSH key。注意给予合适的命名，建议和运行平台计算机名称关联起来方便以后查阅。
+    
+4. 解决本地多个ssh key的问题
+    1. 配置git用户名和邮箱
+    2. 生成ssh key时指定保存的文件名
+    3. 新增并配置config文件。如果config文件不存在，先添加；存在则直接修改
+touch ~/.ssh/config
+添加如下内容：
+```ini
+Host *github.com
+IdentityFile ~/.ssh/id_rsa_github
+User heart5
+```
+注意事项：如果known_hosts中有无效的key请删除，否则github.com回发出反探测警告并拒绝连接。
+
+5. 测试是否配置成功
+```bash
+ssh -T git@github.com
+```
+
+6. 进入代码项目目录下，操作时不成功需要重新初始化
+git init
+然后本地代码基地目录再拉库（会自动建立以项目名称命名的文件夹）
+git clone https://github.com/heart5/everwork
+<!-- #endregion -->
+
 <!-- #region toc-hr-collapsed=true toc-nb-collapsed=true -->
 ## python的各种必须工作库
 <!-- #endregion -->
-
-### 更换pip安装源
-
-
-修改~/.pip/pip.conf（如果没有此文件，可以创建此文件夹和文件）
-
-```ini
-index-url = https://pypi.tuna.tsinghua.edu.cn/simple
-[install]
-trusted-host = pypi.tuna.tsinghua.edu.cn
-```
-
 
 ### numpy、pandas、scipy和jupyter等等
 
@@ -837,6 +957,42 @@ echo ""
 !vim --version | grep clipboard
 ```
 
+#### 华为P8max（android版本：5.1.1）
+
+
+用以上脚本安装，在pandas安装时总是出错。试试老方法。（这也就意味着有不老少库是经过ML脚本已经安装过的）
+
+
+##### 更新pip源
+
+
+**更改pip源为国内**
+
+linux系统下，修改 ~/.pip/pip.conf (没有就创建一个)， 内容如下：
+```ini
+[global]
+index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+
+#### 相关安装
+
+<!-- #region -->
+```bash
+apt install python2 python # 安装了老版本的python2和现有版本的python3
+pip install --upgrade pip # 升级pip到最新版本
+pip install BeautifulSoup4 requests
+apt-get --assume-yes install pkg-config clang libxml2 libxslt libcrypt
+apt install openssl openssl-tool
+pip install lxml Cython # 安装lxml时转了半天
+pip install scrapy # 成功安装
+apt --assume-yes install fftw libzmq freetype libpng
+LDFLAGS=" -lm -lcompiler_rt" pip install numpy==1.12.1 # 除开itpointless安装法，在P8max上还真只有这个版本可以安装成功
+LDFLAGS=" -lm -lcompiler_rt" pip install pandas jupyter
+LDFLAGS=" -lm -lcompiler_rt" pip install matplotlib scipy
+```
+<!-- #endregion -->
+
 ### everwork相关
 
 <!-- #region -->
@@ -964,6 +1120,44 @@ pip install pillow
 pip --default-timeout=500 install -U Pillow
 ```
 <!-- #endregion -->
+
+## jupyter notebook配置
+
+
+1. 配置文件和密码
+
+    `jupyter notebook --generate-config`
+    
+    在~/.jupyter文件夹下生成一个jupyter_notebook_config.py配置文件
+    
+    `jupyter notebook password    # 如果4`
+    
+    生成远程登录需要的密码,自己填,密码会直接输出到jupyter_notebook_config.json文件
+
+2. 编辑配置文件
+    ```ini
+    # Set ip to '*' to bind on all interfaces (ips) for the public server
+    c.NotebookApp.ip = '*'
+    c.NotebookApp.open_browser = False
+
+    # It is a good idea to set a known, fixed port for server access
+    c.NotebookApp.port = 8888
+
+    c.Notebookapp.allow_remote_access = True
+    c.NotebookApp.allow_root = True
+    ```
+3. 启动即可,记着搞清楚服务器的ip地址(ifconfig)
+
+    `jupyter notebook --allow-root`
+
+4. 访问地址，网址形如：`192.168.154.114:8888`
+
+5. 支持jupytext
+在配置文件末尾加入：
+```ini
+c.NotebookApp.contents_manager_class = "jupytext.TextFileContentsManager"
+```
+
 
 ## Jupyterlab安装使用
 
