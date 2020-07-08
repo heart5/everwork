@@ -1,4 +1,4 @@
-# coding=utf8
+# coding:utf-8
 """
 微信联系人管理
 """
@@ -7,10 +7,9 @@ from pathlib import Path
 from io import BytesIO
 import time
 import random
-# import numpy as np
 import sqlite3 as lite
 from PIL import Image
-# import os
+import os
 import sys
 import pandas as pd
 import numpy as np
@@ -26,24 +25,14 @@ with pathmagic.context():
     from func.logme import log
     from func.sysfunc import uuid3hexstr, sha2hexstr
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
-    from func.nettools import isitchat
-
-
-def getownername():
-    """
-    获取登录用户的昵称（NickName），当然默认登录微信
-    """
-    # pklabpath = os.path.relpath(touchfilepath2depth(getdirmain() / 'itchat.pkl'))
-    pklabpath = getdirmain() / 'itchat.pkl'
-    if isitchat(pklabpath):
-        return itchat.search_friends()['NickName']
-
-
-def getdbname(dbpath: str, ownername: str):
-    return touchfilepath2depth(getdirmain() / dbpath / f"wccontact_{ownername}.db")
+    from func.filedatafunc import getdbname
+    from func.wcfuncs import getownername
 
 
 def checktable(dbpath: str, ownername: str):
+    """
+    检查数据表是否存在并根据情况创建
+    """
     if not (ifcreated := getcfpoptionvalue('everwebchat', 'wcdb', ownername)):
         print(ifcreated)
         dbnameinner = getdbname(dbpath, ownername)
@@ -74,7 +63,7 @@ def getimguuid(inputbytes: bytes):
     
     return sha2hexstr(np.array(imgfrombytes))
 
-        
+
 def getwcdffromfrdlst(frdlst: list, howmany: str='fixed', needheadimg=False):
 
     def yieldrange(startnum: int, width: int = 20):
@@ -249,9 +238,12 @@ def showwcsimply(inputdb: pd.DataFrame):
 
 
 if __name__ == '__main__':
-    logstr = f'运行文件\t{__file__}'
-    log.info(logstr)
 
+    try:
+        logstr = f'运行文件\t{__file__}'
+        log.info(logstr)
+    except NameError as ne:
+        log.info(f"于notebook环境中调试，无法正常调用参数：__file__。运行环境：{sys.executable}\t{os.path.abspath(sys.argv[0])}")
     # note_store = get_notestore()
 
     # just4test()
@@ -267,5 +259,10 @@ if __name__ == '__main__':
     # dbpath = Path("data")/ 'db'
     # checktable(dbpath, owner)
 
-    logstr = f'{__file__}\t运行结束！'
-    log.info(logstr)
+    try:
+        logstr = f'{__file__}\t运行结束！'
+        log.info(logstr)
+    except NameError as ne:
+        log.info(f"于notebook环境中调试，无法正常调用参数：__file__。运行环境：{sys.executable}\t{os.path.abspath(sys.argv[0])}")
+
+
