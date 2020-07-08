@@ -52,8 +52,8 @@ def inserttimeitem2db(dbname: str, timestampinput: int):
         )
 #         print(f"数据成功写入{dbname}\t{(timestampinput, elsmin)}")
         conn.commit()
-    except lite.IntegrityError as lie:
-        logstr = f"键值重复错误\t{lie}"
+    except Exception as e:
+        logstr = f"数据库文件{dbname}存取错误！{e}"
         log.critical(logstr)
     finally:
         if conn:
@@ -88,7 +88,7 @@ def getdelaydb(dbname: str, tablename="wcdelaynew"):
         )
         timedfgrp = timedf.set_index("time")     
     else:
-        return
+        return 0, tmpdf
 
     if (tdfsize := timedfgrp.shape[0]) != 0:
         print(f"延时记录共有{tdfsize}条")
