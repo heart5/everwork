@@ -440,6 +440,8 @@ def findnewthenupdatenote(qrfile: str, cfpfile, cfpsection, pre, desc, sendmail=
                 else:
                     filecontent = open(qrfile, 'r').read()
                 filecontent = re.sub('<', '《', filecontent)
+                if len(filecontent) > 500000:
+                    filecontent = filecontent[:500000] + "\n\n\n太长了，切成500k\n\n\n"
                 qrtstr = f"{qrfiletimenew},{qrfiletimeini}"
                 qrtstrlst = [ x for x in qrtstr.split(',') if len(x) != 0]
                 qrtstrflst = [timestamp2str(float(x)) for x in qrtstrlst]
