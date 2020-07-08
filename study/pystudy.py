@@ -14,6 +14,28 @@
 #     name: python3
 # ---
 
+# ## 杂项试验田
+
+# +
+# ?
+# -
+
+# ## PrettyTable
+
+from prettytable import PrettyTable, from_html_one, from_html, from_csv, from_db_cursor
+table = PrettyTable(['No.', 'CVI', 'VUL', 'Rule', 'Lang', 'Level-Score', 'Target', 'Commit(Time, Author)', 'Source Code Content', 'Analysis'])
+table.align = 'l'
+trigger_rules = []
+row = ["1", "130001", "HCP", "password", "PHP", "L-02: ■■□□□□□□□□", "config.php:32", "Unknown, @Unknown", "$dbpassword = 'root';", "REGEX-ONLY-MATCH"]
+table.add_row(row)
+print(table)
+
+??from_csv
+
+??from_db_cursor
+
+??from_html_one
+
 # ## 运行时间管理
 
 # ### `signal`，适用于linux操作系统
@@ -54,7 +76,10 @@ def set_timeout(num, callback):
  
     return wrap
  
-def after_timeout():  # 超时后的处理函数
+def after_timeout():  
+    """
+    超时后的处理函数
+    """
     print("Time out!")
 
 
@@ -62,7 +87,10 @@ def after_timeout():  # 超时后的处理函数
 # -
 
 @set_timeout(2, after_timeout)  # 限时 2 秒超时
-def connect(strtest: str = "I\'m just a test."):  # 要执行的函数
+def connect(strtest: str = "I\'m just a test."):  
+    """
+    要执行的函数
+    """
     time.sleep(3)  # 函数执行时间，写大于2的值，可测试超时
     print(strtest)
     print('Finished without timeout.')
