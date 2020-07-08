@@ -33,7 +33,9 @@ def setcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str, optio
 def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
     cfpin, cfpinpath = getcfp(cfpfilename)
     if not cfpin.has_section(sectionname):
-        print(f"seticon {sectionname} is not exists.")
+        print(f"seticon {sectionname} is not exists. Then creating it now ...")
+        cfpin.add_section(sectionname)
+        cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
         return
     if not cfpin.has_option(sectionname, optionname):
         print(f"option {optionname} is not exists.")
@@ -80,5 +82,4 @@ if __name__ == '__main__':
     print(f'开始测试文件\t{__file__}')
     cp, cppath = getcfp('everwork')
     print(cp, cppath)
-    print(inizysmpath)
     print('Done.')
