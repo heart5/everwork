@@ -14,6 +14,8 @@
 #     name: python3
 # ---
 
+# # everwork瑞士军刀
+
 # 显示所有变量值
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_node_interactivity = "all"
