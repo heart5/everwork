@@ -1,35 +1,33 @@
-#! /data/data/com.termux/files/usr/bin/python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
 获取服务器ip并定期更新至相关笔记
 """
 
-from threading import Timer
 import os
 import sys
 import datetime
 import platform
-import subprocess
-import socket
-import requests
 # import urllib2
-import re
-import pathmagic
 import evernote.edam.type.ttypes as ttypes
+import pathmagic
 
 with pathmagic.context():
-    from func.first import getdirmain, dirmainpath
+    from func.first import dirmainpath
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
-    from func.nettools import get_host_ip, get_ip, get_ip4alleth
+    from func.nettools import get_ip4alleth
     from func.datatools import readfromtxt, write2txt
-    from func.evernttest import get_notestore, imglist2note, timestamp2str, makenote, evernoteapijiayi, readinifromnote
+    from func.evernttest import get_notestore, imglist2note, makenote
+    from func.evernttest import evernoteapijiayi, readinifromnote
     from func.logme import log
-    from func.wrapfuncs import timethis, ift2phone
-    from func.termuxtools import termux_telephony_deviceinfo, termux_telephony_cellinfo, termux_wifi_connectioninfo, termux_wifi_scaninfo, battery_status
+    from func.termuxtools import termux_wifi_connectioninfo
     from etc.getid import getdeviceid
 
 
 def iprecord():
+    """
+    获取本机ip
+    """
     device_id = getdeviceid()
     ip = wifi = wifiid = tun = None
     ethlst = get_ip4alleth()
@@ -58,7 +56,8 @@ def iprecord():
             print(wifiinfo)
             wifi = wifiinfo['ssid']
             if wifi.find('unknown ssid') >= 0:
-                log.warning(f'WIFI处于假连状态：{wifi}\t{ipinner}')
+                logstr = f'WIFI处于假连状态：{wifi}\t{ipinner}'
+                log.warning(logstr)
                 wifi = None
                 continue
             wifiid = wifiinfo['bssid']
@@ -67,19 +66,25 @@ def iprecord():
     return ip, wifi, wifiid, tun, device_id
 
 
-def evalnone(input):
-    if input == 'None':
-        return eval(input)
-    else:
-        return input
+def evalnone(input1):
+    """
+    转换从终端接收数据的数据类型
+    """
+    if input1 == 'None':
+        return eval(input1)
+    return input1
 
 
 def showiprecords():
+    """
+    综合输出ip记录
+    """
     namestr = 'everip'
     ip, wifi, wifiid, tun, device_id = iprecord()
     if ip is None:
-        log.critical('无效ip，可能是没有处于联网状态')
-        exit(1)
+        logstr = '无效ip，可能是没有处于联网状态'
+        log.critical(logstr)
+        sys.exit(1)
     print(f'{ip}\t{wifi}\t{wifiid}\t{tun}\t{device_id}')
     if not (guid := getcfpoptionvalue(namestr, device_id, 'guid')):
         token = getcfpoptionvalue('everwork', 'evernote', 'token')
@@ -122,7 +127,8 @@ def showiprecords():
         itemread = readfromtxt(txtfilename)
         itemclean = [x for x in itemread if 'unknown' not in x]
         itempolluted = [x for x in itemread if 'unknown' in x]
-        log.info(f"不合法记录列表：\t{itempolluted}")
+        logstr = f"不合法记录列表：\t{itempolluted}"
+        log.info(logstr)
         itemnewr = [
             f'{ipr}\t{wifir}\t{wifiidr}\t{tunr}\t{startr}\t{nowstr}']
         itemnewr.extend(itemclean)
@@ -144,12 +150,14 @@ def showiprecords():
         setcfpoptionvalue(namestr, device_id, 'start', start)
         # 把笔记输出放到最后，避免更新不成功退出影响数据逻辑
         imglist2note(get_notestore(), [], guid,
-                     f'服务器_{device_name}_ip更新记录', "<pre>" + "\n".join(itemnew) + "</pre>")
+                     f'服务器_{device_name}_ip更新记录', "<pre>"
+                     + "\n".join(itemnew) + "</pre>")
 
 
 if __name__ == '__main__':
-    log.info(
-        f'开始运行文件\t{__file__}\t{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co_filename}')
+    logstr2 = f'开始运行文件\t{__file__}\t{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co_filename}'
+    log.info(logstr2)
     showiprecords()
     # print(f"{self.__class__.__name__}")
-    log.info(f'文件\t{__file__}\t执行完毕')
+    logstr1 = f'文件\t{__file__}\t执行完毕'
+    log.info(logstr1)
