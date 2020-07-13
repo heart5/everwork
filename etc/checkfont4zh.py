@@ -3,8 +3,8 @@
 查询linux系统下的可用中文字体
 """
 
-from matplotlib.font_manager import FontManager
 import subprocess
+from matplotlib.font_manager import FontManager
 import pathmagic
 
 with pathmagic.context():
@@ -12,6 +12,9 @@ with pathmagic.context():
 
 
 def getavailablezhfont():
+    """
+    获取系统中安装的中文字体列表
+    """
     fm = FontManager()
     mat_fonts = set(f.name for f in fm.ttflist)
 
