@@ -120,7 +120,8 @@ def showbattinfoimg(dbname: str, jingdu: int = 300):
         tmax = timedfinner.index.max()
         shicha = tmax - tmin
         bianjie = int(shicha.total_seconds() / 40)
-        print(f"左边界：{bianjie}秒，也就是大约{int(bianjie / 60)}分钟")
+        logstr = f"左边界：{bianjie}秒，也就是大约{int(bianjie / 60)}分钟"
+        print(logstr)
         # plt.xlim(xmin=tmin-pd.Timedelta(f'{bianjie}s'))
         plt.subplot(pos)
         plt.xlim(xmin=tmin)
