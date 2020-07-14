@@ -7,7 +7,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.2'
-      jupytext_version: 1.3.1
+      jupytext_version: 1.5.0
   kernelspec:
     display_name: Python 3
     language: python
@@ -31,6 +31,7 @@ jupyter:
 * 也不用什么密匙公匙的（当然要加强jupyter-lab的安全性为前提）
 
 那就先这样，windows 10 任务栏上的固定按钮putty可以取消了。
+【后悔药，右键粘贴的失效是因为tmux的mouse设置导致，在tmux中运行`set -g mouse off`即可。
 
 ```python
 
