@@ -1,6 +1,6 @@
 # encoding:utf-8
 """
-功能描述
+获取主机的唯一id
 """
 
 # import os
@@ -73,6 +73,7 @@ def getdeviceid():
             print(f"运行termux专用库出错{e}\n下面尝试用主机名代替")
             try:
                 idstr = execcmd("uname -n")
+                print(idstr)
                 uid = uuid.uuid3(uuid.NAMESPACE_URL, idstr)
                 # print(uid)
                 print(hex(hash(uid)))
@@ -94,9 +95,16 @@ def getdeviceid():
 
 
 if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
+    selfname = ''
+    try:
+        selfname = __file__
+    except Exception as e:
+        print(e)
+    log.info(f'运行文件\t{selfname}')
     id = getdeviceid()
     print(id)
     devicename = getinivaluefromnote('device', id)
     print(f"{devicename}")
-    log.info(f'文件\t{__file__}\t测试完毕。')
+    log.info(f'文件\t{selfname}\t测试完毕。')
+
+
