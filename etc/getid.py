@@ -3,8 +3,8 @@
 功能描述
 """
 
-import os
-import sys
+# import os
+# import sys
 import platform
 import uuid
 # import wmi_client_wrapper as wmi
@@ -12,10 +12,10 @@ import uuid
 import pathmagic
 with pathmagic.context():
     from func.logme import log
-    from func.configpr import getcfp, getcfpoptionvalue, setcfpoptionvalue
-    from func.wrapfuncs import timethis, ift2phone
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
+#     from func.wrapfuncs import timethis, ift2phone
     from func.evernttest import getinivaluefromnote
-    from func.termuxtools import termux_location, termux_telephony_deviceinfo
+    from func.termuxtools import termux_telephony_deviceinfo
     from func.sysfunc import execcmd
     try:
         import wmi
@@ -78,8 +78,9 @@ def getdeviceid():
                 print(hex(hash(uid)))
                 id = hex(hash(uid))
             except Exception as e:
-                print(f"天啊，命令行都不成！只好强行赋值了")
+                print("天啊，命令行都不成！只好强行赋值了")
                 id = 123456789
+                type(e)
 #                 raise
     else:
         log.critical('既不是Windows也不是Linux，那是啥啊。只好强行赋值了！！！')
