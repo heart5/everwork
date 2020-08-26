@@ -133,6 +133,46 @@ print(ans)
 
 # 给出一个数，比如432，按照一定的步长，比如50，分组。形如：(0, 50, 50), (50, 50, 100), (100, 50, 150), (150, 50, 200),...,(400, 32, 432)
 
-432 // 50 + 1
+number = 432
+width = 50
+amounts = number // width + 1
+(number, width, amounts)
+
+for i in range(amounts):
+    print((i * width, width,i * width + width) )
+
+for i in range(amounts -1):
+    print((i * width, width,i * width + width) )
+tailtuple = tuple((width * (amounts - 1), width, number))
+print(tailtuple)
+
+ahhahh = "ddd"
+print("ddd")
+
+# ### 小明体重在增长
+
+age = [7, 8, 9, 10]
+weight = [22.7, 24.6, 27.5, 29.8]
+
+# ### 求体重增加
+
+# ##### 体重最高值减去最低值
+
+increment1 = max(weight) - min(weight)
+print(round(increment1, 2))
+
+# ##### 10岁时体重减去7岁时体重
+
+increment2 = weight[-1] - weight[0]
+print(round(increment2, 2))
+
+# ### 求哪年长的最多
+
+iii = 0
+for iii in range(len(weight) - 1):
+    print(round(weight[iii+1] - weight[iii], 2))
+
+ddd = 29.8-22.7
+print(ddd)
 
 
