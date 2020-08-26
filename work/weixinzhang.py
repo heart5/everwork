@@ -1,20 +1,21 @@
+# -*- coding: utf-8 -*-
 """
 处理微信相关账务事宜
 """
 
 import re
 import os
+import sys
 import pandas as pd
 
 import pathmagic
-
 with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.evernttest import get_notestore, imglist2note, tablehtml2evernote, getinivaluefromnote, getnotecontent
-    from func.splitwebchatmsgs import fulltxt
- 
+    from func.wcfuncs import fulltxt
+
 
 def finance2note(srccount, rstdf, mingmu, mingmu4ini, title):
     print(f"df索引名称为：{rstdf.index.name}")
@@ -140,8 +141,7 @@ def caiwu2note(itemname, itemnameini, rstdf, clnameswithindex):
     setcfpoptionvalue('everwebchat', 'finance', f'{itemname}lcsum', f"{itemslcsum}")
 
 
-def showjinzhang():
-    indf = fulltxt()
+def showjinzhang(indf):
     # dfgpc = indf.groupby(['name']).count()
     sdzzdf = indf[indf.content.str.contains('^收到转账')].loc[:,['time', 'send', 'name', 'content']]
     sdzzdfclnames = list(sdzzdf.columns)
@@ -244,8 +244,7 @@ def showjinzhang():
     # print(rsdf)
 
 
-def pickupzhuanzhanghuizongfromdf():
-    indf = fulltxt()
+def pickupzhuanzhanghuizongfromdf(indf):
     # indf = indf[indf.name == '微信支付']
     sdzzdf = indf[indf.content.str.contains('^转账收款汇总通知')].loc[:,['time', 'send', 'name', 'content']]
     # print(f"{sdzzdf['content']}")
@@ -264,8 +263,7 @@ def pickupzhuanzhanghuizongfromdf():
     return rstdf, clnameswithindex
 
 
-def pickupshoukuanfromdf():
-    indf = fulltxt()
+def pickupshoukuanfromdf(indf):
     sdzzdf = indf[indf.content.str.contains('^微信支付收款')].loc[:,['time', 'send', 'name', 'content']]
     sdzzdf['amount'] = sdzzdf['content'].apply(lambda x : re.findall('([0-9]+\.[0-9]+)', x)[0])
     sdzzdf['memo'] = sdzzdf['content'].apply(lambda x : re.findall('[付收]款方备注(.*)', x)[0] if re.findall('[付收]款方备注(.*)', x) else None)
@@ -279,17 +277,17 @@ def pickupshoukuanfromdf():
     return rstdf, clnameswithindex
 
 
-def showzhuanzhanghuizong():
+def showzhuanzhanghuizong(indf):
     itemname = '微信转账日汇'
     itemnameini = 'wxzzrh'
-    rstdf, clnameswithindex = pickupzhuanzhanghuizongfromdf()
+    rstdf, clnameswithindex = pickupzhuanzhanghuizongfromdf(indf)
     caiwu2note(itemname, itemnameini, rstdf, clnameswithindex)    
 
 
-def showshoukuan():
+def showshoukuan(indf):
     itemname = '微信号收款'
     itemnameini = 'wxhsk'
-    rstdf, clnameswithindex = pickupshoukuanfromdf()
+    rstdf, clnameswithindex = pickupshoukuanfromdf(indf)
     caiwu2note(itemname, itemnameini, rstdf, clnameswithindex)    
 
 
@@ -304,13 +302,17 @@ def otherszhang(indf):
 
 
 def showfinance():
-    showjinzhang()
-    showzhuanzhanghuizong()
-    showshoukuan()
+    indf = fulltxt()
+    showjinzhang(indf)
+    showzhuanzhanghuizong(indf)
+    showshoukuan(indf)
 
 
 if __name__ == '__main__':
-    log.info(f'开始运行文件\t{__file__}')
+    try:
+        log.info(f'开始运行文件\t{__file__}')
+    except NameError as ne:
+        log.info(f"于notebook环境中调试，无法正常调用参数：__file__。运行环境：{sys.executable}\t{os.path.abspath(sys.argv[0])}")
     # jinzhangfixguid = '39c0d815-df23-4fcc-928d-d9193d5fff93' 
     # shoukuanrihuizongguid = '25b6e71d-5f43-4147-b45c-8147b35c8f00'
     # skrhzdf = getfix4finance(shoukuanrihuizongguid, ['date', 'count', 'sum'])
@@ -319,4 +321,9 @@ if __name__ == '__main__':
     # showshoukuan()
     # showzhuanzhanghuizong()
     showfinance()
-    log.info(f'{__file__}\t文件运行结束。')
+    try:
+        log.info(f'{__file__}\t文件运行结束。')
+    except NameError as ne:
+        log.info(f"于notebook环境中调试，无法正常调用参数：__file__。运行环境：{sys.executable}\t{os.path.abspath(sys.argv[0])}")
+
+

@@ -60,7 +60,10 @@ def set_timeout(num, callback):
     return wrap
 
 
-def after_timeout():  # 超时后的处理函数
+def after_timeout():  
+    """
+    超时后的处理函数
+    """
 #     log.critical(sys._getframe().f_code.co_name)
 #     log.critical(sys._getframe().f_back.f_lineno)
 #     log.critical(sys._getframe().f_code.co_filename)

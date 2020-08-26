@@ -196,6 +196,38 @@ len(notelst)
 ns = get_notestore()
 ntguid = notelst[5][0]
 
+
+# ###### `splitcontentfromnotemysms`
+
+def splitcontentfromnotemysms(noteguid: str):
+    
+    @trycounttimes2('evernote服务器')
+    def gettitleandcontent(ntguid: str):
+        ns = get_notestore()
+        nttitle = ns.getNote(ntguid, False, False, False, False).title
+        evernoteapijiayi()
+        ntcontent = ns.getNoteContent(ntguid)
+        evernoteapijiayi()
+        
+        return nttitle, ntcontent
+    nstitle, notecontent = gettitleandcontent(noteguid)
+    titlesplitlst = nstitle.split(" ")
+    name = titlesplitlst[0]
+    number = titlesplitlst[1].replace("+86", "")
+    print(name, number)
+    nclines = BeautifulSoup(notecontent, 'lxml').find('en-note').find_all('div')
+    tiqulst = [[(False, True)[re.findall("float:(left|right)", item.attrs['style'])[0] == 'right']] + [line.strip() for line in item.text.split(":", 1)] for item in nclines]
+    ptntime = re.compile("\d+:\d+\s+[A|P]M, \d+/\d+/\d+")
+    tiqudonelst = [[line[0], name, number, re.sub(ptntime, "", line[2]), pd.to_datetime(re.findall(ptntime, line[2])[0]), 'sms'] for line in tiqulst]
+
+    smsnotedf = pd.DataFrame(tiqudonelst, columns=['sent', 'name', 'number', 'content', 'time', 'type'])
+    smsnotedf['smsuuid'] = smsnotedf[['sent', 'name', 'number', 'time', 'content']].apply(lambda x: sha2hexstr(list(x.values)), axis=1)
+    
+    return [name], smsnotedf[['sent', 'name', 'number', 'time', 'content', 'smsuuid', 'type']].sort_values('time', ascending=False)
+
+
+splitcontentfromnotemysms(notelst[5][0])
+
 nttitle = ns.getNote(ntguid, False, False, False, False).title
 evernoteapijiayi()
 ntcontent = ns.getNoteContent(ntguid)
@@ -238,8 +270,11 @@ nclines = BeautifulSoup(ntcontent, 'lxml').find('en-note')
 nclines.find_all('div')
 
 nttitle
-for item in nclines.find_all('div'):
-    re.findall("float:(left|right)", item.attrs['style']), item.text
+tiqulst = [[(False, True)[re.findall("float:(left|right)", item.attrs['style'])[0] == 'right']] + [line.strip() for line in item.text.split(":", 1)] for item in nclines.find_all('div')]
+tiqulst
+
+ptntime = re.compile("\d+:\d+\s+[A|P]M, \d+/\d+/\d+")
+[[line[0], line[1], re.sub(ptntime, "", line[2]), pd.to_datetime(re.findall(ptntime, line[2])[0])] for line in tiqulst]
 
 [item for item in notelst if item[1] == '李红亮']
 

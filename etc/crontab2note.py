@@ -59,6 +59,7 @@ def findcronlogthenupdate():
     print(ewlogfiles)
     for item in ewlogfiles:
         # pre = re.split(ptn, item)[1].replace('.', '_')
+        print(item)
         pre = item.replace('.', '_').replace('ew_', '')
         if item.endswith('.log'):
             itempath = Path(logpath) / item

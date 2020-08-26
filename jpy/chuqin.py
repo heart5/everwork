@@ -36,6 +36,9 @@ with pathmagic.context():
 
 # + {"pycharm": {"is_executing": false}}
 def tongjichuqin():
+    """
+    人生自古
+    """
     print(f"first line")
     print(f"first line")
     pass

@@ -2,20 +2,23 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_json: true
 #     formats: ipynb,py:light
 #     text_representation:
 #       extension: .py
 #       format_name: light
-#       format_version: '1.4'
-#       jupytext_version: 1.2.1
+#       format_version: '1.5'
+#       jupytext_version: 1.3.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python3
 # ---
 
+# # 测试专用栏
+
 import datetime, os
-print('hih8hh')
+print('home is warmful')
 print(datetime.datetime.now().strftime('%F %T'))
 
 # +

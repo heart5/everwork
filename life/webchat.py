@@ -491,7 +491,7 @@ def text_reply(msg):
                 # rstfile必须是绝对路径，并且不能包含中文字符
                 itchat.send_file(rstfile, toUserName=msg['FromUserName'])
                 # 发给自己一份存档
-                makemsg2write(innermsg,rstfile.replace(os.path.abspath(dirmainpath)))
+                makemsg2write(innermsg,rstfile.replace(os.path.abspath(dirmainpath),""))
                 itchat.send_file(rstfile)
                 infostr = f"成功发送查询结果文件：{os.path.split(rstfile)[1]}给{innermsg['fmSender']}"
                 itchat.send_msg(infostr)

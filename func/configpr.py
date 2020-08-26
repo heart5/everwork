@@ -1,8 +1,8 @@
 # encoding:utf-8
 """
-输出相应的配置处理器
-可用的处理有：everwork, everdatanote, everlife, everzysm, everworkplan
+配置处理器相关的功能函数
 """
+
 import re
 from pathlib import Path
 from configparser import ConfigParser
@@ -10,6 +10,16 @@ import pathmagic
 
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
+
+
+def removesection(cfpfilename: str, sectionname: str):
+    """
+    删除指定section，默认清除其下面的所有option
+    """
+    cfpin, cfpinpath = getcfp(cfpfilename)
+    if cfpin.has_section(sectionname):
+        cfpin.remove_section(sectionname)
+        cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
 
 
 def getcfp(cfpfilename: str):
@@ -33,7 +43,9 @@ def setcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str, optio
 def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
     cfpin, cfpinpath = getcfp(cfpfilename)
     if not cfpin.has_section(sectionname):
-        print(f"seticon {sectionname} is not exists.")
+        print(f"seticon {sectionname} is not exists. Then creating it now ...")
+        cfpin.add_section(sectionname)
+        cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
         return
     if not cfpin.has_option(sectionname, optionname):
         print(f"option {optionname} is not exists.")
@@ -80,5 +92,4 @@ if __name__ == '__main__':
     print(f'开始测试文件\t{__file__}')
     cp, cppath = getcfp('everwork')
     print(cp, cppath)
-    print(inizysmpath)
     print('Done.')

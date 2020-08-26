@@ -1,10 +1,10 @@
 # encoding:utf-8
 """
-功能描述
+获取主机的唯一id
 """
 
-import os
-import sys
+# import os
+# import sys
 import platform
 import uuid
 # import wmi_client_wrapper as wmi
@@ -12,10 +12,10 @@ import uuid
 import pathmagic
 with pathmagic.context():
     from func.logme import log
-    from func.configpr import getcfp, getcfpoptionvalue, setcfpoptionvalue
-    from func.wrapfuncs import timethis, ift2phone
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
+#     from func.wrapfuncs import timethis, ift2phone
     from func.evernttest import getinivaluefromnote
-    from func.termuxtools import termux_location, termux_telephony_deviceinfo
+    from func.termuxtools import termux_telephony_deviceinfo
     from func.sysfunc import execcmd
     try:
         import wmi
@@ -73,13 +73,15 @@ def getdeviceid():
             print(f"运行termux专用库出错{e}\n下面尝试用主机名代替")
             try:
                 idstr = execcmd("uname -n")
+                print(idstr)
                 uid = uuid.uuid3(uuid.NAMESPACE_URL, idstr)
                 # print(uid)
                 print(hex(hash(uid)))
                 id = hex(hash(uid))
             except Exception as e:
-                print(f"天啊，命令行都不成！只好强行赋值了")
+                print("天啊，命令行都不成！只好强行赋值了")
                 id = 123456789
+                type(e)
 #                 raise
     else:
         log.critical('既不是Windows也不是Linux，那是啥啊。只好强行赋值了！！！')
@@ -93,9 +95,16 @@ def getdeviceid():
 
 
 if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
+    selfname = ''
+    try:
+        selfname = __file__
+    except Exception as e:
+        print(e)
+    log.info(f'运行文件\t{selfname}')
     id = getdeviceid()
     print(id)
     devicename = getinivaluefromnote('device', id)
     print(f"{devicename}")
-    log.info(f'文件\t{__file__}\t测试完毕。')
+    log.info(f'文件\t{selfname}\t测试完毕。')
+
+

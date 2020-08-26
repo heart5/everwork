@@ -11,6 +11,7 @@ import pathmagic
 with pathmagic.context():
     from func.logme import log
     from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.wrapfuncs import timethis
 
 
@@ -131,6 +132,23 @@ def droptablefromdb(dbname: str, tablename: str, confirm=False):
 
         conn.close()
 
+        
+def checktableindb(ininame: str, dbpath: str, tablename: str, creattablesql: str, confirm=False):
+    """
+    检查数据表（ini登记，物理存储）是否存在并根据情况创建
+    """
+    absdbpath = os.path.abspath(dbpath) # 取得绝对路径，用于作为section名称
+    if not (ifcreated := getcfpoptionvalue(ininame, absdbpath, tablename)):
+        print(ifcreated)
+        if istableindb(tablename, dbpath) and confirm:
+            # 删表操作，危险，谨慎操作
+            droptablefromdb(dbpath, tablename, confirm=confirm)
+            logstr = f"数据表{tablename}于{dbpath}中被删除"
+            log.critical(logstr)
+        ifnotcreate(tablename, creattablesql, dbpath)
+        
+        setcfpoptionvalue(ininame, absdbpath, tablename, str(True))
+        
 
 @timethis
 def compact_sqlite3_db(dbpath):

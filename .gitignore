@@ -1,3 +1,4 @@
+/.lsp_symlink/
 /.idea
 /.virtual_documents
 /data
@@ -18,3 +19,4 @@
 *tags*
 *QR.png
 /venv/
+sometxt.txt

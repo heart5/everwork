@@ -51,7 +51,7 @@ def checkphoneinfotable(dbname: str):
         logstr = f"数据表{tablename}在数据库{dbname}中构建成功"
         log.info(logstr)
 
-    # 短信数据表检查构建
+    # 联系人描述数据表检查构建
     if not (phonecontactdb := getcfpoptionvalue('everpim', str(getdeviceid()), 'phonectdesctable')):
         tablename = "ctdesc"
         print(phonecontactdb, tablename)
@@ -64,7 +64,7 @@ def checkphoneinfotable(dbname: str):
 
             
 def df2smsdb(indf: pd.DataFrame, tablename = "sms"):
-    dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "phonecontact.db")
+    dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"phonecontact_{getdeviceid()}.db")
     checkphoneinfotable(dbname)
     conn = lite.connect(dbname)
     recordctdf = pd.read_sql(f"select * from {tablename}", con=conn)
@@ -170,7 +170,7 @@ def splitcontentfromnote(noteguid: str):
     alllst = pcdone + wenbiaodone + fubiaofinal
     alldone = [[normalname(item[0], item[2], item[3]), item[1], item[2], item[3], item[4], item[5]] for item in alllst]
     smsnotedf = pd.DataFrame(alldone, columns=['name', 'time', 'number', 'content', 'type', 'sent'])
-    smsnotedf['smsuuid'] = smsnotedf[['sent', 'name', 'number', 'time', 'content']].apply(lambda x: sha2hexstr(list(x.values)), axis=1)
+    smsnotedf['smsuuid'] = smsnotedf[['sent', 'number', 'time', 'content']].apply(lambda x: sha2hexstr(list(x.values)), axis=1)
     
     return [nstitle, descpc + descnormal], smsnotedf[['sent', 'name', 'number', 'time', 'content', 'smsuuid', 'type']].sort_values('time', ascending=False)
 
@@ -190,8 +190,51 @@ def smsfromnotes2smsdb(notebookguid: str):
             df2smsdb(smsnotedf)
             guidchulilst.append(item[0])
             setcfpoptionvalue('everpim', "noteguid", 'noteguid', ','.join(guidchulilst))
+
+            
+def splitcontentfromnotemysms(noteguid: str):
     
+    @trycounttimes2('evernote服务器')
+    def gettitleandcontent(ntguid: str):
+        ns = get_notestore()
+        nttitle = ns.getNote(ntguid, False, False, False, False).title
+        evernoteapijiayi()
+        ntcontent = ns.getNoteContent(ntguid)
+        evernoteapijiayi()
+        
+        return nttitle, ntcontent
+    nstitle, notecontent = gettitleandcontent(noteguid)
+    titlesplitlst = nstitle.split(" ")
+    name = titlesplitlst[0]
+    number = titlesplitlst[1].replace("+86", "")
+    print(name, number)
+    nclines = BeautifulSoup(notecontent, 'lxml').find('en-note').find_all('div')
+    tiqulst = [[(False, True)[re.findall("float:(left|right)", item.attrs['style'])[0] == 'right']] + [line.strip() for line in item.text.split(":", 1)] for item in nclines]
+    ptntime = re.compile("\d+:\d+\s+[A|P]M, \d+/\d+/\d+")
+    tiqudonelst = [[line[0], name, number, re.sub(ptntime, "", line[2]), pd.to_datetime(re.findall(ptntime, line[2])[0]), 'sms'] for line in tiqulst]
+
+    smsnotedf = pd.DataFrame(tiqudonelst, columns=['sent', 'name', 'number', 'content', 'time', 'type'])
+    smsnotedf['smsuuid'] = smsnotedf[['sent', 'number', 'time', 'content']].apply(lambda x: sha2hexstr(list(x.values)), axis=1)
     
+    return [name], smsnotedf[['sent', 'name', 'number', 'time', 'content', 'smsuuid', 'type']].sort_values('time', ascending=False)
+
+
+def mysmsfromnotes2smsdb(notebookguid: str):
+    notelst = findnotefromnotebook(notebookguid)    
+    for item in notelst:
+        if not (guidchuli := getcfpoptionvalue('everpim', "notemysmsguid", 'noteguid')):
+            guidchulilst = []
+        else:
+            guidchulilst = guidchuli.split(',')
+        if item[0] not in guidchulilst:
+            log.info(item[0])
+            desclst, smsnotedf = splitcontentfromnotemysms(item[0])
+            log.info(desclst)
+            df2smsdb(smsnotedf)
+            guidchulilst.append(item[0])
+            setcfpoptionvalue('everpim', "notemysmsguid", 'noteguid', ','.join(guidchulilst))
+
+
 def phonesms2db():
     """
     手机短信数据入库
@@ -228,7 +271,7 @@ def phonecontact2db():
     ctdf['appendtime'] = time.time()
     print(ctdf.shape[0])
     tablename = "phone"
-    dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "phonecontact.db")
+    dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"phonecontact_{getdeviceid()}.db")
     checkphoneinfotable(dbname)
     conn = lite.connect(dbname)
     recordctdf = pd.read_sql(f"select * from {tablename}", con=conn)
@@ -244,7 +287,7 @@ def getphoneinfodb():
     从联系人信息数据表提取数据（DataFrame）
     """
 #     tablename = "wcdelaynew"
-    dbname = touchfilepath2depth(getdirmain() / "data" / "db" / "phonecontact.db")
+    dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"phonecontact_{getdeviceid()}.db")
     tablename="phone"
     checkphoneinfotable(dbname)
 
@@ -273,7 +316,7 @@ def showinfostream(keyin):
     pass
 
 
-def showphoneinfoimg(jingdu: int = 300):
+def showphoneinfoimg(jingdu: int = 300, showincell=False):
     '''
     show the img for phone info
     
@@ -292,7 +335,7 @@ def showphoneinfoimg(jingdu: int = 300):
     ctrecentstr = ctdf[ctdf.appendtime > descbegintime][-20:].to_string(justify='left', show_dimensions=True, index=False)
     contactoutstr += ctrecentstr
 
-    return lststr2img(contactoutstr, title="手机联系人综合描述")
+    return lststr2img(contactoutstr, title="手机联系人综合描述", showincell=showincell)
 
 
 if __name__ == "__main__":
@@ -300,8 +343,10 @@ if __name__ == "__main__":
     log.info(logstrouter)
     phonecontact2db()
     phonesms2db()
-    smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
-    smsfromnotes2smsdb(smsnbguid)
+#     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
+#     smsfromnotes2smsdb(smsnbguid)
+#     mysmsnbguid = "39625f3f-8ee7-486b-ab73-e6ca4f325be6"
+#     mysmsfromnotes2smsdb(mysmsnbguid)
     xinxian, tdf = getphoneinfodb()
     print(xinxian)
     print(tdf.sort_index(ascending=False))
