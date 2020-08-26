@@ -1,8 +1,8 @@
 # encoding:utf-8
 """
-输出相应的配置处理器
-可用的处理有：everwork, everdatanote, everlife, everzysm, everworkplan
+配置处理器相关的功能函数
 """
+
 import re
 from pathlib import Path
 from configparser import ConfigParser
@@ -10,6 +10,16 @@ import pathmagic
 
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
+
+
+def removesection(cfpfilename: str, sectionname: str):
+    """
+    删除指定section，默认清除其下面的所有option
+    """
+    cfpin, cfpinpath = getcfp(cfpfilename)
+    if cfpin.has_section(sectionname):
+        cfpin.remove_section(sectionname)
+        cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
 
 
 def getcfp(cfpfilename: str):
