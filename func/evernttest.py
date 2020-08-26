@@ -24,7 +24,7 @@ from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_M
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue, removesection
     from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.nettools import trycounttimes2
@@ -319,7 +319,7 @@ def createnotebook(nbname: str, stack='fresh'):
     notebook.stack = stack
     
     return get_notestore().createNotebook(gettoken(), notebook)
-    
+
 
 def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
     """
@@ -379,34 +379,43 @@ def timestamp2str(timestamp):
 
 
 def evernoteapijiayi():
-#     calllink = [re.findall("^《FrameSummary file (.+), line (\d+) in (.+)》$", line) for line in traceback.extract_stack()]
-#     calllinks = str(calllink[:-1])
-#     print(calllinks)
+    """
+    evernote api调用次数加一
+    """
+    cfpapiname = 'everapi'
+    nssectionname = 'notestore'
     note_store = get_notestore()
-    nsstr4ini = str(id(note_store))
+    nsstr4ini = hex(id(note_store))
     nowtime = datetime.datetime.now()
     nowmin = nowtime.minute
-    nowhourini = getcfpoptionvalue('everapi', 'apitimes', "hour")
-    # ns首次启动和整点重启（用小时判断）
-    if (not (apitimes := getcfpoptionvalue('everapi', 'notestore', nsstr4ini)) or ((nowmin == 0) and (nowhourini != nowtime.hour))):
-        if nowmin == 0:
-            log.critical(f"Evernote API\t{nsstr4ini} 调用次数整点重启^_^")
-        else:
-            log.critical(f"Evernote API\t{nsstr4ini} 新生^_^{inspect.stack()[-1]}")
-#             log.critical(f"Evernote API\t{nsstr4ini} 新生^_^{inspect.stack()[-1]}")
-        apitimes = 0
-    if nowhourini != nowtime.hour:
-        setcfpoptionvalue('everapi', 'apitimes', "hour", str(nowtime.hour))
-    apitimes += 1
-    log.debug(f'动用Evernote API({note_store})次数：\t {apitimes} ')
-    setcfpoptionvalue('everapi', 'notestore', nsstr4ini, str(apitimes))
+    try:
+        nowhourini = getcfpoptionvalue(cfpapiname, 'apitimes', "hour")
+        # ns首次启动和整点重启（用小时判断）
+        if (not (apitimes := getcfpoptionvalue(cfpapiname, nssectionname, nsstr4ini)) or ((nowmin == 0) and (nowhourini != nowtime.hour))):
+            if nowmin == 0:
+                log.critical(f"Evernote API\t{nsstr4ini} 调用次数整点重启^_^")
+            else:
+                log.critical(f"Evernote API\t{nsstr4ini} 新生^_^{inspect.stack()[-1]}")
+    #             log.critical(f"Evernote API\t{nsstr4ini} 新生^_^{inspect.stack()[-1]}")
+            apitimes = 0
+#         print(nowhourini, nowtime.hour)
+        if nowhourini != nowtime.hour:
+            setcfpoptionvalue(cfpapiname, 'apitimes', "hour", str(nowtime.hour))
+        apitimes += 1
+        log.debug(f'动用Evernote API({note_store})次数：\t {apitimes} ')
+        setcfpoptionvalue(cfpapiname, nssectionname, nsstr4ini, str(apitimes))
+    except Exception as e:
+        log.critical(f'{cfpapiname}配置文件存取出现严重错误，清除《{nssectionname}》小节下的所有内容。跳过一次api调用计数！')
+        log.critical(e)
+        removesection(cfpapiname, nssectionname)
+        return
     if apitimes >= 290:
         sleepsecs = np.random.randint(0, 50)
         time.sleep(sleepsecs)
         note_store = None
         note_store = get_notestore(forcenew=True)
         log.critical(f'休息{sleepsecs:d}秒，重新构造了一个服务器连接{note_store}继续干……')
-        
+
 
 def evernoteapijiayi_test():
     calllink = [re.findall("^《FrameSummary file (.+), line (\d+) in (.+)》$", line) for line in traceback.extract_stack()]
@@ -435,7 +444,7 @@ def evernoteapijiayi_test():
         note_store = None
         note_store = get_notestore(forcenew=True)
         log.critical(f'休息{sleepsecs:d}秒，重新构造了一个服务器连接{note_store}继续干……{calllinks}')
-        
+
 
 # @use_logging()
 def p_notebookattributeundertoken(notebook):
@@ -654,10 +663,10 @@ if __name__ == '__main__':
     notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
     shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
-    findnoteguidlst = findnotefromnotebook(smsnbguid, notecount=1433)
+    findnoteguidlst = findnotefromnotebook(shenghuo_guid, notecount=1433)
     print(len(findnoteguidlst))
     # findnoteguidlst = findsomenotest2showornote(notification_guid, 'ip')
-    print(findnoteguidlst)
+#     print(findnoteguidlst)
 
     # 显示笔记内容，源码方式
     # '39c0d815-df23-4fcc-928d-d9193d5fff93' 转账
