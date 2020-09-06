@@ -393,9 +393,9 @@ def evernoteapijiayi():
         # ns首次启动和整点重启（用小时判断）
         if (not (apitimes := getcfpoptionvalue(cfpapiname, nssectionname, nsstr4ini)) or ((nowmin == 0) and (nowhourini != nowtime.hour))):
             if nowmin == 0:
-                log.critical(f"Evernote API\t{nsstr4ini} 调用次数整点重启^_^")
+                log.info(f"Evernote API\t{nsstr4ini} 调用次数整点重启^_^")
             else:
-                log.critical(f"Evernote API\t{nsstr4ini} 新生^_^{inspect.stack()[-1]}")
+                log.info(f"Evernote API\t{nsstr4ini} 新生^_^{inspect.stack()[-1]}")
     #             log.critical(f"Evernote API\t{nsstr4ini} 新生^_^{inspect.stack()[-1]}")
             apitimes = 0
 #         print(nowhourini, nowtime.hour)
