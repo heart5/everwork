@@ -19,7 +19,7 @@ import pathmagic
 with pathmagic.context():
     from func.logme import log
 
-    
+
 def convertframe2dic(frame):
     framestr = str(frame)
     filename = re.findall("filename=(.+)\s", framestr)[0].strip()
@@ -64,15 +64,9 @@ def after_timeout():
     """
     超时后的处理函数
     """
-#     log.critical(sys._getframe().f_code.co_name)
-#     log.critical(sys._getframe().f_back.f_lineno)
-#     log.critical(sys._getframe().f_code.co_filename)
-#     log.critical(traceback.extract_stack()[-2][2])
-    log.critical(traceback.extract_stack())
-#     log.critical(inspect.stack())
-    log.critical("运行超出预设时间，退出!")
-    
-    
+    log.critical(("运行超出预设时间，强制退出!", traceback.extract_stack()))
+
+
 def uuid3hexstr(inputo: object):
     inputstr = str(inputo)
 
