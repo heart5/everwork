@@ -28,7 +28,7 @@ with pathmagic.context():
     from func.first import getdirmain
     # from func.evernttest import getinivaluefromnote
 
-    
+
 def isitchat(pklabpath):
     """
     判断itchat是否已经运行，没有则热启动之。
