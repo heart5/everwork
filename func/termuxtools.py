@@ -1,6 +1,7 @@
-# ---
-# termux工具集，API
-# ---
+# -*- coding: utf-8 -*-
+"""
+termux工具集，API
+"""
 
 import subprocess
 
@@ -29,7 +30,7 @@ def evaloutput(output):
     return eval(out)
 
 
-@set_timeout(40, after_timeout)
+@set_timeout(60, after_timeout)
 def battery_status():
     out, rc, err = utils.execute('termux-battery-status')
     if rc:
