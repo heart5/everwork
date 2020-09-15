@@ -66,7 +66,7 @@ def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
     if result:
         targetvalue = int(result.group())
         return targetvalue
-    
+
     # 处理小数
     ptn = re.compile(r"^[+-]?[0-9]+\.[0-9]+$")
     result = ptn.match(targetvalue)
