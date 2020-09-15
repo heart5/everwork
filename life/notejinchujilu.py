@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # encoding:utf-8
 #
@@ -111,13 +112,17 @@ def jilugoogledrive():
         lambda x: pd.to_datetime(time.strftime('%Y-%m-%d %H:%M', time.strptime(x, '%B %d, %Y at %I:%M%p'))))
     dfbout['entered'] = dfbout['entered'].apply(
         lambda x: True if x == 'entered' else False)
-    dfbout['atime'] = dfbout['atime'].astype(pd.datetime)
+    dfbout['atime'] = pd.to_datetime(dfbout['atime'])
     dfbout.index = dfbout['atime']
     dfbout = dfbout.sort_index()
     dfout = dfbout[['entered', 'shuxing', 'address']]
     # print(dfout.tail())
     return dfout
 
+
+# +
+# tmpdf = jilugoogledrive()
+# -
 
 def jilunote(noteinfos):
     """
@@ -450,3 +455,5 @@ if __name__ == '__main__':
     # descdb(dfnoti)
 
     # jinchustattimer(token,60*8)
+
+
