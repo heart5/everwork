@@ -4,7 +4,6 @@
 """
 import os
 import time
-# import datetime
 import sqlite3 as lite
 import pandas as pd
 import matplotlib.pyplot as plt
