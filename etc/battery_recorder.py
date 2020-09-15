@@ -12,3 +12,4 @@ if __name__ == "__main__":
     batteryrecord2db(dbnameouter)
     logstrouter = "文件%s运行结束" %(__file__)
     log.info(logstrouter)
+  
