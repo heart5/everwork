@@ -2,6 +2,7 @@
 """
 首函，用于定位相对目录，丰富工作目录路径，还有构建路径的基本函数
 """
+
 import os
 import sys
 from pathlib import Path
