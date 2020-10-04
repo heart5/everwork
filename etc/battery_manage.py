@@ -17,6 +17,7 @@ with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from etc.getid import getdeviceid
     from func.termuxtools import battery_status
+    from func.sysfunc import not_IPython
 
 
 def checkbatteryinfotable(dbname: str, tablename: str):
@@ -162,13 +163,15 @@ def showbattinfoimg(dbname: str, jingdu: int = 300):
 
 
 if __name__ == "__main__":
-    logstrouter = "运行文件\t%s" % __file__
-    log.info(logstrouter)
+    if not_IPython():
+        logstrouter = "运行文件\t%s……" % __file__
+        log.info(logstrouter)
     dbnameouter = touchfilepath2depth(
         getdirmain() / "data" / "db" / "batteryinfo.db")
     # batteryrecord2db(dbnameouter)
     xinxian, tdf = getbattinfodb(dbnameouter)
     print(xinxian)
     print(tdf.sort_index(ascending=False))
-    logstrouter = "文件%s运行结束" % (__file__)
-    log.info(logstrouter)
+    if not_IPython():
+        logstrouter = "文件%s运行结束" % (__file__)
+        log.info(logstrouter)
