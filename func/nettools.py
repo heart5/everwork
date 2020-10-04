@@ -26,7 +26,7 @@ with pathmagic.context():
     from func.logme import log
     from func.termuxtools import termux_sms_send
     from func.first import getdirmain
-    # from func.evernttest import getinivaluefromnote
+    from func.sysfunc import set_timeout, after_timeout, not_IPython
 
 
 def isitchat(pklabpath):
@@ -277,7 +277,8 @@ def tst4trycounttimes2():
 
 
 if __name__ == '__main__':
-    log.info(f'测试文件\t{__file__}')
+    if not_IPython():
+        log.info(f'测试文件\t{__file__}……')
 
     # print(get_ip4alleth('wlan0'))
     pklpath = getdirmain() / 'itchat.pkl'
@@ -286,5 +287,5 @@ if __name__ == '__main__':
     print(get_ip4alleth())
     # print(get_host_ip())
     # tst4trycounttimes2()
-
-    print('Done.测试完毕。')
+    if not_IPython():
+        log.info(f'文件\t{__file__}\t测试完毕。')
