@@ -4,18 +4,12 @@
 获取服务器ip并定期更新至相关笔记
 """
 
-from threading import Timer
 import os
 import sys
 import datetime
 import platform
-import subprocess
-import socket
-import requests
-# import urllib2
 import re
 import pathmagic
-import evernote.edam.type.ttypes as ttypes
 
 with pathmagic.context():
     from func.first import getdirmain, dirmainpath
@@ -25,10 +19,13 @@ with pathmagic.context():
     from func.evernttest import get_notestore, imglist2note, timestamp2str, makenote, evernoteapijiayi, readinifromnote
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
-    from func.termuxtools import termux_telephony_deviceinfo, termux_telephony_cellinfo, termux_wifi_connectioninfo, termux_wifi_scaninfo, battery_status
+    from func.termuxtools import termux_wifi_connectioninfo, battery_status
     from etc.getid import getdeviceid
+    from func.sysfunc import set_timeout, after_timeout, not_IPython
 
 
+@set_timeout(240, after_timeout)
+@timethis
 def iprecord():
     device_id = getdeviceid()
     ip = wifi = wifiid = tun = None
@@ -148,11 +145,13 @@ def showiprecords():
 
 
 if __name__ == '__main__':
-    log.info(
-        f'开始运行文件\t{__file__}\t{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co_filename}')
+    if not_IPython():
+        log.info(
+            f'开始运行文件\t{__file__}\t……\t{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co_filename}')
     if (bsdict := battery_status())['percentage'] >= 20:
         showiprecords()
     else:
         log.warning("手机电量低于20%，跳过ip轮询")
     # print(f"{self.__class__.__name__}")
-    log.info(f'文件\t{__file__}\t执行完毕')
+    if not_IPython():
+        log.info(f'文件\t{__file__}\t执行完毕')
