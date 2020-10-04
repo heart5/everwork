@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 记录足迹
 """
@@ -13,10 +14,15 @@ with pathmagic.context():
     from func.wrapfuncs import timethis
     from func.termuxtools import termux_location, battery_status
     from etc.getid import getdeviceid
+    from func.sysfunc import set_timeout, after_timeout, not_IPython
 
 
+@set_timeout(240, after_timeout)
 @timethis
 def foot2record():
+    """
+    记录位置数据（经纬度等）
+    """
     namestr = 'everloc'
 
     if (device_id := getcfpoptionvalue(namestr, namestr, 'device_id')):
@@ -49,9 +55,11 @@ def foot2record():
 
 
 if __name__ == '__main__':
-    print(f'运行文件\t{__file__}')    
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}……')    
     if (bsdict := battery_status())['percentage'] >= 20:
         foot2record()
     else:
         log.warning("手机电量低于20%，跳过GPS定位轮询")
-    print('Done.')
+    if not_IPython():
+        print(f"完成文件{__file__}\t的运行")

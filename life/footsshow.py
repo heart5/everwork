@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 """
-记录足迹
+展示足迹
 """
 
 import os
@@ -26,6 +27,7 @@ with pathmagic.context():
     from func.termuxtools import termux_telephony_deviceinfo, \
         termux_telephony_cellinfo, termux_location
     from etc.getid import getdeviceid
+    from func.sysfunc import not_IPython
 
 
 def geodistance(lng1, lat1, lng2, lat2):
@@ -39,6 +41,9 @@ def geodistance(lng1, lat1, lng2, lat2):
 
 @timethis
 def foot2show():
+    """
+    展示足迹
+    """
     namestr = 'everloc'
     if (device_id := getcfpoptionvalue(namestr, namestr, 'device_id')):
         device_id = str(device_id)
@@ -151,7 +156,9 @@ def foot2show():
 
 if __name__ == '__main__':
     # global log
-    print(f'运行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}……')
     foot2show()
     # showdis()
-    print('Done.')
+    if not_IPython():
+        log.info(f"完成文件{__file__}\t的运行")
