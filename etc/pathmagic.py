@@ -1,6 +1,6 @@
 # encoding:utf-8
 """
-功能描述
+魔法路径
 """
 
 # import os
