@@ -6,10 +6,10 @@ evernote或印象笔记相关功能函数
 import binascii
 import datetime
 import hashlib
-# import os
+import mimetypes
 import re
 import time
-# import nltk
+import os
 import traceback
 import inspect
 import numpy as np
@@ -18,7 +18,7 @@ from bs4 import BeautifulSoup
 from evernote.api.client import EvernoteClient
 from evernote.edam.error.ttypes import EDAMNotFoundException, EDAMSystemException, EDAMUserException, EDAMErrorCode
 from evernote.edam.notestore.NoteStore import NoteFilter, NotesMetadataResultSpec
-from evernote.edam.type.ttypes import Note, Resource, Data, Notebook
+from evernote.edam.type.ttypes import Note, NoteAttributes, Resource, ResourceAttributes, Data, Notebook
 from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_MINOR
 
 import pathmagic
@@ -28,7 +28,7 @@ with pathmagic.context():
     from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.nettools import trycounttimes2
-    from func.sysfunc import convertframe2dic
+    from func.sysfunc import convertframe2dic, not_IPython
     # from etc.getid import getid
 
 # print(f"{__file__} is loading now...")
@@ -41,7 +41,7 @@ def gettoken():
     else:
         # print(f"china value:\t{china}")
         auth_token = getcfpoptionvalue('everwork', 'evernote', 'token')  # 直接提取，唯一使用
-        
+
     return auth_token
 
 
@@ -93,7 +93,8 @@ def get_notestore(forcenew=False):
     china = getcfpoptionvalue('everwork', 'evernote', 'china')
     client = EvernoteClient(token=auth_token, sandbox=sandbox, china=china)
 
-    servname = ("印象笔记", 'evernote')[china is True]
+    servname = ("印象笔记", 'evernote')[china is False]
+    #     print(china, servname)
     @trycounttimes2(f'{servname}服务器')
     def getnotestore(forcenewinner):
         global note_store
@@ -110,14 +111,17 @@ def get_notestore(forcenew=False):
             # "Evernote EDAMTest (Python)",
             "Evernote EDAMTest (Python)",
             EDAM_VERSION_MAJOR,
-            EDAM_VERSION_MINOR
-        )
+            EDAM_VERSION_MINOR)
         # print("I'm here second.")
         # print(version_ok)
         if not version_ok:
             log.critical('Evernote API版本过时，请更新之！程序终止并退出！！！')
             exit(1)
         # print("Is my Evernote API version up to date? ", str(version_ok))
+        global en_username
+        myuser = userstore.getUser()
+        en_username = myuser.username
+#         print(en_username)
         note_store = client.get_note_store()
         # print(note_store)
         evernoteapijiayi()
@@ -128,20 +132,26 @@ def get_notestore(forcenew=False):
 
 
 note_store = None
+en_username = None
 
 
-def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
+def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
     """
-    更新note内容为图片列表
+    更新note内容，可以包含图片等资源类文件列表
     :param notestore:
-    :param imglist:
+    :param reslist:
     :param noteguid:
     :param notetitle:
     :param neirong:object
     :return:
     """
     note = Note()
-    # print(type(note))
+    noteattrib = NoteAttributes()
+    global en_username
+    if en_username is not None:
+        noteattrib.author = en_username
+        print(f"I'm here while creating the note, {en_username}")
+    note.attributes = noteattrib
     note.guid = noteguid
     note.title = notetitle
 
@@ -161,18 +171,38 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     note.resources = []
     # print(len(note.resources))
     # for img, imgtitle in imglist:
-    for img in imglist:
-        image = open(img, 'rb').read()
+    for res in reslist:
+        """
+        必须要重新构建一个Data（），否则内容不会变化
+        Data只有三个域：bodyHash（用MD5进行hash得到的值）、size（body的字节长度）和body（字节形式的内容本身）
+        """
+        resactual = open(res, 'rb').read()
         md5 = hashlib.md5()
-        md5.update(image)
-        imghash = md5.digest()
-        data = Data()  # 必须要重新构建一个Data（），否则内容不会变化
-        data.size = len(image)
-        data.bodyHash = imghash
-        data.body = image
+        md5.update(resactual)
+        reshash = md5.digest()
+        data = Data()
+        data.size = len(resactual)
+        data.bodyHash = reshash
+        data.body = resactual
+        """
+        Resource需要常用的域：guid、noteGuid、data（指定上面的Data）、mime（需要设定）、attributes（可以设定附件的原文件名）
+        """
         resource = Resource()
-        resource.mime = 'image/png'
+#         resource.mime = 'image/png'
+        if (mtype := mimetypes.guess_type(res)[0]) is None:
+            logstr = f"文件《{res}》的类型无法判断，跳过"
+            log.warning(logstr)
+            print(logstr)
+            continue
+        resource.mime = mtype
+#         print(mtype)
         resource.data = data
+        """
+        NoteAttributes常用的域：sourceURL、fileName和经纬度、照相机等信息
+        """
+        resattrib = ResourceAttributes()
+        resattrib.fileName = res
+        resource.attributes = resattrib
         note.resources.append(resource)
 
     # The content of an Evernote note is represented using Evernote Markup Language
@@ -187,14 +217,15 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
         # Resource using the MD5 hash.
         # nBody += "<br />" * 2
         for resource in note.resources:
-            if resource.guid or True:
+            #             print(resource.guid)
+            if resource.mime.startswith('image') or True:
                 hexhash = binascii.hexlify(resource.data.bodyHash)
                 str1 = "%s" % hexhash  # b'cd34b4b6c8d9279217b03c396ca913df'
                 # print (str1)
                 str1 = str1[2:-1]  # cd34b4b6c8d9279217b03c396ca913df
                 # print (str1)
-                nbody += "<en-media type=\"%s\" hash=\"%s\" align=\"center\" /><br />" % (
-                    resource.mime, str1)
+                nbody += "<en-media type=\"%s\" hash=\"%s\" align=\"center\" longdesc=\"%s\" /><br />%s<hr />" % (
+                    resource.mime, str1, resource.attributes.fileName, resource.attributes.fileName)
     # neirong= "<pre>" + neirong + "</pre>"
 
     # 去除控制符
@@ -282,13 +313,13 @@ def findnotefromnotebook(notebookguid, titlefind='', notecount=10000):
     print(ournotelist.totalNotes)
     items.extend([[note.guid, note.title, note.updateSequenceNum] for note in ournotelist.notes if
          note.title.find(titlefind) >= 0])
-    
+
     if ournotelist.totalNotes > notecount:
         numtobesplit = notecount
     else:
         numtobesplit = ournotelist.totalNotes
 
-    spllst = [(i * width, (width, numtobesplit - width * i)[ numtobesplit - width * (i +1) < 0], numtobesplit) for i in range((numtobesplit // width) +1)]
+    spllst = [(i * width, (width, numtobesplit - width * i)[numtobesplit - width * (i +1) < 0], numtobesplit) for i in range((numtobesplit // width) +1)]
     if len(spllst) >= 1:
         print(spllst)
         for numbt in spllst[1:]:
@@ -317,7 +348,7 @@ def createnotebook(nbname: str, stack='fresh'):
     notebook = Notebook()
     notebook.name = nbname
     notebook.stack = stack
-    
+
     return get_notestore().createNotebook(gettoken(), notebook)
 
 
@@ -396,9 +427,9 @@ def evernoteapijiayi():
                 log.info(f"Evernote API\t{nsstr4ini} 调用次数整点重启^_^")
             else:
                 log.info(f"Evernote API\t{nsstr4ini} 新生^_^{inspect.stack()[-1]}")
-    #             log.critical(f"Evernote API\t{nsstr4ini} 新生^_^{inspect.stack()[-1]}")
+            #             log.critical(f"Evernote API\t{nsstr4ini} 新生^_^{inspect.stack()[-1]}")
             apitimes = 0
-#         print(nowhourini, nowtime.hour)
+            #         print(nowhourini, nowtime.hour)
         if nowhourini != nowtime.hour:
             setcfpoptionvalue(cfpapiname, 'apitimes', "hour", str(nowtime.hour))
         apitimes += 1
@@ -619,7 +650,7 @@ def findsomenotest2showornote(nbguid, keyword, newnote=False):
     notesfind = findnotefromnotebook(nbguid, keyword)
     if newnote:
         tokenfst = getcfpoptionvalue('everwork', 'evernote', 'token')
-        makenote(tokenfst, get_notestore(), f"“{keyword}》”记列表", str(notesfind))
+        makenote(tokenfst, get_notestore(), f"“{keyword}》”笔记列表", str(notesfind))
     else:
         print(notesfind)
 
@@ -650,7 +681,8 @@ def getsampledffromdatahouse(keyword: str, notebookstr='datahouse', firstcolumn=
 # evernoteapiclearatzero()
 
 if __name__ == '__main__':
-    log.info(f'开始运行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'开始运行文件\t{__file__}……')
     nost = get_notestore()
     print(nost)
     # readinifromnote()
@@ -660,13 +692,18 @@ if __name__ == '__main__':
     # print(getsampledffromdatahouse('火界'))
 
     # 查找主题包含关键词的笔记
-    notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
-    shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
-    smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
-    findnoteguidlst = findnotefromnotebook(shenghuo_guid, notecount=1433)
-    print(len(findnoteguidlst))
-    # findnoteguidlst = findsomenotest2showornote(notification_guid, 'ip')
-#     print(findnoteguidlst)
+    #     notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
+    #     shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
+    #     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
+    #     findnoteguidlst = findnotefromnotebook(shenghuo_guid, notecount=1433)
+    #     print(len(findnoteguidlst))
+    #     findnoteguidlst = findsomenotest2showornote(notification_guid, 'ip', newnote=True)
+    #     print(findnoteguidlst)
+
+    # 测试包含文件资源的笔记更新
+    samplenoteguid = "962f0358-7c7a-4dfd-968d-14dd161a3a39"
+    pylst = [fn for fn in os.listdir() if fn.endswith(".py") or fn.endswith('.txt')]
+    imglist2note(nost, pylst, samplenoteguid, "包含附件的笔记", neirong='仅仅为了存在')
 
     # 显示笔记内容，源码方式
     # '39c0d815-df23-4fcc-928d-d9193d5fff93' 转账
@@ -683,4 +720,5 @@ if __name__ == '__main__':
     # makenote(token, nost,filetitle, neirong)
 
     # # makenote(token, nost, '转账记录笔记guid', str(notefind))
-    log.info(f"完成文件{__file__}\t的运行")
+    if not_IPython():
+        log.info(f"完成文件{__file__}\t的运行")
