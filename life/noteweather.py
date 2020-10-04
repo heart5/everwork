@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # encoding:utf-8
 #
@@ -33,6 +34,7 @@ with pathmagic.context():
     from func.profilerlm import lpt_wrapper
     from func.datatools import readfromtxt, write2txt
     from func.filedatafunc import gettopicfilefromgoogledrive
+    from func.sysfunc import not_IPython
 
 
 def getweatherfromevernote():
@@ -320,7 +322,7 @@ def fetchweatherinfo_from_gmail(weathertxtfilename):
             weathertxtlastestday = time.strftime('%F', time.strptime(
                 items[0].split(' ：')[0], '%B %d, %Y at %I:%M%p'))
             setcfpoptionvalue('everlife', '天气', '存储数据最新日期', '%s' % weathertxtlastestday)
-            
+
 
 def isweatherupdate(weathertxtfilename):
     # print(weathertoday, end='\t')
@@ -459,7 +461,7 @@ def getgaowenfromgoogledrive():
 
 
 @timethis
-@ift2phone()
+# @ift2phone()
 def weatherstatdo():
     weathertxtfilename = str(dirmainpath / 'data' / 'ifttt' / 'weather.txt')
     print(weathertxtfilename)
@@ -501,7 +503,8 @@ def weatherstatdo():
 
 
 if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}……')
     weatherstatdo()
     # df, dfall = getrainfromgoogledrive()
     # print(df)
@@ -512,4 +515,5 @@ if __name__ == '__main__':
     # weathertxtfilename = "data\\ifttt\\weather.txt"
     # usn = isweatherupdate(weathertxtfilename)
     # # print(getweatherfromgmail())
-    log.info(f'文件\t{__file__}执行结束。Done！')
+    if not_IPython():
+        log.info(f'文件\t{__file__}执行结束。Done！')
