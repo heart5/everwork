@@ -149,9 +149,9 @@ def showdelayimg(dbname: str, jingdu: int = 300):
     drawdelayimg(211, timedf[timedf.index > timedf.index.max() + pd.Timedelta('-2d')], "信息频率和延时（分钟，最近两天）")
     drawdelayimg(212, timedf, "信息频率和延时（分钟，全部）")
     fig1 = plt.gcf()
-    
+
 #     plt.show()
-    
+
     imgwcdelaypath = touchfilepath2depth(
         getdirmain() / "img" / "webchat" / "wcdelay.png"
     )
