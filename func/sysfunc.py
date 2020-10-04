@@ -12,12 +12,20 @@ import signal
 import time
 import uuid
 import re
+from IPython import get_ipython
 from hashlib import sha256
 # import wmi_client_wrapper as wmi
 
 import pathmagic
 with pathmagic.context():
     from func.logme import log
+
+
+def not_IPython():
+    """
+    判断是否在IPython环境下运行
+    """
+    return get_ipython() is None
 
 
 def convertframe2dic(frame):
@@ -91,9 +99,11 @@ def execcmd(cmd):
 
 
 if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}……')
     outgetstr = execcmd("uname -a")
     print(outgetstr.strip("\n"))
     print(uuid3hexstr(outgetstr))
     print(sha2hexstr(outgetstr))
-    log.info(f'文件\t{__file__}\t测试完毕。')
+    if not_IPython():
+        log.info(f'文件\t{__file__}\t测试完毕。')
