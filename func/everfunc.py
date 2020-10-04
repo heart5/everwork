@@ -1,5 +1,4 @@
 #  encoding:utf-8
-
 """
 import大集合
 everwork的各种函数
