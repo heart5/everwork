@@ -1,7 +1,8 @@
 # encoding:utf-8
 """
-功能描述
+文件、数据相关功能函数集
 """
+
 import datetime
 import os
 import pandas as pd
@@ -24,12 +25,15 @@ def getdbname(dbpath: str, ownername: str, title='wccontact'):
     return touchfilepath2depth(getdirmain() / dbpath / f"{title}_{ownername}.db")
 
 
-def gettopicfilefromgoogledrive(topic:str, neirong:str):
+def gettopicfilefromgoogledrive(topic: str, neirong: str):
     """
     从googledrive读取文件名包含某关键词的文件并读取数据返回DataFrame
     """
     # 验证登录
-    gc = pygsheets.authorize(service_file=str( dirmainpath / 'data' / 'imp' / 'ewjinchu.json'))
+#     gc = pygsheets.authorize(service_file=str(dirmainpath / 'data' / 'imp' / 'everwork-6a7e225e9947.json'))
+    gc = pygsheets.authorize(service_file=str(dirmainpath / 'data' / 'imp' / 'ewjinchu.json'))
+#     files = gc.spreadsheet_titles()
+#     print(files)
     files = gc.list_ssheets()
     dffiles = pd.DataFrame(files)
     # print(dffiles.head())
