@@ -9,7 +9,7 @@ import pathmagic
 with pathmagic.context():
     from func.common import utils
     from func.logme import log
-    from func.sysfunc import set_timeout, after_timeout
+    from func.sysfunc import set_timeout, after_timeout, not_IPython
 
 
 """
@@ -292,7 +292,9 @@ def termux_wifi_scaninfo():
 
 
 if __name__ == '__main__':
-    log.info(f'测试文件\t{__file__}')
+    if not_IPython():
+        log.info(f'测试文件\t{__file__}……')
     print(termux_info())
     print(termux_location())
-    print('Done.测试完毕。')
+    if not_IPython():
+        log.info(f'文件\t{__file__}\t测试完毕。')
