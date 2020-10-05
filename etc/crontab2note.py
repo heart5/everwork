@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 检查crontab是否更新，有更新就更新相应笔记并并开关设置发送邮件
 """
@@ -11,8 +12,10 @@ with pathmagic.context():
     # from func.first import dirmainpath
     from func.logme import log
     from func.mailsfunc import findnewthenupdatenote
+    from func.sysfunc import set_timeout, after_timeout, not_IPython
 
 
+@set_timeout(300, after_timeout)
 def findnewcronthenupdate():
     """
     查看当前登录用户的cron自动运行配置表是否有更新（修改时间），并视情况更新
@@ -43,6 +46,7 @@ def findnewcronthenupdate():
         log.critical(logstr)
 
 
+@set_timeout(300, after_timeout)
 def findcronlogthenupdate():
     """
     构建待处理的目标日志或配置文件列表并处理之
@@ -70,7 +74,9 @@ def findcronlogthenupdate():
 
 
 if __name__ == '__main__':
-    # log.info(f'运行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}')
     findnewcronthenupdate()
     findcronlogthenupdate()
-    # log.info(f"文件\t{__file__}\t运行结束。")
+    if not_IPython():
+        log.info(f"文件\t{__file__}\t运行结束。")
