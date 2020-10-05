@@ -10,6 +10,7 @@ import random
 import platform
 import os
 import re
+import traceback
 import itchat
 # from requests.packages.urllib3 import HTTPConnectionPool
 from evernote.edam.error.ttypes import EDAMSystemException
@@ -202,22 +203,25 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                     # 5的倍数次尝试输出log，避免网络不佳时的log冗余
                     if i % showfreq == 0:
                         if hasattr(eee, 'errno'):
+                            eeestr = f"{eee}\t{traceback.extract_stack()}"
                             if eee.errno == 11001:
-                                log.critical(f'寻址失败，貌似网络不通。{eee}')
+                                log.critical(f'寻址失败，貌似网络不通。{eeestr}')
                             elif eee.errno == 10061:
-                                log.critical(f'被主动拒绝，好没面啊！{eee}')
+                                log.critical(f'被主动拒绝，好没面啊！{eeestr}')
                             elif eee.errno == 10060:
-                                log.critical(f'够不着啊，是不是在墙外？！{eee}')
+                                log.critical(f'够不着啊，是不是在墙外？！{eeestr}')
                             elif eee.errno == 10048:
-                                log.critical(f'多次强行连接，被拒了！{eee}')
+                                log.critical(f'多次强行连接，被拒了！{eeestr}')
                             elif eee.errno == 10054:
-                                log.critical(f'主机发脾气，强行断线了。{eee}')
+                                log.critical(f'主机发脾气，强行断线了。{eeestr}')
                             elif eee.errno == 8:
-                                log.critical(f'和{servname}握手失败。{eee}')
+                                log.critical(f'和{servname}握手失败。{eeestr}')
                             elif eee.errno == 4:
-                                log.critical(f'和{servname}连接异常，被中断。{eee}')
+                                log.critical(f'和{servname}连接异常，被中断。{eeestr}')
+                            elif eee.errno == 13:
+                                log.critical(f'连接{servname}的权限不够哦。{eeestr}')
                             else:
-                                log.critical(f'连接失败。{eee.errno}\t{eee}')
+                                log.critical(f'连接失败。{eee.errno}\t{eeestr}')
                         else:
                             log.critical(f'连接失败。{eee}\t{args}\t{kwargs}')
                         log.critical(
@@ -248,7 +252,8 @@ def ifttt_notify(content="content", funcname="funcname"):
 
 
 def tst4trycounttimes2():
-    ifttt_notify("test for ifttt notify", f"{__file__}")
+    if not_IPython():
+        ifttt_notify("test for ifttt notify", f"{__file__}")
 
     @trycounttimes2('xmu.edu.cn网站服务器')
     def fetchfromnet(addressin: object):
@@ -285,7 +290,7 @@ if __name__ == '__main__':
 #     print(pklpath)
 #     isitchat(pklpath)
     print(get_ip4alleth())
-    # print(get_host_ip())
-    # tst4trycounttimes2()
+#     print(get_host_ip())
+#     tst4trycounttimes2()
     if not_IPython():
         log.info(f'文件\t{__file__}\t测试完毕。')
