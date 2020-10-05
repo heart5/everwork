@@ -14,6 +14,7 @@ with pathmagic.context():
     from func.logme import log
     from func.nettools import ifttt_notify
     from func.evernttest import getinivaluefromnote
+    from func.sysfunc import not_IPython
 
 
 def logit(func):
@@ -87,7 +88,7 @@ def timethis(func):
 
 
 @timethis
-# @ift2phone("倒数计时器")
+@ift2phone("倒数计时器")
 @ift2phone()
 # @lpt_wrapper()
 def countdown(n: int):
@@ -104,7 +105,8 @@ def countdown(n: int):
 
 
 if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}')
     countdown(10088)
     print(f"函数名\t{countdown.__name__}")
     print(f"函数文档\t{countdown.__doc__}")
@@ -121,4 +123,5 @@ if __name__ == '__main__':
     print(f"函数默认值\t{countdown.__defaults__}")
     print(f"函数字典\t{countdown.__dict__}")
     print(f"函数内涵全集\t{countdown.__dir__()}")
-    log.info(f"文件\t{__file__}\t结束运行")
+    if not_IPython():
+        log.info(f"文件\t{__file__}\t结束运行")
