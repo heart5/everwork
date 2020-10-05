@@ -1,6 +1,6 @@
 # encoding:utf-8
 """
-功能描述
+网络相关函数集
 """
 import sys
 import ssl
@@ -281,9 +281,9 @@ if __name__ == '__main__':
         log.info(f'测试文件\t{__file__}……')
 
     # print(get_ip4alleth('wlan0'))
-    pklpath = getdirmain() / 'itchat.pkl'
-    print(pklpath)
-    isitchat(pklpath)
+#     pklpath = getdirmain() / 'itchat.pkl'
+#     print(pklpath)
+#     isitchat(pklpath)
     print(get_ip4alleth())
     # print(get_host_ip())
     # tst4trycounttimes2()
