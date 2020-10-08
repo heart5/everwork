@@ -10,6 +10,7 @@ from threading import Timer
 import pathmagic
 import re
 import pandas as pd
+import evernote.edam.type.ttypes as ttypes
 
 with pathmagic.context():
     from func.first import getdirmain
@@ -20,7 +21,7 @@ with pathmagic.context():
     from func.termuxtools import termux_location, termux_telephony_deviceinfo
     from func.nettools import ifttt_notify
     from etc.getid import getdeviceid
-    import evernote.edam.type.ttypes as ttypes
+    from func.sysfunc import not_IPython, set_timeout, after_timeout
 
 
 @timethis
@@ -91,6 +92,7 @@ def log2note(noteguid, loglimit, levelstr='', notetitle='everwork日志信息'):
             ifttt_notify(errmsg, 'log2note')
 
 
+@set_timeout(360, after_timeout)
 def log2notes():
     namestr = 'everlog'
     device_id = getdeviceid()
@@ -143,6 +145,8 @@ def log2notes():
 
 
 if __name__ == '__main__':
-    log.info(f'开始运行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'开始运行文件\t{__file__}')
     log2notes()
-    log.info(f'Done.结束执行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'Done.结束执行文件\t{__file__}')
