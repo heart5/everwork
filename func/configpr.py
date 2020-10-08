@@ -10,6 +10,7 @@ import pathmagic
 
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
+    from func.sysfunc import not_IPython
 
 
 def removesection(cfpfilename: str, sectionname: str):
@@ -89,7 +90,12 @@ def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
 
 
 if __name__ == '__main__':
-    print(f'开始测试文件\t{__file__}')
-    cp, cppath = getcfp('everwork')
-    print(cp, cppath)
-    print('Done.')
+    if not_IPython():
+        print(f'开始测试文件\t{__file__}')
+#     cp, cppath = getcfp('everwork')
+#     print(cp, cppath)
+    cfpapiname = 'everapi'
+    nssectionname = 'notestore'
+    removesection(cfpapiname, nssectionname)
+    if not_IPython():
+        print('Done.')
