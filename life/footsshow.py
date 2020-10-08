@@ -27,10 +27,13 @@ with pathmagic.context():
     from func.termuxtools import termux_telephony_deviceinfo, \
         termux_telephony_cellinfo, termux_location
     from etc.getid import getdeviceid
-    from func.sysfunc import not_IPython
+    from func.sysfunc import not_IPython, set_timeout, after_timeout
 
 
 def geodistance(lng1, lat1, lng2, lat2):
+    """
+    计算两点之间的距离并返回（公里）
+    """
     lng1, lat1, lng2, lat2 = map(radians, [lng1, lat1, lng2, lat2])
     dlon = lng2 - lng1
     dlat = lat2 - lat1
@@ -39,6 +42,7 @@ def geodistance(lng1, lat1, lng2, lat2):
     return dis
 
 
+@set_timeout(360, after_timeout)
 @timethis
 def foot2show():
     """
