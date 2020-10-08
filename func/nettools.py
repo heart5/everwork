@@ -38,7 +38,7 @@ def isitchat(pklabpath):
 
     inputpklpath = os.path.abspath(pklabpath)
 #     print(inputpklpath)
-        
+
     if itchat.originInstance.alive:
         # 转换成绝对路径方便对比
 
@@ -58,7 +58,7 @@ def isitchat(pklabpath):
             loginpklpath = os.path.abspath(itchat.originInstance.hotReloadDir)
             logstr = f"微信热启动成功\t{loginpklpath}"
             log.info(logstr)
-            
+
     return True
 
 
