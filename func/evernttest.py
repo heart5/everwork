@@ -405,6 +405,62 @@ def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲�
             exit(2)
 
 
+def makenote2(notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
+    """
+    创建note，封装token和notestore
+    :param notetitle:
+    :param notebody:
+    :param parentnotebook:
+    :return:
+    """
+    
+    notestore = get_notestore()
+    nbody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+    nbody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+    nbody += "<en-note>%s</en-note>" % notebody
+
+    # Create note object
+    ournote = Note()
+    ournote.title = notetitle
+    ournote.content = nbody
+
+    # parentNotebook is optional; if omitted, default notebook is used
+    if type(parentnotebook) is str:
+        try:
+            parentnotebook = notestore.getNotebook(gettoken(), parentnotebook)
+        except:
+            log.critical(f"新建笔记的笔记本guid属性无效，设置为默认")
+            parentnotebook = None
+    if parentnotebook and hasattr(parentnotebook, 'guid'):
+        ournote.notebookGuid = parentnotebook.guid
+
+    # Attempt to create note in Evernote account
+    try:
+        note = notestore.createNote(gettoken(), ournote)
+        evernoteapijiayi()
+        if parentnotebook and hasattr(parentnotebook, 'name'):
+            bkname = f"<{parentnotebook.name}>"
+        else:
+            bkname = '默认'
+        log.info(f'笔记《{notetitle}》在\t{bkname}\t笔记本中创建成功。')
+        return note
+    except EDAMUserException as usere:
+        # Something was wrong with the note data
+        # See EDAMErrorCode enumeration for error code explanation
+        # http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
+        log.critical("用户错误！%s" % str(usere))
+    except EDAMNotFoundException as notfounde:
+        # Parent Notebook GUID doesn't correspond to an actual notebook
+        print("无效的笔记本guid（识别符）！%s" % str(notfounde))
+    except EDAMSystemException as systeme:
+        if systeme.errorCode == EDAMErrorCode.RATE_LIMIT_REACHED:
+            log.critical("API达到调用极限，需要 %d 秒后重来" % systeme.rateLimitDuration)
+            exit(1)
+        else:
+            log.critical('创建笔记时出现严重错误：' + str(systeme))
+            exit(2)
+
+
 def timestamp2str(timestamp):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
 
