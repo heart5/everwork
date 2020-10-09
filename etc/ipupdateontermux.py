@@ -16,7 +16,7 @@ with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.nettools import get_host_ip, get_ip, get_ip4alleth
     from func.datatools import readfromtxt, write2txt
-    from func.evernttest import get_notestore, imglist2note, timestamp2str, makenote, evernoteapijiayi, readinifromnote
+    from func.evernttest import get_notestore, gettoken, imglist2note, timestamp2str, makenote2, evernoteapijiayi, readinifromnote
     from func.logme import log
     from func.wrapfuncs import timethis, ift2phone
     from func.termuxtools import termux_wifi_connectioninfo, battery_status
@@ -79,16 +79,11 @@ def showiprecords():
         exit(1)
     print(f'{ip}\t{wifi}\t{wifiid}\t{tun}\t{device_id}')
     if not (guid := getcfpoptionvalue(namestr, device_id, 'guid')):
-        token = getcfpoptionvalue('everwork', 'evernote', 'token')
-        note_store = get_notestore()
-        parentnotebook = note_store.getNotebook(
-            '4524187f-c131-4d7d-b6cc-a1af20474a7f')
-        evernoteapijiayi()
-        note = ttypes.Note()
-        note.title = f'服务器_{device_id}_ip更新记录'
+        parentnotebookguid = '4524187f-c131-4d7d-b6cc-a1af20474a7f'
+        note_title = f'服务器_{device_id}_ip更新记录'
         # note.title = "hengchu"
-        print(note.title)
-        note = makenote(token, note_store, note.title, notebody='',
+        print(note_title)
+        note = makenote2(note_title, notebody='',
                         parentnotebook=parentnotebook)
         guid = note.guid
         setcfpoptionvalue(namestr, device_id, 'guid', guid)
