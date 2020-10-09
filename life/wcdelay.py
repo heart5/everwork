@@ -16,6 +16,7 @@ with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain
     from func.litetools import ifnotcreate
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
+    from func.sysfunc import not_IPython
 
 
 def checkwcdelaytable(dbname: str, tablename: str):
@@ -48,7 +49,7 @@ def inserttimeitem2db(dbname: str, timestampinput: int):
         conn = lite.connect(dbname)
         cursor = conn.cursor()
         cursor.execute(
-            f"insert into {tablename} values(?, ?)", (timestampinput, elsmin)
+            f"insert into {tablename} (msgtime, delay) values(?, ?)", (timestampinput, elsmin)
         )
 #         print(f"数据成功写入{dbname}\t{(timestampinput, elsmin)}")
         conn.commit()
@@ -150,7 +151,7 @@ def showdelayimg(dbname: str, jingdu: int = 300):
     drawdelayimg(212, timedf, "信息频率和延时（分钟，全部）")
     fig1 = plt.gcf()
 
-#     plt.show()
+    plt.show()
 
     imgwcdelaypath = touchfilepath2depth(
         getdirmain() / "img" / "webchat" / "wcdelay.png"
@@ -161,14 +162,17 @@ def showdelayimg(dbname: str, jingdu: int = 300):
 
     return imgwcdelaypath
 
+
 if __name__ == "__main__":
-    logstrouter = "运行文件\t%s" %__file__
-    log.info(logstrouter)
+    if not_IPython():
+        logstrouter = "运行文件\t%s" %__file__
+        log.info(logstrouter)
     # owner = 'heart5'
     owner = '白晔峰'
     dbnameouter = touchfilepath2depth(getdirmain() / "data" / "db" / f"wcdelay_{owner}.db")
     xinxian, tdf = getdelaydb(dbnameouter)
     print(xinxian)
     print(tdf.sort_index(ascending=False))
-    logstrouter = "文件%s运行结束" %(__file__)
-    log.info(logstrouter)
+    if not_IPython():
+        logstrouter = "文件%s运行结束" %(__file__)
+        log.info(logstrouter)
