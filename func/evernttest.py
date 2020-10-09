@@ -492,7 +492,7 @@ def evernoteapijiayi():
         log.debug(f'动用Evernote API({note_store})次数：\t {apitimes} ')
         setcfpoptionvalue(cfpapiname, nssectionname, nsstr4ini, str(apitimes))
     except Exception as e:
-        log.critical(f'{cfpapiname}配置文件存取出现严重错误，清除《{nssectionname}》小节下的所有内容。跳过一次api调用计数！')
+        log.critical(f'{cfpapiname}配置文件存取出现严重错误，试图清除《{nssectionname}》小节下的所有内容。跳过一次api调用计数！')
         log.critical(e)
         removesection(cfpapiname, nssectionname)
         return
