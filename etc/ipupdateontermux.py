@@ -84,7 +84,7 @@ def showiprecords():
         # note.title = "hengchu"
         print(note_title)
         note = makenote2(note_title, notebody='',
-                        parentnotebook=parentnotebook)
+                        parentnotebook=parentnotebookguid)
         guid = note.guid
         setcfpoptionvalue(namestr, device_id, 'guid', guid)
     if getcfpoptionvalue(namestr, device_id, 'ipr'):
