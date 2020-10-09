@@ -5,12 +5,39 @@
 
 import re
 from pathlib import Path
-from configparser import ConfigParser
+from configparser import ConfigParser, DuplicateSectionError
 import pathmagic
 
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
+    from func.logme import log
     from func.sysfunc import not_IPython
+
+
+def fixinifile(inipath, name):
+#     print(inipath, name)
+    with open(inipath, 'r') as f:
+        fcontent = f.read()
+        with open(str(inipath) + '.bak', 'w') as writer:
+            writer.write(fcontent)
+    ftn = re.compile(r"\[\w+\]")
+    sectionlst = re.findall(ftn, fcontent)
+    optionlst = re.split(ftn, fcontent)
+    resultdict = dict()
+    for i in range(len(sectionlst)):
+        sname = sectionlst[i]
+        if sname in resultdict.keys():
+            thislen = len(resultdict[sname])
+            thatlen = len(optionlst[i+1])
+            log.critical(f"{sname}\t{thislen}\t{thatlen}")
+            if thislen > thatlen:
+                continue
+        resultdict.update({sname:optionlst[i+1]})
+    rstlst = [x for y in list(zip(resultdict.keys(), resultdict.values())) for x in y]
+    correctcontent = ''.join(rstlst)
+    with open(str(inipath), 'w') as writer:
+        writer.write(correctcontent)
+    return correctcontent
 
 
 def removesection(cfpfilename: str, sectionname: str):
@@ -21,13 +48,25 @@ def removesection(cfpfilename: str, sectionname: str):
     if cfpin.has_section(sectionname):
         cfpin.remove_section(sectionname)
         cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
+        log.critical(f"成功清除{sectionname}下的所有option！！！")
 
 
 def getcfp(cfpfilename: str):
     cfpson = ConfigParser()
     inipathson = Path(getdirmain()) / 'data' / (cfpfilename + '.ini')
     touchfilepath2depth(inipathson)
-    cfpson.read(inipathson, encoding='utf-8')
+    try:
+        cfpson.read(inipathson, encoding='utf-8')
+    except DuplicateSectionError as dse:
+        log.critical(f"ini文件《{inipathson}》中存在重复的section名称，备份文件并试图删除项目数量较少的section以修复文件……{dse}")
+        ptn = re.compile("section \'(\w+)\'")
+        sname = re.search(ptn, str(dse)).group(1)
+        fixinifile(inipathson, '[' + sname + ']')
+        try:
+            cfpson.read(inipathson, encoding='utf-8')
+        except Exception as e:
+            log.critical(f"修复配置文件时失败！！！{e}")
+            return
 
     return cfpson, inipathson
 
@@ -95,7 +134,10 @@ if __name__ == '__main__':
 #     cp, cppath = getcfp('everwork')
 #     print(cp, cppath)
     cfpapiname = 'everapi'
-    nssectionname = 'notestore'
-    removesection(cfpapiname, nssectionname)
+    inipathson = Path(getdirmain()) / 'data' / (cfpapiname + '.ini')
+    name = '[notestore]'
+#     cp, cppath = getcfp(cfpapiname)
+#     removesection(cfpapiname, nssectionname)
+    ict = fixinifile(inipathson, name)
     if not_IPython():
         print('Done.')
