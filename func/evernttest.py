@@ -706,7 +706,7 @@ def findsomenotest2showornote(nbguid, keyword, newnote=False):
     notesfind = findnotefromnotebook(nbguid, keyword)
     if newnote:
         tokenfst = getcfpoptionvalue('everwork', 'evernote', 'token')
-        makenote(tokenfst, get_notestore(), f"“{keyword}》”笔记列表", str(notesfind))
+        makenote(tokenfst, get_notestore(), f"“《{keyword}》”笔记列表", str(notesfind))
     else:
         print(notesfind)
 
@@ -748,18 +748,18 @@ if __name__ == '__main__':
     # print(getsampledffromdatahouse('火界'))
 
     # 查找主题包含关键词的笔记
-    #     notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
-    #     shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
-    #     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
-    #     findnoteguidlst = findnotefromnotebook(shenghuo_guid, notecount=1433)
-    #     print(len(findnoteguidlst))
-    #     findnoteguidlst = findsomenotest2showornote(notification_guid, 'ip', newnote=True)
-    #     print(findnoteguidlst)
+    notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
+#     shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
+#     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
+#     findnoteguidlst = findnotefromnotebook(shenghuo_guid, notecount=1433)
+#     print(len(findnoteguidlst))
+    findnoteguidlst = findsomenotest2showornote(notification_guid, '微信记录', newnote=True)
+    print(findnoteguidlst)
 
     # 测试包含文件资源的笔记更新
-    samplenoteguid = "962f0358-7c7a-4dfd-968d-14dd161a3a39"
-    pylst = [fn for fn in os.listdir() if fn.endswith(".py") or fn.endswith('.txt')]
-    imglist2note(nost, pylst, samplenoteguid, "包含附件的笔记", neirong='仅仅为了存在')
+#     samplenoteguid = "962f0358-7c7a-4dfd-968d-14dd161a3a39"
+#     pylst = [fn for fn in os.listdir() if fn.endswith(".py") or fn.endswith('.txt')]
+#     imglist2note(nost, pylst, samplenoteguid, "包含附件的笔记", neirong='仅仅为了存在')
 
     # 显示笔记内容，源码方式
     # '39c0d815-df23-4fcc-928d-d9193d5fff93' 转账
