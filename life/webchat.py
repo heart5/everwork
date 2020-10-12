@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 微信大观园，工作优先，娱乐生活
 """
@@ -173,7 +174,8 @@ def showfmmsg(inputformatmsg):
     if len(men_wc) ==0 :
         log.critical(f"登录名为空！！！")
         return
-    chatnoteguid = getinivaluefromnote('webchat', men_wc).lower()
+    if (chatnoteguid := getinivaluefromnote('webchat', men_wc+f"_{getdeviceid()}").lower()) is None:
+        chatnoteguid = getinivaluefromnote('webchat', men_wc).lower()
     updatefre = getinivaluefromnote('webchat', 'updatefre')
     showitemscount = getinivaluefromnote('webchat', 'showitems')
     # print(f"{type(showitemscount)}\t{showitemscount}")
@@ -182,7 +184,7 @@ def showfmmsg(inputformatmsg):
         .replace('=', '等于').replace('&', '并或')
     if (len(chatitems) % updatefre) == 0:
         neirongplain = "<pre>" + neirongplain + "</pre>"
-        imglist2note(note_store, [], chatnoteguid, f"微信（{men_wc}）记录更新笔记",
+        imglist2note(note_store, [], chatnoteguid, f"微信（{men_wc}）_（{getinivaluefromnote('device', getdeviceid())}）记录更新笔记",
                      neirongplain)
     # print(webchats)
 
