@@ -4,8 +4,9 @@
 """
 
 import re
+import os
 from pathlib import Path
-from configparser import ConfigParser, DuplicateSectionError
+from configparser import ConfigParser, DuplicateSectionError, DuplicateOptionError
 import pathmagic
 
 with pathmagic.context():
@@ -14,12 +15,21 @@ with pathmagic.context():
     from func.sysfunc import not_IPython
 
 
-def fixinifile(inipath, name):
-#     print(inipath, name)
-    with open(inipath, 'r') as f:
-        fcontent = f.read()
-        with open(str(inipath) + '.bak', 'w') as writer:
-            writer.write(fcontent)
+def dropdup4option(opcontent):
+    ptno = re.compile("(\w+)\s*=\s*(\w*)")
+    opdict = dict()
+    fdlst = re.findall(ptno, opcontent)
+    for item in fdlst:
+        if item[0] in opdict.keys():
+            log.critical(f"出现option名称重复：\t{item[0]}，取用最新的数据")
+        opdict.update(dict({item[0]: item[1]}))
+    # opdict
+    rstlst = [' = '.join(list(x)) for x in list(zip(opdict.keys(), opdict.values()))]
+    # rstlst
+    return '\n' + '\n'.join(rstlst) + '\n\n'
+
+
+def dropdup4section(fcontent):
     ftn = re.compile(r"\[\w+\]")
     sectionlst = re.findall(ftn, fcontent)
     optionlst = re.split(ftn, fcontent)
@@ -28,13 +38,24 @@ def fixinifile(inipath, name):
         sname = sectionlst[i]
         if sname in resultdict.keys():
             thislen = len(resultdict[sname])
-            thatlen = len(optionlst[i+1])
-            log.critical(f"{sname}\t{thislen}\t{thatlen}")
+            thatlen = len(optionlst[i + 1])
+            log.critical(f"存在重复的section：\t{sname}\t{thislen}\t{thatlen}")
             if thislen > thatlen:
                 continue
-        resultdict.update({sname:optionlst[i+1]})
+        cleanopcontent = dropdup4option(optionlst[i + 1])
+        resultdict.update({sname: cleanopcontent})
     rstlst = [x for y in list(zip(resultdict.keys(), resultdict.values())) for x in y]
     correctcontent = ''.join(rstlst)
+
+    return correctcontent
+
+
+def fixinifile(inipath):
+    with open(inipath, 'r') as f:
+        fcontent = f.read()
+        with open(str(inipath) + '.bak', 'w') as writer:
+            writer.write(fcontent)
+    correctcontent = dropdup4section(fcontent)
     with open(str(inipath), 'w') as writer:
         writer.write(correctcontent)
     return correctcontent
@@ -57,15 +78,19 @@ def getcfp(cfpfilename: str):
     touchfilepath2depth(inipathson)
     try:
         cfpson.read(inipathson, encoding='utf-8')
-    except DuplicateSectionError as dse:
-        log.critical(f"ini文件《{inipathson}》中存在重复的section名称，备份文件并试图删除项目数量较少的section以修复文件……{dse}")
-        ptn = re.compile("section \'(\w+)\'")
-        sname = re.search(ptn, str(dse)).group(1)
-        fixinifile(inipathson, '[' + sname + ']')
+    except (DuplicateSectionError, DuplicateOptionError) as dse:
+        log.critical(f"ini文件《{inipathson}》中存在重复的section或option名称，备份文件并试图修复文件……{dse}")
+        fixinifile(inipathson)
+    except Exception as eee:
+        log.critical(eee)
         try:
             cfpson.read(inipathson, encoding='utf-8')
+            log.critical(f"ini文件《{inipathson}》修复成功！！！")
         except Exception as e:
-            log.critical(f"修复配置文件时失败！！！{e}")
+            log.critical(f"读取配置文件《{inipathson}》时失败！！！{e}")
+            log.critical(f"试图强制删除该配置文件《{inipathson}》")
+            os.remove(inipathson)
+            log.critical(f"配置文件《{inipathson}》被强制删除！！！")
             return
 
     return cfpson, inipathson
@@ -136,8 +161,8 @@ if __name__ == '__main__':
     cfpapiname = 'everapi'
     inipathson = Path(getdirmain()) / 'data' / (cfpapiname + '.ini')
     name = '[notestore]'
-#     cp, cppath = getcfp(cfpapiname)
+    cp, cppath = getcfp(cfpapiname)
 #     removesection(cfpapiname, nssectionname)
-    ict = fixinifile(inipathson, name)
+#     ict = fixinifile(inipathson)
     if not_IPython():
         print('Done.')
