@@ -16,13 +16,23 @@ with pathmagic.context():
 #     from func.wrapfuncs import timethis, ift2phone
     from func.evernttest import getinivaluefromnote
     from func.termuxtools import termux_telephony_deviceinfo
-    from func.sysfunc import execcmd
+    from func.sysfunc import execcmd, not_IPython
     try:
         import wmi
     except ImportError:
         # log.warning('wmi库未安装或者是在linux系统下无法成功import而已。')
         # print('wmi库未安装或者是在linux系统下无法成功import而已。')
         pass
+
+
+def set_devicename2ini(id, sysstr):
+    if (device_name := getcfpoptionvalue('everhard', id, 'device_name')) is None:
+        if (device_name_fromnote := getinivaluefromnote('device', id)):
+            setcfpoptionvalue('everhard', id, 'device_name', device_name_fromnote)
+        else:
+            log.critical(f"当前主机（id：{id}）尚未在网络端配置笔记中设定名称或者是还没完成本地化设定！！！")
+            if sysstr == 'Linux':
+                log.critical(f"主机信息：{execcmd('uname -a')}")
 
 
 # @timethis
@@ -33,8 +43,7 @@ def getdeviceid():
     # printDisk()
     # printMacAddress()
     # print(printBattery())
-    d_id_from_ini = getcfpoptionvalue('everhard', 'everhard', 'device_id')
-    if d_id_from_ini:
+    if (d_id_from_ini := getcfpoptionvalue('everhard', 'everhard', 'device_id')):
         return str(d_id_from_ini)
     id = None
     sysstr = platform.system()
@@ -90,21 +99,19 @@ def getdeviceid():
 
     id = str(id)
     setcfpoptionvalue('everhard', 'everhard', 'device_id', id)
+    set_devicename2ini(id, sysstr)
 
     return id
 
 
 if __name__ == '__main__':
-    selfname = ''
-    try:
-        selfname = __file__
-    except Exception as e:
-        print(e)
-    log.info(f'运行文件\t{selfname}')
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}')
     id = getdeviceid()
-    print(id)
+    set_devicename2ini(id, 'Linux')
     devicename = getinivaluefromnote('device', id)
     print(f"{devicename}")
-    log.info(f'文件\t{selfname}\t测试完毕。')
+    if not_IPython():
+        log.info(f'文件\t{__file__}\t测试完毕。')
 
 
