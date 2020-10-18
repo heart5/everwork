@@ -14,7 +14,7 @@ import traceback
 import itchat
 # from requests.packages.urllib3 import HTTPConnectionPool
 from evernote.edam.error.ttypes import EDAMSystemException
-from urllib3.exceptions import *
+from urllib3.exceptions import NewConnectionError, MaxRetryError
 import requests
 from bs4 import BeautifulSoup
 import struct
@@ -26,8 +26,7 @@ import pathmagic
 with pathmagic.context():
     from func.logme import log
     from func.termuxtools import termux_sms_send
-    from func.first import getdirmain
-    from func.sysfunc import set_timeout, after_timeout, not_IPython
+    from func.sysfunc import not_IPython
 
 
 def isitchat(pklabpath):
@@ -132,50 +131,6 @@ def get_ip4alleth(*args):
             #  print(ip)
     #  print(resultiplst)
     return resultiplst
-
-
-def trycounttimes(jutifunc, inputparam='', returnresult=False, servname='服务器'):
-    trytimes = 3
-    sleeptime = 15
-    for i in range(trytimes):
-        try:
-            if returnresult:
-                if len(inputparam) == 0:
-                    result = jutifunc()
-                else:
-                    result = jutifunc(inputparam)
-                return result
-            else:
-                if len(inputparam) == 0:
-                    jutifunc()
-                else:
-                    jutifunc(inputparam)
-            break
-        except (OSError, ConnectionRefusedError, ConnectionResetError, ConnectionError, struct.error) as eee:
-            if hasattr(eee, 'errno'):
-                if eee.errno == 11001:
-                    log.critical(f'寻址失败，貌似网络不通。{eee}')
-                elif eee.errno == 10061:
-                    log.critical(f'被主动拒绝，好没面啊！{eee}')
-                elif eee.errno == 10060:
-                    log.critical(f'够不着啊，是不是在墙外？！{eee}')
-                elif eee.errno == 10048:
-                    log.critical(f'多次强行连接，被拒了！{eee}')
-                elif eee.errno == 10054:
-                    log.critical(f'主机发脾气，强行断线了。{eee}')
-                elif eee.errno == 8:
-                    log.critical(f'和evernote服务器握手失败。{eee}')
-                else:
-                    log.critical(f'连接失败。{eee.errno}\t{eee}')
-            else:
-                log.critical(f'连接失败。{eee}')
-            log.critical(
-                f"第{i + 1}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
-            # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
-            if i == (trytimes - 1):
-                log.critical(f'“{servname}”连接失败，只好无功而返。')
-                # raise eee
-            time.sleep(sleeptime)
 
 
 def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
