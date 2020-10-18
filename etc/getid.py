@@ -35,6 +35,10 @@ def set_devicename2ini(id, sysstr):
                 log.critical(f"主机信息：{execcmd('uname -a')}")
 
 
+def get_devicenamefromini(id):
+    return getcfpoptionvalue('everhard', id, 'device_name')
+
+
 # @timethis
 def getdeviceid():
     # printCPU()
@@ -109,7 +113,7 @@ if __name__ == '__main__':
         log.info(f'运行文件\t{__file__}')
     id = getdeviceid()
     set_devicename2ini(id, 'Linux')
-    devicename = getinivaluefromnote('device', id)
+    devicename = get_devicenamefromini(id)
     print(f"{devicename}")
     if not_IPython():
         log.info(f'文件\t{__file__}\t测试完毕。')
