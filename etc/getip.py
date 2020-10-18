@@ -1,5 +1,8 @@
 #!PREFIX/bin/python
-
+# -*- coding: utf-8 -*-
+"""
+获取ip地址
+"""
 import socket
 
 def get_host_ip():
