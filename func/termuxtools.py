@@ -181,8 +181,8 @@ def termux_share():
 
 
 @set_timeout(90, after_timeout)
-def termux_sms_list(timecreated:bool=True, num:int=10, shownumber:bool=True,
-                    where:str="all"):
+def termux_sms_list(timecreated:bool = True, num:int = 10, shownumber:bool = True,
+                    where:str = "all"):
     cmdlst = ['termux-sms-list']
     if timecreated:
         cmdlst.append('-d')
