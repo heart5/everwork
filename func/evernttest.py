@@ -653,11 +653,8 @@ def readinifromnote():
     """
     # cfpeverwork, cfpeverworkpath = getcfp('everwork')
     # noteguid_inifromnote = cfpeverwork.get('evernote', 'ininoteguid')
-    ininoteupdatenum = getcfpoptionvalue('eversys', 'evernote', 'ininoteupdatenum')
-    # print(ininoteupdatenum)
-    if not ininoteupdatenum:
+    if not (ininoteupdatenum := getcfpoptionvalue('eversys', 'evernote', 'ininoteupdatenum')):
         ininoteupdatenum = 0
-    global note_store
     note_store = get_notestore()
     # noteguid_inifromnote = 'e0565861-db9e-4efd-be00-cbce06d0cf98'
     noteguid_inifromnote = getcfpoptionvalue('everwork', 'evernote', 'ininoteguid')
@@ -753,7 +750,7 @@ if __name__ == '__main__':
 #     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
 #     findnoteguidlst = findnotefromnotebook(shenghuo_guid, notecount=1433)
 #     print(len(findnoteguidlst))
-    findnoteguidlst = findsomenotest2showornote(notification_guid, '微信记录', newnote=True)
+    findnoteguidlst = findsomenotest2showornote(notification_guid, 'data')
     print(findnoteguidlst)
 
     # 测试包含文件资源的笔记更新
