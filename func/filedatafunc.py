@@ -21,6 +21,22 @@ with pathmagic.context():
     from func.configpr import getcfp
 
 
+def removeblanklinesfromtxt(fname):
+    """
+    去除文本文件中的空行
+    """
+    with open(fname, 'r') as f:
+        fcontent = f.read()
+        flst = fcontent.split('\n')
+        blanklst = [x for x in flst if len(x) == 0]
+        itemlst = [x for x in flst if len(x) > 0]
+        log.info(f"文件《{fname}》内容行数量为：\t{len(itemlst)}，空行数量为：\t{len(blanklst)}")
+    if len(blanklst) != 0:
+        with open(fname, 'w') as writer:
+            writer.write('\n'.join(itemlst))
+        log.info(f"文件《{fname}》只保留内容行（去除了空行），成功写入！！！")
+
+
 def getdbname(dbpath: str, ownername: str, title='wccontact'):
     return touchfilepath2depth(getdirmain() / dbpath / f"{title}_{ownername}.db")
 
