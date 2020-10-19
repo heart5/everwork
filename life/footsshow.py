@@ -104,8 +104,8 @@ def foot2show():
             itemtimeend = pd.to_datetime(time2)
             timedelta = itemtime - itemtimeend
         except:
-            log.critical(f"{time1}\t{time2}，此时间点处数据存在问题")
-            raise
+            log.critical(f"{time1}\t{time2}，此时间点处数据存在问题。跳过此两个数据条目！！！")
+            continue
         while timedelta.seconds == 0:
             log.info(f"位置记录时间戳相同：{itemtime}\t{itemtimeend}")
             i = i + 1
