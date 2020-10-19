@@ -146,6 +146,8 @@ def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
     return targetvalue
 
 
+is_log_details = getcfpoptionvalue('everinifromnote', 'everwork', 'logdetails')
+
 # cfp, inifilepath = getcfp('everwork')
 # cfpdata, inidatanotefilepath = getcfp('everdatanote')
 # cfplife, inilifepath = getcfp('everlife')
@@ -154,7 +156,7 @@ def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
 
 
 if __name__ == '__main__':
-    if not_IPython():
+    if not_IPython() and is_log_details:
         print(f'开始测试文件\t{__file__}')
 #     cp, cppath = getcfp('everwork')
 #     print(cp, cppath)
@@ -164,5 +166,5 @@ if __name__ == '__main__':
     cp, cppath = getcfp(cfpapiname)
 #     removesection(cfpapiname, nssectionname)
 #     ict = fixinifile(inipathson)
-    if not_IPython():
+    if not_IPython() and is_log_details:
         print('Done.')
