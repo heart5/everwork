@@ -467,7 +467,7 @@ def timestamp2str(timestamp):
 
 def evernoteapijiayi():
     """
-    evernote api调用次数加一
+    evernote api调用次数加一。结合api调用限制，整点或达到限值（貌似是300次每小时）则重构一个继续干。
     """
     cfpapiname = 'everapi'
     nssectionname = 'notestore'
@@ -505,9 +505,12 @@ def evernoteapijiayi():
 
 
 def evernoteapijiayi_test():
-    calllink = [re.findall("^《FrameSummary file (.+), line (\d+) in (.+)》$", line) for line in traceback.extract_stack()]
-    calllinks = str(calllink[:-1])
-    print(calllinks)
+    calllink = [re.findall("^<FrameSummary file (.+), line (\d+) in (.+)>$", str(line)) for line in traceback.extract_stack()]
+    if len(calllink) > 0:
+        calllinks = str(calllink[-1])
+#         print(calllinks)
+    else:
+        calllinks = ""
     note_store = get_notestore()
     nsstr4ini = str(id(note_store))
     nowtime = datetime.datetime.now()
@@ -738,6 +741,7 @@ if __name__ == '__main__':
         log.info(f'开始运行文件\t{__file__}……')
     nost = get_notestore()
     print(nost)
+    evernoteapijiayi_test()
     # readinifromnote()
     # writeini()
     # ntdf = findnotebookfromevernote()
@@ -750,8 +754,8 @@ if __name__ == '__main__':
 #     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
 #     findnoteguidlst = findnotefromnotebook(shenghuo_guid, notecount=1433)
 #     print(len(findnoteguidlst))
-    findnoteguidlst = findsomenotest2showornote(notification_guid, 'data')
-    print(findnoteguidlst)
+#     findnoteguidlst = findsomenotest2showornote(notification_guid, 'data')
+#     print(findnoteguidlst)
 
     # 测试包含文件资源的笔记更新
 #     samplenoteguid = "962f0358-7c7a-4dfd-968d-14dd161a3a39"
