@@ -12,7 +12,7 @@ import uuid
 import pathmagic
 with pathmagic.context():
     from func.logme import log
-    from func.configpr import getcfpoptionvalue, setcfpoptionvalue
+    from func.configpr import getcfpoptionvalue, setcfpoptionvalue, is_log_details
 #     from func.wrapfuncs import timethis, ift2phone
     from func.evernttest import getinivaluefromnote
     from func.termuxtools import termux_telephony_deviceinfo
@@ -109,13 +109,13 @@ def getdeviceid():
 
 
 if __name__ == '__main__':
-    if not_IPython():
+    if not_IPython() and is_log_details:
         log.info(f'运行文件\t{__file__}')
     id = getdeviceid()
     set_devicename2ini(id, 'Linux')
     devicename = get_devicenamefromini(id)
     print(f"{devicename}")
-    if not_IPython():
-        log.info(f'文件\t{__file__}\t测试完毕。')
+    if not_IPython() and is_log_details:
+        log.info(f'文件\t{__file__}\t运行完毕。')
 
 
