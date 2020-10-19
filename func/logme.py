@@ -47,7 +47,6 @@ def mylog():
 log = mylog()
 
 if __name__ == '__main__':
-    log.info(os.__file__)
     cwd = os.getcwd()
     print(cwd)
     log.info('测试func下的log，主要看路径')
