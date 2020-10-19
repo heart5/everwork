@@ -117,5 +117,3 @@ if __name__ == '__main__':
     print(f"{devicename}")
     if not_IPython() and is_log_details:
         log.info(f'文件\t{__file__}\t运行完毕。')
-
-
