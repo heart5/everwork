@@ -24,7 +24,7 @@ with pathmagic.context():
     from func.logme import log
     from func.nettools import trycounttimes2
     from func.wrapfuncs import timethis
-    from func.profilerlm import lpt_wrapper
+#    from func.profilerlm import lpt_wrapper
 
 # print(f"{__file__} is loading now...")
 
@@ -194,7 +194,7 @@ def dftotal2top(df: pd.DataFrame):
 
 
 @timethis
-@lpt_wrapper()
+#@lpt_wrapper()
 def isworkday(dlist: list, person: str = '全体', fromthen=False):
     if fromthen and (len(dlist) == 1):
         dlist = pd.date_range(dlist[0], datetime.datetime.today(), freq='D')
