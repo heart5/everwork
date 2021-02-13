@@ -203,7 +203,7 @@ def ifttt_notify(content="content", funcname="funcname"):
     ifttt = IFTTT('0sa6Pl_UJ9a_w6UQlYuDJ', 'everwork')
     pu = platform.uname()
     ifttt.notify(f'{pu.machine}_{pu.node}', content, funcname)
-    log.info(f'{pu.machine}_{pu.node}\t{content}\t{funcname}')
+    log.critical(f'{pu.machine}_{pu.node}\t{content}\t{funcname}')
 
 
 def tst4trycounttimes2():
