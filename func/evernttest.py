@@ -128,7 +128,13 @@ def get_notestore(forcenew=False):
         log.info(f'成功连接Evernote服务器！构建notestore：{note_store}')
         return note_store
 
-    return getnotestore(forcenew)
+    try:
+        outns = getnotestore(forcenew)
+    except Exception as eeee:
+        log.critical(f"百般尝试，不得而入。再来一次，不行就算了。{eeee}")
+        outns = getnotestore(True)
+
+    return outns
 
 
 note_store = None
@@ -150,7 +156,7 @@ def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
     global en_username
     if en_username is not None:
         noteattrib.author = en_username
-        print(f"I'm here while creating the note, {en_username}")
+        print(f"I'm here while creating the note, for evernote user {en_username}")
     note.attributes = noteattrib
     note.guid = noteguid
     note.title = notetitle
@@ -190,10 +196,11 @@ def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
         resource = Resource()
 #         resource.mime = 'image/png'
         if (mtype := mimetypes.guess_type(res)[0]) is None:
-            logstr = f"文件《{res}》的类型无法判断，跳过"
-            log.warning(logstr)
+            logstr = f"文件《{res}》的类型无法判断"
+            log.critical(logstr)
             print(logstr)
-            continue
+            mtype = 'file/unkonwn'
+#             continue
         resource.mime = mtype
 #         print(mtype)
         resource.data = data
@@ -319,7 +326,7 @@ def findnotefromnotebook(notebookguid, titlefind='', notecount=10000):
     else:
         numtobesplit = ournotelist.totalNotes
 
-    spllst = [(i * width, (width, numtobesplit - width * i)[numtobesplit - width * (i +1) < 0], numtobesplit) for i in range((numtobesplit // width) +1)]
+    spllst = [(i * width, (width, numtobesplit - width * i)[numtobesplit - width * (i + 1) < 0], numtobesplit) for i in range((numtobesplit // width) + 1)]
     if len(spllst) >= 1:
         print(spllst)
         for numbt in spllst[1:]:
@@ -342,6 +349,26 @@ def getnotecontent(guid: str):
     # print(soup)
 
     return soup
+
+
+def getnoteresource(guid: str):
+    """
+    获取笔记附件
+    :param guid:
+    :return:
+    """
+    ns = get_notestore()
+    note = ns.getNote(gettoken(), guid, True, True, False, False)
+    evernoteapijiayi()
+    resultlst = list()
+    for resitem in note1.resources:
+        sonlst = list()
+        sonlst.append(resitem.attributes.fileName)
+        sonlst.append(resitem.data.body.decode())
+        resultlst.append(sonlst)
+    # print(soup)
+
+    return resultlst
 
 
 def createnotebook(nbname: str, stack='fresh'):
@@ -413,7 +440,7 @@ def makenote2(notetitle, notebody='真元商贸——休闲食品经营专家', 
     :param parentnotebook:
     :return:
     """
-    
+
     notestore = get_notestore()
     nbody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
     nbody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
@@ -752,7 +779,7 @@ if __name__ == '__main__':
     notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
 #     shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
 #     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
-#     findnoteguidlst = findnotefromnotebook(shenghuo_guid, notecount=1433)
+    findnoteguidlst = findnotefromnotebook(notification_guid, titlefind='tmux.conf', notecount=1433)
 #     print(len(findnoteguidlst))
 #     findnoteguidlst = findsomenotest2showornote(notification_guid, 'data')
 #     print(findnoteguidlst)
