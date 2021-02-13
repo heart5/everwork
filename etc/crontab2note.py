@@ -24,7 +24,8 @@ def findnewcronthenupdate():
     # 获取用户名，方便适配不同的运行平台
     r = os.popen('whoami')
     me = r.read()[:-1]
-    print(me)
+    # print(me)
+    # print("This is just a test for jupytext.")
 
     # 打开配置表，过滤掉注释并简单检查（由6部分构成）是否符合规范
     cronfile = f'/data/data/com.termux/files/usr/var/spool/cron/crontabs/{me}'
