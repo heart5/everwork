@@ -28,7 +28,13 @@ def findnewcronthenupdate():
     # print("This is just a test for jupytext.")
 
     # 打开配置表，过滤掉注释并简单检查（由6部分构成）是否符合规范
-    cronfile = f'/data/data/com.termux/files/usr/var/spool/cron/crontabs/{me}'
+    cronpath = Path('/data/data/com.termux/files/usr/var/spool/cron/crontabs')
+    if not cronpath.exists():
+        cronpath = cronpath.parents[1]
+        print(cronpath)
+        log.warning("maybe newer linux, directory change")
+    cronfile = cronpath / me
+    
     cfl = open(cronfile, 'r').readlines()
     # print(f"{cfl}")
     cflen = [len(x.split()) for x in cfl if not x.startswith('#')]
@@ -81,3 +87,5 @@ if __name__ == '__main__':
     findcronlogthenupdate()
     if not_IPython():
         log.info(f"文件\t{__file__}\t运行结束。")
+
+
