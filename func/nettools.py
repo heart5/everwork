@@ -15,6 +15,7 @@ import itchat
 # from requests.packages.urllib3 import HTTPConnectionPool
 from evernote.edam.error.ttypes import EDAMSystemException
 from urllib3.exceptions import NewConnectionError, MaxRetryError
+from requests.exceptions import *
 import requests
 from bs4 import BeautifulSoup
 import struct
