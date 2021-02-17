@@ -1,4 +1,16 @@
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.10.1
+# ---
+
 """
 微信大观园，工作优先，娱乐生活
 """
@@ -21,7 +33,7 @@ with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.logme import log
     from func.nettools import trycounttimes2
-    from func.sysfunc import uuid3hexstr
+    from func.sysfunc import uuid3hexstr, not_IPython
     from func.evernttest import get_notestore, makenote, imglist2note, \
         evernoteapijiayi, getinivaluefromnote
     from func.datatools import readfromtxt, write2txt
@@ -145,6 +157,23 @@ def formatmsg(msg):
     return finnalmsg
 
 
+def getsendernick(msg):
+    # sendernick = itchat.search_friends(userName=msg['FromUserName'])
+    if msg['FromUserName'].startswith('@@'):
+        qun = itchat.search_chatrooms(userName=msg['FromUserName'])
+        sendernick = qun['NickName'] + '(群)' + msg['ActualNickName']
+    else:
+        senderuser = itchat.search_friends(userName=msg['FromUserName'])
+        if senderuser is None:
+            return "self?"
+        if len(senderuser['RemarkName']) == 0:
+            sendernick = senderuser['NickName']
+        else:
+            sendernick = senderuser['RemarkName']
+    # sendernick = itchat.search_friends(userName=msg['FromUserName'])['NickName']
+    return sendernick
+
+
 def showfmmsg(inputformatmsg):
     msgcontent = ""
     for item in inputformatmsg:
@@ -251,6 +280,7 @@ def soupclean2item(msgcontent):
 @itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True,
                      isMpChat=True)
 def sharing_reply(msg):
+    sendernick = getsendernick(msg)
     innermsg = formatmsg(msg)
 
     # showmsg(msg)
@@ -258,29 +288,29 @@ def sharing_reply(msg):
     # http://zj.lgmob.com/h5_whmj_qp/fks0_eb81c193dea882941fe13dfa5be24a11.html
     # ptn = re.compile("h5_whmj_qp/fks0_")
     # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
-    ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
+    # ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
+    men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
+    ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     msgurl = msg['Url']
     print(msgurl)
     if re.findall(ptn, msgurl):
         if msgurl.startswith('http'):
-            roomid = updateurllst(msgurl)
-            outstr = f"【Sharing】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}"
-            log.info(outstr)
-            itchat.send_msg(outstr)
+            roomid = updateurllst(men_wc, msgurl)
+            outstr = f"【Sharing】信息中发现新的火界麻将战绩网页链接并处理：\t{roomid}"
+            # log.info(outstr)
+            itchat.send_msg(f'({sendernick})'  +outstr)
             makemsg2write(innermsg, outstr)
+            makemsg2write(innermsg, msgurl)
 
     # 处理开房链接
     # http://s0.lgmob.com/h5_whmj_qp/?d=217426
-    ptnfang = re.compile("http://s0.lgmob.com/h5_whmj_qp/\\?d=(\d+)")
+    ptnfang = re.compile("s0.lgmob.com/h5_whmj_qp/\\?d=(\d+)")
     if re.findall(ptnfang, msgurl):
         if msgurl.startswith('http'):
-            outstr = f"【Sharing】信息中发现新的火界麻将开房链接并处理，房间号为：\t{re.findall(ptnfang, msgurl)[0]}"
-            log.info(outstr)
-            itchat.send_msg(outstr)
+            outstr = f"【Sharing】信息中发现新的火界麻将开房链接并处理，房间号为：\t{re.findall(ptnfang, msgurl)[0]}: {msg['Text']}"
+            # log.info(outstr)
+            itchat.send_msg(f'({sendernick})'  +outstr)
             makemsg2write(innermsg, outstr)
-            print(innermsg['fmText'])
-            innermsg['fmText'] = msgurl
-
 
     soup, items = soupclean2item(msg['Content'])
 
@@ -331,6 +361,9 @@ def sharing_reply(msg):
 
 
 def makemsg2write(innermsg, inputtext=''):
+    """
+    make record then write to items for chatitems
+    """
     nowtuple = time.time()
     nowdatetime = datetime.datetime.fromtimestamp(nowtuple)
     finnalmsg = {'fmId': math.floor(nowtuple),
@@ -344,6 +377,7 @@ def makemsg2write(innermsg, inputtext=''):
 
 @itchat.msg_register([TEXT], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def text_reply(msg):
+    sendernick = getsendernick(msg)
     innermsg = formatmsg(msg)
     soup, items = soupclean2item(msg['Content'])
 
@@ -376,23 +410,37 @@ def text_reply(msg):
 
     # 处理火界麻将战绩网页
     men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
-    ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
+    ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fcs0_)")
     msgtxt = msg['Text']
     if re.findall(ptn, msgtxt):
         if msgtxt.startswith('http'):
-            roomid = updateurllst(msgtxt)
-            outstr = f"【Text】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t{roomid}"
-            log.info(outstr)
-            itchat.send_msg(outstr)
+            roomid = updateurllst(men_wc, msgtxt)
+            outstr = f"【Text】信息中发现新的火界麻将战绩网页链接并处理：\t{roomid}"
+            # log.info(outstr)
+            itchat.send_msg(sendernick + outstr)
             makemsg2write(innermsg, outstr)
+            makemsg2write(innermsg, msgtxt)
 
     # 根据口令显示火界麻将战绩综合统计结果
     if msg['Text'].startswith('火界麻将战果统计') or msg['Text'].startswith('麻果'):
         log.info(f"根据口令显示火界麻将战绩综合统计结果")
         msgtxt = msg['Text']
-        recentday = True
-        if msgtxt.find('全部') != -1:
-            recentday = False
+        recentday = ""
+        if msgtxt.find('日') != -1:
+            recentday = "日"
+        elif msgtxt.find('周') != -1:
+            recentday = "周"
+        elif msgtxt.find('旬') != -1:
+            recentday = "旬"
+        elif msgtxt.find('月') != -1:
+            recentday = "月"
+        elif msgtxt.find('年') != -1:
+            recentday = "年"
+        elif msgtxt.find('全部') != -1:
+            recentday = "全部"
+        else:
+            recentday = '周'
+
         simpledesc = True
         if msgtxt.find('综合') != -1:
             simpledesc = False
@@ -404,24 +452,13 @@ def text_reply(msg):
         imgwcrel = os.path.relpath(imgzhanji)
         itchat.send_image(imgwcrel, toUserName=msg['FromUserName'])
         makemsg2write(innermsg, imgwcrel)
-        # sendernick = itchat.search_friends(userName=msg['FromUserName'])
-        if msg['FromUserName'].startswith('@@'):
-            qun = itchat.search_chatrooms(userName=msg['FromUserName'])
-            sendernick = qun['NickName'] + '(群)' + msg['ActualNickName']
-        else:
-            senderuser = itchat.search_friends(userName=msg['FromUserName'])
-            if len(senderuser['RemarkName']) == 0:
-                sendernick = senderuser['NickName']
-            else:
-                sendernick = senderuser['RemarkName']
-        # sendernick = itchat.search_friends(userName=msg['FromUserName'])['NickName']
         outstr = f"{sendernick}\t查询信息：\n{msgtxt}"
         # 查询记录发给自己一份备档
         itchat.send_msg(outstr)
         makemsg2write(innermsg, outstr)
 
         if msgtxt.find('折线图') != -1:
-            imgzhanji = showzhanjiimg()
+            imgzhanji = showzhanjiimg(men_wc, recentday)
             imgzhanjirel = os.path.relpath(imgzhanji)
             itchat.send_image(imgzhanjirel, toUserName=msg['FromUserName'])
             # 折线图发送记录备档
@@ -587,9 +624,11 @@ def keepliverun():
 
 
 if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}')
 
     note_store = get_notestore()
     keepliverun()
 
-    log.info(f'{__file__}\t运行结束！')
+    if not_IPython():
+        log.info(f'{__file__}\t运行结束！')
