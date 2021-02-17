@@ -1,4 +1,16 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.10.1
+# ---
+
 """
 获取火界麻将的比赛结果并输出
 """
@@ -8,7 +20,9 @@ import matplotlib.pyplot as plt
 import os
 import requests
 import re
+from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+from xpinyin import Pinyin
 
 import pathmagic
 
@@ -17,6 +31,7 @@ with pathmagic.context():
     from func.evernttest import trycounttimes2, getinivaluefromnote
     from func.first import getdirmain, touchfilepath2depth
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue, getcfp
+    from func.sysfunc import not_IPython
 
 
 def find_class_in_tag(key: str, tags):
@@ -97,11 +112,15 @@ def getsinglepage(url: str):
 
 
 def fetchmjurl():
+    """
+    fetch all zhanji urls from chatitems files
+    """
     datapath = getdirmain() / 'data' / 'webchat'
     datafilelist = os.listdir(datapath)
     resultlst = list()
     # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
-    ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
+    # ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
+    ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fcs0_)")
     for filenameinner in datafilelist:
         if filenameinner.startswith('chatitems'):
             # print(filenameinner)
@@ -223,60 +242,80 @@ def fetchmjfang(owner):
     return cleandf.sort_values('mintime', ascending=False)
 
 
-def updateurllst(url):
-    excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
+def updateurllst(ownername, url):
+    excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownername}.xlsx'
     touchfilepath2depth(excelpath)
-    excelwriter = pd.ExcelWriter(excelpath)
     roomid: str = '已处理'
-    if readfrominiurls := getcfpoptionvalue('evermuse', 'huojiemajiang', 'zhanjiurls'):
+    ownpy = Pinyin().get_pinyin(ownername, '')
+    descstr = ''
+    if readfrominiurls := getcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls'):
         # 用\t标记无效的链接，这里做对比的时候需要去掉tab
         urlsrecord = [x.strip('\t') for x in readfrominiurls.split(',')]
         if url not in urlsrecord:
-            if (rstdf := getsinglepage(url)) is None:
-                log.info(f"获取失败，跳过该网页\t{url}")
-                return
-            roomid = rstdf.iloc[0, 0]
-            if rstdf.shape[0] != 0:
+            if (tdf := getsinglepage(url)) is None:
+                descstr = "获取失败，跳过该网页\t{url}"
+                log.info(descstr)
+                return descstr
+            roomid = tdf.iloc[0, 0]
+            if tdf.shape[0] != 0:
                 urlsrecord.insert(0, url)
                 recorddf = pd.read_excel(excelpath)
-                rstdf = recorddf.append(getsinglepage(url))
-                rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
+                oldsize = recorddf.shape[0]
+                rstdf = recorddf.append(tdf)
                 rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
                 # 修正用户别名
                 rstdf = fixnamebyguestid(rstdf, 'guestid')
-                rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
-                excelwriter.close()
-                log.info(f"{rstdf.shape[0]}条记录写入文件\t{excelpath}")
+                rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
+                if rstdf.shape[0] == oldsize:
+                    descstr = f"room {roomid} is already recorded. recordsize is {oldsize} now."
+                    log.warning(descstr)
+                else:
+                    excelwriter = pd.ExcelWriter(excelpath)
+                    rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
+                    excelwriter.close()
+                    descstr = f"{rstdf.shape[0]}条记录写入文件\t{excelpath}, {roomid} record done now.\n{tdf[['guest', 'score']]}"
+                    log.info(descstr)
 
             else:
-                log.critical(f"这个网页貌似无效\t{url}")
+                descstr = f"这个网页貌似无效\t{url}"
+                log.critical(descstr)
                 urlsrecord.insert(0, f"\t{url}")
-            log.info(f"此将链接加入列表（现数量为{len(urlsrecord)}\t{url}")
-            setcfpoptionvalue('evermuse', 'huojiemajiang', 'zhanjiurls', ','.join(urlsrecord))
+            descstr += f"此将链接加入列表（现数量为{len(urlsrecord)})\t{url}"
+            log.info(descstr)
+            setcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls', ','.join(urlsrecord))
         else:
+            descstr = f"此链接已经存在于列表中\t{url}"
             # log.info(f"此链接已经存在于列表中\t{url}")
-            pass
     else:
         if (firstdf := getsinglepage(url)) is None:
-            log.info(f"获取失败，跳过该网页\t{url}")
-            return
+            descste = f"获取失败，跳过该网页\t{url}"
+            log.info(descstr)
+            return descstr
         # firstdf = getsinglepage(url)
         roomid = firstdf.iloc[0, 0]
         if firstdf.shape[0] != 0:
             urlsrecord = [url]
             # 修正用户别名
             firstdf = fixnamebyguestid(firstdf, 'guestid')
-            firstdf.to_excel(excelwriter, index=False, encoding='utf-8')
+            # little logic bug for minor
+            if excelpath.exists():
+                recorddf = pd.read_excel(excelpath)
+                rstdf = recorddf.append(firstdf)
+                rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
+            excelwriter = pd.ExcelWriter(excelpath)
+            rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
             excelwriter.close()
-            log.info(f"{firstdf.shape[0]}条记录写入文件\t{excelpath}")
+            descstr = f"{rstdf.shape[0]}条记录写入文件\t{excelpath}, {roomid} record done now. Its first one. Good start...\n{tdf[['guest', 'score']]}"
+            log.info(descstr)
         else:
-            log.critical(f"这个网页貌似无效\t{url}")
+            descstr = f"这个网页貌似无效\t{url}"
+            log.critical(descstr)
             urlsrecord = [f"\t{url}"]
 
         log.info(f"第一条链接加入列表\t{url}")
-        setcfpoptionvalue('evermuse', 'huojiemajiang', 'zhanjiurls', ','.join(urlsrecord))
+        setcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls', ','.join(urlsrecord))
 
-    return roomid
+    return descstr
 
 
 def fixnamealias(inputdf: pd.DataFrame, clname: str):
@@ -353,8 +392,35 @@ def showhighscore(rstdf, highbool: bool = True):
     return outputstr
 
 
-def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
-    excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
+def getstartdatefronmdf(recentday, rstdf):
+    # 根据开关，选择输出当天或者全部数据结果
+    time4datamax = rstdf['time'].max()
+    if recentday == '日':
+        zuijindatestart = pd.to_datetime(time4datamax.strftime("%Y-%m-%d"))
+    elif recentday == '周':
+        weekstarttime = time4datamax - timedelta(days=time4datamax.weekday())  # Monday
+        zuijindatestart = pd.to_datetime(weekstarttime.strftime("%Y-%m-%d"))
+    elif recentday == '旬':
+        if time4datamax.day < 10:
+            frtday = 1
+        elif time4datamax.day < 20:
+            frtday = 10
+        else:
+            frtday = 20
+        zuijindatestart = pd.to_datetime(time4datamax.strftime(f"%Y-%m-{frtday}"))
+    elif recentday == '月':
+        zuijindatestart = pd.to_datetime(time4datamax.strftime("%Y-%m-1"))
+    elif recentday == '年':
+        zuijindatestart = pd.to_datetime(time4datamax.strftime("%Y-1-1"))
+    else:
+        zuijindatestart = rstdf['time'].min()
+    print(f"data used from : {zuijindatestart}")
+    return zuijindatestart
+
+
+def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
+    excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownername}.xlsx'
+    print(excelpath)
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf.copy(deep=True)
     # print(rstdf.groupby(['guestid', 'guest']).count())
@@ -427,14 +493,12 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
 
     fangfinaldf = fangfdf.sort_values(['mintime'], ascending=False)
 
-    # 根据开关，选择输出当天或者全部数据结果
-    if recentday:
-        zuijindatestart = pd.to_datetime(rstdf['time'].max().strftime("%Y-%m-%d"))
-        rstdf = rstdf[rstdf.time >= zuijindatestart]
-        fangfilter = fangfdf.apply(lambda x: x['mintime'] >= zuijindatestart or x['closetime'] >= zuijindatestart,
-                                   axis=1)
-        # print(fangfilter)
-        fangfinaldf = fangfdf[fangfilter]
+
+    zuijindatestart = getstartdatefronmdf(recentday, rstdf)
+    rstdf = rstdf[rstdf.time >= zuijindatestart]
+    fangfilter = fangfdf.apply(lambda x: x['mintime'] >= zuijindatestart or x['closetime'] >= zuijindatestart, axis=1)
+    # print(fangfilter)
+    fangfinaldf = fangfdf[fangfilter]
     # print(fangfinaldf)
     # print(rstdf)
     outlst = list()
@@ -443,6 +507,7 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     timestart = rstdf['time'].min().strftime("%y-%m-%d %H:%M")
     titlestr = f"战果统计（{timestart}至{timeend}）"
     outlst.append(titlestr)
+    outlst.append(f"{recentday}战报*" * 5)
 
     renshu = rgp.shape[0]
     print(f"人数共有：\t{renshu}")
@@ -518,10 +583,12 @@ def zhanjidesc(ownername, recentday: bool = True, simpledesc: bool = True):
     return outstr
 
 
-def showzhanjiimg(jingdu: int = 300):
-    excelpath = getdirmain() / 'data' / 'muse' / 'huojiemajiang.xlsx'
+def showzhanjiimg(ownername, recentday = "日", jingdu: int = 300):
+    excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownername}.xlsx'
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf.copy(deep=True)
+    zuijindatestart = getstartdatefronmdf(recentday, rstdf)
+    rstdf = rstdf[rstdf.time >= zuijindatestart]
     zgridf = rstdf.groupby([pd.to_datetime(rstdf['time'].dt.strftime("%Y-%m-%d")), rstdf.guest]).sum().reset_index('guest', drop=False)[['guest', 'score']].sort_index()
 
     # register_matplotlib_converters()
@@ -532,7 +599,7 @@ def showzhanjiimg(jingdu: int = 300):
         pzgr.name = person
         pzgr.plot(legend=True)
 
-    plt.title("战绩累积图")
+    plt.title(f"[[{recentday}]]战绩累积图")
 
     imgwcdelaypath = touchfilepath2depth(
         getdirmain() / "img" / "webchat" / "zhanjicum.png"
@@ -558,20 +625,28 @@ def updateallurlfromtxt(owner: str):
             pass
 
         for sp in splst:
-            updateurllst(sp)
+            updateurllst(sp, owner)
 
 
 if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}')
 
-    # own = '白晔峰'
-    own = 'heart5'
+    own = '白晔峰'
+    # own = 'heart5'
 
     # fangdf = fetchmjfang(own)
     # print(fangdf)
 
-    updateallurlfromtxt(own)
-    rst = zhanjidesc(own, False, False)
+    # updateallurlfromtxt(own)
+    "  日 周 旬 月 年 全部"
+    rst = zhanjidesc(own, '月', False)
     print(rst)
+    
+    # img = showzhanjiimg(own)
 
-    log.info(f'文件{__file__}运行结束')
+
+    if not_IPython():
+        log.info(f'文件{__file__}运行结束')
+
+
