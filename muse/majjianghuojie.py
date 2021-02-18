@@ -31,6 +31,7 @@ with pathmagic.context():
     from func.evernttest import trycounttimes2, getinivaluefromnote
     from func.first import getdirmain, touchfilepath2depth
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue, getcfp
+    from func.datetimetools import getstartdate
     from func.sysfunc import not_IPython
 
 
@@ -120,7 +121,7 @@ def fetchmjurl():
     resultlst = list()
     # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
     # ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
-    ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fcs0_)")
+    ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     for filenameinner in datafilelist:
         if filenameinner.startswith('chatitems'):
             # print(filenameinner)
@@ -248,7 +249,8 @@ def updateurllst(ownername, url):
     roomid: str = '已处理'
     ownpy = Pinyin().get_pinyin(ownername, '')
     descstr = ''
-    if readfrominiurls := getcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls'):
+    if (readfrominiurls := getcfpoptionvalue(f'evermuse_{ownpy}', ownername,
+                                             'zhanjiurls')) is not None:
         # 用\t标记无效的链接，这里做对比的时候需要去掉tab
         urlsrecord = [x.strip('\t') for x in readfrominiurls.split(',')]
         if url not in urlsrecord:
@@ -262,9 +264,9 @@ def updateurllst(ownername, url):
                 recorddf = pd.read_excel(excelpath)
                 oldsize = recorddf.shape[0]
                 rstdf = recorddf.append(tdf)
-                rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
                 # 修正用户别名
                 rstdf = fixnamebyguestid(rstdf, 'guestid')
+                rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
                 rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
                 if rstdf.shape[0] == oldsize:
                     descstr = f"room {roomid} is already recorded. recordsize is {oldsize} now."
@@ -280,7 +282,7 @@ def updateurllst(ownername, url):
                 descstr = f"这个网页貌似无效\t{url}"
                 log.critical(descstr)
                 urlsrecord.insert(0, f"\t{url}")
-            descstr += f"此将链接加入列表（现数量为{len(urlsrecord)})\t{url}"
+            descstr += f"\n此链接将加入列表（现数量为{len(urlsrecord)})\t{url}"
             log.info(descstr)
             setcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls', ','.join(urlsrecord))
         else:
@@ -392,30 +394,6 @@ def showhighscore(rstdf, highbool: bool = True):
     return outputstr
 
 
-def getstartdatefronmdf(recentday, rstdf):
-    # 根据开关，选择输出当天或者全部数据结果
-    time4datamax = rstdf['time'].max()
-    if recentday == '日':
-        zuijindatestart = pd.to_datetime(time4datamax.strftime("%Y-%m-%d"))
-    elif recentday == '周':
-        weekstarttime = time4datamax - timedelta(days=time4datamax.weekday())  # Monday
-        zuijindatestart = pd.to_datetime(weekstarttime.strftime("%Y-%m-%d"))
-    elif recentday == '旬':
-        if time4datamax.day < 10:
-            frtday = 1
-        elif time4datamax.day < 20:
-            frtday = 10
-        else:
-            frtday = 20
-        zuijindatestart = pd.to_datetime(time4datamax.strftime(f"%Y-%m-{frtday}"))
-    elif recentday == '月':
-        zuijindatestart = pd.to_datetime(time4datamax.strftime("%Y-%m-1"))
-    elif recentday == '年':
-        zuijindatestart = pd.to_datetime(time4datamax.strftime("%Y-1-1"))
-    else:
-        zuijindatestart = rstdf['time'].min()
-    print(f"data used from : {zuijindatestart}")
-    return zuijindatestart
 
 
 def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
@@ -494,11 +472,11 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     fangfinaldf = fangfdf.sort_values(['mintime'], ascending=False)
 
 
-    zuijindatestart = getstartdatefronmdf(recentday, rstdf)
-    rstdf = rstdf[rstdf.time >= zuijindatestart]
-    fangfilter = fangfdf.apply(lambda x: x['mintime'] >= zuijindatestart or x['closetime'] >= zuijindatestart, axis=1)
-    # print(fangfilter)
-    fangfinaldf = fangfdf[fangfilter]
+    if (zuijindatestart := getstartdate(recentday, rstdf['time'].max())) != rstdf['time'].max():
+        rstdf = rstdf[rstdf.time >= zuijindatestart]
+        fangfilter = fangfdf.apply(lambda x: x['mintime'] >= zuijindatestart or x['closetime'] >= zuijindatestart, axis=1)
+        # print(fangfilter)
+        fangfinaldf = fangfdf[fangfilter]
     # print(fangfinaldf)
     # print(rstdf)
     outlst = list()
@@ -587,9 +565,9 @@ def showzhanjiimg(ownername, recentday = "日", jingdu: int = 300):
     excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownername}.xlsx'
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf.copy(deep=True)
-    zuijindatestart = getstartdatefronmdf(recentday, rstdf)
-    rstdf = rstdf[rstdf.time >= zuijindatestart]
-    zgridf = rstdf.groupby([pd.to_datetime(rstdf['time'].dt.strftime("%Y-%m-%d")), rstdf.guest]).sum().reset_index('guest', drop=False)[['guest', 'score']].sort_index()
+    if (zuijindatestart := getstartdate(recentday, rstdf['time'].max())) != rstdf['time'].max():
+        rstdf = rstdf[rstdf.time >= zuijindatestart]
+    zgridf = rstdf.groupbn([pd.to_datetime(rstdf['time'].dt.strftime("%Y-%m-%d")), rstdf.guest]).sum().reset_index('guest', drop=False)[['guest', 'score']].sort_index()
 
     # register_matplotlib_converters()
     plt.style.use("ggplot")  # 使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
