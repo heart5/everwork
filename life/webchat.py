@@ -277,8 +277,7 @@ def soupclean2item(msgcontent):
     return soup, items
 
 
-@itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True,
-                     isMpChat=True)
+@itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def sharing_reply(msg):
     sendernick = getsendernick(msg)
     innermsg = formatmsg(msg)
@@ -296,7 +295,7 @@ def sharing_reply(msg):
     if re.findall(ptn, msgurl):
         if msgurl.startswith('http'):
             roomid = updateurllst(men_wc, msgurl)
-            outstr = f"【Sharing】信息中发现新的火界麻将战绩网页链接并处理：\t{roomid}"
+            outstr = f"【Sharing】信息中发现新的火界麻将战绩网页链接：\t{roomid}"
             # log.info(outstr)
             itchat.send_msg(f'({sendernick})'  +outstr)
             makemsg2write(innermsg, outstr)
@@ -307,7 +306,7 @@ def sharing_reply(msg):
     ptnfang = re.compile("s0.lgmob.com/h5_whmj_qp/\\?d=(\d+)")
     if re.findall(ptnfang, msgurl):
         if msgurl.startswith('http'):
-            outstr = f"【Sharing】信息中发现新的火界麻将开房链接并处理，房间号为：\t{re.findall(ptnfang, msgurl)[0]}: {msg['Text']}"
+            outstr = f"【Sharing】信息中发现新的火界麻将开房链接：\t{re.findall(ptnfang, msgurl)[0]}: {msg['Text']}"
             # log.info(outstr)
             itchat.send_msg(f'({sendernick})'  +outstr)
             makemsg2write(innermsg, outstr)
@@ -410,7 +409,7 @@ def text_reply(msg):
 
     # 处理火界麻将战绩网页
     men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
-    ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fcs0_)")
+    ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     msgtxt = msg['Text']
     if re.findall(ptn, msgtxt):
         if msgtxt.startswith('http'):
