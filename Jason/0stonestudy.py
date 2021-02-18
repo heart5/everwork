@@ -7,14 +7,16 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.3.1
+#       jupytext_version: 1.5.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python3
 # ---
 
+# + [markdown] jupyter={"source_hidden": true}
 # ### 和白珍石一起学编程（python）
+# -
 
 # #### 文本在电脑屏幕的输出
 
@@ -137,6 +139,10 @@ number = 432
 width = 50
 amounts = number // width + 1
 (number, width, amounts)
+
+wer = 37
+print(wer^3)
+print(wer)
 
 for i in range(amounts):
     print((i * width, width,i * width + width) )
