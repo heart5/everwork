@@ -20,7 +20,6 @@ import matplotlib.pyplot as plt
 import os
 import requests
 import re
-from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from xpinyin import Pinyin
 
@@ -44,16 +43,11 @@ def find_class_in_tag(key: str, tags):
 
 @trycounttimes2('火界麻将服务器', 5, 50)
 def getsinglepage(url: str):
-    try:
-        mjhtml = requests.get(url)
-    except Exception as eee:
-        log.critical(f"获取网页{url}时出现错误。{eee}")
-        return
-
+    mjhtml = requests.get(url)
     mjhtml.encoding = mjhtml.apparent_encoding
     log.info(f"网页内容编码为：\t{mjhtml.encoding}")
     soup = BeautifulSoup(mjhtml.text, 'lxml')
-    if souptitle := soup.title.text == "404 Not Found":
+    if (souptitle := soup.title.text) == "404 Not Found":
         print(f"该网页无有效内容返回或者已经不存在\t{url}")
         return pd.DataFrame()
     else:
@@ -112,25 +106,22 @@ def getsinglepage(url: str):
     return rstdf
 
 
-def fetchmjurl():
+def fetchmjurl(ownername):
     """
     fetch all zhanji urls from chatitems files
     """
+    ownpy = Pinyin().get_pinyin(ownername, '')
     datapath = getdirmain() / 'data' / 'webchat'
     datafilelist = os.listdir(datapath)
+    print(datapath)
     resultlst = list()
     # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
     # ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
     ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     for filenameinner in datafilelist:
-        if filenameinner.startswith('chatitems'):
-            # print(filenameinner)
-            pass
-        else:
-            # print(f"{filenameinner}不是合格的微信信息数据文件，跳过。")
+        if not filenameinner.startswith('chatitems'):
             continue
         filename = datapath / filenameinner
-        # print(filename)
         rstlst = []
 
         decode_set = ['utf-8', 'gb18030', 'ISO-8859-2', 'gb2312', 'gbk', 'Error']
@@ -148,19 +139,22 @@ def fetchmjurl():
                     print(f"{filename}没办法用预设的集中字符集正确打开")
                 break
 
+        # print(resultlst[:5])
+        # print(resultlst[-5:])
+        print(f"[{len(rstlst)}]\t{filename}")
         resultlst.extend(rstlst)
 
-    if (urlsnum := getcfpoptionvalue('evermuse', 'huojiemajiang', 'urlsnum')):
+    if (urlsnum:=getcfpoptionvalue(f'evermuse_{ownpy}',ownername, 'urlsnum')) is not None:
         if urlsnum == len(resultlst):
-            log.info(f"战绩链接数量暂无变化")
+            log.info(f"战绩链接数量暂无变化, it's {len(resultlst)} now.")
             return
         else:
-            setcfpoptionvalue('evermuse', 'huojiemajiang', 'urlsnum',
-                              f"{len(resultlst)}")
+            setcfpoptionvalue(f'evermuse_{ownpy}',ownername, 'urlsnum', f"{len(resultlst)}")
     else:
-        urlsnum = len(resultlst)
-        setcfpoptionvalue('evermuse', 'huojiemajiang', 'urlsnum',
-                          f"{len(resultlst)}")
+        urlsnumnew = len(resultlst)
+        setcfpoptionvalue(f'evermuse_{ownpy}',ownername, 'urlsnum', f"{urlsnumnew}")
+        log.info(f"战绩链接数量暂无变化, from {urlsnum} to {urlsnumnew} now.")
+
     return list(tuple(resultlst))
 
 
@@ -198,7 +192,7 @@ def fetchmjfang(owner):
                     # 2020-02-13 11:27:21	True	搓雀雀(群)白晔峰	Text	http://s0.lgmob.com/h5_whmj_qp/?d=852734
                     fanglst = [line.strip() for line in filelines if re.search(ptn, line)]
                     rstlst = [[pd.to_datetime(lnspt[0]), re.findall(r'\b\w+\b', lnspt[2])[-1], int(lnspt[-1].split('=')[-1])] for
-                          line in fanglst if (lnspt := line.split('\t'))]
+                              line in fanglst if (lnspt:= line.split('\t'))]
                     print(filename, dk)
                     break
             except UnicodeDecodeError as eef:
@@ -210,7 +204,7 @@ def fetchmjfang(owner):
 
         resultlst.extend(rstlst)
 
-    if (urlsnum := getcfpoptionvalue('evermuse', 'huojiemajiang', 'fangsnum')):
+    if (urlsnum:=getcfpoptionvalue('evermuse', 'huojiemajiang', 'fangsnum')):
         if urlsnum == len(resultlst):
             log.info(f"战绩链接数量暂无变化")
         else:
@@ -220,7 +214,6 @@ def fetchmjfang(owner):
         urlsnum = len(resultlst)
         setcfpoptionvalue('evermuse', 'huojiemajiang', 'fangsnum',
                           f"{len(resultlst)}")
-
 
     rstdf = pd.DataFrame(resultlst, columns=['time', 'name', 'roomid'])
     # print(rstdf)
@@ -246,57 +239,48 @@ def fetchmjfang(owner):
 def updateurllst(ownername, url):
     excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownername}.xlsx'
     touchfilepath2depth(excelpath)
-    roomid: str = '已处理'
+    # roomid: str = '已处理'
     ownpy = Pinyin().get_pinyin(ownername, '')
     descstr = ''
-    if (readfrominiurls := getcfpoptionvalue(f'evermuse_{ownpy}', ownername,
-                                             'zhanjiurls')) is not None:
-        # 用\t标记无效的链接，这里做对比的时候需要去掉tab
-        urlsrecord = [x.strip('\t') for x in readfrominiurls.split(',')]
-        if url not in urlsrecord:
-            if (tdf := getsinglepage(url)) is None:
-                descstr = "获取失败，跳过该网页\t{url}"
-                log.info(descstr)
-                return descstr
+    if (readfrominiurls:=getcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls')) is None:
+        readfrominiurls = ''
+    # 用\t标记无效的链接，这里做对比的时候需要去掉tab
+    urlsrecord = [x.strip('[]') for x in readfrominiurls.split(',')]
+    if (url not in urlsrecord) and (len(urlsrecord) > 0):
+        tdf = getsinglepage(url)
+        if tdf.shape[0] != 0:
             roomid = tdf.iloc[0, 0]
-            if tdf.shape[0] != 0:
-                urlsrecord.insert(0, url)
-                recorddf = pd.read_excel(excelpath)
-                oldsize = recorddf.shape[0]
-                rstdf = recorddf.append(tdf)
-                # 修正用户别名
-                rstdf = fixnamebyguestid(rstdf, 'guestid')
-                rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
-                rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
-                if rstdf.shape[0] == oldsize:
-                    descstr = f"room {roomid} is already recorded. recordsize is {oldsize} now."
-                    log.warning(descstr)
-                else:
-                    excelwriter = pd.ExcelWriter(excelpath)
-                    rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
-                    excelwriter.close()
-                    descstr = f"{rstdf.shape[0]}条记录写入文件\t{excelpath}, {roomid} record done now.\n{tdf[['guest', 'score']]}"
-                    log.info(descstr)
-
+            urlsrecord.insert(0, url)
+            recorddf = pd.read_excel(excelpath)
+            oldsize = recorddf.shape[0]
+            rstdf = recorddf.append(tdf)
+            # 修正用户别名
+            rstdf = fixnamebyguestid(rstdf, 'guestid')
+            rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
+            rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
+            if rstdf.shape[0] == oldsize:
+                descstr = f"room {roomid} is already recorded. recordsize is {oldsize} now."
+                log.warning(descstr)
             else:
-                descstr = f"这个网页貌似无效\t{url}"
-                log.critical(descstr)
-                urlsrecord.insert(0, f"\t{url}")
-            descstr += f"\n此链接将加入列表（现数量为{len(urlsrecord)})\t{url}"
-            log.info(descstr)
-            setcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls', ','.join(urlsrecord))
+                excelwriter = pd.ExcelWriter(excelpath)
+                rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
+                excelwriter.close()
+                descstr = f"{rstdf.shape[0]}条记录写入文件\t{excelpath}, {roomid} record done now.\n{tdf[['guest', 'score']]}"
+                log.info(descstr)
+
         else:
-            descstr = f"此链接已经存在于列表中\t{url}"
-            # log.info(f"此链接已经存在于列表中\t{url}")
+            descstr = f"no valid content, 这个网页貌似无效\t{url}"
+            log.critical(descstr)
+            urlsrecord.insert(0, f"[{url}]")
+        descstr += f"\n此链接将加入列表（现数量为{len(urlsrecord)})\t{url}"
+        setcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls', ','.join(urlsrecord))
+    elif(url in urlsrecord):
+        descstr = f"此链接已经存在于列表中\t{url}"
+        log.info(f"此链接已经存在于列表中\t{url}")
     else:
-        if (firstdf := getsinglepage(url)) is None:
-            descste = f"获取失败，跳过该网页\t{url}"
-            log.info(descstr)
-            return descstr
-        # firstdf = getsinglepage(url)
-        roomid = firstdf.iloc[0, 0]
+        firstdf = getsinglepage(url)
         if firstdf.shape[0] != 0:
-            urlsrecord = [url]
+            koomid = firstdf.iloc[0, 0]
             # 修正用户别名
             firstdf = fixnamebyguestid(firstdf, 'guestid')
             # little logic bug for minor
@@ -307,12 +291,13 @@ def updateurllst(ownername, url):
             excelwriter = pd.ExcelWriter(excelpath)
             rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
             excelwriter.close()
-            descstr = f"{rstdf.shape[0]}条记录写入文件\t{excelpath}, {roomid} record done now. Its first one. Good start...\n{tdf[['guest', 'score']]}"
+            descstr = f"{rstdf.shape[0]}条记录写入文件\t{excelpath}, {roomid} record done now. Its first one. Good start...\n{firstdf[['guest', 'score']]}"
             log.info(descstr)
+            urlsrecord = [url]
         else:
             descstr = f"这个网页貌似无效\t{url}"
             log.critical(descstr)
-            urlsrecord = [f"\t{url}"]
+            urlsrecord = [f"[{url}]"]
 
         log.info(f"第一条链接加入列表\t{url}")
         setcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls', ','.join(urlsrecord))
@@ -394,8 +379,6 @@ def showhighscore(rstdf, highbool: bool = True):
     return outputstr
 
 
-
-
 def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownername}.xlsx'
     print(excelpath)
@@ -422,7 +405,7 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(
         lambda df: (df['closetime'] - df['maxtime']).total_seconds() // 60 if df['closetime'] else pd.NaT, axis=1)
     # print(fangfinaldf[fangfinaldf['mintime'].isnull()])
-    
+
     # 根据对局战绩修正房主信息
     rstdfroomhost = rstdf[rstdf.host].groupby('roomid')['guest'].first()
     for ix in list(rstdfroomhost.index.values):
@@ -450,7 +433,7 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
         print(f"续局房号：\t{ix}，记录共有{zdds[ix]}条，需删除时间点\t{time2drop}，保留的终局时间点为：\t{time2keep}")
         rstdf = rstdf[rstdf.time != time2drop]
 
-    fangfinaldf.to_csv(csvfile := touchfilepath2depth(getdirmain() / 'data' / 'game' / 'huojiemajiangfang.csv'))
+    fangfinaldf.to_csv(csvfile:=touchfilepath2depth(getdirmain() / 'data' / 'game' / 'huojiemajiangfang.csv'))
 
     fangfdf = fangfinaldf.copy(deep=True)
 
@@ -471,10 +454,10 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
 
     fangfinaldf = fangfdf.sort_values(['mintime'], ascending=False)
 
-
-    if (zuijindatestart := getstartdate(recentday, rstdf['time'].max())) != rstdf['time'].max():
+    if (zuijindatestart:=getstartdate(recentday, rstdf['time'].max())) != rstdf['time'].max():
         rstdf = rstdf[rstdf.time >= zuijindatestart]
-        fangfilter = fangfdf.apply(lambda x: x['mintime'] >= zuijindatestart or x['closetime'] >= zuijindatestart, axis=1)
+        fangfilter = fangfdf.apply(lambda x: x['mintime'] >=
+                                   zuijindatestart or x['closetime'] >= zuijindatestart, axis=1)
         # print(fangfilter)
         fangfinaldf = fangfdf[fangfilter]
     # print(fangfinaldf)
@@ -497,7 +480,7 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
         return '\n'.join(str(ddf).split('\n')[1:-1])
 
     if simpledesc:
-        if shownumber := getinivaluefromnote('game', 'huojieshow'):
+        if (shownumber:= getinivaluefromnote('game', 'huojieshow')):
             pass
         else:
             shownumber = 3
@@ -561,13 +544,14 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     return outstr
 
 
-def showzhanjiimg(ownername, recentday = "日", jingdu: int = 300):
+def showzhanjiimg(ownername, recentday="日", jingdu: int = 300):
     excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownername}.xlsx'
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf.copy(deep=True)
-    if (zuijindatestart := getstartdate(recentday, rstdf['time'].max())) != rstdf['time'].max():
+    if (zuijindatestart:=getstartdate(recentday, rstdf['time'].max())) != rstdf['time'].max():
         rstdf = rstdf[rstdf.time >= zuijindatestart]
-    zgridf = rstdf.groupbn([pd.to_datetime(rstdf['time'].dt.strftime("%Y-%m-%d")), rstdf.guest]).sum().reset_index('guest', drop=False)[['guest', 'score']].sort_index()
+    zgridf = rstdf.groupbn([pd.to_datetime(rstdf['time'].dt.strftime("%Y-%m-%d")), rstdf.guest]
+                           ).sum().reset_index('guest', drop=False)[['guest', 'score']].sort_index()
 
     # register_matplotlib_converters()
     plt.style.use("ggplot")  # 使得作图自带色彩，这样不用费脑筋去考虑配色什么的；
@@ -590,20 +574,19 @@ def showzhanjiimg(ownername, recentday = "日", jingdu: int = 300):
 
 
 def updateallurlfromtxt(owner: str):
-    sp1 = '''http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?\
-    id=fks0_2ba66d661e4c7712d0e6bcd3a6df255f'''
-    print(sp1)
+    sp1 = '''http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_2ba66d661e4c7712d0e6bcd3a6df255f'''
+    sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_1bba46a83cccbb0f87ea0cab16cdec2a"
+    # print(sp1)
     # sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_46247683e1b6e744ad956041ab2579a6"
     # sp3 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_62a635b6dc15b34b74527550cd88d83f"
     # sp4 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_9b8bd588d1d44ae2867aa1319241881b"
     # splst = [sp1, sp2, sp3, sp4]
-    if splst := fetchmjurl():
-        for sp in splst[:4]:
-            # print(sp)
-            pass
-
+    splst = [sp1, sp2]
+    splst = fetchmjurl(owner)
+    print(splst)
+    if (splst is not None) and len(splst) != 0:
         for sp in splst:
-            updateurllst(sp, owner)
+            desc = updateurllst(owner, sp)
 
 
 if __name__ == '__main__':
@@ -616,15 +599,13 @@ if __name__ == '__main__':
     # fangdf = fetchmjfang(own)
     # print(fangdf)
 
-    # updateallurlfromtxt(own)
-    "  日 周 旬 月 年 全部"
-    rst = zhanjidesc(own, '月', False)
-    print(rst)
-    
-    # img = showzhanjiimg(own)
+    updateallurlfromtxt(own)
 
+    "  日 周 旬 月 年 全部"
+    # rst = zhanjidesc(own, '月', False)
+    # print(rst)
+
+    # img = showzhanjiimg(own)
 
     if not_IPython():
         log.info(f'文件{__file__}运行结束')
-
-
