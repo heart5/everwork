@@ -113,7 +113,7 @@ def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
         cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
         return
     if not cfpin.has_option(sectionname, optionname):
-        print(f"option {optionname} is not exists.")
+        print(f"option {optionname} is not exists under section [{sectionname}]")
         return
 
     targetvalue = str(cfpin.get(sectionname, optionname))
