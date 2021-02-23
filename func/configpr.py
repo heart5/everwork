@@ -1,6 +1,6 @@
 # encoding:utf-8
 """
-配置处理器相关的功能函数
+配置处理器(ConfigParser)相关的功能函数
 """
 
 import re
@@ -15,17 +15,22 @@ with pathmagic.context():
     from func.sysfunc import not_IPython
 
 
-def dropdup4option(opcontent):
-    ptno = re.compile("(\w+)\s*=\s*(\w*)")
-    opdict = dict()
+def dropdup4option(opcontent:str):
+    """
+    manuplicate the content(str), which is such as 'option'='value',
+    then return clean option/value contents in list object, drop the duplicated
+    options, keep the first value
+    """
+    ptno = re.compile("(\w+)\s*=\s*(\w*)") # = pairs pattern
+    opdict = dict() # result container in dict
     fdlst = re.findall(ptno, opcontent)
     for item in fdlst:
         if item[0] in opdict.keys():
             log.critical(f"出现option名称重复：\t{item[0]}，取用最新的数据")
         opdict.update(dict({item[0]: item[1]}))
-    # opdict
+    # make = pairs list
     rstlst = [' = '.join(list(x)) for x in list(zip(opdict.keys(), opdict.values()))]
-    # rstlst
+    # add two new lines at head and tail
     return '\n' + '\n'.join(rstlst) + '\n\n'
 
 
@@ -106,6 +111,10 @@ def setcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str, optio
 
 
 def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
+    """
+    return option value for certain optionname, under given ssction, all for indicated cfp filename
+    if section is not exsited, create it, then return None; if the option is not exsiteds, just return None.
+    """
     cfpin, cfpinpath = getcfp(cfpfilename)
     if not cfpin.has_section(sectionname):
         print(f"seticon {sectionname} is not exists. Then creating it now ...")
@@ -138,16 +147,11 @@ def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
     if result:
         targetvalue = float(result.group())
         return targetvalue
-    # if isinstance(targetvalue, int):
-        # targetvalue = int(targetvalue)
-    # elif isinstance(targetvalue, float):
-        # targetvalue = float(targetvalue)
 
     return targetvalue
 
 
-is_log_details = getcfpoptionvalue('everinifromnote', 'everwork', 'logdetails')
-
+is_log_details = getcfpoptionvalue('everinifromnote', 'everwork', 'logdetails') 
 # cfp, inifilepath = getcfp('everwork')
 # cfpdata, inidatanotefilepath = getcfp('everdatanote')
 # cfplife, inilifepath = getcfp('everlife')
@@ -164,6 +168,7 @@ if __name__ == '__main__':
     inipathson = Path(getdirmain()) / 'data' / (cfpapiname + '.ini')
     name = '[notestore]'
     cp, cppath = getcfp(cfpapiname)
+    print(cp)
 #     removesection(cfpapiname, nssectionname)
 #     ict = fixinifile(inipathson)
     if not_IPython() and is_log_details:
