@@ -147,13 +147,13 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                 try:
                     result = jutifunc(*args, **kwargs)
                     return result
-                except (
+                except (requests.exceptions.ConnectionError,
                         ConnectionRefusedError, ConnectionResetError,
                         ConnectionAbortedError, NewConnectionError,
                         ConnectionError, MaxRetryError,
                         struct.error, socket.gaierror,
                         ssl.SSLError, EDAMSystemException,
-                        OSError, IndexError, Exception
+                        OSError, IndexError, Exception, ValueError
                 ) as eee:
 
                     # 5的倍数次尝试输出log，避免网络不佳时的log冗余
@@ -172,6 +172,10 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                                 log.critical(f'主机发脾气，强行断线了。{eeestr}')
                             elif eee.errno == 8:
                                 log.critical(f'和{servname}握手失败。{eeestr}')
+                            elif eee.errno == 7:
+                                log.critical(f'和{servname}连接失败。域名无法解析，断网了  。{eeestr}')
+                                # 断网特殊，二十倍延时等网回来～_～
+                                sleeptime *= 20
                             elif eee.errno == 4:
                                 log.critical(f'和{servname}连接异常，被中断。{eeestr}')
                             elif eee.errno == 13:
@@ -192,6 +196,7 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                         termux_sms_send(badnews)
                         # exit(1)
                         raise eee
+                    print(sleeptime)
                     time.sleep(sleeptime)
 
         return wrapper
