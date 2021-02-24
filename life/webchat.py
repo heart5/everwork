@@ -42,7 +42,7 @@ with pathmagic.context():
     import evernote.edam.type.ttypes as ttypes
     from work.zymessage import searchcustomer, searchqiankuan, searchpinxiang
     from etc.getid import getdeviceid
-    from muse.majjianghuojie import updateurllst, zhanjidesc, showzhanjiimg
+    from muse.majjianghuojie import updateurllst, splitmjurlfromtext, zhanjidesc, showzhanjiimg
     from life.wcdelay import inserttimeitem2db, showdelayimg
     from life.wccontact import updatectdf, getctdf, showwcsimply
     from life.phonecontact import showphoneinfoimg
@@ -289,17 +289,15 @@ def sharing_reply(msg):
     # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
     # ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
     men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
-    ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     msgurl = msg['Url']
     print(msgurl)
-    if re.findall(ptn, msgurl):
-        if msgurl.startswith('http'):
-            roomid = updateurllst(men_wc, msgurl)
-            outstr = f"【Sharing】信息中发现新的火界麻将战绩网页链接：\t{roomid}"
-            # log.info(outstr)
-            itchat.send_msg(f'({sendernick})'  +outstr)
-            makemsg2write(innermsg, outstr)
-            makemsg2write(innermsg, msgurl)
+    if (ulst := splitmjurlfromtext(msgurl)) and (len(ulst) > 0):
+        roomid = updateurllst(men_wc, ulst)
+        outstr = f"【Sharing】信息中发现新的火界麻将战绩网页链接：\t{roomid}"
+        # log.info(outstr)
+        itchat.send_msg(f'({sendernick})'  +outstr)
+        makemsg2write(innermsg, outstr)
+        makemsg2write(innermsg, msgurl)
 
     # 处理开房链接
     # http://s0.lgmob.com/h5_whmj_qp/?d=217426
@@ -411,14 +409,13 @@ def text_reply(msg):
     men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
     ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     msgtxt = msg['Text']
-    if re.findall(ptn, msgtxt):
-        if msgtxt.startswith('http'):
-            roomid = updateurllst(men_wc, msgtxt)
-            outstr = f"【Text】信息中发现新的火界麻将战绩网页链接并处理：\t{roomid}"
-            # log.info(outstr)
-            itchat.send_msg(sendernick + outstr)
-            makemsg2write(innermsg, outstr)
-            makemsg2write(innermsg, msgtxt)
+    if (ulst := splitmjurlfromtext(msgurl)) and (len(ulst) > 0):
+        descstr = updateurllst(men_wc, ulst)
+        outstr = f"【Text】信息中发现新的火界麻将战绩网页链接并处理：\t{descstr}"
+        # log.info(outstr)
+        itchat.send_msg(sendernick + outstr)
+        makemsg2write(innermsg, outstr)
+        makemsg2write(innermsg, msgtxt)
 
     # 根据口令显示火界麻将战绩综合统计结果
     if msg['Text'].startswith('火界麻将战果统计') or msg['Text'].startswith('麻果'):
