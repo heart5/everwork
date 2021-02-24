@@ -409,7 +409,7 @@ def text_reply(msg):
     men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
     ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     msgtxt = msg['Text']
-    if (ulst := splitmjurlfromtext(msgurl)) and (len(ulst) > 0):
+    if (ulst := splitmjurlfromtext(msgtxt)) and (len(ulst) > 0):
         descstr = updateurllst(men_wc, ulst)
         outstr = f"【Text】信息中发现新的火界麻将战绩网页链接并处理：\t{descstr}"
         # log.info(outstr)
