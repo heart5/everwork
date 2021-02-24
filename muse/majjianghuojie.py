@@ -1,4 +1,4 @@
-# encoding:utf-8
+# encodin:utf-8
 # ---
 # jupyter:
 #   jupytext:
@@ -41,7 +41,7 @@ def find_class_in_tag(key: str, tags):
         return resultlst
 
 
-@trycounttimes2('火界麻将服务器', 5, 50)
+@trycounttimes2('火界麻将服务器', 17, 50)
 def getsinglepage(url: str):
     mjhtml = requests.get(url)
     mjhtml.encoding = mjhtml.apparent_encoding
@@ -143,8 +143,10 @@ def fetchmjurlfromfile(ownername):
             try:
                 with open(filename, "r", encoding='utf-8') as f:
                     filelines = f.readlines()
-                    rstlst = [inurl for line in filelines for inurl in splitmjurlfromtext(line)]
-                    print(len(rstlst), filename, dk)
+                    rstlstraw = [inurl for line in filelines for inurl in splitmjurlfromtext(line)]
+                    # drops the duplicates url
+                    rstlst = list(tuple(rstlstraw))
+                    print(len(rstlst), len(rstlstraw), filename, dk)
                     break
             except UnicodeDecodeError as eef:
                 continue
@@ -155,18 +157,22 @@ def fetchmjurlfromfile(ownername):
 
         resultlst.extend(rstlst)
 
-    if (urlsnum:=getcfpoptionvalue(f'evermuse_{ownpy}',ownername, 'urlsnum')) is not None:
+    resultlst = list(tuple(resultlst))
+    # print(resultlst[:10])
+    if (urlsnum:=getcfpoptionvalue(f'evermuse_{ownpy}',ownername, 'urlsnum')):
         if urlsnum == len(resultlst):
-            log.info(f"战绩链接数量暂无变化, it's {len(resultlst)} now.")
-            return
+            changed = False
+            log.info(f"战绩链接数量暂无变化, till then is {len(resultlst)}.")
         else:
+            changed = True
             setcfpoptionvalue(f'evermuse_{ownpy}',ownername, 'urlsnum', f"{len(resultlst)}")
     else:
         urlsnumnew = len(resultlst)
         setcfpoptionvalue(f'evermuse_{ownpy}',ownername, 'urlsnum', f"{urlsnumnew}")
-        log.info(f"战绩链接数量暂无变化, from {urlsnum} to {urlsnumnew} now.")
+        changed = True
+        log.info(f"战绩链接数 is set to {urlsnumnew} at first time.")
 
-    return list(tuple(resultlst))
+    return resultlst, changed
 
 
 def getfangitem(line):
@@ -180,8 +186,8 @@ def getfangitem(line):
 def fetchmjfang(owner):
     """
     从数据目录中符合命名标准的文本档案库中提取开房信息（发布时间和房号）
-    :param owner: 文本档案库的所属主人
-    :return: DataFrame 开房信息df
+    param owner: 文本档案库的所属主人
+    return: DataFrame 开房信息df
     """
     datapath = getdirmain() / 'data' / 'webchat'
     datafilelist = os.listdir(datapath)
@@ -191,7 +197,6 @@ def fetchmjfang(owner):
     for filenameinner in datafilelist:
         if not filenameinner.startswith('chatitems'):
             continue
-
         filename = datapath / filenameinner
         rstlst = []
 
@@ -203,7 +208,7 @@ def fetchmjfang(owner):
                     # 2020-02-13 11:27:21	True	搓雀雀(群)白晔峰	Text	http://s0.lgmob.com/h5_whmj_qp/?d=852734
                     fanglst = [line.strip() for line in filelines if re.search(ptn, line)]
                     rstlst = [[pd.to_datetime(lnspt[0]), re.findall(r'\b\w+\b', lnspt[2])[-1], int(lnspt[-1].split('=')[-1])] for
-                              line in fanglst if (lnspt:= line.split('\t'))]
+                              line in fanglst if (lnspt := line.split('\t'))]
                     print(filename, dk)
                     break
             except UnicodeDecodeError as eef:
@@ -215,16 +220,18 @@ def fetchmjfang(owner):
 
         resultlst.extend(rstlst)
 
-    if (urlsnum:=getcfpoptionvalue('evermuse', 'huojiemajiang', 'fangsnum')):
+    resultlst = list(tuple(resultlst))
+    ownpy = Pinyin().get_pinyin(owner, '')
+    if (urlsnum:=getcfpoptionvalue(f'evermuse_{ownpy}', 'huojiemajiang', 'fangsnum')):
         if urlsnum == len(resultlst):
-            log.info(f"战绩链接数量暂无变化")
+            log.info(f"战绩链接数量暂无变化, till then is {lwn(urlsnum)}.")
         else:
-            setcfpoptionvalue('evermuse', 'huojiemajiang', 'fangsnum',
-                              f"{len(resultlst)}")
+            setcfpoptionvalue('evermuse_{ownpy}', 'huojiemajiang', 'fangsnum', f"{len(resultlst)}")
+            log.info(f"战绩链接数量变化, from {urlsnum} to {len(resultlst)}.")
     else:
         urlsnum = len(resultlst)
-        setcfpoptionvalue('evermuse', 'huojiemajiang', 'fangsnum',
-                          f"{len(resultlst)}")
+        setcfpoptionvalue('evermuse_{ownpy}', 'huojiemajiang', 'fangsnum', f"{len(resultlst)}")
+        log.info(f"战绩链接 size is set to {urlsnum} at fiest time.")
 
     rstdf = pd.DataFrame(resultlst, columns=['time', 'name', 'roomid'])
     # print(rstdf)
@@ -281,23 +288,27 @@ def geturlcontentwrite2excel(ownername, url):
     """
     excelpath, ownpy = makeexcelfileownpy(ownername)
     tdf = getsinglepage(url)
-    if tdf.shape[0] != 0:
+    print(tdf)
+    if tdf.shape[0] > 0:
         roomid = tdf.iloc[0, 0]
         recorddf = pd.read_excel(excelpath)
+        #vdrop dupliceres at first, I studun there for many times
+        recorddf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
         oldsize = recorddf.shape[0]
         rstdf = recorddf.append(tdf)
         # 修正用户别名
         rstdf = fixnamebyguestid(rstdf, 'guestid')
         rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
         rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
+        print(rstdf)
         if rstdf.shape[0] == oldsize:
-            descstr = f"room {roomid} is already recorded. recordsize is {oldsize} now."
+            descstr = f"room {roomid} is already recorded. till then the recordsize is {oldsize}"
             log.warning(descstr)
         else:
             excelwriter = pd.ExcelWriter(excelpath)
             rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
             excelwriter.close()
-            descstr = f"{rstdf.shape[0]}条记录写入文件\t{excelpath}, {roomid} record done now.\n{tdf[['guest', 'score']]}"
+            descstr = f"{rstdf.shape[0]}条记录写入文件\t{excelpath}, new roomid {roomid} record done now.\n{tdf[['guest', 'score']]}"
             log.info(descstr)
         outurl = url
     else:
@@ -305,7 +316,7 @@ def geturlcontentwrite2excel(ownername, url):
         log.critical(descstr)
         outurl = f"[{url}]"
 
-    return outurl
+    return outurl, descstr
 
 
 def updateurl2excelandini(ownername, url):
@@ -320,20 +331,19 @@ def updateurl2excelandini(ownername, url):
         return
 
     excelpath, ownpy = makeexcelfileownpy(ownername)
-    descstr = ''
     if (readfrominiurls:=getcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls')):
-        readfrominiurlslst = list(set(readfrominiurls.split(','))) # drop duplicetes
+        readfrominiurlslst = list(tuple(readfrominiurls.split(','))) # drop duplicetes
     else:
         readfrominiurlslst = list() 
     # 用[]标记无效的链接，这里做对比的时候需要去掉
     urlsrecord = [x.strip('[]') for x in readfrominiurls]
     if (url not in urlsrecord):
-        inurl = geturlcontentwrite2excel(ownername, url)
+        inurl, descstr = geturlcontentwrite2excel(ownername, url)
         readfrominiurlslst.insert(0, inurl)
         descstr += f"\n此链接加入列表（现数量为{len(readfrominiurls)})\t{url}"
         setcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls', ','.join(readfrominiurlslst))
     elif(url in urlsrecord):
-        descstr += f"此链接已经存在于列表中（现数量为{len(readfrominiurls)})\t{url}"
+        descstr = f"此链接已经存在于列表中（现数量为{len(readfrominiurls)})\t{url}"
         log.info(f"{descstr}")
 
     return descstr
@@ -352,6 +362,7 @@ def fixnamealias(inputdf: pd.DataFrame, clname: str):
     # print(namelst)
     cfpini, cfpinipath = getcfp('everinifromnote')
     gamedict = dict(cfpini.items('game'))
+    print(f"id to name correctring...")
     for name in namelst:
         if name in gamedict.keys():
             namez = gamedict[name]
@@ -374,6 +385,7 @@ def fixnamebyguestid(inputdf: pd.DataFrame, guestidcl: str):
     # print(guestidlst)
     cfpini, cfpinipath = getcfp('everinifromnote')
     gamedict = dict(cfpini.items('game'))
+    print(f"name correctted by id from ini...")
     for nameid in guestidlst:
         if nameid in gamedict.keys():
             namez = gamedict[nameid]
@@ -530,7 +542,7 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     jingding = rstdf.groupby(['guest']).sum()['jingding'].sort_values(ascending=False)
     outlst.append(f"最有含金量的金顶排名：\n{formatdfstr(jingding[:shownumber])}")
 
-    teams = list(set(rstdf['guest']))
+    teams = list(tuple(rstdf['guest']))
     print(teams)
     playtimelst = []
     for player in teams:
@@ -607,19 +619,15 @@ def showzhanjiimg(ownername, recentday="日", jingdu: int = 300):
     return imgwcdelaypath
 
 
-def updateallurlfromtxt(owner: str):
-    sp1 = '''http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_2ba66d661e4c7712d0e6bcd3a6df255f'''
-    sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_1bba46a83cccbb0f87ea0cab16cdec2a"
-    # print(sp1)
-    # sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_46247683e1b6e744ad956041ab2579a6"
-    # sp3 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_62a635b6dc15b34b74527550cd88d83f"
-    # sp4 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_9b8bd588d1d44ae2867aa1319241881b"
-    # splst = [sp1, sp2, sp3, sp4]
-    # splst = [sp1, sp2]
-    splst = fetchmjurlfromfile(owner)
-    print(len(splst))
-    if (splst is not None) and len(splst) != 0:
-        desc = updateurllst(owner, splst)
+def updateallurlfromtxt(owner: str, startnum=0, itemsnnm=10):
+    splst, changed = fetchmjurlfromfile(owner)
+    if splst and len(splst) != 0:
+        # desc = updateurllst(owner, splst[:itemsnnm])
+        # print(desc)
+        print(len(splst), startnum, itemsnnm)
+        for sp in splst[startnum:(startnum + itemsnnm)]:
+            url, desc = geturlcontentwrite2excel(owner, sp)
+            print(desc)
 
 
 if __name__ == '__main__':
@@ -627,16 +635,17 @@ if __name__ == '__main__':
         log.info(f'运行文件\t{__file__}')
 
     own = '白晔峰'
-    own = 'heart5'
+    # own = 'heart5'
 
     # fangdf = fetchmjfang(own)
     # print(fangdf)
-    sp1 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_5b4e07f2d3ef0c67735426b3239dfe96"
-    sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_bc3c4f643d3c5317202550bc17c4864c"
-    updateurl2excelandini(own, sp2)
+
+    # sp1 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_5b4e07f2d3ef0c67735426b3239dfe96"
+    # sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_bc3c4f643d3c5317202550bc17c4864c"
+    # updateurl2excelandini(own, sp2)
     # geturlcontentwrite2excel(own, sp2)
 
-    # updateallurlfromtxt(own)
+    updateallurlfromtxt(own, 0, 2)
 
     "  日 周 旬 月 年 全部"
     # rst = zhanjidesc(own, '月', False)
