@@ -106,7 +106,25 @@ def getsinglepage(url: str):
     return rstdf
 
 
-def fetchmjurl(ownername):
+def splitmjurlfromtext(incontent:str):
+    """
+    从输入文本中提取有效的url链接，返回包含有效链接的list
+    **正则中的贪婪和非贪婪搞得一头包，慎之慎之**
+    """
+    # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
+    # ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
+    #  '微信【Text】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t806666\thttp://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_9b8bd588d1d44ae2867aa1319241881b'
+    # ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
+    # reg .+? 限制为非贪婪模式，用于提取文本多个有效连接
+    ptn = re.compile("(http://.+?h5_whmj_qp/(?:zhanji/index.php\\?id=|fks0_)\S+)\s*")
+    # rstlst = [inurl for inurl in vurl if (vurl := re.findall(ptn, incontent))]
+    if (vurl := re.findall(ptn, incontent)):
+        return [url for url in vurl]
+    else:
+        return list()
+
+
+def fetchmjurlfromfile(ownername):
     """
     fetch all zhanji urls from chatitems files
     """
@@ -115,9 +133,6 @@ def fetchmjurl(ownername):
     datafilelist = os.listdir(datapath)
     print(datapath)
     resultlst = list()
-    # http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_eb81c193dea882941fe13dfa5be24a11
-    # ptn = re.compile("h5_whmj_qp/zhanji/index.php\\?id=")
-    ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     for filenameinner in datafilelist:
         if not filenameinner.startswith('chatitems'):
             continue
@@ -129,8 +144,8 @@ def fetchmjurl(ownername):
             try:
                 with open(filename, "r", encoding='utf-8') as f:
                     filelines = f.readlines()
-                    rstlst = [line.split('Text\t')[1].strip() for line in filelines if re.findall(ptn, line)]
-                    print(filename, dk)
+                    rstlst = [inurl for line in filelines for inurl in splitmjurlfromtext(line)]
+                    print(len(rstlst), filename, dk)
                     break
             except UnicodeDecodeError as eef:
                 continue
@@ -139,9 +154,6 @@ def fetchmjurl(ownername):
                     print(f"{filename}没办法用预设的集中字符集正确打开")
                 break
 
-        # print(resultlst[:5])
-        # print(resultlst[-5:])
-        print(f"[{len(rstlst)}]\t{filename}")
         resultlst.extend(rstlst)
 
     if (urlsnum:=getcfpoptionvalue(f'evermuse_{ownpy}',ownername, 'urlsnum')) is not None:
@@ -236,7 +248,28 @@ def fetchmjfang(owner):
     return cleandf.sort_values('mintime', ascending=False)
 
 
-def updateurllst(ownername, url):
+def updateurllst(ownername, urllst):
+    """
+    成组更新url列表
+    """
+    rstlst = list()
+    for url in urllst:
+        rstlst.append(updateurl(ownername, url))
+
+    return '\n'.join(rstlst)
+
+
+def updateurl(ownername, url):
+    """
+    处理url，提取网页内容，有效数据写入数据文件，并更新相应配套ini辅助文件
+    """
+    ptn = re.compile("(http://.+?h5_whmj_qp/(?:zhanji/index.php\\?id=|fks0_)\S+)\s*")
+    if (urlst := re.findall(ptn, url)):
+        url = urlst[0]
+    else:
+        log.critical(f"无效网址连接：\t{url}, 不做处理，直接返回NOne")
+        return
+
     excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownername}.xlsx'
     touchfilepath2depth(excelpath)
     # roomid: str = '已处理'
@@ -581,12 +614,11 @@ def updateallurlfromtxt(owner: str):
     # sp3 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_62a635b6dc15b34b74527550cd88d83f"
     # sp4 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_9b8bd588d1d44ae2867aa1319241881b"
     # splst = [sp1, sp2, sp3, sp4]
-    splst = [sp1, sp2]
-    splst = fetchmjurl(owner)
+    # splst = [sp1, sp2]
+    splst = fetchmjurlfromfile(owner)
     print(splst)
     if (splst is not None) and len(splst) != 0:
-        for sp in splst:
-            desc = updateurllst(owner, sp)
+        desc = updateurllst(owner, splst)
 
 
 if __name__ == '__main__':
@@ -598,7 +630,6 @@ if __name__ == '__main__':
 
     # fangdf = fetchmjfang(own)
     # print(fangdf)
-
     updateallurlfromtxt(own)
 
     "  日 周 旬 月 年 全部"
