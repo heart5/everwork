@@ -42,7 +42,7 @@ with pathmagic.context():
     import evernote.edam.type.ttypes as ttypes
     from work.zymessage import searchcustomer, searchqiankuan, searchpinxiang
     from etc.getid import getdeviceid
-    from muse.majjianghuojie import updateurllst, splitmjurlfromtext, zhanjidesc, showzhanjiimg
+    from muse.majjianghuojie import updateurllst, splitmjurlfromtext, zhanjidesc, showzhanjiimg, geturlcontentwrite2excel
     from life.wcdelay import inserttimeitem2db, showdelayimg
     from life.wccontact import updatectdf, getctdf, showwcsimply
     from life.phonecontact import showphoneinfoimg
@@ -292,9 +292,14 @@ def sharing_reply(msg):
     msgurl = msg['Url']
     print(msgurl)
     if (ulst := splitmjurlfromtext(msgurl)) and (len(ulst) > 0):
-        roomid = updateurllst(men_wc, ulst)
-        outstr = f"【Sharing】信息中发现新的火界麻将战绩网页链接：\t{roomid}"
-        # log.info(outstr)
+        if getinivaluefromnote("game", "forceupdateexcel"):
+            descstr = ''
+            for sp in ulst:
+                tmpurl, tmpdescstr = geturlcontentwrite2excel(men_wc, sp)
+                descstr += tmpdescstr
+        else:
+            descstr = updateurllst(men_wc, ulst)
+        outstr = f"【Text】信息中发现新的火界麻将战绩网页链接并处理：\t{descstr}"
         itchat.send_msg(f'({sendernick})'  +outstr)
         makemsg2write(innermsg, outstr)
         makemsg2write(innermsg, msgurl)
@@ -410,7 +415,13 @@ def text_reply(msg):
     ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     msgtxt = msg['Text']
     if (ulst := splitmjurlfromtext(msgtxt)) and (len(ulst) > 0):
-        descstr = updateurllst(men_wc, ulst)
+        if getinivaluefromnote("game", "forceupdateexcel"):
+            descstr = ''
+            for sp in ulst:
+                tmpurl, tmpdescstr = geturlcontentwrite2excel(men_wc, sp)
+                descstr += tmpdescstr
+        else:
+            descstr = updateurllst(men_wc, ulst)
         outstr = f"【Text】信息中发现新的火界麻将战绩网页链接并处理：\t{descstr}"
         # log.info(outstr)
         itchat.send_msg(sendernick + outstr)
