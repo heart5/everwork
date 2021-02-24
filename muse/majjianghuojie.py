@@ -98,8 +98,7 @@ def getsinglepage(url: str):
         resultlst.append(itemlstout)
     # print(gamelist)
     # ['945901', '2020/02/12 12:05:31', '白晔峰', '1080972', '微信登陆', '2', '2', '1', '', '114', '房主']
-    clnames = ['roomid', 'time', 'guest', 'guestid', 'client', 'zimo', 'jingding', 'dianpao', 'laizigang', 'score',
-               'host']
+    clnames = ['roomid', 'time', 'guest', 'guestid', 'client', 'zimo', 'jingding', 'dianpao', 'laizigang', 'score', 'host']
     rstdf = pd.DataFrame(resultlst, columns=clnames)
     # print(clnames)
 
@@ -254,12 +253,62 @@ def updateurllst(ownername, urllst):
     """
     rstlst = list()
     for url in urllst:
-        rstlst.append(updateurl(ownername, url))
+        rstlst.append(updateurl2excelandini(ownername, url))
 
     return '\n'.join(rstlst)
 
 
-def updateurl(ownername, url):
+def makeexcelfileownpy(ownername):
+    """
+    init excelpath, and ownername in pinyin
+    """
+    ownpy = Pinyin().get_pinyin(ownername, '')
+    excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownpy}.xlsx'
+    touchfilepath2depth(excelpath)
+    if not excelpath.exists():
+        excelwriter = pd.ExcelWriter(excelpath)
+        clnames = ['roomid', 'time', 'guest', 'guestid', 'client', 'zimo', 'jingding', 'dianpao', 'laizigang', 'score', 'host']
+        rstdf = pd.DataFrame(list(), columns=clnames)
+        rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
+        excelwriter.close()
+
+    return excelpath, ownpy
+
+
+def geturlcontentwrite2excel(ownername, url):
+    """
+    处理url，提取网页内容，有效数据写入数据文件，return url valid, if not valid, [url]
+    """
+    excelpath, ownpy = makeexcelfileownpy(ownername)
+    tdf = getsinglepage(url)
+    if tdf.shape[0] != 0:
+        roomid = tdf.iloc[0, 0]
+        recorddf = pd.read_excel(excelpath)
+        oldsize = recorddf.shape[0]
+        rstdf = recorddf.append(tdf)
+        # 修正用户别名
+        rstdf = fixnamebyguestid(rstdf, 'guestid')
+        rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
+        rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
+        if rstdf.shape[0] == oldsize:
+            descstr = f"room {roomid} is already recorded. recordsize is {oldsize} now."
+            log.warning(descstr)
+        else:
+            excelwriter = pd.ExcelWriter(excelpath)
+            rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
+            excelwriter.close()
+            descstr = f"{rstdf.shape[0]}条记录写入文件\t{excelpath}, {roomid} record done now.\n{tdf[['guest', 'score']]}"
+            log.info(descstr)
+        outurl = url
+    else:
+        descstr = f"no valid content there, 这个网页貌似无效\t{url}"
+        log.critical(descstr)
+        outurl = f"[{url}]"
+
+    return outurl
+
+
+def updateurl2excelandini(ownername, url):
     """
     处理url，提取网页内容，有效数据写入数据文件，并更新相应配套ini辅助文件
     """
@@ -270,70 +319,22 @@ def updateurl(ownername, url):
         log.critical(f"无效网址连接：\t{url}, 不做处理，直接返回NOne")
         return
 
-    excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownername}.xlsx'
-    touchfilepath2depth(excelpath)
-    # roomid: str = '已处理'
-    ownpy = Pinyin().get_pinyin(ownername, '')
+    excelpath, ownpy = makeexcelfileownpy(ownername)
     descstr = ''
-    if (readfrominiurls:=getcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls')) is None:
-        readfrominiurls = ''
-    # 用\t标记无效的链接，这里做对比的时候需要去掉tab
-    urlsrecord = [x.strip('[]') for x in readfrominiurls.split(',')]
-    if (url not in urlsrecord) and (len(urlsrecord) > 0):
-        tdf = getsinglepage(url)
-        if tdf.shape[0] != 0:
-            roomid = tdf.iloc[0, 0]
-            urlsrecord.insert(0, url)
-            recorddf = pd.read_excel(excelpath)
-            oldsize = recorddf.shape[0]
-            rstdf = recorddf.append(tdf)
-            # 修正用户别名
-            rstdf = fixnamebyguestid(rstdf, 'guestid')
-            rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
-            rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
-            if rstdf.shape[0] == oldsize:
-                descstr = f"room {roomid} is already recorded. recordsize is {oldsize} now."
-                log.warning(descstr)
-            else:
-                excelwriter = pd.ExcelWriter(excelpath)
-                rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
-                excelwriter.close()
-                descstr = f"{rstdf.shape[0]}条记录写入文件\t{excelpath}, {roomid} record done now.\n{tdf[['guest', 'score']]}"
-                log.info(descstr)
-
-        else:
-            descstr = f"no valid content, 这个网页貌似无效\t{url}"
-            log.critical(descstr)
-            urlsrecord.insert(0, f"[{url}]")
-        descstr += f"\n此链接将加入列表（现数量为{len(urlsrecord)})\t{url}"
-        setcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls', ','.join(urlsrecord))
-    elif(url in urlsrecord):
-        descstr = f"此链接已经存在于列表中\t{url}"
-        log.info(f"此链接已经存在于列表中\t{url}")
+    if (readfrominiurls:=getcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls')):
+        readfrominiurlslst = list(set(readfrominiurls.split(','))) # drop duplicetes
     else:
-        firstdf = getsinglepage(url)
-        if firstdf.shape[0] != 0:
-            koomid = firstdf.iloc[0, 0]
-            # 修正用户别名
-            firstdf = fixnamebyguestid(firstdf, 'guestid')
-            # little logic bug for minor
-            if excelpath.exists():
-                recorddf = pd.read_excel(excelpath)
-                rstdf = recorddf.append(firstdf)
-                rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
-            excelwriter = pd.ExcelWriter(excelpath)
-            rstdf.to_excel(excelwriter, index=False, encoding='utf-8')
-            excelwriter.close()
-            descstr = f"{rstdf.shape[0]}条记录写入文件\t{excelpath}, {roomid} record done now. Its first one. Good start...\n{firstdf[['guest', 'score']]}"
-            log.info(descstr)
-            urlsrecord = [url]
-        else:
-            descstr = f"这个网页貌似无效\t{url}"
-            log.critical(descstr)
-            urlsrecord = [f"[{url}]"]
-
-        log.info(f"第一条链接加入列表\t{url}")
-        setcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls', ','.join(urlsrecord))
+        readfrominiurlslst = list() 
+    # 用[]标记无效的链接，这里做对比的时候需要去掉
+    urlsrecord = [x.strip('[]') for x in readfrominiurls]
+    if (url not in urlsrecord):
+        inurl = geturlcontentwrite2excel(ownername, url)
+        readfrominiurlslst.insert(0, inurl)
+        descstr += f"\n此链接加入列表（现数量为{len(readfrominiurls)})\t{url}"
+        setcfpoptionvalue(f'evermuse_{ownpy}', ownername, 'zhanjiurls', ','.join(readfrominiurlslst))
+    elif(url in urlsrecord):
+        descstr += f"此链接已经存在于列表中（现数量为{len(readfrominiurls)})\t{url}"
+        log.info(f"{descstr}")
 
     return descstr
 
@@ -616,7 +617,7 @@ def updateallurlfromtxt(owner: str):
     # splst = [sp1, sp2, sp3, sp4]
     # splst = [sp1, sp2]
     splst = fetchmjurlfromfile(owner)
-    print(splst)
+    print(len(splst))
     if (splst is not None) and len(splst) != 0:
         desc = updateurllst(owner, splst)
 
@@ -626,11 +627,16 @@ if __name__ == '__main__':
         log.info(f'运行文件\t{__file__}')
 
     own = '白晔峰'
-    # own = 'heart5'
+    own = 'heart5'
 
     # fangdf = fetchmjfang(own)
     # print(fangdf)
-    updateallurlfromtxt(own)
+    sp1 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_5b4e07f2d3ef0c67735426b3239dfe96"
+    sp2 = "http://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_bc3c4f643d3c5317202550bc17c4864c"
+    updateurl2excelandini(own, sp2)
+    # geturlcontentwrite2excel(own, sp2)
+
+    # updateallurlfromtxt(own)
 
     "  日 周 旬 月 年 全部"
     # rst = zhanjidesc(own, '月', False)
