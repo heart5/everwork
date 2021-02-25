@@ -196,7 +196,7 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                         termux_sms_send(badnews)
                         # exit(1)
                         raise eee
-                    print(sleeptime)
+                    print(f"&&&\t{sleeptime}\t&&& in (tct2)")
                     time.sleep(sleeptime)
 
         return wrapper
