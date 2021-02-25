@@ -426,8 +426,8 @@ def showhighscore(rstdf, highbool: bool = True):
 
 
 def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
-    excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownername}.xlsx'
-    print(excelpath)
+    excelpath, ownpy = makeexcelfileownpy(ownername)
+    print(excelpath, ownpy)
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf.copy(deep=True)
     # print(rstdf.groupby(['guestid', 'guest']).count())
@@ -591,12 +591,12 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
 
 
 def showzhanjiimg(ownername, recentday="日", jingdu: int = 300):
-    excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownername}.xlsx'
+    excelpath, ownpy = makeexcelfileownpy(ownername)
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf.copy(deep=True)
     if (zuijindatestart:=getstartdate(recentday, rstdf['time'].max())) != rstdf['time'].max():
         rstdf = rstdf[rstdf.time >= zuijindatestart]
-    zgridf = rstdf.groupbn([pd.to_datetime(rstdf['time'].dt.strftime("%Y-%m-%d")), rstdf.guest]
+    zgridf = rstdf.groupby([pd.to_datetime(rstdf['time'].dt.strftime("%Y-%m-%d")), rstdf.guest]
                            ).sum().reset_index('guest', drop=False)[['guest', 'score']].sort_index()
 
     # register_matplotlib_converters()
@@ -620,14 +620,25 @@ def showzhanjiimg(ownername, recentday="日", jingdu: int = 300):
 
 
 def updateallurlfromtxt(owner: str, startnum=0, itemsnnm=10):
+    """
+    从文本文件中读取所有url并更新入数据表格文件
+    """
     splst, changed = fetchmjurlfromfile(owner)
     if splst and len(splst) != 0:
-        # desc = updateurllst(owner, splst[:itemsnnm])
-        # print(desc)
         print(len(splst), startnum, itemsnnm)
-        for sp in splst[startnum:(startnum + itemsnnm)]:
-            url, desc = geturlcontentwrite2excel(owner, sp)
-            print(desc)
+        endnum = tmpend if (tmpend := (startnum + itemsnnm)) < len(splst) else len(splst)
+        print(len(splst), startnum, endnum)
+        targetlst = splst[startnum:(endnum)]
+
+        # print(f"\n\n\nwrite to excel using updateurllst fucntion\n\n\n")
+        # updateurllst(owner, targetlst)
+
+        # 强制更新所有链接数据
+        print(f"\n\n\nwrite to excel using geturlcontentwrite2excel fucntion\n\n\n")
+        for ii in range(startnum, endnum):
+            url, desc = geturlcontentwrite2excel(owner, targetlst[ii])
+            print(f"[{{startnum}}/{ii}/{endnum}]\t{desc}")
+            pass
 
 
 if __name__ == '__main__':
@@ -635,7 +646,7 @@ if __name__ == '__main__':
         log.info(f'运行文件\t{__file__}')
 
     own = '白晔峰'
-    # own = 'heart5'
+    own = 'heart5'
 
     # fangdf = fetchmjfang(own)
     # print(fangdf)
@@ -645,7 +656,7 @@ if __name__ == '__main__':
     # updateurl2excelandini(own, sp2)
     # geturlcontentwrite2excel(own, sp2)
 
-    updateallurlfromtxt(own, 0, 2)
+    updateallurlfromtxt(own, 0, 2000)
 
     "  日 周 旬 月 年 全部"
     # rst = zhanjidesc(own, '月', False)
