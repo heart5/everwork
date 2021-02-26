@@ -3,12 +3,14 @@
 date time function related
 """
 
+import arrow
 from datetime import datetime, timedelta
+from dateutil import tz
 
 import pathmagic
 with pathmagic.context():
     from func.logme import log
-print(f"{__file__} is loading now...")
+# print(f"{__file__} is loading now...")
 
 
 def getstartdate(period, thedatetime):
@@ -39,12 +41,30 @@ def getstartdate(period, thedatetime):
     return zuijindatestart
 
 
+def gethumantimedelay(inputlocaltime, inseconds=120):
+    intime = arrow.get(inputlocaltime, tzinfo=tz.tzlocal())
+    # thenow = arrow.utcnow()
+    thenow = arrow.now()
+    elasptime = thenow - intime
+    print(elasptime, elasptime.seconds)
+    if elasptime.seconds > inseconds:
+        return intime.humanize(locale='zh_cn')
+    else:
+        return False
+
+
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
+
+    hmstr = gethumantimedelay("20210227 01:04:23")
+    print(hmstr)
+    hmstr = gethumantimedelay(arrow.get("20210227 02:04:23",
+                                        tzinfo=tz.tzlocal()))
+    print(hmstr)
 
     periodlst = ['日', '周', '旬', '月', '年', '全部']
     for pr in periodlst:
         tned = getstartdate(pr, datetime.now())
-        print(f"{pr}:\t{tned}")
+        # print(f"{pr}:\t{tned}")
 
     log.info(f"文件\t{__file__}\t运行结束。")
