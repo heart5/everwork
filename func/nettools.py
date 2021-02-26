@@ -156,8 +156,11 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                         OSError, IndexError, Exception, ValueError
                 ) as eee:
 
+                    # 通过sys函数获取eee的相关信息
+                    eee_type, eee_value, eee_traceback = sys.exec_info()
                     # 5的倍数次尝试输出log，避免网络不佳时的log冗余
                     if i % showfreq == 0:
+                        # 如果eee包含错误代码，尽量显示详细信息方便深入了解、统计、分析、诊断
                         if hasattr(eee, 'errno'):
                             eeestr = f"{eee}\t{traceback.extract_stack()}"
                             if eee.errno == 11001:
@@ -186,8 +189,7 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                             log.critical(f'连接失败。{eee}\t{args}\t{kwargs}')
                         log.critical(
                             f"第{i}次（最多尝试{trytimes}次）连接“{servname}”时失败，将于{sleeptime}秒后重试。")
-                    # log.critical(f"第{i+1}次（最多尝试{trytimes}次）连接服务器时失败，将于{sleeptime}秒后重试。")
-                    # log.critical(f'{eee.args}\t{eee.errno}\t{eee.filename}\t{eee.filename2}\t{eee.strerror}\t{eee.winerror}')
+                    # 跑够次数，日志记录，通知，抛出给上级处理
                     if i == (trytimes - 1):
                         badnews = f'{__file__}\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}\t{eee}'
                         # badnews = f'{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co__filename}\t\"{
@@ -196,7 +198,8 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                         termux_sms_send(badnews)
                         # exit(1)
                         raise eee
-                    print(f"&&&\t{sleeptime}\t&&& in (tct2)")
+                    # 暂歇开始前终端输出，看看而已
+                    print(f"&&&\t{sleeptime}\t&&& in (tct2), type is {eee_type}")
                     time.sleep(sleeptime)
 
         return wrapper
