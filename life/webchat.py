@@ -17,6 +17,7 @@
 
 import time
 import datetime
+import arrow
 import re
 import os
 import sys
@@ -37,6 +38,7 @@ with pathmagic.context():
     from func.evernttest import get_notestore, makenote, imglist2note, \
         evernoteapijiayi, getinivaluefromnote
     from func.datatools import readfromtxt, write2txt
+    from func.datetimetools import gethumantimedelay
     from func.termuxtools import termux_sms_send
     # from work.weixinzhang import showjinzhang, showshoukuan
     import evernote.edam.type.ttypes as ttypes
@@ -51,6 +53,9 @@ with pathmagic.context():
 
 
 def newchatnote():
+    """
+    构建新的聊天记录笔记(置于笔记本《notification》中)并返回
+    """
     global note_store
     # parentnotebook = \
     # note_store.getNotebook('4524187f-c131-4d7d-b6cc-a1af20474a7f')
@@ -76,7 +81,10 @@ def get_response(msg):
     return txt
 
 
-def showmsg(msg):
+def showmsgexpanddictetc(msg):
+    """
+    列印dict中的所有属性和值，对于dict类型的子元素，则再展开一层
+    """
     # print(msg)
     for item in msg:
         # print(item)
@@ -105,10 +113,14 @@ def showmsg(msg):
 
 
 def formatmsg(msg):
+    """
+    格式化并重构msg,获取合适用于直观显示的用户名，对公众号和群消息特别处置
+    """
     timetuple = time.localtime(msg['CreateTime'])
     timestr = time.strftime("%Y-%m-%d %H:%M:%S", timetuple)
     # print(msg['CreateTime'], timetuple, timestr)
     men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
+    # 信息延时登记入专门数据库文件
     dbname = touchfilepath2depth(getdirmain() / "data" / "db" /
                                  f"wcdelay_{men_wc}.db")
     inserttimeitem2db(dbname, msg['CreateTime'])
@@ -126,21 +138,22 @@ def formatmsg(msg):
     else:
         showname = ""
         log.warning(f"NickName或者UserName或者userName键值不存在哦")
-        showmsg(msg)
+        showmsgexpanddictetc(msg)
 
     # 过滤掉已经研究过属性公众号信息，对于尚未研究过的显示详细信息
     ignoredmplist = getinivaluefromnote('webchat', 'ignoredmplist')
     imlst = re.split('[，,]', ignoredmplist)
     ismp = type(msg['User']) == itchat.storage.MassivePlatform
     if ismp and (showname not in imlst):
-        showmsg(msg)
-        print(f"{showname}\t{imlst}")
+        showmsgexpanddictetc(msg)
+        # print(f"{showname}\t{imlst}")
 
+    # 处理群消息
     if type(msg['User']) == itchat.storage.templates.Chatroom:
         isfrom = msg['FromUserName'].startswith('@@')
         isto = msg['ToUserName'].startswith('@@')
         # qunmp = isfrom or isto
-        # showmsg(msg)
+        # showmsgexpanddictetc(msg)
         if isfrom:
             # print(f"（群)\t{msg['ActualNickName']}", end='')
             showname += f"(群){msg['ActualNickName']}"
@@ -157,29 +170,19 @@ def formatmsg(msg):
     return finnalmsg
 
 
-def getsendernick(msg):
-    # sendernick = itchat.search_friends(userName=msg['FromUserName'])
-    if msg['FromUserName'].startswith('@@'):
-        qun = itchat.search_chatrooms(userName=msg['FromUserName'])
-        sendernick = qun['NickName'] + '(群)' + msg['ActualNickName']
-    else:
-        senderuser = itchat.search_friends(userName=msg['FromUserName'])
-        if senderuser is None:
-            return "self?"
-        if len(senderuser['RemarkName']) == 0:
-            sendernick = senderuser['NickName']
-        else:
-            sendernick = senderuser['RemarkName']
-    # sendernick = itchat.search_friends(userName=msg['FromUserName'])['NickName']
-    return sendernick
-
-
-def showfmmsg(inputformatmsg):
+def writefmmsg2txtandmaybeevernotetoo(inputformatmsg):
+    """
+    把格式化好的微信聊天记录写入文件，并根据笔记ini设定更新相应账号的聊天笔记
+    """
+    # 判断是否延时并增加提示到条目内容中
+    if (humantimestr := gethumantimedelay(inputformatmsg['fmTime'])):
+        inputformatmsg['fmText'] = f"[{humantimestr}]" + inputformatmsg['fmText'] 
     msgcontent = ""
     for item in inputformatmsg:
         if item == "fmId":
             continue
         msgcontent += f"{inputformatmsg[item]}\t"
+    # 去除最后一个\t
     msgcontent = msgcontent[:-1]
     print(f"{msgcontent}")
 
@@ -218,34 +221,57 @@ def showfmmsg(inputformatmsg):
     # print(webchats)
 
 
+def getsendernick(msg):
+    """
+    获取发送者昵称并返回
+    """
+    # sendernick = itchat.search_friends(userName=msg['FromUserName'])
+    if msg['FromUserName'].startswith('@@'):
+        qun = itchat.search_chatrooms(userName=msg['FromUserName'])
+        sendernick = qun['NickName'] + '(群)' + msg['ActualNickName']
+    else:
+        senderuser = itchat.search_friends(userName=msg['FromUserName'])
+        if senderuser is None:
+            return "self?"
+        if len(senderuser['RemarkName']) == 0:
+            sendernick = senderuser['NickName']
+        else:
+            sendernick = senderuser['RemarkName']
+    # sendernick = itchat.search_friends(userName=msg['FromUserName'])['NickName']
+    return sendernick
+
+
 @itchat.msg_register([CARD, FRIENDS], isFriendChat=True, isGroupChat=True,
                      isMpChat=True)
 def tuling_reply(msg):
-    # showmsg(msg)
-    showfmmsg(formatmsg(msg))
+    # showmsgexpanddictetc(msg)
+    writefmmsg2txtandmaybeevernotetoo(formatmsg(msg))
 
 
 @itchat.msg_register([NOTE], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def note_reply(msg):
-    # showmsg(msg)
+    """
+    处理note类型信息，对微信转账记录深入处置
+    """
+    # showmsgexpanddictetc(msg)
     innermsg = formatmsg(msg)
     if msg["FileName"] == "微信转账":
         ptn = re.compile("<pay_memo><!\\[CDATA\\[(.*)\\]\\]></pay_memo>")
         pay = re.search(ptn, msg["Content"])[1]
         innermsg['fmText'] = innermsg['fmText'] + f"[{pay}]"
     if msg["FileName"].find('红包') >= 0:
-        showmsg(msg)
-    showfmmsg(innermsg)
+        showmsgexpanddictetc(msg)
+    writefmmsg2txtandmaybeevernotetoo(innermsg)
 
 
 @itchat.msg_register([MAP], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def map_reply(msg):
-    # showmsg(msg)
+    # showmsgexpanddictetc(msg)
     innermsg = formatmsg(msg)
     gps = msg['Url'].split('=')[1]
     # print(f"[{gps}]")
     innermsg['fmText'] = innermsg['fmText'] + f"[{gps}]"
-    showfmmsg(innermsg)
+    writefmmsg2txtandmaybeevernotetoo(innermsg)
 
 
 @itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO],
@@ -260,7 +286,7 @@ def fileetc_reply(msg):
     msg['Text'](str(filepath))
     innermsg['fmText'] = str(filepath)
 
-    showfmmsg(innermsg)
+    writefmmsg2txtandmaybeevernotetoo(innermsg)
 
 
 def soupclean2item(msgcontent):
@@ -282,7 +308,7 @@ def sharing_reply(msg):
     sendernick = getsendernick(msg)
     innermsg = formatmsg(msg)
 
-    # showmsg(msg)
+    # showmsgexpanddictetc(msg)
     # 处理火界麻将战绩网页
     # http://zj.lgmob.com/h5_whmj_qp/fks0_eb81c193dea882941fe13dfa5be24a11.html
     # ptn = re.compile("h5_whmj_qp/fks0_")
@@ -347,7 +373,7 @@ def sharing_reply(msg):
             valuepart = soup.des or soup.digest
             innermsg['fmText'] = innermsg['fmText'] + f"[{valuepart.string}]"
         else:
-            showmsg(msg)
+            showmsgexpanddictetc(msg)
     elif len(items) > 0:
         itemstr = '\n'
         for item in items:
@@ -357,9 +383,9 @@ def sharing_reply(msg):
         innermsg['fmText'] = innermsg['fmText'] + itemstr
     elif type(msg['User']) == itchat.storage.MassivePlatform:
         log.info(f"公众号信息\t{msg['User']}")
-        showmsg(msg)
+        showmsgexpanddictetc(msg)
 
-    showfmmsg(innermsg)
+    writefmmsg2txtandmaybeevernotetoo(innermsg)
 
 
 def makemsg2write(innermsg, inputtext=''):
@@ -374,7 +400,7 @@ def makemsg2write(innermsg, inputtext=''):
                  'fmType': 'Text',
                  'fmText': f"{inputtext}"
                 }
-    showfmmsg(finnalmsg)
+    writefmmsg2txtandmaybeevernotetoo(finnalmsg)
 
 
 @itchat.msg_register([TEXT], isFriendChat=True, isGroupChat=True, isMpChat=True)
@@ -394,7 +420,7 @@ def text_reply(msg):
         itemstr = itemstr[:-1]
         innermsg['fmText'] = itemstr
 
-    showfmmsg(innermsg)
+    writefmmsg2txtandmaybeevernotetoo(innermsg)
 
     # 特定指令则退出
     if msg['Text'] == '退出小元宝系统':
@@ -561,7 +587,7 @@ def listchatrooms():
 def add_friend(msg):
     msg.user.verify()
     msg.user.send('Nice to meet you!')
-    showfmmsg(msg)
+    writefmmsg2txtandmaybeevernotetoo(msg)
     log.info(msg)
 
 
@@ -598,7 +624,7 @@ def keepliverun():
     itchat.originInstance.receivingRetryCount = 50
 
     init_info = itchat.web_init()
-    # showmsg(init_info)
+    # showmsgexpanddictetc(init_info)
     if init_info['BaseResponse']['Ret'] == 0:
         logstr = f"微信初始化信息成功返回，获取登录用户信息"
         log.info(logstr)
