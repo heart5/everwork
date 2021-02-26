@@ -199,7 +199,7 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                         # exit(1)
                         raise eee
                     # 暂歇开始前终端输出，看看而已
-                    print(f"&&&\t{sleeptime}\t&&& in (tct2), type is\t[ {eee_type}]\t, value is \t[{eee_value}], traceback is \t[{eee_traceback}]")
+                    print(f"&&&\t{sleeptime}\t&&& in (tct2), type is\t[ {eee_type}]\t, value is \t[{eee_value}], traceback is \t[{[st for st in traceback.extract_tb(eee_traceback)]}]")
                     time.sleep(sleeptime)
 
         return wrapper
