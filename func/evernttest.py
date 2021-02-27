@@ -689,7 +689,11 @@ def readinifromnote():
     # noteguid_inifromnote = 'e0565861-db9e-4efd-be00-cbce06d0cf98'
     noteguid_inifromnote = getcfpoptionvalue('everwork', 'evernote', 'ininoteguid')
     # print(noteguid_inifromnote)
-    note = note_store.getNote(noteguid_inifromnote, True, True, False, False)
+    try:
+        note = note_store.getNote(noteguid_inifromnote, True, True, False, False)
+    except (http.client.RemoteDisconnected, TimeoutError, ssl.SSLEOFError) as e:
+        log.critical(f"读取evernote笔记配置文件时出错。\t{e}")
+        return
     # print(note.updateSequenceNum)
     if int(note.updateSequenceNum) == ininoteupdatenum:
         # print(f'配置笔记无变化，不对本地化的ini配置文件做更新。')
