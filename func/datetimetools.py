@@ -1,6 +1,8 @@
 # encoding:utf-8
 """
 date time function related
+getstartdate
+gethumantimedelay
 """
 
 import arrow
@@ -19,52 +21,57 @@ def getstartdate(period, thedatetime):
     period list: ['日', '周', '旬', '月', '年', '全部']
     """
     if period == '日':
-        zuijindatestart = datetime.strptime(thedatetime.strftime("%Y-%m-%d"), "%Y-%m-%d")
+        zuijindatestart = arrow.get(arrow.get(thedatetime).date()).naive
     elif period == '周':
         weekstarttime = thedatetime - timedelta(days=thedatetime.weekday())  # Monday
-        zuijindatestart = datetime.strptime(weekstarttime.strftime("%Y-%m-%d"), "%Y-%m-%d")
+        zuijindatestart = arrow.get(arrow.get(weekstarttime).date()).naive
     elif period == '旬':
-        if thedatetime.day < 10:
-            frtday = 1
-        elif thedatetime.day < 20:
-            frtday = 10
-        else:
-            frtday = 20
-        zuijindatestart = datetime.strptime(thedatetime.strftime(f"%Y-%m-{frtday}"), "%Y-%m-%d")
+        # 连用两次三元操作，减缩代码行数
+        frtday = 1 if thedatetime.day < 10 else (10 if thedatetime.day < 20 else 20)
+        tmpdt = arrow.get(thedatetime).replace(day=frtday)
+        zuijindatestart = arrow.get(tmpdt.date()).naive
     elif period == '月':
-        zuijindatestart = datetime.strptime(thedatetime.strftime("%Y-%m-1"),  "%Y-%m-%d")
+        zuijindatestart = arrow.get(arrow.get(thedatetime).replace(day=1).date()).naive
     elif period == '年':
-        zuijindatestart = datetime.strptime(thedatetime.strftime("%Y-1-1"),  "%Y-%m-%d")
+        zuijindatestart = arrow.get(arrow.get(thedatetime).replace(month=1, day=1).date()).naive
     else:
         zuijindatestart = thedatetime
 
     return zuijindatestart
 
 
-def gethumantimedelay(inputlocaltime, inseconds=120):
+def test_getstartdate():
+    periodlst = ['日', '周', '旬', '月', '年', '全部']
+    for pr in periodlst:
+        tned = getstartdate(pr, datetime.now())
+        print(f"{datetime.now()}\t{pr}:\t{tned}\t{type(tned)}")
+
+
+def gethumantimedelay(inputlocaltime, intervalseconds=120):
+    """
+    返回输入时间和当前时间差值的人类可读字符串
+    默认对超过120秒（两分钟）的差值有效，否则返回False
+    """
+    # 默认用当地时间运算
     intime = arrow.get(inputlocaltime, tzinfo=tz.tzlocal())
-    # thenow = arrow.utcnow()
-    thenow = arrow.now()
-    elasptime = thenow - intime
-    print(elasptime, elasptime.seconds)
-    if elasptime.seconds > inseconds:
+    if (elasptime := arrow.now() - intime) and (elasptime.seconds > intervalseconds):
+        # print(elasptime, elasptime.seconds)
         return intime.humanize(locale='zh_cn')
     else:
         return False
+
+def test_gethumantimedelay():
+    hmtimetestlst= ["20210227 01:04:23", arrow.get("20210227 02:04:23",
+                                        tzinfo=tz.tzlocal()), "19761006"]
+    for htt in hmtimetestlst:
+        hmstr = gethumantimedelay(htt)
+        print(hmstr)
 
 
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
 
-    hmstr = gethumantimedelay("20210227 01:04:23")
-    print(hmstr)
-    hmstr = gethumantimedelay(arrow.get("20210227 02:04:23",
-                                        tzinfo=tz.tzlocal()))
-    print(hmstr)
-
-    periodlst = ['日', '周', '旬', '月', '年', '全部']
-    for pr in periodlst:
-        tned = getstartdate(pr, datetime.now())
-        # print(f"{pr}:\t{tned}")
+    test_gethumantimedelay()
+    test_getstartdate()
 
     log.info(f"文件\t{__file__}\t运行结束。")
