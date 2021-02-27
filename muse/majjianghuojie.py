@@ -385,7 +385,7 @@ def fixnamebyguestid(inputdf: pd.DataFrame, guestidcl: str):
     # print(guestidlst)
     cfpini, cfpinipath = getcfp('everinifromnote')
     gamedict = dict(cfpini.items('game'))
-    print(f"name correctted by id from ini...")
+    print(f"name correctted by id from evernote ini...")
     for nameid in guestidlst:
         if nameid in gamedict.keys():
             namez = gamedict[nameid]
@@ -623,7 +623,7 @@ def updateallurlfromtxt(owner: str, startnum=0, itemsnnm=10):
     """
     从文本文件中读取所有url并更新入数据表格文件
     """
-    splst, changed = fetchmjurlfromfile(owner)
+    spls, change = fetchmjurlfromfile(owner)
     if splst and len(splst) != 0:
         print(len(splst), startnum, itemsnnm)
         endnum = tmpend if (tmpend := (startnum + itemsnnm)) < len(splst) else len(splst)
@@ -637,8 +637,7 @@ def updateallurlfromtxt(owner: str, startnum=0, itemsnnm=10):
         print(f"\n\n\nwrite to excel using geturlcontentwrite2excel fucntion\n\n\n")
         for ii in range(startnum, endnum):
             url, desc = geturlcontentwrite2excel(owner, targetlst[ii])
-            print(f"[{{startnum}}/{ii}/{endnum}]\t{desc}")
-            pass
+            print(f"[{startnu}/{ii}/{endnum}]\t{desc}")
 
 
 if __name__ == '__main__':
@@ -656,11 +655,7 @@ if __name__ == '__main__':
     # updateurl2excelandini(own, sp2)
     # geturlcontentwrite2excel(own, sp2)
 
-    updateallurlfromtxt(own, 0, 2000)
-
-    "  日 周 旬 月 年 全部"
-    # rst = zhanjidesc(own, '月', False)
-    # print(rst)
+    updateallurlfromtxt(own, 0, 5)
 
     # img = showzhanjiimg(own)
 
