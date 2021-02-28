@@ -21,6 +21,22 @@ with pathmagic.context():
     from func.logme import log
 
 
+def extract_traceback4exception(tbtuple, func_name):
+    """
+    格式化指定异常的详细信息（tuple）并返回（字符串）
+    """
+    # 通sys函数获取eee的相关信息
+    eee_type, eee_value, tblst = tbtuple
+    brieftb = [x for x in tblst[:2]]
+    brieftb.append('\t...\t')
+    brieftb.extend([x for x in tblst[-2:]])
+    rststr = f"&&&\t{sleeptime}\t&&& in (func_name),\t"
+    rststr += "type is\t[ {eee_type}]\t, value is \t[{eee_value}],\t"
+    rststr += "traceback is \t{brieftb}"
+
+    return rststr
+
+
 def not_IPython():
     """
     判断是否在IPython环境下运行
