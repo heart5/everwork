@@ -34,8 +34,8 @@ def extract_traceback4exception(tbtuple, func_name, sleeptime=None, alltraceback
     else:
         brieftb = tblst
     rststr = f"&&&\t{sleeptime}\t&&& in (func_name),\t"
-    rststr += "type is\t[ {eee_type}]\t, value is \t[{eee_value}],\t"
-    rststr += "traceback is \t{brieftb}"
+    rststr += f"type is\t[ {eee_type}]\t, value is \t[{eee_value}],\t"
+    rststr += f"traceback is \t{brieftb}"
 
     return rststr
 
