@@ -696,7 +696,7 @@ def readinifromnote():
     except (http.client.RemoteDisconnected, TimeoutError, ssl.SSLEOFError) as e:
         eee_type, eee_value, eee_traceback = sys.exc_info()
         tbtuple = (eee_type, eee_value,
-                               traceback.extract_tb(eee_traceback))
+                               list(traceback.extract_tb(eee_traceback)))
         print(extract_traceback4exception(tbtuple, "readinifromnote"))
         log.critical(f"读取evernote笔记配置文件时出错。\t{e}")
         return
