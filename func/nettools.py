@@ -27,7 +27,7 @@ import pathmagic
 with pathmagic.context():
     from func.logme import log
     from func.termuxtools import termux_sms_send
-    from func.sysfunc import not_IPython
+    from func.sysfunc import not_IPython, extract_traceback4exception
 
 
 def isitchat(pklabpath):
@@ -156,8 +156,9 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                         OSError, IndexError, Exception, ValueError
                 ) as eee:
 
-                    # 通过sys函数获取eee的相关信息
                     eee_type, eee_value, eee_traceback = sys.exc_info()
+                    tbtuple = (eee_type, eee_value,
+                               traceback.extract_tb(eee_traceback))
                     # 5的倍数次尝试输出log，避免网络不佳时的log冗余
                     if i % showfreq == 0:
                         # 如果eee包含错误代码，尽量显示详细信息方便深入了解、统计、分析、诊断
@@ -199,7 +200,7 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                         # exit(1)
                         raise eee
                     # 暂歇开始前终端输出，看看而已
-                    print(f"&&&\t{sleeptime}\t&&& in (tct2), type is\t[ {eee_type}]\t, value is \t[{eee_value}], traceback is \t[{[st for st in traceback.extract_tb(eee_traceback)]}]")
+                    print(extract_traceback4exception(tbtuple, 'trycounttimes2'))
                     time.sleep(sleeptime)
 
         return wrapper
