@@ -14,6 +14,7 @@ import traceback
 import inspect
 import numpy as np
 import pandas as pd
+import http
 from bs4 import BeautifulSoup
 from evernote.api.client import EvernoteClient
 from evernote.edam.error.ttypes import EDAMNotFoundException, EDAMSystemException, EDAMUserException, EDAMErrorCode
