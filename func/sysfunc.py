@@ -21,12 +21,12 @@ with pathmagic.context():
     from func.logme import log
 
 
-def extract_traceback4exception(tbtuple, func_name, alltraceback=False):
+def extract_traceback4exception(tbtuple, func_name, sleeptime=None, alltraceback=False):
     """
     格式化指定异常的详细信息（tuple）并返回（字符串），默认只返回堆栈的首位各两个元素，除非显性指定显示全部
     """
     # 通sys函数获取eee的相关信息
-    eee_type, eee_value, tblst, sleeptime = tbtuple
+    eee_type, eee_value, tblst = tbtuple
     if not alltraceback:
         brieftb = [x for x in tblst[:2]]
         brieftb.append('\t...\t')

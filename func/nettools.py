@@ -158,7 +158,7 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
 
                     eee_type, eee_value, eee_traceback = sys.exc_info()
                     tbtuple = (eee_type, eee_value,
-                               traceback.extract_tb(eee_traceback), sleeptime)
+                               traceback.extract_tb(eee_traceback))
                     # buding^_^
                     # 5的倍数次尝试输出log，避免网络不佳时的log冗余
                     if i % showfreq == 0:
@@ -201,7 +201,7 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                         # exit(1)
                         raise eee
                     # 暂歇开始前终端输出，看看而已
-                    print(extract_traceback4exception(tbtuple, 'trycounttimes2'))
+                    print(extract_traceback4exception(tbtuple, 'trycounttimes2', sleeptime=sleeptime))
                     time.sleep(sleeptime)
 
         return wrapper
