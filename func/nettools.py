@@ -174,6 +174,20 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                                 log.critical(f'多次强行连接，被拒了！{eeestr}')
                             elif eee.errno == 10054:
                                 log.critical(f'主机发脾气，强行断线了。{eeestr}')
+                            elif eee.errno == 113:
+                                log.critical(f'和{servname} cannot establied a new  connection. no route to host。{eeestr}')
+                                # 断网eptime *= 20
+                                sleeptime *= 20
+                            elif eee.errno == 8:
+                                log.critical(f'和{servname}握手失败。{eeestr}')
+                            elif eee.errno == 7:
+                                log.critical(f'和{servname}连接失败。域名无法解析，断网了  。{eeestr}')
+                                # 断网eptime *= 20
+                            elif eee.errno == 8:
+                                log.critical(f'和{servname}握手失败。{eeestr}')
+                            elif eee.errno == 7:
+                                log.critical(f'和{servname}连接失败。域名无法解析，断网了  。{eeestr}')
+                                # 断网eptime *= 20
                             elif eee.errno == 8:
                                 log.critical(f'和{servname}握手失败。{eeestr}')
                             elif eee.errno == 7:
