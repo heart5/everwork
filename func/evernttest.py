@@ -15,6 +15,7 @@ import inspect
 import numpy as np
 import pandas as pd
 import http
+import ssl
 from bs4 import BeautifulSoup
 from evernote.api.client import EvernoteClient
 from evernote.edam.error.ttypes import EDAMNotFoundException, EDAMSystemException, EDAMUserException, EDAMErrorCode
@@ -29,7 +30,7 @@ with pathmagic.context():
     from func.first import dirlog, dirmainpath
     from func.logme import log
     from func.nettools import trycounttimes2
-    from func.sysfunc import convertframe2dic, not_IPython
+    from func.sysfunc import convertframe2dic, not_IPython, extract_traceback4exception
     # from etc.getid import getid
 
 # print(f"{__file__} is loading now...")
@@ -693,6 +694,10 @@ def readinifromnote():
     try:
         note = note_store.getNote(noteguid_inifromnote, True, True, False, False)
     except (http.client.RemoteDisconnected, TimeoutError, ssl.SSLEOFError) as e:
+        eee_type, eee_value, eee_traceback = sys.exc_info()
+        tbtuple = (eee_type, eee_value,
+                               traceback.extract_tb(eee_traceback))
+        print(extract_traceback4exception(tbtuple, "readinifromnote"))
         log.critical(f"读取evernote笔记配置文件时出错。\t{e}")
         return
     # print(note.updateSequenceNum)
