@@ -33,9 +33,10 @@ def extract_traceback4exception(tbtuple, func_name, sleeptime=None, alltraceback
         brieftb.extend([x for x in tblst[-2:]])
     else:
         brieftb = tblst
-    rststr = f"&&&\t{sleeptime}\t&&& in (func_name),\t"
-    rststr += f"type is\t[ {eee_type}]\t, value is \t[{eee_value}],\t"
-    rststr += f"traceback is \t{brieftb}"
+    rststr = f"&&&\t{sleeptime}\t&&& in [{func_name}],\t"
+    rststr += f"type is\t[{eee_type}]\t, value is \t[{eee_value}],\t"
+    tbstr = '\t'.join(brieftb)
+    rststr += f"traceback is \t{tbstr}"
 
     return rststr
 
