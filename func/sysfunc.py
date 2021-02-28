@@ -21,15 +21,18 @@ with pathmagic.context():
     from func.logme import log
 
 
-def extract_traceback4exception(tbtuple, func_name):
+def extract_traceback4exception(tbtuple, func_name, alltraceback=False):
     """
-    格式化指定异常的详细信息（tuple）并返回（字符串）
+    格式化指定异常的详细信息（tuple）并返回（字符串），默认只返回堆栈的首位各两个元素，除非显性指定显示全部
     """
     # 通sys函数获取eee的相关信息
     eee_type, eee_value, tblst = tbtuple
-    brieftb = [x for x in tblst[:2]]
-    brieftb.append('\t...\t')
-    brieftb.extend([x for x in tblst[-2:]])
+    if not alltraceback:
+        brieftb = [x for x in tblst[:2]]
+        brieftb.append('\t...\t')
+        brieftb.extend([x for x in tblst[-2:]])
+    else:
+        brieftb = tblst
     rststr = f"&&&\t{sleeptime}\t&&& in (func_name),\t"
     rststr += "type is\t[ {eee_type}]\t, value is \t[{eee_value}],\t"
     rststr += "traceback is \t{brieftb}"
