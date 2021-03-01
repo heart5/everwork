@@ -3,13 +3,14 @@
 evernote或印象笔记相关功能函数
 """
 
+import os
+import sys
 import binascii
 import datetime
 import hashlib
 import mimetypes
 import re
 import time
-import os
 import traceback
 import inspect
 import numpy as np
