@@ -698,8 +698,8 @@ def readinifromnote():
         eee_type, eee_value, eee_traceback = sys.exc_info()
         tbtuple = (eee_type, eee_value, [str(x) for x in traceback.extract_tb(eee_traceback)])
         sleeptime = 5
-        print(extract_traceback4exception(tbtuple, "readinifromnote"),
-              sleeptime=sleeptime)
+        print(extract_traceback4exception(tbtuple, "readinifromnote",
+              sleeptime=sleeptime))
         log.critical(f"读取evernote笔记配置文件时出错。\t{e}")
         return
     # print(note.updateSequenceNum)
