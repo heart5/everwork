@@ -678,7 +678,7 @@ def findnotebookfromevernote():
     return rstdf
 
 
-@trycounttimes2('evernote服务器')
+@trycounttimes2('evernote服务器', maxtimes=5, maxsecs=10)
 def readinifromnote():
     """
     更新动态化配置到本地ini文件，确保数据新鲜
