@@ -21,7 +21,7 @@ with pathmagic.context():
     from func.logme import log
 
 
-def extract_traceback4exception(tbtuple, func_name, shownums=2, sleeptime=None):
+def extract_traceback4exception(tbtuple, func_name, sleeptime=None):
     """
     格式化指定异常的详细信息（tuple）并返回（字符串），默认只返回堆栈的首位各两个元素，除非显性指定显示全部
     """
@@ -29,16 +29,23 @@ def extract_traceback4exception(tbtuple, func_name, shownums=2, sleeptime=None):
     from func.configpr import getcfpoptionvalue
     # 通sys函数获取eee的相关信息
     eee_type, eee_value, tblst = tbtuple
-    alltraceback = getcfpoptionvalue("everinifromnote", "nettools", "tracebackall")
+    if not (brief := getcfpoptionvalue("everinifromnote", "nettools", "brief")):
+        brief = False
+    if not (shownums := getcfpoptionvalue("everinifromnote", "nettools", "shownums")):
+        shownums = 3
+    if not (alltraceback := getcfpoptionvalue("everinifromnote", "nettools", "tracebackall")):
+        alltraceback = True
     if alltraceback:
-        brieftb = tblst
+        rsttb = tblst
     else:
-        brieftb = [x for x in tblst[:shownums]]
-        brieftb.append('\t...\t')
-        brieftb.extend([x for x in tblst[(-1 * shownums):]])
+        rsttb = [x for x in tblst[:shownums]]
+        rsttb.append('\t...\t')
+        rsttb.extend([x for x in tblst[(-1 * shownums):]])
+    if brief:
+        rsttb = [x.replace("/data/data/com.termux/files", "/d/d/c/f") for x in rsttb]
     rststr = f"&&&\t{sleeptime}\t&&& in [{func_name}],\t"
     rststr += f"type is\t[{eee_type}]\t, value is \t[{eee_value}],\t"
-    tbstr = '\t'.join(brieftb)
+    tbstr = '\t'.join(rsttb)
     rststr += f"traceback is \t{tbstr}"
 
     return rststr
