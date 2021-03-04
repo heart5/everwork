@@ -700,7 +700,10 @@ def readinifromnote():
         sleeptime = 5
         print(extract_traceback4exception(tbtuple, "readinifromnote",
               sleeptime=sleeptime))
-        log.critical(f"读取evernote笔记配置文件时出错。\t{e}")
+        # 避免log污染，只打印，不记录
+        # log.critical(f"读取evernote笔记配置文件时出错。\t{e}")
+        # 返回None，相当于跳过一次note参数获取；不采用raise
+        # e，那样trycounttimes2生效，非获取有效值不可，耽搁事务推进
         return
     # print(note.updateSequenceNum)
     if int(note.updateSequenceNum) == ininoteupdatenum:
