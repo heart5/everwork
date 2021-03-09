@@ -17,7 +17,7 @@ with pathmagic.context():
     from func.evernttest import get_notestore, imglist2note, tablehtml2evernote
     from func.mailsfunc import jilugmail
     from func.logme import log
-    from func.configpr import cfplife, inilifepath
+    from func.configpr import getcfp
     from func.first import dirmainpath
 
 
@@ -46,7 +46,7 @@ def notification2df(items):
     try:
         notestore = get_notestore()
         xiangmu = ['微信', '支付宝', 'QQ', '日历']
-        # global cfplife, inilifepath
+        cfplife, inilifepath = getcfp('everlife')
         for xm in xiangmu:
             biaoti = '系统提醒（%s）记录' % xm
             dfxm = dfnoti[dfnoti.shuxing == xm]
@@ -209,6 +209,7 @@ def callsms2df(itemstr):
 
     try:
         notestore = get_notestore()
+        cfplife, inilifepath = getcfp('everlilfe')
         if cfplife.has_option('allsets', 'callsms'):
             ready2update = dfout.shape[0] > cfplife.getint('allsets', 'callsms')
         else:
