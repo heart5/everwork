@@ -151,6 +151,21 @@ def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
     return targetvalue
 
 
+def getcfpsectionvalue(cfpfilename: str, sectionname: str):
+    """
+    return section value(which is list including tuple) for certain section name,, all for indicated cfp filename
+    if section is not exsited, create it, then return None.
+    """
+    cfpin, cfpinpath = getcfp(cfpfilename)
+    if not cfpin.has_section(sectionname):
+        print(f"seticon {sectionname} is not exists. Then creating it now ...")
+        cfpin.add_section(sectionname)
+        cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
+        return
+    else:
+        return cfpin.items(f'{sectionname}')
+
+
 is_log_details = getcfpoptionvalue('everinifromnote', 'everwork', 'logdetails') 
 # cfp, inifilepath = getcfp('everwork')
 # cfpdata, inidatanotefilepath = getcfp('everdatanote')
@@ -171,5 +186,7 @@ if __name__ == '__main__':
     print(cp)
 #     removesection(cfpapiname, nssectionname)
 #     ict = fixinifile(inipathson)
+    seccontent = getcfpsectionvalue('everwork', 'evernote')
+    print(seccontent)
     if not_IPython() and is_log_details:
         print('Done.')
