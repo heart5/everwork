@@ -4,7 +4,6 @@
 #
 """
 处理进出记录笔记，生成图表呈现
-
 名称：行政管理 guid：31eee750-e240-438b-a1f5-03ce34c904b4
 名称：love    guid：c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b
 源信息笔记guid和标题如下：
@@ -49,11 +48,11 @@ from pandas.tseries.offsets import *
 import pathmagic
 
 with pathmagic.context():
-    from func.configpr import getcfp, getcfpoptionvalue, setcfpoptionvalue
+    from func.configpr import getcfp, getcfpoptionvalue, setcfpoptionvalue, getcfpsectionvalue
     from func.evernttest import get_notestore, evernoteapijiayi, tablehtml2evernote, imglist2note
     from func.logme import log
     from func.mailsfunc import jilugmail
-    from func.first import dirmainpath
+    from func.first import dirmainpath, touchfilepath2depth
 
 
 def jilugooglefile(filepath):
@@ -349,16 +348,19 @@ def jinchustat(jinchujiluall, noteinfos):
 
 
 def jinchustatdo():
-    items = getcfp('everlife')[0].items('impinfolist')
+    # items = getcfp('everlife')[0].items('impinfolist')
     noteinfolistinside = []
-    for address, infoslicelist in items:
-        infoslist = [*args, wifilist] = infoslicelist.split('\n')
-        infoslist.insert(1, address)
-        infoslist.insert(-1, infoslist[-1].split(','))
-        noteinfolistinside.append(infoslist[:-1])
+    if (items := getcfpsectionvalue('everlife', 'impinfolist')):
+        for address, infoslicelist in items:
+            infoslist = [*args, wifilist] = infoslicelist.split('\n')
+            infoslist.insert(1, address)
+            infoslist.insert(-1, infoslist[-1].split(','))
+            noteinfolistinside.append(infoslist[:-1])
     # print(noteinfolist)
 
-    dfjinchu = pd.DataFrame(jilugooglefile(dirmainpath / 'data' / 'google'))
+    gfile = dirmainpath / 'data' / 'google'
+    touchfilepath2depth(gfile / 'somethingelse')
+    dfjinchu = pd.DataFrame(jilugooglefile(gfile))
     itemswifi = jilugmail('Ifttt/Wifi', 'wifi', 'all')
     if itemswifi:
         dfjinchuwifi = wifitodf(itemswifi, noteinfolistinside)
