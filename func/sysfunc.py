@@ -131,9 +131,11 @@ def execcmd(cmd):
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'运行文件\t{__file__}……')
-    outgetstr = execcmd("uname -a")
+    # outgetstr = execcmd("uname -a")
+    outgetstr = execcmd("echo $PATH")
     print(outgetstr.strip("\n"))
     print(uuid3hexstr(outgetstr))
     print(sha2hexstr(outgetstr))
+    log.critical(outgetstr)
     if not_IPython():
         log.info(f'文件\t{__file__}\t测试完毕。')
