@@ -1,0 +1,2 @@
+default_jupytext_formats = "ipynb,py:percent"
+default_notebook_metadata_filter = "jupytext.text_representation.jupytext_version"
