@@ -1,12 +1,26 @@
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.10.3
+# ---
+
+# %%
 """
 检查crontab是否更新，有更新就更新相应笔记并并开关设置发送邮件
 """
 
+# %%
 from pathlib import Path
 import os
 import re
 
+# %%
 import pathmagic
 with pathmagic.context():
     # from func.first import dirmainpath
@@ -15,6 +29,7 @@ with pathmagic.context():
     from func.sysfunc import set_timeout, after_timeout, not_IPython
 
 
+# %%
 @set_timeout(300, after_timeout)
 def findnewcronthenupdate():
     """
@@ -53,6 +68,7 @@ def findnewcronthenupdate():
         log.critical(logstr)
 
 
+# %%
 @set_timeout(300, after_timeout)
 def findcronlogthenupdate():
     """
@@ -80,6 +96,7 @@ def findcronlogthenupdate():
         findnewthenupdatenote(itempath, 'eversys', 'everwork', f"cron_{pre}", f"cron_{pre}日志")
 
 
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'运行文件\t{__file__}')
@@ -88,4 +105,4 @@ if __name__ == '__main__':
     if not_IPython():
         log.info(f"文件\t{__file__}\t运行结束。")
 
-
+# %%

@@ -1,10 +1,23 @@
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.10.3
+# ---
+
+# %%
 """
 4524187f-c131-4d7d-b6cc-a1af20474a7f notification 笔记本
 4a940ff2-74a8-4584-be46-aa6d68a4fa53 everworklog 笔记
 log目录
 """
 
+# %%
 import os
 from threading import Timer
 import pathmagic
@@ -12,6 +25,7 @@ import re
 import pandas as pd
 import evernote.edam.type.ttypes as ttypes
 
+# %%
 with pathmagic.context():
     from func.first import getdirmain
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
@@ -24,6 +38,7 @@ with pathmagic.context():
     from func.sysfunc import not_IPython, set_timeout, after_timeout
 
 
+# %%
 @timethis
 # @ift2phone()
 # @profile
@@ -92,6 +107,7 @@ def log2note(noteguid, loglimit, levelstr='', notetitle='everwork日志信息'):
             ifttt_notify(errmsg, 'log2note')
 
 
+# %%
 @set_timeout(360, after_timeout)
 def log2notes():
     namestr = 'everlog'
@@ -144,6 +160,7 @@ def log2notes():
     # print(locinfo)
 
 
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'开始运行文件\t{__file__}')

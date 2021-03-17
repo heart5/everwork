@@ -1,6 +1,6 @@
 # encoding:utf-8
 """
-魔术路径，转为解决谜之路径而设
+魔术路径，专为解决谜之路径而设
 """
 
 # import os
@@ -22,7 +22,7 @@ class context:
 
 
 if __name__ == '__main__':
-    print(f'运行文件\t{__file__}')
+#     print(f'运行文件\t{__file__}')
     for pp in sys.path:
         print(pp)
     print('Done.完毕。')

@@ -1,9 +1,22 @@
 #! /data/data/com.termux/files/usr/bin/python
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.10.3
+# ---
+
+# %%
 """
 获取服务器ip并定期更新至相关笔记
 """
 
+# %%
 import os
 import sys
 import datetime
@@ -11,6 +24,7 @@ import platform
 import re
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.first import getdirmain, dirmainpath
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
@@ -24,6 +38,7 @@ with pathmagic.context():
     from func.sysfunc import set_timeout, after_timeout, not_IPython
 
 
+# %%
 @set_timeout(240, after_timeout)
 @timethis
 def iprecord():
@@ -64,6 +79,7 @@ def iprecord():
     return ip, wifi, wifiid, tun, device_id
 
 
+# %%
 def evalnone(input):
     if input == 'None':
         return eval(input)
@@ -71,6 +87,7 @@ def evalnone(input):
         return input
 
 
+# %%
 def showiprecords():
     namestr = 'everip'
     ip, wifi, wifiid, tun, device_id = iprecord()
@@ -139,6 +156,7 @@ def showiprecords():
                      f'服务器_{device_name}_ip更新记录', "<pre>" + "\n".join(itemnew) + "</pre>")
 
 
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(

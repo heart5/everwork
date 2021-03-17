@@ -1,4 +1,16 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.10.3
+# ---
+
+# %%
 """
 电池电量管理
 """
@@ -9,6 +21,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pandas.plotting import register_matplotlib_converters
 
+# %%
 import pathmagic
 with pathmagic.context():
     from func.logme import log
@@ -20,6 +33,7 @@ with pathmagic.context():
     from func.sysfunc import not_IPython
 
 
+# %%
 def checkbatteryinfotable(dbname: str, tablename: str):
     """
     检查设备的电池信息数据表是否已经构建，设置相应的ini值避免重复打开关闭数据库文件进行检查
@@ -34,6 +48,7 @@ def checkbatteryinfotable(dbname: str, tablename: str):
         log.info(logstr)
 
 
+# %%
 def insertbattinfoitem2db(dbname: str, percentage: int, temperature: float):
     '''
     插入电池信息（电量百分比、温度）到数据表battinfo中
@@ -62,6 +77,7 @@ def insertbattinfoitem2db(dbname: str, percentage: int, temperature: float):
             conn.close()
 
 
+# %%
 def batteryrecord2db(dbname: str):
     while (bsdict := battery_status())['plugged'].upper() == 'PLUGGED_AC':
         insertbattinfoitem2db(
@@ -69,6 +85,7 @@ def batteryrecord2db(dbname: str):
         time.sleep(30)
 
 
+# %%
 def getbattinfodb(dbname: str, tablename="battinfo"):
     """
     从电池信息数据表提取数据（DataFrame）
@@ -102,6 +119,7 @@ def getbattinfodb(dbname: str, tablename="battinfo"):
     return jujinmins, timedfgrp
 
 
+# %%
 def showbattinfoimg(dbname: str, jingdu: int = 300):
     '''
     show the img for battery info
@@ -162,6 +180,7 @@ def showbattinfoimg(dbname: str, jingdu: int = 300):
     return imgwcdelaypath
 
 
+# %%
 if __name__ == "__main__":
     if not_IPython():
         logstrouter = "运行文件\t%s……" % __file__

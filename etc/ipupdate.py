@@ -1,9 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.10.3
+# ---
+
+# %%
 """
 获取服务器ip并定期更新至相关笔记
 """
 
+# %%
 import os
 import sys
 import datetime
@@ -12,6 +25,7 @@ import platform
 import evernote.edam.type.ttypes as ttypes
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.first import dirmainpath
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
@@ -24,6 +38,7 @@ with pathmagic.context():
     from etc.getid import getdeviceid
 
 
+# %%
 def iprecord():
     """
     获取本机ip
@@ -66,6 +81,7 @@ def iprecord():
     return ip, wifi, wifiid, tun, device_id
 
 
+# %%
 def evalnone(input1):
     """
     转换从终端接收数据的数据类型
@@ -75,6 +91,7 @@ def evalnone(input1):
     return input1
 
 
+# %%
 def showiprecords():
     """
     综合输出ip记录
@@ -154,6 +171,7 @@ def showiprecords():
                      + "\n".join(itemnew) + "</pre>")
 
 
+# %%
 if __name__ == '__main__':
     logstr2 = f'开始运行文件\t{__file__}\t{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co_filename}'
     log.info(logstr2)

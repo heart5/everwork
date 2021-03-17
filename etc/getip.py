@@ -1,5 +1,16 @@
 #!PREFIX/bin/python
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       jupytext_version: 1.10.3
+#   kernelspec:
+#     display_name: Python 3
+#     language: python
+#     name: python3
+# ---
+
 """
 获取ip地址
 """

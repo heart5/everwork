@@ -1,4 +1,16 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.10.3
+# ---
+
+# %%
 """
 备份数据目录data到压缩文件
 """
@@ -11,15 +23,18 @@ from pathlib import Path
 from threading import Timer
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.first import dirmainpath, touchfilepath2depth
     from func.logme import log
 
 
+# %%
 def zap():
     pass
 
 
+# %%
 def zipdir2one():
     sourcedirpath = dirmainpath / 'data'
     sourcedir = str(sourcedirpath)
@@ -125,6 +140,7 @@ def zipdir2one():
         log.info(f'成功压缩{updateoradd}备份至：{targetzipfileadd}')
 
 
+# %%
 def zipdata2one_timer(jiangemiao):
     try:
         zipdir2one()
@@ -135,6 +151,7 @@ def zipdata2one_timer(jiangemiao):
     timer_zip2one.start()
 
 
+# %%
 if __name__ == '__main__':
     print(f'开始测试文件\t{__file__}')
     zipdir2one()

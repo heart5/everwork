@@ -1,14 +1,29 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.10.3
+# ---
 
+# %%
+# %%
 import subprocess
 import matplotlib
 from matplotlib.font_manager import FontManager
 
+# %%
 print(matplotlib.matplotlib_fname())    # 包含全路径的配置文件
 
+# %%
 fm = FontManager()
 
+# %%
 # print(fm.findfont(matplotlib.font_manager.FontProperties(), fontext='ttf'))
 # mat_fonts = set(f.fname for f in fm.ttflist) # matplotlib可用的字体路径列表
 # print(mat_fonts)
@@ -31,6 +46,7 @@ zh_fonts = set(f.split(',', 1)[0]
 available = mat_fonts & zhfs    # matplotlib字体和操作系统字体取交集
 
 
+# %%
 # @profile
 def showfont():
     print(f"{'*' * 10}可用的中文字体（取交集）{'*' * 10}")
@@ -39,4 +55,5 @@ def showfont():
     #     print(len(mat_fonts))
     print("All thing done.")
 
+# %%
 showfont()

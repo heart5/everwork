@@ -3,22 +3,20 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,py:light
 #     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.3.1
+#       jupytext_version: 1.10.3
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python3
 # ---
 
+# %%
 """
 显示当前目录下所有py文件（包括子目录）的函数结构并更新至evernote
 """
 
+# %%
 import os
 import re
 import pathmagic
@@ -31,6 +29,7 @@ with pathmagic.context():
     from func.evernttest import findnotefromnotebook, get_notestore, imglist2note
 
 
+# %%
 def findfilesincluedef(path, t, designext='.py'):
     """
     找到给出目录下所有（包含子目录）指定文件名后缀的文件，并检查是否包含了定义函数（形如：def sample()），返回查找结果的相对路径文件名列表t
@@ -52,6 +51,7 @@ def findfilesincluedef(path, t, designext='.py'):
                 findfilesincluedef(npath, t, designext)
 
 
+# %%
 def checknewthenupdatenote():
     """
     查验程序文件是否有更新（文件时间作为判断标准）并更新至笔记
@@ -118,5 +118,6 @@ def checknewthenupdatenote():
             setcfpoptionvalue('evercode', nbname, filename, f"{filetimenow}")
 
 
+# %%
 if __name__ == '__main__':
     checknewthenupdatenote()

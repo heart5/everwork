@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.10.3
+# ---
+
+# %%
 import argparse
 import yagmail
 import re
@@ -5,8 +18,10 @@ import os
 import sys
 # from pathlib import Path
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.first import dirmainpath
     from func.logme import log
@@ -15,6 +30,7 @@ with pathmagic.context():
     from func.evernttest import getinivaluefromnote
 
 
+# %%
 def mailfun(txtorfile, tonotek=False):
     cfpew, cfpewpath = getcfp('everwork')
     host = cfpew.get('gmail', 'host')
@@ -45,13 +61,15 @@ def mailfun(txtorfile, tonotek=False):
     yag_imap_connecttion.close()
 
 
+# %%
 def mailfileindir(dirfrom, extstr='.txt'):
     fls = [x for x in os.listdir(dirfrom) if x.endswith(extstr)]
     print(f"{fls}")
     for fl1 in fls:
         mailfun(dirfrom / fl1)
-        
 
+
+# %%
 def configargp():
     parser = argparse.ArgumentParser(description='send files or content to mailbox.(发送文件或者文本内容到邮箱去。)')
     parser.add_argument('content', metavar='File', type=str, nargs='+', help='file name or content')
@@ -66,6 +84,7 @@ def configargp():
     return args1
 
 
+# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     # mailfun(notelststr)

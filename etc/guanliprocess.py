@@ -1,10 +1,25 @@
+# -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.10.3
+# ---
+
+# %%
 import psutil
 
+# %%
 import pathmagic
 with pathmagic.context():
     from func.logme import log
 
 
+# %%
 def judgeprocess(processcmdline):
     inputlst = processcmdline.strip().split()
     processcmdline = ' '.join(inputlst)
@@ -22,6 +37,7 @@ def judgeprocess(processcmdline):
         pass
 
 
+# %%
 def test_judgepro():
     if judgeprocess('python life/webchat.py '):
         print('success')
@@ -31,6 +47,7 @@ def test_judgepro():
         exit(1)
 
 
+# %%
 def getproall():
     """
     返回带有详细信息的进程列表
@@ -91,6 +108,7 @@ def getproall():
     return proclst
 
 
+# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     test_judgepro()

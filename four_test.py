@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       jupytext_version: 1.10.3
+#   kernelspec:
+#     display_name: Python 3
+#     language: python
+#     name: python3
+# ---
+
+# %matplotlib inline
+
+# + [markdown]
 """
     everwork.four_test
     ~~~~~~~~~~~~~~~~~~
@@ -9,9 +23,13 @@
     :license: LICENSE_NAME, see LICENSE for more details.
 """
 
+# +
 # -*- coding: utf-8 -*-
+# -
 
+import os
 
+# + [markdown]
 """
 File: four_test.py
 Author: heart5
@@ -20,24 +38,7 @@ Github: https://github.com/heart5
 Description: everwork.py four_test.py imp4nb.py main.py pathmagic.py
 showfuncstruct.py
 """
-# TODO:format time string  <15-03-21, heart5> 2021-03-15 05:54 #
-
-# Fold description {{{1 #
-# 1}}} #
-
-# Fold description {{{ #
-# }}} Fold description #
-
-###############################################################################
-#                                   content                                   #
-###############################################################################
-
-#############
-#  content  #
-#############
-
-
-
+# -
 import pathmagic
 with pathmagic.context():
     from func.first import getdirmain
@@ -53,24 +54,6 @@ class myobj(object):
         log.info(myticket)
 
 
-def mytest(arg1):
-    """TODO: Docstring for function.
-
-    :arg1: TODO
-    :returns: TODO
-
-    """
-    pass
-
-def otherfunc(arg1):
-    """TODO: Docstring for otherfunc.
-
-    :arg1: TODO
-    :returns: TODO
-
-    """
-    pass
-
 def mylast(homestr, secondstr, thirdstr):
     """TODO: Docstring for mylast.
 
@@ -82,7 +65,6 @@ def mylast(homestr, secondstr, thirdstr):
     myline = "Home is wonderful"
 
 
-
 if __name__ == '__main__':
     dm = getdirmain()
     print(f"I am strong", end='\n\n')
@@ -90,5 +72,8 @@ if __name__ == '__main__':
     mo = myobj()
     print(mo)
 
+    print(os.path.abspath('.'))
+    
     log.debug(mo)
+    
     print("Home is warmful.")
