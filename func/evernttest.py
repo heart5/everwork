@@ -1,8 +1,10 @@
 # encoding:utf-8
+# %%
 """
 evernote或印象笔记相关功能函数
 """
 
+# %%
 import os
 import sys
 import binascii
@@ -36,7 +38,7 @@ with pathmagic.context():
 
 # print(f"{__file__} is loading now...")
 
-
+# %%
 def gettoken():
     if (china := getcfpoptionvalue('everwork', 'evernote', 'china')):
         # print(f"china value:\t{china}")
@@ -48,6 +50,7 @@ def gettoken():
     return auth_token
 
 
+# %%
 def get_notestore(forcenew=False):
     """
     获取notestore实例以供使用
@@ -140,10 +143,12 @@ def get_notestore(forcenew=False):
     return outns
 
 
+# %%
 note_store = None
 en_username = None
 
 
+# %%
 def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
     """
     更新note内容，可以包含图片等资源类文件列表
@@ -269,6 +274,7 @@ def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
     updatenote(note)
 
 
+# %%
 def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True,
                        setwidth=True):
     colwidth = pd.get_option('max_colwidth')
@@ -287,6 +293,7 @@ def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True,
     return outstr
 
 
+# %%
 def findnotefromnotebook(notebookguid, titlefind='', notecount=10000):
     """
     列出笔记本中包含某关键词的笔记信息
@@ -341,6 +348,7 @@ def findnotefromnotebook(notebookguid, titlefind='', notecount=10000):
     return items
 
 
+# %%
 def getnotecontent(guid: str):
     """
     获取笔记内容
@@ -354,6 +362,7 @@ def getnotecontent(guid: str):
     return soup
 
 
+# %%
 def getnoteresource(guid: str):
     """
     获取笔记附件
@@ -374,6 +383,7 @@ def getnoteresource(guid: str):
     return resultlst
 
 
+# %%
 def createnotebook(nbname: str, stack='fresh'):
     notebook = Notebook()
     notebook.name = nbname
@@ -382,6 +392,7 @@ def createnotebook(nbname: str, stack='fresh'):
     return get_notestore().createNotebook(gettoken(), notebook)
 
 
+# %%
 def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
     """
     创建一个note
@@ -435,6 +446,7 @@ def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲�
             exit(2)
 
 
+# %%
 def makenote2(notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
     """
     创建note，封装token和notestore
@@ -491,10 +503,12 @@ def makenote2(notetitle, notebody='真元商贸——休闲食品经营专家', 
             exit(2)
 
 
+# %%
 def timestamp2str(timestamp):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
 
 
+# %%
 def evernoteapijiayi():
     """
     evernote api调用次数加一。结合api调用限制，整点或达到限值（貌似是300次每小时）则重构一个继续干。
@@ -534,6 +548,7 @@ def evernoteapijiayi():
         log.critical(f'休息{sleepsecs:d}秒，重新构造了一个服务器连接{note_store}继续干……')
 
 
+# %%
 def evernoteapijiayi_test():
     calllink = [re.findall("^<FrameSummary file (.+), line (\d+) in (.+)>$", str(line)) for line in traceback.extract_stack()]
     if len(calllink) > 0:
@@ -566,6 +581,7 @@ def evernoteapijiayi_test():
         log.critical(f'休息{sleepsecs:d}秒，重新构造了一个服务器连接{note_store}继续干……{calllinks}')
 
 
+# %%
 # @use_logging()
 def p_notebookattributeundertoken(notebook):
     """
@@ -611,6 +627,7 @@ def p_notebookattributeundertoken(notebook):
     return rstdict
 
 
+# %%
 def p_noteattributeundertoken(note):
     """
     测试笔记（note）数据结构每个属性的返回值,通过findNotesMetadata函数获取，开发口令（token）的方式调用返回如下:
@@ -648,6 +665,7 @@ def p_noteattributeundertoken(note):
     # print ('范围\t%s' % note.limits) #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'limits'
 
 
+# %%
 def findnotebookfromevernote():
     """
     列出所有笔记本
@@ -678,7 +696,8 @@ def findnotebookfromevernote():
     return rstdf
 
 
-@trycounttimes2('evernote服务器', maxtimes=5, maxsecs=10)
+# %%
+@trycounttimes2('evernote服务器', maxtimes=20, maxsecs=10)
 def readinifromnote():
     """
     更新动态化配置到本地ini文件，确保数据新鲜
@@ -727,16 +746,19 @@ def readinifromnote():
     log.info(f'配置笔记内容有变化，更新本地化的ini配置文件。')
 
 
+# %%
 def getinivaluefromnote(section, option):
     readinifromnote()
 
     return getcfpoptionvalue('everinifromnote', section, option)
 
 
+# %%
 def writeini2note():
     pass
 
 
+# %%
 def findsomenotest2showornote(nbguid, keyword, newnote=False):
     """
     获取指定笔记本中主题包含某关键词的笔记
@@ -755,6 +777,7 @@ def findsomenotest2showornote(nbguid, keyword, newnote=False):
     return notesfind
 
 
+# %%
 def getsampledffromdatahouse(keyword: str, notebookstr='datahouse', firstcolumn=True):
     """
     封装出直接获取示例数据集的函数
@@ -778,6 +801,8 @@ def getsampledffromdatahouse(keyword: str, notebookstr='datahouse', firstcolumn=
 # ENtimes, ENAPIlasttime = enapistartlog()
 # evernoteapiclearatzero()
 
+
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'开始运行文件\t{__file__}……')
@@ -795,7 +820,8 @@ if __name__ == '__main__':
 #     shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
 #     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
     findnoteguidlst = findnotefromnotebook(notification_guid, titlefind='tmux.conf', notecount=1433)
-#     print(len(findnoteguidlst))
+    print(len(findnoteguidlst))
+    print(findnoteguidlst)
 #     findnoteguidlst = findsomenotest2showornote(notification_guid, 'data')
 #     print(findnoteguidlst)
 
@@ -821,3 +847,5 @@ if __name__ == '__main__':
     # # makenote(token, nost, '转账记录笔记guid', str(notefind))
     if not_IPython():
         log.info(f"完成文件{__file__}\t的运行")
+
+# %%
