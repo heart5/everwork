@@ -23,13 +23,13 @@ def checkwcdelaytable(dbname: str, tablename: str):
     """
     检查和dbname（绝对路径）相对应的延时数据表是否已经构建，设置相应的ini值避免重复打开关闭数据库文件进行检查
     """
-    if not (wcdelaycreated := getcfpoptionvalue('everwebchat',
-                                                os.path.abspath(dbname), 'wcdelay')):
+    if (wcdelaycreated := getcfpoptionvalue('everwebchat',
+                                            os.path.abspath(dbname),
+                                            tablename)) is None:
         print(wcdelaycreated)
         csql = f"create table if not exists {tablename} (id INTEGER PRIMARY KEY AUTOINCREMENT, msgtime int, delay int)"
         ifnotcreate(tablename, csql, dbname)
-        setcfpoptionvalue('everwebchat', os.path.abspath(dbname), 'wcdelay',
-                          str(True))
+        setcfpoptionvalue('everwebchat', os.path.abspath(dbname), tablename, str(True))
         logstr = f"数据表{tablename}在数据库{dbname}中构建成功"
         log.info(logstr)
 
@@ -73,7 +73,7 @@ def getdelaydb(dbname: str, tablename="wcdelaynew"):
     cursor.execute(f"select * from {tablename}")
     table = cursor.fetchall()
     conn.close()
-    
+
     tmpdf = pd.DataFrame(table)
     if len(tmpdf.columns) == 3:
         timedf = pd.DataFrame(table, columns=["id", "time", "delay"], index='id')
@@ -87,7 +87,7 @@ def getdelaydb(dbname: str, tablename="wcdelaynew"):
         timedf["time"] = timedf["time"].apply(
             lambda x: pd.to_datetime(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(x)))
         )
-        timedfgrp = timedf.set_index("time")     
+        timedfgrp = timedf.set_index("time")
     else:
         return 0, tmpdf
 
