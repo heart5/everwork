@@ -81,7 +81,7 @@ def ifclexists(dbin, tb, cl):
     if len(tablefd) == 0:
         print(f"数据表{tb}不存在")
         return False
-              
+
     createsql =  [name for x in tablefd for name in x][0]
     print(createsql)
     ptn = re.compile("\((.+)\)")
@@ -98,7 +98,7 @@ def ifclexists(dbin, tb, cl):
         print(f"列{cl}在数据表{tb}中尚未存在，可以新增")
         return False
 
-    
+
 def showtablesindb(dbname: str):
     conn = lite.connect(dbname)
     cursor = conn.cursor()
@@ -115,7 +115,7 @@ def showtablesindb(dbname: str):
     tcs = conn.total_changes
     print(tcs)
     conn.close()
-    
+
 
 def droptablefromdb(dbname: str, tablename: str, confirm=False):
     if not confirm:
@@ -132,7 +132,7 @@ def droptablefromdb(dbname: str, tablename: str, confirm=False):
 
         conn.close()
 
-        
+
 def checktableindb(ininame: str, dbpath: str, tablename: str, creattablesql: str, confirm=False):
     """
     检查数据表（ini登记，物理存储）是否存在并根据情况创建
@@ -146,9 +146,9 @@ def checktableindb(ininame: str, dbpath: str, tablename: str, creattablesql: str
             logstr = f"数据表{tablename}于{dbpath}中被删除"
             log.critical(logstr)
         ifnotcreate(tablename, creattablesql, dbpath)
-        
+
         setcfpoptionvalue(ininame, absdbpath, tablename, str(True))
-        
+
 
 @timethis
 def compact_sqlite3_db(dbpath):
