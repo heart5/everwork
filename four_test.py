@@ -73,7 +73,7 @@ if __name__ == '__main__':
     print(mo)
 
     print(os.path.abspath('.'))
-    
     log.debug(mo)
-    
+    log.critical(mo)
+
     print("Home is warmful.")

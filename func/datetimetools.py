@@ -1,10 +1,15 @@
 # encoding:utf-8
+# %%
 """
 date time function related
 getstartdate
 gethumantimedelay
 """
 
+# %% [markdown]
+# # 引入库
+
+# %%
 import arrow
 from datetime import datetime, timedelta
 from dateutil import tz
@@ -12,9 +17,10 @@ from dateutil import tz
 import pathmagic
 with pathmagic.context():
     from func.logme import log
+    from func.sysfunc import not_IPython
 # print(f"{__file__} is loading now...")
 
-
+# %%
 def getstartdate(period, thedatetime):
     """
     return date depend on period idicated for certain datetime input
@@ -40,6 +46,7 @@ def getstartdate(period, thedatetime):
     return zuijindatestart
 
 
+# %%
 def test_getstartdate():
     periodlst = ['日', '周', '旬', '月', '年', '全部']
     for pr in periodlst:
@@ -47,6 +54,7 @@ def test_getstartdate():
         print(f"{datetime.now()}\t{pr}:\t{tned}\t{type(tned)}")
 
 
+# %%
 def gethumantimedelay(inputlocaltime, intervalseconds=120):
     """
     返回输入时间和当前时间差值的人类可读字符串
@@ -60,6 +68,8 @@ def gethumantimedelay(inputlocaltime, intervalseconds=120):
     else:
         return False
 
+
+# %%
 def test_gethumantimedelay():
     hmtimetestlst= ["20210227 01:04:23", arrow.get("20210227 02:04:23",
                                         tzinfo=tz.tzlocal()), "19761006"]
@@ -68,10 +78,18 @@ def test_gethumantimedelay():
         print(hmstr)
 
 
+# %% [markdown]
+# # 运行主函数main
+
+# %%
 if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}')
 
     test_gethumantimedelay()
     test_getstartdate()
+    
+    if not_IPython():
+        log.info(f"文件\t{__file__}\t运行结束。")
 
-    log.info(f"文件\t{__file__}\t运行结束。")
+# %%
