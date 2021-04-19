@@ -760,5 +760,3 @@ if __name__ == '__main__':
 
     if not_IPython():
         log.info(f'文件{__file__}运行结束')
-# %%
-rcdf.iloc[:60,]
