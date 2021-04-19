@@ -1,8 +1,25 @@
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       jupytext_version: 1.10.3
+#   kernelspec:
+#     display_name: Python 3
+#     language: python
+#     name: python3
+# ---
+
+# %%
 """
 展示足迹
 """
 
+
+
+
+
+# %%
 import os
 # import urllib2
 import re
@@ -15,6 +32,9 @@ import pandas as pd
 import numpy as np
 from pylab import *
 
+
+
+# %%
 import pathmagic
 with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
@@ -31,6 +51,8 @@ with pathmagic.context():
     from func.sysfunc import not_IPython, set_timeout, after_timeout
 
 
+
+# %%
 def geodistance(lng1, lat1, lng2, lat2):
     """
     计算两点之间的距离并返回（公里，千米）
@@ -43,6 +65,8 @@ def geodistance(lng1, lat1, lng2, lat2):
     return dis
 
 
+
+# %%
 @timethis
 def chuli_datasource():
     """
@@ -116,6 +140,8 @@ def chuli_datasource():
     return df.set_index(['time'])[['longi', 'lati', 'alti', 'provider', 'jiange', 'distance']]
 
 
+
+# %%
 @set_timeout(360, after_timeout)
 @timethis
 def foot2show(df4dis):
@@ -171,8 +197,9 @@ def foot2show(df4dis):
                  tablehtml2evernote(df4dis.sort_index(ascending=False).iloc[:100,], "坐标流水记录单"))
 
 
+
+# %%
 if __name__ == '__main__':
-    # global log
     if not_IPython():
         log.info(f'运行文件\t{__file__}……')
     dout = chuli_datasource()
@@ -181,6 +208,9 @@ if __name__ == '__main__':
     if not_IPython():
         log.info(f"完成文件{__file__}\t的运行")
 
+
+
+# %%
 df = dout.copy(deep=True)
 
 df.sort_index(ascending=False).iloc[:100,]
