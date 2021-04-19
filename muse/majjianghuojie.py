@@ -1,20 +1,32 @@
-# encodin:utf-8
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
-#     cell_metadata_filter: -all
-#     formats: ipynb,py
 #     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.10.1
+#       jupytext_version: 1.10.3
+#   kernelspec:
+#     display_name: Python 3
+#     language: python
+#     name: python3
 # ---
 
+# %% [markdown]
+# ## 火界数据处理
+
+# %% [raw]
+# ---
+# encodin:utf-8
+# ---
+
+# %%
 """
 获取火界麻将的比赛结果并输出
 """
 
+# %% [markdown]
+# ## 库引入
+
+# %%
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
@@ -23,8 +35,8 @@ import re
 from bs4 import BeautifulSoup
 from xpinyin import Pinyin
 
+# %%
 import pathmagic
-
 with pathmagic.context():
     from func.logme import log
     from func.evernttest import trycounttimes2, getinivaluefromnote
@@ -34,6 +46,10 @@ with pathmagic.context():
     from func.sysfunc import not_IPython
 
 
+# %% [markdown]
+# ## 功能函数
+
+# %%
 def find_class_in_tag(key: str, tags):
     resultlst = [x for x in tags if x.has_attr('class') and key in x['class']]
     # print(resultlst)
@@ -41,8 +57,15 @@ def find_class_in_tag(key: str, tags):
         return resultlst
 
 
+# %% [markdown]
+# ### getsinglepage(url: str)
+
+# %%
 @trycounttimes2('火界麻将服务器', 17, 50)
 def getsinglepage(url: str):
+    """
+    获取输入url的内容，提取有效战绩数据；返回DataFrame格式的数据结果
+    """
     mjhtml = requests.get(url)
     mjhtml.encoding = mjhtml.apparent_encoding
     log.info(f"网页内容编码为：\t{mjhtml.encoding}")
@@ -105,6 +128,10 @@ def getsinglepage(url: str):
     return rstdf
 
 
+# %% [markdown]
+# ### splitmjurlfromtext(incontent:str)
+
+# %%
 def splitmjurlfromtext(incontent:str):
     """
     从输入文本中提取有效的url链接，返回包含有效链接的list
@@ -123,6 +150,10 @@ def splitmjurlfromtext(incontent:str):
         return list()
 
 
+# %% [markdown]
+# ### fetchmjurlfromfile(ownername)
+
+# %%
 def fetchmjurlfromfile(ownername):
     """
     fetch all zhanji urls from chatitems files
@@ -138,21 +169,22 @@ def fetchmjurlfromfile(ownername):
         filename = datapath / filenameinner
         rstlst = []
 
+        # 应对文本文件编码不同的情况
         decode_set = ['utf-8', 'gb18030', 'ISO-8859-2', 'gb2312', 'gbk', 'Error']
         for dk in decode_set:
             try:
-                with open(filename, "r", encoding='utf-8') as f:
+                with open(filename, "r", encoding=dk) as f:
                     filelines = f.readlines()
                     rstlstraw = [inurl for line in filelines for inurl in splitmjurlfromtext(line)]
                     # drops the duplicates url
-                    rstlst = list(tuple(rstlstraw))
+                    rstlst = list(set(rstlstraw))
                     print(len(rstlst), len(rstlstraw), filename, dk)
                     break
             except UnicodeDecodeError as eef:
                 continue
             except LookupError as eel:
                 if dk == 'Error':
-                    print(f"{filename}没办法用预设的集中字符集正确打开")
+                    print(f"{filename}没办法用预设的字符集正确打开")
                 break
 
         resultlst.extend(rstlst)
@@ -165,7 +197,9 @@ def fetchmjurlfromfile(ownername):
             log.info(f"战绩链接数量暂无变化, till then is {len(resultlst)}.")
         else:
             changed = True
-            setcfpoptionvalue(f'evermuse_{ownpy}',ownername, 'urlsnum', f"{len(resultlst)}")
+            urlsnumnew = len(resultlst)
+            setcfpoptionvalue(f'evermuse_{ownpy}',ownername, 'urlsnum', f"{urlsnumnew}")
+            log.info(f"战绩链接数 is set to {urlsnumnew} now.")
     else:
         urlsnumnew = len(resultlst)
         setcfpoptionvalue(f'evermuse_{ownpy}',ownername, 'urlsnum', f"{urlsnumnew}")
@@ -175,7 +209,14 @@ def fetchmjurlfromfile(ownername):
     return resultlst, changed
 
 
+# %% [markdown]
+# ### getfangitem(line)
+
+# %%
 def getfangitem(line):
+    """
+    从输入的文本行中提取房号信息，返回格式：[日期，房号]
+    """
     # http://s0.lgmob.com/h5_whmj_qp/?d=217426
     ptn = re.compile("h5_whmj_qp/\\?d=(\\d+)")
     rstlst = [pd.to_datetime(line.split('\t')[0].strip()), int(re.findall(ptn, line.split('\t')[-1])[0])]
@@ -183,6 +224,10 @@ def getfangitem(line):
     return rstlst
 
 
+# %% [markdown]
+# ### fetchmjfang(owner)
+
+# %%
 def fetchmjfang(owner):
     """
     从数据目录中符合命名标准的文本档案库中提取开房信息（发布时间和房号）
@@ -200,6 +245,7 @@ def fetchmjfang(owner):
         filename = datapath / filenameinner
         rstlst = []
 
+        # 应对文本文件编码不同的情况
         decode_set = ['utf-8', 'gb18030', 'ISO-8859-2', 'gb2312', 'gbk', 'Error']
         for dk in decode_set:
             try:
@@ -215,23 +261,23 @@ def fetchmjfang(owner):
                 continue
             except LookupError as eel:
                 if dk == 'Error':
-                    print(f"{filename}没办法用预设的集中字符集正确打开")
+                    print(f"{filename}没办法用预设的字符集正确打开")
                 break
 
         resultlst.extend(rstlst)
 
-    resultlst = list(tuple(resultlst))
+    resultlst = list(set(resultlst))
     ownpy = Pinyin().get_pinyin(owner, '')
     if (urlsnum:=getcfpoptionvalue(f'evermuse_{ownpy}', 'huojiemajiang', 'fangsnum')):
         if urlsnum == len(resultlst):
-            log.info(f"战绩链接数量暂无变化, till then is {lwn(urlsnum)}.")
+            log.info(f"战绩链接数量暂无变化, till then is {urlsnum}.")
         else:
-            setcfpoptionvalue('evermuse_{ownpy}', 'huojiemajiang', 'fangsnum', f"{len(resultlst)}")
+            setcfpoptionvalue(f'evermuse_{ownpy}', 'huojiemajiang', 'fangsnum', f"{len(resultlst)}")
             log.info(f"战绩链接数量变化, from {urlsnum} to {len(resultlst)}.")
     else:
         urlsnum = len(resultlst)
-        setcfpoptionvalue('evermuse_{ownpy}', 'huojiemajiang', 'fangsnum', f"{len(resultlst)}")
-        log.info(f"战绩链接 size is set to {urlsnum} at fiest time.")
+        setcfpoptionvalue(f'evermuse_{ownpy}', 'huojiemajiang', 'fangsnum', f"{urlsnum}")
+        log.info(f"战绩链接 size is set to {urlsnum} at first time.")
 
     rstdf = pd.DataFrame(resultlst, columns=['time', 'name', 'roomid'])
     # print(rstdf)
@@ -254,6 +300,10 @@ def fetchmjfang(owner):
     return cleandf.sort_values('mintime', ascending=False)
 
 
+# %% [markdown]
+# ### updateurllst(ownername, urllst)
+
+# %%
 def updateurllst(ownername, urllst):
     """
     成组更新url列表
@@ -265,9 +315,13 @@ def updateurllst(ownername, urllst):
     return '\n'.join(rstlst)
 
 
+# %% [markdown]
+# ### makeexcelfileownpy(ownername)
+
+# %%
 def makeexcelfileownpy(ownername):
     """
-    init excelpath, and ownername in pinyin
+    init excelpath for dataset store, and ownername in pinyin
     """
     ownpy = Pinyin().get_pinyin(ownername, '')
     excelpath = getdirmain() / 'data' / 'muse' / f'huojiemajiang_{ownpy}.xlsx'
@@ -282,6 +336,10 @@ def makeexcelfileownpy(ownername):
     return excelpath, ownpy
 
 
+# %% [markdown]
+# ### geturlcontentwrite2excel(ownername, url)
+
+# %%
 def geturlcontentwrite2excel(ownername, url):
     """
     处理url，提取网页内容，有效数据写入数据文件，return url valid, if not valid, [url]
@@ -293,14 +351,14 @@ def geturlcontentwrite2excel(ownername, url):
         roomid = tdf.iloc[0, 0]
         recorddf = pd.read_excel(excelpath)
         #vdrop dupliceres at first, I studun there for many times
-        recorddf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
+        recorddf.drop_duplicates(['roomid', 'guestid'], inplace=True)
         oldsize = recorddf.shape[0]
-        rstdf = recorddf.append(tdf)
+        rstdf = recorddf.append(tdf, ignore_index=True) # 使用ignore_index开关，避免追加数据因为索引问题导致错乱
         # 修正用户别名
-        rstdf = fixnamebyguestid(rstdf, 'guestid')
-        rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
-        rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
-        print(rstdf)
+        rstdf = fixnamebyguestid(rstdf)
+        rstdf = rstdf.sort_values(by=['time', 'score'], ascending=[False, False])
+        rstdf = rstdf.drop_duplicates(['roomid', 'guestid'])
+        print(rstdf.iloc[:16,])
         if rstdf.shape[0] == oldsize:
             descstr = f"room {roomid} is already recorded. till then the recordsize is {oldsize}"
             log.warning(descstr)
@@ -319,6 +377,10 @@ def geturlcontentwrite2excel(ownername, url):
     return outurl, descstr
 
 
+# %% [markdown]
+# ### updateurl2excelandini(ownername, url)
+
+# %%
 def updateurl2excelandini(ownername, url):
     """
     处理url，提取网页内容，有效数据写入数据文件，并更新相应配套ini辅助文件
@@ -349,6 +411,10 @@ def updateurl2excelandini(ownername, url):
     return descstr
 
 
+# %% [markdown]
+# ### fixnamealias(inputdf: pd.DataFrame, clname: str)
+
+# %%
 def fixnamealias(inputdf: pd.DataFrame, clname: str):
     '''
     更新df中的别名为规范名称
@@ -375,27 +441,43 @@ def fixnamealias(inputdf: pd.DataFrame, clname: str):
     return rstdf1
 
 
-def fixnamebyguestid(inputdf: pd.DataFrame, guestidcl: str):
+# %% [markdown]
+# ### fixnamebyguestid(inputdf: pd.DataFrame, guestidcl: str='guestid')
+
+# %%
+def fixnamebyguestid(inputdf: pd.DataFrame, guestidcl: str='guestid'):
+    """
+    根据guestid更新用户名
+    """
     rstdf1: pd.DataFrame = inputdf.copy(deep=True)
     # print(rstdf1.dtypes)
     guestidalllst = rstdf1.groupby(guestidcl).first().index.values
-    # print(guestidalllst)
+#     print(guestidalllst)
     gidds = rstdf1.groupby(['guestid', 'guest']).count().groupby(level='guestid').count()['roomid']
-    guestidlst = [str(guestid) for guestid in gidds[gidds > 1].index]
-    # print(guestidlst)
+    guestidduplst = [str(guestid) for guestid in gidds[gidds > 1].index]
+    if len(guestidduplst) > 0:
+        print(guestidduplst)
+
+    # 存在一人多号情况，所以需要无差别更新所有id的对应用户名
     cfpini, cfpinipath = getcfp('everinifromnote')
     gamedict = dict(cfpini.items('game'))
-    print(f"name correctted by id from evernote ini...")
-    for nameid in guestidlst:
-        if nameid in gamedict.keys():
-            namez = gamedict[nameid]
-            needdf = rstdf1[rstdf1.guestid == int(nameid)]
-            print(nameid, namez, needdf.shape[0])
+#     print(gamedict)
+    print(f"name correctted by id from evernote ini...", end='\t')
+    for nameid in guestidalllst:
+        if str(nameid) in gamedict.keys():
+            namez = gamedict[str(nameid)]
+            needdf = rstdf1[rstdf1.guestid == nameid]
+#             print(nameid, namez, needdf.shape[0])
             rstdf1.loc[list(needdf.index), 'guest'] = namez
+    print('Done!')
 
     return rstdf1
 
 
+# %% [markdown]
+# ### showhighscore(rstdf, highbool: bool = True)
+
+# %%
 def showhighscore(rstdf, highbool: bool = True):
     """
     统计输入df的赛事单局最高分或最低分对局信息
@@ -425,14 +507,18 @@ def showhighscore(rstdf, highbool: bool = True):
     return outputstr
 
 
+# %% [markdown]
+# ### zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True)
+
+# %%
 def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     excelpath, ownpy = makeexcelfileownpy(ownername)
     print(excelpath, ownpy)
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf.copy(deep=True)
     # print(rstdf.groupby(['guestid', 'guest']).count())
-    rstdf = fixnamebyguestid(rstdf, 'guestid')
-    rstdf.drop_duplicates(['roomid', 'time', 'guestid'], inplace=True)
+    rstdf = fixnamebyguestid(rstdf)
+    rstdf.drop_duplicates(['roomid', 'guestid'], inplace=True)
     rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
     # print(rstdf.head())
     # print(rstdf.dtypes)
@@ -590,10 +676,15 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     return outstr
 
 
+# %% [markdown]
+# ### showzhanjiimg(ownername, recentday="日", jingdu: int = 300)
+
+# %%
 def showzhanjiimg(ownername, recentday="日", jingdu: int = 300):
     excelpath, ownpy = makeexcelfileownpy(ownername)
     recorddf = pd.read_excel(excelpath)
     rstdf = recorddf.copy(deep=True)
+    rstdf = fixnamebyguestid(rstdf)
     if (zuijindatestart:=getstartdate(recentday, rstdf['time'].max())) != rstdf['time'].max():
         rstdf = rstdf[rstdf.time >= zuijindatestart]
     zgridf = rstdf.groupby([pd.to_datetime(rstdf['time'].dt.strftime("%Y-%m-%d")), rstdf.guest]
@@ -616,14 +707,18 @@ def showzhanjiimg(ownername, recentday="日", jingdu: int = 300):
     plt.savefig(imgwcdelaypath, dpi=jingdu)
     print(os.path.relpath(imgwcdelaypath))
 
-    return imgwcdelaypath
+    return recorddf, imgwcdelaypath
 
 
+# %% [markdown]
+# ### updateallurlfromtxt(owner: str, startnum=0, itemsnnm=10)
+
+# %%
 def updateallurlfromtxt(owner: str, startnum=0, itemsnnm=10):
     """
     从文本文件中读取所有url并更新入数据表格文件
     """
-    spls, change = fetchmjurlfromfile(owner)
+    splst, change = fetchmjurlfromfile(owner)
     if splst and len(splst) != 0:
         print(len(splst), startnum, itemsnnm)
         endnum = tmpend if (tmpend := (startnum + itemsnnm)) < len(splst) else len(splst)
@@ -637,15 +732,19 @@ def updateallurlfromtxt(owner: str, startnum=0, itemsnnm=10):
         print(f"\n\n\nwrite to excel using geturlcontentwrite2excel fucntion\n\n\n")
         for ii in range(startnum, endnum):
             url, desc = geturlcontentwrite2excel(owner, targetlst[ii])
-            print(f"[{startnu}/{ii}/{endnum}]\t{desc}")
+            print(f"[{startnum}/{ii}/{endnum}]\t{desc}")
 
 
+# %% [markdown]
+# ## 主函数main
+
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'运行文件\t{__file__}')
 
     own = '白晔峰'
-    own = 'heart5'
+#     own = 'heart5'
 
     # fangdf = fetchmjfang(own)
     # print(fangdf)
@@ -655,9 +754,11 @@ if __name__ == '__main__':
     # updateurl2excelandini(own, sp2)
     # geturlcontentwrite2excel(own, sp2)
 
-    updateallurlfromtxt(own, 0, 5)
+#     updateallurlfromtxt(own, 0, 20)
 
-    # img = showzhanjiimg(own)
+    rcdf, img = showzhanjiimg(own, '月')
 
     if not_IPython():
         log.info(f'文件{__file__}运行结束')
+# %%
+rcdf.iloc[:60,]
