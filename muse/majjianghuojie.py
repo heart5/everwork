@@ -266,7 +266,7 @@ def fetchmjfang(owner):
 
         resultlst.extend(rstlst)
 
-    resultlst = list(set(resultlst))
+    resultlst = list(tuple(resultlst))
     ownpy = Pinyin().get_pinyin(owner, '')
     if (urlsnum:=getcfpoptionvalue(f'evermuse_{ownpy}', 'huojiemajiang', 'fangsnum')):
         if urlsnum == len(resultlst):
@@ -313,6 +313,35 @@ def updateurllst(ownername, urllst):
         rstlst.append(updateurl2excelandini(ownername, url))
 
     return '\n'.join(rstlst)
+
+
+# %% [markdown]
+# ### combinedataset()
+
+# %%
+def combinedataset(ownername):
+#     musedatapath = getdirmain() / 'data' / 'muse'
+    excelpath, ownpy = makeexcelfileownpy(ownername)
+    musedatapath = excelpath.parent
+    print(musedatapath)
+    files = [fl for fl in os.listdir(musedatapath) if fl.startswith('huojiemajiang') and fl.endswith('.xlsx')]
+    rstdf = pd.DataFrame()
+    for fl in files:
+        print(fl)
+        tmpdf = pd.read_excel(musedatapath / fl)
+        if rstdf.shape[0] == 0:
+            rstdf = tmpdf.copy(deep=True)
+        else:
+            rstdf = rstdf.append(tmpdf, ignore_index=True)
+        rstdf.drop_duplicates(['roomid', 'guestid'], inplace=True)
+        print(tmpdf.shape[0], '\t', rstdf.shape[0])
+
+    rstdf.drop_duplicates(['roomid', 'guestid'], inplace=True)
+    rstdf = fixnamebyguestid(rstdf)
+    rstdf = rstdf.sort_values(by=['time', 'score'], ascending=[False, False])
+    rstdf.to_excel(excelpath, index=False, encoding='utf-8')
+    
+    return rstdf
 
 
 # %% [markdown]
@@ -628,7 +657,7 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     jingding = rstdf.groupby(['guest']).sum()['jingding'].sort_values(ascending=False)
     outlst.append(f"最有含金量的金顶排名：\n{formatdfstr(jingding[:shownumber])}")
 
-    teams = list(tuple(rstdf['guest']))
+    teams = list(set(rstdf['guest']))
     print(teams)
     playtimelst = []
     for player in teams:
@@ -756,7 +785,11 @@ if __name__ == '__main__':
 
 #     updateallurlfromtxt(own, 0, 20)
 
-    rcdf, img = showzhanjiimg(own, '月')
+#     combinedataset(own)
+
+    rcdf, img = showzhanjiimg(own, '年')
 
     if not_IPython():
         log.info(f'文件{__file__}运行结束')
+# %%
+# set(fixnamebyguestid(rcdf)['guest'])
