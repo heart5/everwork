@@ -10,10 +10,16 @@
 #     name: python3
 # ---
 
+# %% [markdown]
+# # 微信大观园
+
 # %%
 """
 微信大观园，工作优先，娱乐生活
 """
+
+# %% [markdown]
+# ## 库引入
 
 # %%
 import time
@@ -30,8 +36,6 @@ from bs4 import BeautifulSoup
 
 # %%
 import pathmagic
-
-# %%
 with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain, dirmainpath
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
@@ -54,6 +58,12 @@ with pathmagic.context():
     from etc.battery_manage import showbattinfoimg
     from func.pdtools import db2img, lststr2img
 
+
+# %% [markdown]
+# ## 功能函数
+
+# %% [markdown]
+# ### newchatnote()
 
 # %%
 def newchatnote():
@@ -250,6 +260,9 @@ def getsendernick(msg):
     return sendernick
 
 
+# %% [markdown]
+# ### @itchat.msg_register([CARD, FRIENDS], isFriendChat=True, isGroupChat=True, isMpChat=True)
+
 # %%
 @itchat.msg_register([CARD, FRIENDS], isFriendChat=True, isGroupChat=True,
                      isMpChat=True)
@@ -257,6 +270,9 @@ def tuling_reply(msg):
     # showmsgexpanddictetc(msg)
     writefmmsg2txtandmaybeevernotetoo(formatmsg(msg))
 
+
+# %% [markdown]
+# ### @itchat.msg_register([NOTE], isFriendChat=True, isGroupChat=True, isMpChat=True)
 
 # %%
 @itchat.msg_register([NOTE], isFriendChat=True, isGroupChat=True, isMpChat=True)
@@ -275,6 +291,9 @@ def note_reply(msg):
     writefmmsg2txtandmaybeevernotetoo(innermsg)
 
 
+# %% [markdown]
+# ### @itchat.msg_register([MAP], isFriendChat=True, isGroupChat=True, isMpChat=True)
+
 # %%
 @itchat.msg_register([MAP], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def map_reply(msg):
@@ -285,6 +304,9 @@ def map_reply(msg):
     innermsg['fmText'] = innermsg['fmText'] + f"[{gps}]"
     writefmmsg2txtandmaybeevernotetoo(innermsg)
 
+
+# %% [markdown]
+# ### @itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO], isFriendChat=True, isGroupChat=True, isMpChat=True)
 
 # %%
 @itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO],
@@ -316,6 +338,9 @@ def soupclean2item(msgcontent):
 
     return soup, items
 
+
+# %% [markdown]
+# ### @itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True, isMpChat=True)
 
 # %%
 @itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True, isMpChat=True)
@@ -419,6 +444,9 @@ def makemsg2write(innermsg, inputtext=''):
     writefmmsg2txtandmaybeevernotetoo(finnalmsg)
 
 
+# %% [markdown]
+# ### @itchat.msg_register([TEXT], isFriendChat=True, isGroupChat=True, isMpChat=True)
+
 # %%
 @itchat.msg_register([TEXT], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def text_reply(msg):
@@ -508,7 +536,7 @@ def text_reply(msg):
         makemsg2write(innermsg, outstr)
 
         if msgtxt.find('折线图') != -1:
-            imgzhanji = showzhanjiimg(men_wc, recentday)
+            _, imgzhanji = showzhanjiimg(men_wc, recentday)
             imgzhanjirel = os.path.relpath(imgzhanji)
             itchat.send_image(imgzhanjirel, toUserName=msg['FromUserName'])
             # 折线图发送记录备档
