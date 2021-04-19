@@ -2,19 +2,20 @@
 # ---
 # jupyter:
 #   jupytext:
-#     cell_metadata_filter: -all
-#     formats: ipynb,py
 #     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.10.1
+#       jupytext_version: 1.10.3
+#   kernelspec:
+#     display_name: Python 3
+#     language: python
+#     name: python3
 # ---
 
+# %%
 """
 微信大观园，工作优先，娱乐生活
 """
 
+# %%
 import time
 import datetime
 import arrow
@@ -27,8 +28,10 @@ import itchat.storage
 from itchat.content import *
 from bs4 import BeautifulSoup
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.first import touchfilepath2depth, getdirmain, dirmainpath
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
@@ -52,11 +55,12 @@ with pathmagic.context():
     from func.pdtools import db2img, lststr2img
 
 
+# %%
 def newchatnote():
     """
     构建新的聊天记录笔记(置于笔记本《notification》中)并返回
     """
-    global note_store
+    note_store = get_notestore()
     # parentnotebook = \
     # note_store.getNotebook('4524187f-c131-4d7d-b6cc-a1af20474a7f')
     parentnotebook = \
@@ -74,6 +78,7 @@ def newchatnote():
     return notechat
 
 
+# %%
 @trycounttimes2('微信服务器')
 def get_response(msg):
     txt = msg['Text']
@@ -81,6 +86,7 @@ def get_response(msg):
     return txt
 
 
+# %%
 def showmsgexpanddictetc(msg):
     """
     列印dict中的所有属性和值，对于dict类型的子元素，则再展开一层
@@ -112,6 +118,7 @@ def showmsgexpanddictetc(msg):
             print(msg[item])
 
 
+# %%
 def formatmsg(msg):
     """
     格式化并重构msg,获取合适用于直观显示的用户名，对公众号和群消息特别处置
@@ -170,6 +177,7 @@ def formatmsg(msg):
     return finnalmsg
 
 
+# %%
 def writefmmsg2txtandmaybeevernotetoo(inputformatmsg):
     """
     把格式化好的微信聊天记录写入文件，并根据笔记ini设定更新相应账号的聊天笔记
@@ -221,6 +229,7 @@ def writefmmsg2txtandmaybeevernotetoo(inputformatmsg):
     # print(webchats)
 
 
+# %%
 def getsendernick(msg):
     """
     获取发送者昵称并返回
@@ -241,6 +250,7 @@ def getsendernick(msg):
     return sendernick
 
 
+# %%
 @itchat.msg_register([CARD, FRIENDS], isFriendChat=True, isGroupChat=True,
                      isMpChat=True)
 def tuling_reply(msg):
@@ -248,6 +258,7 @@ def tuling_reply(msg):
     writefmmsg2txtandmaybeevernotetoo(formatmsg(msg))
 
 
+# %%
 @itchat.msg_register([NOTE], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def note_reply(msg):
     """
@@ -264,6 +275,7 @@ def note_reply(msg):
     writefmmsg2txtandmaybeevernotetoo(innermsg)
 
 
+# %%
 @itchat.msg_register([MAP], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def map_reply(msg):
     # showmsgexpanddictetc(msg)
@@ -274,6 +286,7 @@ def map_reply(msg):
     writefmmsg2txtandmaybeevernotetoo(innermsg)
 
 
+# %%
 @itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO],
                      isFriendChat=True, isGroupChat=True, isMpChat=True)
 def fileetc_reply(msg):
@@ -289,6 +302,7 @@ def fileetc_reply(msg):
     writefmmsg2txtandmaybeevernotetoo(innermsg)
 
 
+# %%
 def soupclean2item(msgcontent):
     rpcontent = msgcontent.replace('<![CDATA[', '').replace(']]>', '')
     soup = BeautifulSoup(rpcontent, 'lxml')
@@ -303,6 +317,7 @@ def soupclean2item(msgcontent):
     return soup, items
 
 
+# %%
 @itchat.msg_register([SHARING], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def sharing_reply(msg):
     sendernick = getsendernick(msg)
@@ -388,6 +403,7 @@ def sharing_reply(msg):
     writefmmsg2txtandmaybeevernotetoo(innermsg)
 
 
+# %%
 def makemsg2write(innermsg, inputtext=''):
     """
     make record then write to items for chatitems
@@ -403,6 +419,7 @@ def makemsg2write(innermsg, inputtext=''):
     writefmmsg2txtandmaybeevernotetoo(finnalmsg)
 
 
+# %%
 @itchat.msg_register([TEXT], isFriendChat=True, isGroupChat=True, isMpChat=True)
 def text_reply(msg):
     sendernick = getsendernick(msg)
@@ -571,18 +588,21 @@ def text_reply(msg):
             # return rst
 
 
+# %%
 def listfriends(num=-10):
     friends = itchat.get_friends(update=True)
     for fr in friends[num:]:
         print(fr)
 
 
+# %%
 def listchatrooms():
     chatrooms = itchat.get_chatrooms(update=True)
     for cr in chatrooms:
         print(cr)
 
 
+# %%
 @itchat.msg_register(FRIENDS)
 def add_friend(msg):
     msg.user.verify()
@@ -591,11 +611,13 @@ def add_friend(msg):
     log.info(msg)
 
 
+# %%
 def after_login():
     men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
     log.info(f"登入《{men_wc}》的微信服务")
 
 
+# %%
 def after_logout():
     men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
     try:
@@ -605,10 +627,12 @@ def after_logout():
     log.critical(f'退出微信({men_wc})登录')
 
 
+# %%
 def get_host_uuid():
     return uuid3hexstr(os.path.abspath(itchat.originInstance.hotReloadDir))
 
 
+# %%
 @trycounttimes2('微信服务器', 200, 50)
 def keepliverun():
     # 为了让实验过程更加方便（修改程序不用多次扫码），我们使用热启动
@@ -656,6 +680,7 @@ def keepliverun():
     # raise Exception
 
 
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'运行文件\t{__file__}')
