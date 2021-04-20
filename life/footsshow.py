@@ -10,6 +10,9 @@
 #     name: python3
 # ---
 
+# %% [markdown]
+# # 足迹展示
+
 # %%
 """
 展示足迹
@@ -17,7 +20,8 @@
 
 
 
-
+# %% [markdown]
+# ## 库引入
 
 # %%
 import os
@@ -52,6 +56,14 @@ with pathmagic.context():
 
 
 
+
+
+# %% [markdown]
+# ## 功能函数
+
+# %% [markdown]
+# ### geodistance(lng1, lat1, lng2, lat2)
+
 # %%
 def geodistance(lng1, lat1, lng2, lat2):
     """
@@ -65,6 +77,11 @@ def geodistance(lng1, lat1, lng2, lat2):
     return dis
 
 
+
+
+
+# %% [markdown]
+# ### chuli_datasource()
 
 # %%
 @timethis
@@ -141,6 +158,11 @@ def chuli_datasource():
 
 
 
+
+
+# %% [markdown]
+# ### foot2show(df4dis)
+
 # %%
 @set_timeout(360, after_timeout)
 @timethis
@@ -149,9 +171,10 @@ def foot2show(df4dis):
     展示足迹
     """
     namestr = 'everloc'
-    if (device_id := str(getcfpoptionvalue(namestr, namestr, 'device_id'))) is None:
+    if (device_id := getcfpoptionvalue(namestr, namestr, 'device_id')) is None:
         device_id = getdeviceid()
         setcfpoptionvalue(namestr, namestr, 'device_id', device_id)
+    device_id = str(device_id)
 
     if (guid := getcfpoptionvalue(namestr, device_id, 'guid')) is None:
         token = getcfpoptionvalue('everwork', 'evernote', 'token')
@@ -198,6 +221,11 @@ def foot2show(df4dis):
 
 
 
+
+
+# %% [markdown]
+# ## 主函数main
+
 # %%
 if __name__ == '__main__':
     if not_IPython():
@@ -210,23 +238,26 @@ if __name__ == '__main__':
 
 
 
+
+
 # %%
-df = dout.copy(deep=True)
+def sampledef(dout):
+    df = dout.copy(deep=True)
 
-df.sort_index(ascending=False).iloc[:100,]
-
-
-def is_normal(timed):
-    return timed.total_seconds() > 12 * 3600
+    df.sort_index(ascending=False).iloc[:100,]
 
 
-df[df['jiange'].map(is_normal) == True]
+    def is_normal(timed):
+        return timed.total_seconds() > 12 * 3600
 
-jglst = list(df[df['jiange'].map(is_normal) == True].index)
-jglst
 
-jglst.insert(0, 0)
+    df[df['jiange'].map(is_normal) == True]
 
-df.loc[jglst[-1]:,]
+    jglst = list(df[df['jiange'].map(is_normal) == True].index)
+    jglst
+
+    jglst.insert(0, 0)
+
+    df.loc[jglst[-1]:,]
 
 
