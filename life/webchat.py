@@ -524,8 +524,8 @@ def text_reply(msg):
             simpledesc = False
         zhanji = zhanjidesc(men_wc, recentday, simpledesc)
         # 发回给查询者
-#         itchat.send_msg(f"{zhanji}", toUserName=msg['FromUserName'])
-#         makemsg2write(innermsg, zhanji)
+        itchat.send_msg(f"{zhanji}", toUserName=msg['FromUserName'])
+        makemsg2write(innermsg, zhanji)
         imgzhanji = lststr2img(zhanji)
         imgwcrel = os.path.relpath(imgzhanji)
         itchat.send_image(imgwcrel, toUserName=msg['FromUserName'])
