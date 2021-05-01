@@ -20,6 +20,8 @@
 
 
 
+
+
 # %% [markdown]
 # ## 库引入
 
@@ -56,8 +58,6 @@ with pathmagic.context():
 
 
 
-
-
 # %% [markdown]
 # ## 功能函数
 
@@ -75,6 +75,8 @@ def geodistance(lng1, lat1, lng2, lat2):
     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2) ** 2
     dis = 4 * asin(sqrt(a)) * 6371 * 1000
     return dis
+
+
 
 
 
@@ -160,6 +162,8 @@ def chuli_datasource():
 
 
 
+
+
 # %% [markdown]
 # ### foot2show(df4dis)
 
@@ -223,6 +227,8 @@ def foot2show(df4dis):
 
 
 
+
+
 # %% [markdown]
 # ## 主函数main
 
@@ -235,6 +241,8 @@ if __name__ == '__main__':
     # showdis()
     if not_IPython():
         log.info(f"完成文件{__file__}\t的运行")
+
+
 
 
 
