@@ -10,10 +10,12 @@
 #     name: python3
 # ---
 
+# %%
 """
 获取主机的唯一id
 """
 
+# %%
 # import os
 # import sys
 import platform
@@ -36,6 +38,7 @@ with pathmagic.context():
         pass
 
 
+# %%
 def set_devicename2ini(id, sysstr):
     if (device_name := getcfpoptionvalue('everhard', id, 'device_name')) is None:
         if (device_name_fromnote := getinivaluefromnote('device', id)):
@@ -46,10 +49,12 @@ def set_devicename2ini(id, sysstr):
                 log.critical(f"主机信息：{execcmd('uname -a')}")
 
 
+# %%
 def get_devicenamefromini(id):
     return getcfpoptionvalue('everhard', id, 'device_name')
 
 
+# %%
 # @timethis
 def getdeviceid():
     # printCPU()
@@ -119,6 +124,7 @@ def getdeviceid():
     return id
 
 
+# %%
 if __name__ == '__main__':
     if not_IPython() and is_log_details:
         log.info(f'运行文件\t{__file__}')
