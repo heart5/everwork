@@ -68,13 +68,12 @@ def convertframe2dic(frame):
     filename = re.findall("filename=(.+)\s", framestr)[0].strip()
     lineno = re.findall("lineno=(.+)\s", framestr)[0].strip()
     code_context = [line.strip() for line in eval(re.findall("code_context=(.+)\s", framestr)[0].strip())]
-    
+
     return filename, lineno, code_context
 
 
 # %%
 def set_timeout(num, callback):
-    
     def wrap(func):
         def handle(signum, frame):  # 收到信号 SIGALRM 后的回调函数，第一个参数是信号的数字，第二个参数是the interrupted stack frame.
             raise RuntimeError
@@ -82,12 +81,12 @@ def set_timeout(num, callback):
         def to_do(*args, **kwargs):
             try:
                 if (sysstr := platform.system()) == "Linux":
-                    print(sysstr)
+#                     print(sysstr)
                     signal.signal(signal.SIGALRM, handle)  # 设置信号和回调函数
                     signal.alarm(num)  # 设置 num 秒的闹钟
-                    print('start alarm signal.')
+#                     print('start alarm signal.')
                     r = func(*args, **kwargs)
-                    print('close alarm signal.')
+#                     print('close alarm signal.')
                     signal.alarm(0)  # 关闭闹钟
                     return r
                 else:
@@ -95,17 +94,17 @@ def set_timeout(num, callback):
                     logstr = f"{sysstr}\t非linux系统，啥也没做。"
                     log.warning(logstr)
                     return r
-                    
-            except RuntimeError as e:
+
+            except RuntimeError as e123:
                 callback()
 
         return to_do
- 
+
     return wrap
 
 
 # %%
-def after_timeout():  
+def after_timeout():
     """
     超时后的处理函数
     """

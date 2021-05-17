@@ -187,6 +187,9 @@ def formatmsg(msg):
     return finnalmsg
 
 
+# %% [markdown]
+# ### def writefmmsg2txtandmaybeevernotetoo(inputformatmsg):
+
 # %%
 def writefmmsg2txtandmaybeevernotetoo(inputformatmsg):
     """
