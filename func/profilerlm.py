@@ -1,4 +1,5 @@
 # encoding:utf-8
+# %%
 """
 装饰器函数集，ift2phone、timethis, logit
 """
@@ -11,8 +12,10 @@ from py2ifttt import IFTTT
 from line_profiler import LineProfiler as lpt
 # from memory_profiler import LineProfiler as lpm, show_results as lpm_show
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.logme import log
     from func.wrapfuncs import countdown
@@ -20,9 +23,11 @@ with pathmagic.context():
     from func.evernttest import getinivaluefromnote
 
 
+# %%
 lptt = lpt()
 
 
+# %%
 def lpt_wrapper():
     """
     显示函数调用时间（逐行）
@@ -39,9 +44,11 @@ def lpt_wrapper():
     return wrapper
 
 
+# %% [markdown]
 # lpmm = lpm()
 
 
+# %%
 # def lpm_wrapper():
     # """
     # 显示函数内存消耗（逐行）
@@ -58,11 +65,13 @@ def lpt_wrapper():
     # return wrapper
 
 
+# %%
 @lpt_wrapper()
 def countdwontest():
     countdown(10901)
 
 
+# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     countdwontest()

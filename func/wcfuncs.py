@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
+# %%
 """
 拆分微信聊天记录并分类处理
 """
 
+# %%
 import re
 import os
 import sys
 import itchat
 import pandas as pd
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.first import dirlog, dirmainpath, getdirmain
@@ -19,6 +23,7 @@ with pathmagic.context():
     from func.nettools import isitchat
 
 
+# %%
 def getownername():
     """
     获取登录用户的昵称（NickName），当然默认登录微信
@@ -29,6 +34,7 @@ def getownername():
         return itchat.search_friends()['NickName']
 
 
+# %%
 def finance2note(srccount, rstdf, mingmu, mingmu4ini, title):
     noteguid = getinivaluefromnote('webchat', mingmu)
     if not (count_zdzz := getcfpoptionvalue('everwebchat', 'finance', mingmu4ini)):
@@ -50,6 +56,7 @@ def finance2note(srccount, rstdf, mingmu, mingmu4ini, title):
         log.info(f"成功更新《{title}》，记录共有{rstdf.shape[0]}条")
 
 
+# %%
 def tiqucaiwujilufromsingletxt(filename):
     """
     从单一文件提取聊天记录，生成DataFrame输出
@@ -142,6 +149,7 @@ def tiqucaiwujilufromsingletxt(filename):
     return rstdf
 
 
+# %%
 def fulltxt():
     dmpath = dirmainpath / "data" / "webchat"
     # print(f"{dmpath}")
@@ -164,6 +172,7 @@ def fulltxt():
     return rstdf.sort_values('time', ascending=False)
 
 
+# %%
 if __name__ == '__main__':
     try:
         log.info(f'开始运行文件\t{__file__}')

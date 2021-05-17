@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
+# %%
 from __future__ import print_function
 
+# %%
 import datetime
 import pickle
 import os
@@ -9,26 +12,32 @@ import pprint
 import json
 from pathlib import Path
 
+# %%
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from apiclient import errors
 from email.mime.text import MIMEText
 
+# %%
 import mimetypes
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
     from func.logme import log
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
 
+# %%
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 service: None = None
 
 
+# %%
 def getservice():
     """
     构建Gmail连接服务service，全局化，可以复用
@@ -67,6 +76,7 @@ def getservice():
     return service
 
 
+# %%
 def getworknewmail():
     """
     获取work标签下的新邮件并保存附件
@@ -187,6 +197,7 @@ def getworknewmail():
     log.info(f"共有{len(msgchulilst)}封邮件处理完毕，邮件编号列表：{msgchulilst}")
 
 
+# %%
 def create_message(sender, to, subject, message_text):
     """Create a message for an email.
 
@@ -215,6 +226,7 @@ def create_message(sender, to, subject, message_text):
     return {"raw": rawcontent}
 
 
+# %%
 def create_message_with_attachment( sender, to, subject, message_text, file):
     """Create a message for an email.
 
@@ -265,6 +277,7 @@ def create_message_with_attachment( sender, to, subject, message_text, file):
     return {'raw': base64.urlsafe_b64encode(message.as_string())}
 
 
+# %%
 def send_message(service, user_id, message):
     """Send an email message.
 
@@ -285,12 +298,14 @@ def send_message(service, user_id, message):
       print('An error occurred: %s' % error)
 
 
+# %%
 def sendmymail():
     service = getservice()
     mymail = create_message('baiyefeng@gmail.com', 'baiyefeng@gmail.com', '尝试通过gmail API发送邮件', '来来来，API很棒的')
     print(mymail)
     send_message(service, 'me', mymail)
 
+# %%
 if __name__ == '__main__':
     getworknewmail()
     # sendmymail()

@@ -221,10 +221,10 @@ def writefmmsg2txtandmaybeevernotetoo(inputformatmsg):
 
     # readinifromnote()
     # cfpfromnote, cfpfromnotepath = getcfp('everinifromnote')
-    if len(men_wc) ==0 :
-        log.critical(f"登录名为空！！！")
+    if (men_wc is None) or (len(men_wc) == 0):
+        log.critical(f"登录名{men_wc}为空！！！")
         return
-    if (chatnoteguid := getinivaluefromnote('webchat', men_wc+f"_{getdeviceid()}").lower()) is None:
+    if (chatnoteguid := getinivaluefromnote('webchat', men_wc + f"_{getdeviceid()}").lower()) is None:
         chatnoteguid = getinivaluefromnote('webchat', men_wc).lower()
     updatefre = getinivaluefromnote('webchat', 'updatefre')
     showitemscount = getinivaluefromnote('webchat', 'showitems')

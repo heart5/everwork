@@ -1,7 +1,10 @@
 # encoding:utf-8
+# %%
 """
 网络相关函数集
 """
+
+# %%
 import sys
 import ssl
 import socket
@@ -22,6 +25,7 @@ import struct
 from functools import wraps
 from py2ifttt import IFTTT
 
+# %%
 import pathmagic
 
 with pathmagic.context():
@@ -30,6 +34,7 @@ with pathmagic.context():
     from func.sysfunc import not_IPython, extract_traceback4exception
 
 
+# %%
 def isitchat(pklabpath):
     """
     判断itchat是否已经运行，没有则热启动之。
@@ -62,6 +67,7 @@ def isitchat(pklabpath):
     return True
 
 
+# %%
 def get_ip(*args):
     if platform.system() == 'Windows':
         my_name = socket.getfqdn(socket.gethostbyname('localhost'))
@@ -86,6 +92,7 @@ def get_ip(*args):
         return ip
 
 
+# %%
 def get_host_ip():
     """
     在windows下查询本机ip地址,对多个网卡可以得到wlan0那个,亲测有效
@@ -103,6 +110,7 @@ def get_host_ip():
     return ip
 
 
+# %%
 def get_ip4alleth(*args):
     print(args)
     resultiplst = []
@@ -134,6 +142,7 @@ def get_ip4alleth(*args):
     return resultiplst
 
 
+# %%
 def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
     def decorate(jutifunc):
 
@@ -217,6 +226,7 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
     return decorate
 
 
+# %%
 @trycounttimes2("ifttt服务器")
 def ifttt_notify(content="content", funcname="funcname"):
     ifttt = IFTTT('0sa6Pl_UJ9a_w6UQlYuDJ', 'everwork')
@@ -225,6 +235,7 @@ def ifttt_notify(content="content", funcname="funcname"):
     log.critical(f'{pu.machine}_{pu.node}\t{content}\t{funcname}')
 
 
+# %%
 def tst4trycounttimes2():
     if not_IPython():
         ifttt_notify("test for ifttt notify", f"{__file__}")
@@ -255,6 +266,7 @@ def tst4trycounttimes2():
         print(f'{name},{url}')
 
 
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'测试文件\t{__file__}……')

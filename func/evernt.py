@@ -1,4 +1,5 @@
 # encoding:utf-8
+# %%
 """
 印象笔记相关功能函数
 """
@@ -18,6 +19,7 @@ from evernote.edam.notestore.NoteStore import NoteFilter, NotesMetadataResultSpe
 from evernote.edam.type.ttypes import Note, Resource, Data
 from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_MINOR
 
+# %%
 print(f"{__file__} is loading now ...")
 import pathmagic
 with pathmagic.context():
@@ -27,6 +29,7 @@ with pathmagic.context():
     from func.nettools import trycounttimes2
 
 
+# %%
 def get_notestore():
     # Real applications authenticate with Evernote using OAuth, but for the
     # purpose of exploring the API, you can get a developer token that allows
@@ -92,9 +95,11 @@ def get_notestore():
     return getnotestore()
 
 
+# %%
 note_store = None
 
 
+# %%
 def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     """
     更新note内容为图片列表
@@ -199,6 +204,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     #         time.sleep(sleeptime)
 
 
+# %%
 def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True):
     pd.set_option('max_colwidth', 200)
     df = pd.DataFrame(dataframe)
@@ -209,6 +215,7 @@ def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True):
     return outstr
 
 
+# %%
 def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000):
     """
     列出笔记本中包含某关键词的笔记信息
@@ -258,6 +265,7 @@ def findnotefromnotebook(tokenfnfn, notebookguid, titlefind='', notecount=10000)
     return items
 
 
+# %%
 def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
     """
     创建一个note
@@ -306,10 +314,12 @@ def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲�
             exit(2)
 
 
+# %%
 def timestamp2str(timestamp):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
 
 
+# %%
 def getapitimesfromlog():
     """
     从log中提取API调用次数
@@ -345,6 +355,7 @@ def getapitimesfromlog():
     return result
 
 
+# %%
 def writeini():
     """
     evernote API调用次数写入配置文件以备调用。又及，函数写在这里还有个原因是global全局变量无法跨文件传递。
@@ -361,6 +372,7 @@ def writeini():
              (ENtimes, os.path.split(inifilepath)[1]))
 
 
+# %%
 def evernoteapiclearatzero():
     """
     evernote API的调用次数过整点清零
@@ -380,6 +392,7 @@ def evernoteapiclearatzero():
         writeini()
 
 
+# %%
 def evernoteapijiayi():
     """
     evernote API调用次数加一，如果达到限值则sleep后归零。又及，多次测试，限值应该是300次每个小时，整点清零重来。
@@ -415,6 +428,7 @@ def evernoteapijiayi():
             writeini()
 
 
+# %%
 # @use_logging()
 def p_notebookattributeundertoken(notebook):
     """
@@ -448,6 +462,7 @@ def p_notebookattributeundertoken(notebook):
     # print '接受人设定\t', notebook.recipientSettings  #这种权限的调用没有返回这个值，报错
 
 
+# %%
 def p_noteattributeundertoken(note):
     """
     测试笔记（note）数据结构每个属性的返回值,通过findNotesMetadata函数获取，开发口令（token）的方式调用返回如下:
@@ -485,6 +500,7 @@ def p_noteattributeundertoken(note):
     # print ('范围\t%s' % note.limits) #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'limits'
 
 
+# %%
 def findnotebookfromevernote():
     # 列出账户中的全部笔记本
     global note_store
@@ -496,6 +512,7 @@ def findnotebookfromevernote():
         p_notebookattributeundertoken(x)
 
 
+# %%
 def readinifromnote():
     cfpeverwork, cfpeverworkpath = getcfp('everwork')
     noteguid_inifromnote = cfpeverwork.get('evernote', 'ininoteguid')
@@ -518,10 +535,12 @@ def readinifromnote():
     fileobj.close()
 
 
+# %%
 def writeini2note():
     pass
 
 
+# %%
 # print('我是evernt啊')
 # global cfp
 token = cfp.get('evernote', 'token')
@@ -543,8 +562,10 @@ if apitime:
         ENtimes = apitime[1] + 1
 evernoteapiclearatzero()
 
+# %% [markdown]
 # writeini()
 
+# %%
 if __name__ == '__main__':
     print(f'开始测试文件\t{__file__}')
     nost = get_notestore()

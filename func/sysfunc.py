@@ -1,8 +1,10 @@
 # encoding:utf-8
+# %%
 """
 操作系统相关的函数集
 """
 
+# %%
 import os
 import traceback
 import inspect
@@ -21,6 +23,7 @@ with pathmagic.context():
     from func.logme import log
 
 
+# %%
 def extract_traceback4exception(tbtuple, func_name, sleeptime=None):
     """
     格式化指定异常的详细信息（tuple）并返回（字符串），默认只返回堆栈的首位各两个元素，除非显性指定显示全部
@@ -51,6 +54,7 @@ def extract_traceback4exception(tbtuple, func_name, sleeptime=None):
     return rststr
 
 
+# %%
 def not_IPython():
     """
     判断是否在IPython环境下运行
@@ -58,6 +62,7 @@ def not_IPython():
     return get_ipython() is None
 
 
+# %%
 def convertframe2dic(frame):
     framestr = str(frame)
     filename = re.findall("filename=(.+)\s", framestr)[0].strip()
@@ -67,6 +72,7 @@ def convertframe2dic(frame):
     return filename, lineno, code_context
 
 
+# %%
 def set_timeout(num, callback):
     
     def wrap(func):
@@ -98,6 +104,7 @@ def set_timeout(num, callback):
     return wrap
 
 
+# %%
 def after_timeout():  
     """
     超时后的处理函数
@@ -105,12 +112,14 @@ def after_timeout():
     log.critical(("运行超出预设时间，强制退出!", traceback.extract_stack()))
 
 
+# %%
 def uuid3hexstr(inputo: object):
     inputstr = str(inputo)
 
     return hex(hash(uuid.uuid3(uuid.NAMESPACE_URL, inputstr)))[2:].upper()
 
 
+# %%
 def sha2hexstr(inputo: object):
     if type(inputo) == bytes:
         targetb = inputo
@@ -121,6 +130,7 @@ def sha2hexstr(inputo: object):
     return hhh.hexdigest().upper()
 
 
+# %%
 def execcmd(cmd):
     r = os.popen(cmd)
     text = r.read()
@@ -128,6 +138,7 @@ def execcmd(cmd):
     return text
 
 
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'运行文件\t{__file__}……')

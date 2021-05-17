@@ -1,12 +1,14 @@
 # encoding:utf-8
+# %%
 """
 魔法路径
 """
 
+# %%
 # import os
 import sys
 
-
+# %%
 # bp = os.path.dirname(os.path.realpath('.')).split(os.sep)
 # modpath = os.sep.join(bp + ['src'])
 # sys.path.insert(0, modpath)
@@ -21,8 +23,9 @@ class context:
         pass
 
 
+# %%
 if __name__ == '__main__':
-    print(f'运行文件\t{__file__}')
+#     print(f'运行文件\t{__file__}')
     for pp in sys.path:
         print(pp)
-    print('Done.完毕。')
+#     print('Done.完毕。')

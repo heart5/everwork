@@ -1,4 +1,7 @@
 # encoding:utf-8
+# %% [markdown]
+# # 时间日期相关函数集
+
 # %%
 """
 date time function related
@@ -19,6 +22,14 @@ with pathmagic.context():
     from func.logme import log
     from func.sysfunc import not_IPython
 # print(f"{__file__} is loading now...")
+
+# %% [markdown]
+# # 功能函数集
+
+# %%
+def timestamp2str(timestamp):
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
+
 
 # %%
 def getstartdate(period, thedatetime):
