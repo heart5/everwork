@@ -664,7 +664,7 @@ def after_logout():
 # %%
 def get_host_uuid():
     hotdir = itchat.originInstance.hotReloadDir
-    print(hotdir)
+#     print(hotdir) # itchat.pkl
     return uuid3hexstr(os.path.abspath(hotdir))
 
 
@@ -691,23 +691,27 @@ def keepliverun():
         host_nickname = init_info['User']['NickName']
         host_username = init_info['User']['UserName']
         log.critical(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(host_nickname, host_username)}")
-        if len(host_username) > 0:
+        if (host_username is not None) and (len(host_username) > 0):
             setcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname',
                               host_nickname)
             setcfpoptionvalue('everwebchat', get_host_uuid(), 'host_username',
                               host_username)
+        else:
+            log.critical("username is None")
     elif (itchat.originInstance.loginInfo):
         log.info("从itchat.originInstance.loginInfo中获取登录用户信息")
         host_nickname = dict(itchat.originInstance.loginInfo['User'])['NickName']
         host_username = dict(itchat.originInstance.loginInfo['User'])['UserName']
         log.critical(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(host_nickname, host_username)}")
-        if len(host_username) > 0:
+        if (host_username is not None) and (len(host_username) > 0):
             setcfpoptionvalue('everwebchat', get_host_uuid, 'host_nickname',
                               host_username)
             setcfpoptionvalue('everwebchat', get_host_uuid, 'host_username',
                               host_username)
+        else:
+            log.critical("username is None")
     else:
-        log.info(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(host_nickname, host_username)}")
+        log.critical(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(host_nickname, host_username)}")
 
     # notechat = newchatnote()
     # listchatrooms()
