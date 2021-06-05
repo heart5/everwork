@@ -96,6 +96,9 @@ def get_response(msg):
     return txt
 
 
+# %% [markdown]
+# ### def showmsgexpanddicttetc
+
 # %%
 def showmsgexpanddictetc(msg):
     """
@@ -660,7 +663,9 @@ def after_logout():
 
 # %%
 def get_host_uuid():
-    return uuid3hexstr(os.path.abspath(itchat.originInstance.hotReloadDir))
+    hotdir = itchat.originInstance.hotReloadDir
+    print(hotdir)
+    return uuid3hexstr(os.path.abspath(hotdir))
 
 
 # %%
@@ -681,21 +686,21 @@ def keepliverun():
     init_info = itchat.web_init()
     # showmsgexpanddictetc(init_info)
     if init_info['BaseResponse']['Ret'] == 0:
-        logstr = f"微信初始化信息成功返回，获取登录用户信息"
+        logstr = "微信初始化信息成功返回，获取登录用户信息"
         log.info(logstr)
         host_nickname = init_info['User']['NickName']
         host_username = init_info['User']['UserName']
-        log.info(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(host_nickname, host_username)}")
+        log.critical(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(host_nickname, host_username)}")
         if len(host_username) > 0:
             setcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname',
                               host_nickname)
             setcfpoptionvalue('everwebchat', get_host_uuid(), 'host_username',
                               host_username)
     elif (itchat.originInstance.loginInfo):
-        log.info(f"从itchat.originInstance.loginInfo中获取登录用户信息")
+        log.info("从itchat.originInstance.loginInfo中获取登录用户信息")
         host_nickname = dict(itchat.originInstance.loginInfo['User'])['NickName']
         host_username = dict(itchat.originInstance.loginInfo['User'])['UserName']
-        log.info(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(host_nickname, host_username)}")
+        log.critical(f"函数《{sys._getframe().f_code.co_name}》中用户变量为：\t{(host_nickname, host_username)}")
         if len(host_username) > 0:
             setcfpoptionvalue('everwebchat', get_host_uuid, 'host_nickname',
                               host_username)
