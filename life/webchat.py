@@ -422,8 +422,9 @@ def sharing_reply(msg):
             showmsgexpanddictetc(msg)
     elif len(items) > 0:
         itemstr = '\n'
-        for item in items:
-            itemstr += item.title.string + '\n'
+        for item in [x for x in items if x]:
+            if (titlestr := item.title.string):
+                itemstr += titlestr + '\n'
         # 去掉尾行的回车
         itemstr = itemstr[:-1]
         innermsg['fmText'] = innermsg['fmText'] + itemstr
