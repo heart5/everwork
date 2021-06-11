@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+# %%
 #
 # encoding:utf-8
 #
+
+# %%
 """
 处理每日天气信息，生成图表呈现
 
@@ -12,31 +15,35 @@ e5d81ffa-89e7-49ff-bd4c-a5a71ae14320 武汉雨天记录
 296f57a3-c660-4dd5-885a-56492deb2cee 武汉天气图
 """
 
-import pandas as pd
+# %%
 import re
 import time
 import pygsheets
+import datetime
+import pandas as pd
+import numpy as np
 from threading import Timer
 from bs4 import BeautifulSoup
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
-from pylab import *
+from pylab import plt, FuncFormatter
 
+# %%
 import pathmagic
-
 with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.evernttest import get_notestore, imglist2note
     from func.first import dirmainpath, touchfilepath2depth
     from func.logme import log
     from func.mailsfunc import getmail
-    from func.wrapfuncs import timethis, ift2phone
-    from func.profilerlm import lpt_wrapper
+    from func.wrapfuncs import timethis  # , ift2phone
+#     from func.profilerlm import lpt_wrapper
     from func.datatools import readfromtxt, write2txt
     from func.filedatafunc import gettopicfilefromgoogledrive
     from func.sysfunc import not_IPython
 
 
+# %%
 def getweatherfromevernote():
     noteguid_weather = '277dff5e-7042-47c0-9d7b-aae270f903b8'
     note_store = get_notestore()
@@ -58,6 +65,7 @@ def getweatherfromevernote():
     return split_item
 
 
+# %%
 def getweatherfromgmail():
     host = getcfpoptionvalue('everwork', 'gmail', 'host')
     username = getcfpoptionvalue('everwork', 'gmail', 'username')
@@ -76,6 +84,7 @@ def getweatherfromgmail():
     return split_items
 
 
+# %%
 def getweatherfromgoogledrive():
     dfboottrails = gettopicfilefromgoogledrive('Today\'s weather report', 'A:H')
     dfboottrails.columns = ['date', 'gaowen', 'diwen', 'fengsu', 'fengxiang', 'sunon', 'sunoff', 'shidu']
@@ -91,6 +100,7 @@ def getweatherfromgoogledrive():
     return dfout
 
 
+# %%
 def weatherstat(df, destguid=None):
     dfduplicates = df.groupby('date').apply(lambda d: tuple(d.index) if len(d.index) > 1 else None).dropna()
     log.info(dfduplicates)
@@ -298,15 +308,17 @@ def weatherstat(df, destguid=None):
     imglist2note(get_notestore(), imglist, destguid, '武汉天气图')
 
 
+# %%
 def getnewestdataday(item):
     weatherlastestday = getcfpoptionvalue('everlife', '天气', f"{item}最新日期")
     if not weatherlastestday:
         weatherlastestday = '2016-09-19'
         setcfpoptionvalue('everlife', '天气', f'{item}最新日期', '%s' % weatherlastestday)
-        
+
     return weatherlastestday
 
 
+# %%
 def fetchweatherinfo_from_gmail(weathertxtfilename):
     weatherdatalastestday = getnewestdataday('存储数据')
     today = datetime.datetime.now().strftime('%F')
@@ -324,6 +336,7 @@ def fetchweatherinfo_from_gmail(weathertxtfilename):
             setcfpoptionvalue('everlife', '天气', '存储数据最新日期', '%s' % weathertxtlastestday)
 
 
+# %%
 def isweatherupdate(weathertxtfilename):
     # print(weathertoday, end='\t')
     # print(datetime.datetime.now().strftime('%F'))
@@ -345,13 +358,14 @@ def isweatherupdate(weathertxtfilename):
     print(len(items))
     if not (dycountini := getcfpoptionvalue('everlife', '天气', '统计天数')):
         dycountini = 0
-        
+
     if len(items) > dycountini:
         return items
     else:
         return False
 
 
+# %%
 def items2df(items):
     split_item = items
     # print len(split_item)
@@ -401,23 +415,25 @@ def items2df(items):
     return df
 
 
+# %%
 def fetchweatherinfo_from_googledrive():
     weatherdatalastestday = getnewestdataday('存储数据')
     today = datetime.datetime.now().strftime('%F')
     hour = int(datetime.datetime.now().strftime('%H'))
-    if (today > weatherdatalastestday): # or True:
+    if (today > weatherdatalastestday):  # or True:
         df = getweatherfromgoogledrive()
         if df is not None:
             log.info('通过读Google drive表格，获取天气信息%d条。' % df.shape[0])
             print(df['date'].max())
             weathertxtlastestday = df['date'].max().strftime('%F')
             setcfpoptionvalue('everlife', '天气', '存储数据最新日期', '%s' % weathertxtlastestday)
-            
+
             return df
 
 
+# %%
 @timethis
-@lpt_wrapper()
+# @lpt_wrapper()
 def getrainfromgoogledrive():
     dfrainraw = gettopicfilefromgoogledrive('Rain in Wuhan', 'A:E')
     dfrainraw.columns = ['raintime', 'tianxiang', 'huashi', 'sheshi', 'links']
@@ -444,6 +460,7 @@ def getrainfromgoogledrive():
     return dfout, dfrain
 
 
+# %%
 @timethis
 def getgaowenfromgoogledrive():
     dfgaowenraw = gettopicfilefromgoogledrive('武汉高温纪录', 'A:D')
@@ -460,6 +477,7 @@ def getgaowenfromgoogledrive():
     return dfout, dfgaowen
 
 
+# %%
 @timethis
 # @ift2phone()
 def weatherstatdo():
@@ -476,9 +494,9 @@ def weatherstatdo():
     weathernotelastestday = getnewestdataday('笔记')
     today = datetime.datetime.now().strftime('%F')
     weathertxtlastestday = getnewestdataday('存储数据')
-    if today == weathernotelastestday: # and False:
+    if today == weathernotelastestday:  # and False:
         print('今天的天气信息统计笔记已刷新，本次轮询跳过')
-    elif today == weathertxtlastestday: # or True:
+    elif today == weathertxtlastestday:  # or True:
         try:
             items = readfromtxt(weathertxtfilename)
             dftxt = items2df(items)
@@ -502,6 +520,7 @@ def weatherstatdo():
         log.info('时间的花儿静悄悄！')
 
 
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'运行文件\t{__file__}……')
