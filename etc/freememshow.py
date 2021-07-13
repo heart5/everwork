@@ -134,7 +134,7 @@ def getcutpoint(inputdatapath):
     outlst.insert(0, 0)
     outlst.append(inputdf.shape[0])
 
-    plt.figure(figsize=(20, 40))
+    plt.figure(figsize=(10, 20))
 #     fig, ax1 = plt.subplots()
     if len(outlst) > 2:
         plt.subplot(211)
@@ -182,5 +182,3 @@ if __name__ == '__main__':
     datarelatepath = "sbase/zshscripts"
     img = getcutpoint(datarelatepath)
     show2evernote([img])
-
-# %%
