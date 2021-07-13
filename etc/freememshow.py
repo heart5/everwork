@@ -24,13 +24,17 @@
 # %%
 import os
 import time
+import math
 import pandas as pd
 from pathlib import Path
 from pylab import plt
-
+# %%
 import pathmagic
 with pathmagic.context():
-    from func.first import getdirmain
+    from func.first import getdirmain, touchfilepath2depth
+    from etc.getid import getdeviceid
+    from func.evernttest import get_notestore, imglist2note, \
+        getinivaluefromnote
 # %% [markdown]
 # ## 函数集合
 
@@ -62,9 +66,14 @@ def gettotalmem(cpath):
         firstline = f.readline().strip()
     print(firstline)
     totalmem = int(firstline.split('=')[1])
+    totalmeminG = math.ceil(totalmem / (1024 * 1024))
 
-    return totalmem
+    return totalmeminG
 
+
+# %%
+# datarelatepath = "sbase/zshscripts"
+# gettotalmem(getdatapath(datarelatepath))
 
 # %% [markdown]
 # ### def getdatadf
@@ -77,8 +86,27 @@ def getdatadf(cpath):
     fdf = indf.loc[:, ['time', 1, 2, 3]]
     fdf = fdf.set_index('time', drop=False)
     fdf.columns = ['time', 'freeper', 'swap', 'swapfree']
-    
+
     return fdf
+
+
+# %% [markdown]
+# ### def getdelta()
+
+# %%
+def getdelta():
+    if (delta := getinivaluefromnote('freemem', getdeviceid())) is not None:
+        print(delta)
+        delta = [int(x) for x in delta.split(',')]
+        deltatime = pd.Timedelta(minutes=delta[0], seconds=delta[1])
+    elif (delta := getinivaluefromnote('freemem', 'common')) is not None:
+        print(delta)
+        delta = [int(x) for x in delta.split(',')]
+        deltatime = pd.Timedelta(minutes=delta[0], seconds=delta[1])
+    else:
+        deltatime = pd.Timedelta(minutes=8, seconds=0)
+
+    return deltatime
 
 
 # %% [markdown]
@@ -89,37 +117,61 @@ def getcutpoint(inputdatapath):
     totalmen = gettotalmem(getdatapath(inputdatapath))
     inputdf = getdatadf(getdatapath(inputdatapath))
     ds = inputdf['time'] - inputdf['time'].shift()
-    deltads = ds[ds > pd.Timedelta(minutes=1, seconds=20)]
+    deltads = ds[ds > getdelta()]
 
     outlst = list()
     for ix in deltads.index:
         ipos = list(inputdf.index).index(ix)
-        if inputdf.iloc[ipos -1]['freeper'] == 0:
+        if inputdf.iloc[ipos - 1]['freeper'] == 0:
             continue
         print()
         print(ipos, ix, deltads[ix])
         outlst.append(ipos)
-        bfdf = inputdf[inputdf.index >= (ix - deltads[ix] + pd.Timedelta(minutes=-5))]
-        tmpdf = bfdf[bfdf.index < (ix + pd.Timedelta(minutes=5))]
+#         bfdf = inputdf[inputdf.index >= (ix - deltads[ix] + pd.Timedelta(minutes=-5))]
+#         tmpdf = bfdf[bfdf.index < (ix + pd.Timedelta(minutes=5))]
 #         print(tmpdf)
-    
+
     outlst.insert(0, 0)
     outlst.append(inputdf.shape[0])
-    
-    plt.figure(figsize=(17, 20))
-    fig, ax1 = plt.subplots()
 
-    plt.ylabel(f'空闲内存百分比({totalmen})')
+    plt.figure(figsize=(20, 40))
+#     fig, ax1 = plt.subplots()
+    if len(outlst) > 2:
+        plt.subplot(211)
+    plt.ylabel(f'空闲内存百分比({totalmen}G)')
+    cutdf = inputdf.iloc[outlst[-2]:outlst[-1]]
+    plt.plot(cutdf.index, cutdf['freeper'])
+    plt.annotate(cutdf.index[0].strftime("%y-%m-%d %H:%M"), xy=[cutdf.index[0], cutdf.iloc[0, 1]])
+    plt.annotate(cutdf.index[-1].strftime("%y-%m-%d %H:%M"), xy=[cutdf.index[-1], cutdf.iloc[-1, 1]])
+
+    if len(outlst) == 2:
+        imgpath = getdirmain() / 'img' / 'freemen.png'
+        plt.savefig(imgpath)
+        return imgpath
+    plt.subplot(212)
+    plt.ylabel(f'空闲内存百分比({totalmen}G)')
     for i in range(len(outlst) - 1):
-#         print(i)
-        cutdf = df.iloc[outlst[i]:outlst[i+1]]
+        cutdf = inputdf.iloc[outlst[i]:outlst[i + 1]]
         plt.plot(cutdf.index, cutdf['freeper'])
         plt.annotate(cutdf.index[0].strftime("%y-%m-%d %H:%M"), xy=[cutdf.index[0], cutdf.iloc[0, 1]])
-        plt.annotate(cutdf.index[-1].strftime("%y-%m-%d %H:%M"), xy=[cutdf.index[-1], cutdf.iloc[-1, 1]]) 
-        
+        plt.annotate(cutdf.index[-1].strftime("%y-%m-%d %H:%M"), xy=[cutdf.index[-1], cutdf.iloc[-1, 1]])
+
     imgpath = getdirmain() / 'img' / 'freemen.png'
+    touchfilepath2depth(imgpath)
     plt.savefig(imgpath)
-    return imgpath
+    return str(imgpath)
+
+
+# %%
+def show2evernote(imglst):
+    deviceid = getdeviceid()
+    guid = getinivaluefromnote('freemem', f'free_{deviceid}')
+    print(guid)
+    if (device_name := getinivaluefromnote('device', deviceid)) is None:
+        device_name = deviceid
+
+    imglist2note(get_notestore(), imglst, guid,
+                 f'手机_{device_name}_空闲内存动态', "")
 
 
 # %% [markdown]
@@ -128,6 +180,7 @@ def getcutpoint(inputdatapath):
 # %%
 if __name__ == '__main__':
     datarelatepath = "sbase/zshscripts"
-    getcutpoint(datarelatepath)
+    img = getcutpoint(datarelatepath)
+    show2evernote([img])
 
 # %%
