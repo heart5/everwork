@@ -173,7 +173,7 @@ def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
         noteattrib.author = en_username
         print(f"I'm here while creating the note, for evernote user {en_username}")
     note.attributes = noteattrib
-    note.guid = noteguid
+    note.guid = noteguid.lower()
     note.title = notetitle
 
     # To include an attachment such as an image in a note, first create a Resource
