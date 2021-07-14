@@ -134,6 +134,7 @@ def getcutpoint(inputdatapath):
     outlst.insert(0, 0)
     outlst.append(inputdf.shape[0])
 
+    plt.rcParams['font.sans-serif']='SimHei'
     plt.figure(figsize=(10, 20))
 #     fig, ax1 = plt.subplots()
     if len(outlst) > 2:
