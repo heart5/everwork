@@ -151,12 +151,18 @@ def getcutpoint(inputdatapath):
     outlst.append(inputdf.shape[0])
 
     plt.rcParams['font.sans-serif'] = 'SimHei'
-    picheight = len(outlst) - 2 + 1
+    olen = len(outlst)
+    if olen == 2:
+        picheight = 1
+    elif olen == 3:
+        picheight = 2
+    else:
+        picheight = 3
     plt.figure(figsize=(10, 10 * picheight))
     imgpath = getdirmain() / 'img' / 'freemen.png'
     touchfilepath2depth(imgpath)
     #     fig, ax1 = plt.subplots()
-    # 针对单次（一般也是首次运行）数据集进行处理
+    # 针对数据集周期次数进行处理，主要是处理小于三次的情况
     if len(outlst) > 3:
         plt.subplot(311)
     elif len(outlst) == 3:
@@ -176,7 +182,7 @@ def getcutpoint(inputdatapath):
         plt.savefig(imgpath)
         return str(imgpath)
 
-    # 最近两次数据集图形输出
+    # 针对数据集周期次数进行处理，主要是处理小于三次的情况
     if len(outlst) == 3:
         plt.subplot(212)
     elif len(outlst) > 3:
