@@ -42,12 +42,16 @@ def huojieds2note():
     print(jushufromnote)
     musedatapath = getdirmain() / 'data' / 'muse'
     tlst = [musedatapath / pt for pt in os.listdir(musedatapath) if (pt.endswith('xlsx') or pt.endswith('xls'))]
+    print(tlst)
     df = pd.DataFrame()
     for datafile in tlst:
+        countbefore = df.shape[0]
         df = df.append(pd.read_excel(datafile))
+        log.info(f"{os.path.basename(datafile)}\t{df.shape[0] - countbefore}")
 
     df = df.drop_duplicates().sort_values('time', ascending=False)
     jushufromhost = df.shape[0] // 4
+    log.info(f"主机本地数据文件有效局数为：\t{jushufromhost}")
 
     if jushufromnote != jushufromhost:
         datamainpath = musedatapath / 'huojiemain.xlsx'
