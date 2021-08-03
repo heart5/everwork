@@ -32,7 +32,7 @@ import pathmagic
 
 with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue, removesection
-    from func.first import dirlog, dirmainpath
+    from func.first import dirlog, dirmainpath, touchfilepath2depth
     from func.logme import log
     from func.nettools import trycounttimes2
     from func.sysfunc import convertframe2dic, not_IPython, extract_traceback4exception, set_timeout, after_timeout
@@ -245,7 +245,7 @@ def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
                 str1 = "%s" % hexhash  # b'cd34b4b6c8d9279217b03c396ca913df'
                 # print (str1)
                 str1 = str1[2:-1]  # cd34b4b6c8d9279217b03c396ca913df
-                # print (str1)
+                print(resource.mime)
                 nbody += "<en-media type=\"%s\" hash=\"%s\" align=\"center\" longdesc=\"%s\" /><br />%s<hr />" % (
                     resource.mime, str1, resource.attributes.fileName, resource.attributes.fileName)
     # neirong= "<pre>" + neirong + "</pre>"
@@ -277,6 +277,155 @@ def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
         evernoteapijiayi()
         log.info('成功更新了笔记《%s》，guid：%s。' %
                  (updated_note.title, updated_note.guid))
+
+    updatenote(note)
+
+
+# ###  def updatereslst2note(reslist, guidinput, title=None, neirong=None, filenameonly=False):
+
+def updatereslst2note(reslist, guidinput, title=None, neirong=None, filenameonly=False):
+    """
+    更新note附件和文字内容，附件只更新或添加，不影响其它附件，可以包含图片等资源类文件列表
+    :param notestore:
+    :param reslist:
+    :param noteguid:
+    :param notetitle:
+    :param neirong:object
+    :return:
+    """
+    noteattrib = NoteAttributes()
+    global en_username
+    if en_username is not None:
+        noteattrib.author = en_username
+        print(f"I'm here while updating the note for special res, for evernote user {en_username}")
+
+    print(reslist)
+    resfnonlylist = [os.path.basename(innerpath) for innerpath in reslist]  # 只取用文件名，保证名称唯一
+    print(resfnonlylist)
+    reslist = [os.path.abspath(innerpath) for innerpath in reslist]  # 取用绝对路径，保证名称唯一
+    print(reslist)
+
+    noteinput = getnoteall(guidinput)
+    note = Note()
+    note.attributes = noteattrib
+    note.guid = guidinput
+    if title is None:
+        note.title = noteinput.title
+    else:
+        note.title = title
+
+    if filenameonly:
+        notereslstclean = [res for res in noteinput.resources if res.attributes.fileName not in resfnonlylist]
+    else:
+        notereslstclean = [res for res in noteinput.resources if res.attributes.fileName not in reslist]
+    print(f"待操作笔记的res共有{len(noteinput.resources)}个。")
+    """
+    必须重新构建note.resources，否则内容不会改变
+    """
+    note.resources = []
+    for res in notereslstclean:
+        note.resources.append(res)
+
+    # To include an attachment such as an image in a note, first create a Resource
+    # for the attachment. At a minimum, the Resource contains the binary attachment
+    # data, an MD5 hash of the binary data, and the attachment MIME type.
+    # It can also include attributes such as filename and location.
+
+    # Now, add the new Resource to the note's list of resources
+    for res in reslist:
+        """
+        必须要重新构建一个Data（），否则内容不会变化
+        Data只有三个域：bodyHash（用MD5进行hash得到的值）、size（body的字节长度）和body（字节形式的内容本身）
+        """
+        resactual = open(res, 'rb').read()
+        md5 = hashlib.md5()
+        md5.update(resactual)
+        reshash = md5.digest()
+        data = Data()
+        data.size = len(resactual)
+        data.bodyHash = reshash
+        data.body = resactual
+        """
+        Resource需要常用的域：guid、noteGuid、data（指定上面的Data）、mime（需要设定）、attributes（可以设定附件的原文件名）
+        """
+        resource = Resource()
+#         resource.mime = 'image/png'
+        if (mtype := mimetypes.guess_type(res)[0]) is None:
+            logstr = f"文件《{res}》的类型无法判断"
+            log.critical(logstr)
+            print(logstr)
+            mtype = 'file/unkonwn'
+#             continue
+        resource.mime = mtype
+#         print(mtype)
+        resource.data = data
+        """
+        NoteAttributes常用的域：sourceURL、fileName和经纬度、照相机等信息
+        """
+        resattrib = ResourceAttributes()
+        if filenameonly:
+            resattrib.fileName = os.path.basename(res)
+        else:
+            resattrib.fileName = res
+        resource.attributes = resattrib
+        note.resources.append(resource)
+
+    print(f"笔记res处理后共有{len(note.resources)}个。")
+    # The content of an Evernote note is represented using Evernote Markup Language
+    # (ENML). The full ENML specification can be found in the Evernote API Overview
+    # at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
+    nbody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+    nbody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+    nbody += "<en-note>"
+    if note.resources:
+        # To display the Resource as part of the note's content, include an <en-media>
+        # tag in the note's ENML content. The en-media tag identifies the corresponding
+        # Resource using the MD5 hash.
+        # nBody += "<br />" * 2
+        for resource in note.resources:
+            #             print(resource.guid)
+            if resource.mime.startswith('image') or True:
+                hexhash = binascii.hexlify(resource.data.bodyHash)
+                str1 = "%s" % hexhash  # b'cd34b4b6c8d9279217b03c396ca913df'
+                # print (str1)
+                str1 = str1[2:-1]  # cd34b4b6c8d9279217b03c396ca913df
+#                 print(resource.mime)
+                nbody += "<en-media type=\"%s\" hash=\"%s\" align=\"center\" longdesc=\"%s\" /><br />%s<hr />" % (
+                    resource.mime, str1, resource.attributes.fileName, resource.attributes.fileName)
+    if neirong is not None:
+        neirong = "<pre>" + neirong + "</pre>"
+        # 去除控制符
+        neirong = re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f]', '', neirong)
+        neirong = re.sub('&', 'and连接符', neirong)
+        nbody += neirong
+
+    nbody += "</en-note>"
+
+    # ！！！严重错误，过滤\x14时把回车等符号都杀了！！！
+    # nbodynotasciilst = [hex(ord(x)) for x in nbody if ord(x) < 32]
+    # print(f"存在不可显示字符串：{''.join(nbodynotasciilst)}")
+    # nbodylst = [x for x in nbody if ord(x) >= 32]
+    # nbody = ''.join(nbodylst)
+    note.content = nbody
+#     print(nbody)
+    # log.info(f"新构笔记文字部分长度为：\t{len(nbody)}")
+    # print(note.content[:100])
+
+    # Finally, send the new note to Evernote using the updateNote method
+    # The new Note object that is returned will contain server-generated
+    # attributes such as the new note's unique GUID.
+    @trycounttimes2('evernote服务器，更新笔记。')
+    def updatenote(notesrc):
+        nsinner = get_notestore()
+        token = gettoken()
+        updated_note = nsinner.updateNote(token, notesrc)
+        evernoteapijiayi()
+        log.info('成功更新了笔记《%s》，guid：%s。资源列表为：%s' %
+                 (updated_note.title, updated_note.guid, reslist))
+        if updated_note:
+            if updated_note.resources:
+                print(f"笔记res更新后共有{len(updated_note.resources)}个")
+                print([res.attributes.fileName for res in updated_note.resources])
 
     updatenote(note)
 
@@ -357,6 +506,23 @@ def findnotefromnotebook(notebookguid, titlefind='', notecount=10000):
     return items
 
 
+# ###  def getnoteall(guid: str):
+
+@trycounttimes2('evernote服务器')
+def getnoteall(guid: str):
+    """
+    获取笔记
+    :param guid:
+    :return:note
+    """
+    nost = get_notestore()
+    note = nost.getNote(gettoken(), guid.lower(), True, True, False, False)
+#     print(note)
+    evernoteapijiayi()
+
+    return note
+
+
 # ###  def getnotecontent(guid: str):
 
 def getnotecontent(guid: str):
@@ -384,10 +550,11 @@ def getnoteresource(guid: str):
     note = ns.getNote(gettoken(), guid, True, True, False, False)
     evernoteapijiayi()
     resultlst = list()
-    for resitem in note1.resources:
+    for resitem in note.resources:
         sonlst = list()
         sonlst.append(resitem.attributes.fileName)
-        sonlst.append(resitem.data.body.decode())
+#         sonlst.append(resitem.data.body.decode())
+        sonlst.append(resitem.data.body)
         resultlst.append(sonlst)
     # print(soup)
 
@@ -828,19 +995,20 @@ if __name__ == '__main__':
     # print(getsampledffromdatahouse('火界'))
 
     # 查找主题包含关键词的笔记
-    notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
+#     notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
 #     shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
 #     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
-    findnoteguidlst = findnotefromnotebook(notification_guid, titlefind='tmux.conf', notecount=1433)
-    print(len(findnoteguidlst))
-    print(findnoteguidlst)
+#     findnoteguidlst = findnotefromnotebook(notification_guid, titlefind='tmux.conf', notecount=1433)
+#     print(len(findnoteguidlst))
+#     print(findnoteguidlst)
 #     findnoteguidlst = findsomenotest2showornote(notification_guid, 'data')
 #     print(findnoteguidlst)
 
     # 测试包含文件资源的笔记更新
-#     samplenoteguid = "962f0358-7c7a-4dfd-968d-14dd161a3a39"
-#     pylst = [fn for fn in os.listdir() if fn.endswith(".py") or fn.endswith('.txt')]
-#     imglist2note(nost, pylst, samplenoteguid, "包含附件的笔记", neirong='仅仅为了存在')
+    samplenoteguid = "962f0358-7c7a-4dfd-968d-14dd161a3a39"
+    tpath = dirmainpath / 'data' / 'muse'
+    pylst = [tpath / fn for fn in os.listdir(tpath) if fn.endswith(".xls") or fn.endswith('.xlsx')]
+    updatereslst2note(pylst, samplenoteguid, title="火界游戏数据", filenameonly=True)
 
     # 显示笔记内容，源码方式
     # '39c0d815-df23-4fcc-928d-d9193d5fff93' 转账
