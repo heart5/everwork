@@ -69,7 +69,7 @@ def huojieds2note():
             device_name = deviceid
         updatereslst2note([datamainpath], huojieguid, neirong=f'局数：{jushufromhost}\n时间跨度：{timemin}至{timemax}\n{device_name}', filenameonly=True)
     
-    return jushufromnote, jusufromhost
+    return jushufromnote, jusdhufromhost
 
 
 # %% [markdown]
