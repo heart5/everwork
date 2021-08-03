@@ -34,11 +34,15 @@ def huojieds2note():
     huojieguid = getinivaluefromnote('game', 'guid')
     notecontent = getnotecontent(huojieguid)
 
-    neirong = notecontent.find('pre').text
-    print(neirong)
-    nrlst = neirong.split('\n')
-    print(nrlst)
-    jushufromnote = int(nrlst[0].split("：")[1])
+    try:
+        neirong = notecontent.find('pre').text
+        print(neirong)
+        nrlst = neirong.split('\n')
+        print(nrlst)
+        jushufromnote = int(nrlst[0].split("：")[1])
+    except Exception as e:
+        print(e)
+        jushufromnote = 0
     print(jushufromnote)
     musedatapath = getdirmain() / 'data' / 'muse'
     tlst = [musedatapath / pt for pt in os.listdir(musedatapath) if (pt.endswith('xlsx') or pt.endswith('xls'))]
@@ -56,10 +60,10 @@ def huojieds2note():
     if jushufromnote != jushufromhost:
         datamainpath = musedatapath / 'huojiemain.xlsx'
         touchfilepath2depth(datamainpath)
-        
+
         reslst = getnoteresource(huojieguid)
         targetbinlst = [x[1] for x in reslst if x[0] == os.path.basename(datamainpath)]
-        if len(targetbinlst) != 0:            
+        if len(targetbinlst) != 0:
             huojiefromnotepath = musedatapath / 'huojiemainfromnote.xlsx'
             f = open(huojiefromnotepath, 'wb')
             f.write(targetbinlst[0])
@@ -78,7 +82,7 @@ def huojieds2note():
             device_name = deviceid
         updatereslst2note([datamainpath], huojieguid, 
                           neirong=f'局数：{jushufromhost}\n时间跨度：{timemin}至{timemax}\n主机名称：{device_name}', filenameonly=True)
-    
+
     return jushufromnote, jushufromhost
 
 
