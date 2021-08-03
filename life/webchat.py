@@ -485,7 +485,7 @@ def text_reply(msg):
     houseid = getinivaluefromnote('webchat', 'datahouse')
     # print(f"type:{type(houseid)}\t{houseid}")
     men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
-    if (thisid != str(houseid) or (men_wc != '白晔峰') :
+    if (thisid != str(houseid) or (men_wc != '白晔峰')) :
         print(f"不是数据分析中心也不是主账号，指令咱不管哦")
         return
 
