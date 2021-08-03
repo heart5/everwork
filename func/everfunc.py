@@ -1,9 +1,11 @@
 #  encoding:utf-8
+# %%
 """
 import大集合
 everwork的各种函数
 """
 
+# %%
 import binascii
 import datetime
 import email
@@ -28,11 +30,11 @@ from pandas.tseries.offsets import *
 from pylab import *
 
 import pathmagic
-
 with pathmagic.context():
     from func.logme import log
 
 
+# %%
 def dirbuildfirst():
     """
     准备目录结构
@@ -57,6 +59,7 @@ def dirbuildfirst():
                 # print(os.path.join(dir1,dr2))
 
 
+# %%
 def getapitimesfromlog():
     """
     从log中提取API调用次数
@@ -84,6 +87,7 @@ def getapitimesfromlog():
     return result
 
 
+# %%
 def writeini():
     """
     evernote API调用次数写入配置文件以备调用。又及，函数写在这里还有个原因是global全局变量无法跨文件传递。
@@ -98,6 +102,7 @@ def writeini():
     log.info('Evernote API调用次数：%d，写入配置文件%s' % (ENtimes, inifilepath))
 
 
+# %%
 def evernoteapiclearatzero():
     """
     evernote API的调用次数过整点清零
@@ -115,6 +120,7 @@ def evernoteapiclearatzero():
         writeini()
 
 
+# %%
 # dirbuildfirst()
 
 cfp = ConfigParser()
@@ -150,6 +156,7 @@ ywananchor = 50000  # 纵轴标识万化锚点
 evernoteapiclearatzero()
 
 
+# %%
 def evernoteapijiayi():
     """
     evernote API调用次数加一，如果达到限值则sleep后归零。又及，多次测试，限值应该是300次每个小时，整点清零重来。
@@ -174,12 +181,14 @@ def evernoteapijiayi():
         ENtimes = 0
 
 
+# %%
 def myrndsleep(second=20):
     rnd = np.random.randint(0, second)
     time.sleep(rnd)
     log.debug('休息一哈！这次是' + str(rnd) + '秒……')
 
 
+# %%
 def use_logging(level='debug'):
     def decorator(func):
         def wrapper(*args, **kwargs):
@@ -190,10 +199,12 @@ def use_logging(level='debug'):
     return decorator
 
 
+# %%
 def timestamp2str(timestamp):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
 
 
+# %%
 def readinisection2df(cfpp: ConfigParser, section: object, biaoti: object):
     """
     读取ini中的section，返回df
@@ -215,6 +226,7 @@ def readinisection2df(cfpp: ConfigParser, section: object, biaoti: object):
     return df
 
 
+# %%
 def yingdacal(x: pd.datetime, cnx):
     """
     :type x: datetime
@@ -234,6 +246,7 @@ def yingdacal(x: pd.datetime, cnx):
         return x + pd.DateOffset(days=1)
 
 
+# %%
 # @use_logging()
 def get_notestore():
     # Real applications authenticate with Evernote using OAuth, but for the
@@ -344,6 +357,7 @@ def get_notestore():
     #     # exit(5)
 
 
+# %%
 def findnotefromnotebook(token, notebookguid, titlefind, notecount=10000):
     """
     列出笔记本中的笔记信息
@@ -385,6 +399,7 @@ def findnotefromnotebook(token, notebookguid, titlefind, notecount=10000):
     return items
 
 
+# %%
 # @use_logging()
 def p_notebookattributeundertoken(notebook):
     """
@@ -415,6 +430,7 @@ def p_notebookattributeundertoken(notebook):
     # print '接受人设定\t', notebook.recipientSettings  #这种权限的调用没有返回这个值，报错
 
 
+# %%
 def p_noteattributeundertoken(note):
     """
     测试笔记（note）数据结构每个属性的返回值,通过findNotesMetadata函数获取，开发口令（token）的方式调用返回如下:
@@ -448,6 +464,7 @@ def p_noteattributeundertoken(note):
     # print ('范围\t%s' % note.limits) #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'limits'
 
 
+# %%
 def p_userattributeundertoken(user):
     """
     # 测试用户（user）数据结构每个属性的返回值,开发口令（token）的方式调用返回如下
@@ -480,6 +497,7 @@ def p_userattributeundertoken(user):
     # print '账户限制\t', str(user.accountLimits)  #这种权限的调用没有返回这个值，报错
 
 
+# %%
 def findnotebookfromevernote():
     # 列出账户中的全部笔记本
     note_store = get_notestore()
@@ -490,6 +508,7 @@ def findnotebookfromevernote():
         p_notebookattributeundertoken(x)
 
 
+# %%
 def makenote(token, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
     """
     创建一个note
@@ -536,6 +555,7 @@ def makenote(token, notestore, notetitle, notebody='真元商贸——休闲食�
             exit(2)
 
 
+# %%
 def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhuti='销售业绩图表'):
     """
     根据fromsection中的值构建新的tosection，fenbu、guid
@@ -571,6 +591,7 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
     cfpp.write(open(inifile, 'w', encoding='utf-8'))
 
 
+# %%
 def gengxinfou(filename, conn, tablename='fileread'):
     try:
         create_tb_cmd = "CREATE TABLE IF NOT EXISTS %s " \
@@ -632,6 +653,7 @@ def gengxinfou(filename, conn, tablename='fileread'):
     return rt
 
 
+# %%
 def dataokay(cnx):
     pathxitongbiaoxls = os.path.join('data', '系统表.xlsx')
     if gengxinfou(pathxitongbiaoxls, cnx, 'fileread'):  # or True:
@@ -698,6 +720,7 @@ def dataokay(cnx):
         df.to_sql(name='jiaqi', con=cnx, schema=sql_df, if_exists='replace')
 
 
+# %%
 def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount=1):
     # print(dfin.tail())
     imglists = []
@@ -730,6 +753,7 @@ def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount
     return imglistreturn
 
 
+# %%
 def biaozhukedu(dfc, weibiao):
     if weibiao == dfc.index.max():
         kedus = [dfc.loc[weibiao]]
@@ -773,6 +797,7 @@ def biaozhukedu(dfc, weibiao):
                          arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
 
 
+# %%
 def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu='', leixing='', pinpai='', nianshu=3,
                     imgpath=os.path.join('img')):
     """
@@ -871,6 +896,7 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, imglist=list(), quyu=''
     plt.close()
 
 
+# %%
 def chuturizhexian(df, riqienddate, xiangmu, cum=False,
                    imglist=list(), quyu='', leixing='', pinpai='', imgpath=os.path.join('img')):
     """
@@ -942,6 +968,7 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False,
     # return imgsavepath
 
 
+# %%
 def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     """
     更新note内容为图片列表
@@ -1056,6 +1083,7 @@ def imglist2note(notestore, imglist, noteguid, notetitle, neirong=''):
     #     raise eee
 
 
+# %%
 def isnoteupdate(token, noteguid):
 
     if cfp.has_option('noteupdatenum', noteguid):
@@ -1079,6 +1107,7 @@ def isnoteupdate(token, noteguid):
         return False
 
 
+# %%
 def tablehtml2evernote(dataframe, tabeltitle, withindex=True):
     pd.set_option('max_colwidth', 200)
     df = pd.DataFrame(dataframe)
@@ -1088,6 +1117,7 @@ def tablehtml2evernote(dataframe, tabeltitle, withindex=True):
     return outstr
 
 
+# %%
 def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum=100000, dirtarget='Inbox', unseen=False,
             topicloc='subject', topic='', datadir=os.path.join('data', 'work')):
     def parseheader(message):
@@ -1412,6 +1442,7 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
     return mailitemsresult
 
 
+# %%
 def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
     """
     从指定邮件目录读取包含关键字的新邮件并更新至txt文件
@@ -1474,6 +1505,7 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
     return items
 
 
+# %%
 def isworkday(dlist: list, person: str = '全体', fromthen=False):
     if fromthen and (len(dlist) == 1):
         dlist = pd.date_range(dlist[0], datetime.datetime.today(), freq='D')
@@ -1534,6 +1566,7 @@ def isworkday(dlist: list, person: str = '全体', fromthen=False):
     return dfout
 
 
+# %%
 def dftotal2top(df: pd.DataFrame):
     """
     给DataFrame增加汇总行，并将汇总行置顶
@@ -1590,6 +1623,7 @@ def dftotal2top(df: pd.DataFrame):
     return dfout
 
 
+# %%
 if __name__ == '__main__':
     # host = cfp.get('gmail', 'host')
     # username = cfp.get('gmail', 'username')
