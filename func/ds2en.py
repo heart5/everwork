@@ -75,7 +75,7 @@ def huojieds2note():
         updatereslst2note([datamainpath], huojieguid, 
                           neirong=f'局数：{jushufromhost}\n时间跨度：{timemin}至{timemax}\n主机名称：{device_name}', filenameonly=True)
     
-    return jushufromnote, jusdhufromhost
+    return jushufromnote, jushufromhost
 
 
 # %% [markdown]
@@ -90,3 +90,5 @@ if __name__ == '__main__':
 
     if not_IPython():
         log.info(f"文件\t{__file__}\t运行结束。")
+
+# %%
