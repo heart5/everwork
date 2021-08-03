@@ -44,7 +44,7 @@ with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue, getcfp
     from func.datetimetools import getstartdate
     from func.sysfunc import not_IPython
-    from func.ds2note import huojieds2note
+    from func.ds2en import huojieds2note
 
 
 # %% [markdown]
