@@ -44,6 +44,7 @@ with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue, getcfp
     from func.datetimetools import getstartdate
     from func.sysfunc import not_IPython
+    from func.ds2note import huojieds2note
 
 
 # %% [markdown]
@@ -543,7 +544,9 @@ def showhighscore(rstdf, highbool: bool = True):
 def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     excelpath, ownpy = makeexcelfileownpy(ownername)
     print(excelpath, ownpy)
-    recorddf = pd.read_excel(excelpath)
+#     recorddf = pd.read_excel(excelpath)  # 暂时停用，用huojiemain主数据文件
+    huojieds2note()
+    recorddf = pd.read_excel(getdirmain() / 'data' / 'muse' / 'huojiemain.xlsx')
     rstdf = recorddf.copy(deep=True)
     # print(rstdf.groupby(['guestid', 'guest']).count())
     rstdf = fixnamebyguestid(rstdf)
