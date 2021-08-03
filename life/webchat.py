@@ -479,19 +479,9 @@ def text_reply(msg):
         log.info(f"根据指令退出小元宝系统")
         itchat.logout()
 
-    # 如何不是指定的数据分析中心，则不进行语义分析
-    thisid = getdeviceid()
-    # print(f"type:{type(thisid)}\t{thisid}")
-    houseid = getinivaluefromnote('webchat', 'datahouse')
-    # print(f"type:{type(houseid)}\t{houseid}")
-    men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
-    if (thisid != str(houseid) or (men_wc != '白晔峰')) :
-        print(f"不是数据分析中心也不是主账号，指令咱不管哦")
-        return
-
     # 处理火界麻将战绩网页
     men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
-    ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
+#     ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     msgtxt = msg['Text']
     if (ulst := splitmjurlfromtext(msgtxt)) and (len(ulst) > 0):
         if getinivaluefromnote("game", "forceupdateexcel"):
@@ -506,6 +496,16 @@ def text_reply(msg):
         itchat.send_msg(sendernick + outstr)
         makemsg2write(innermsg, outstr)
         makemsg2write(innermsg, msgtxt)
+
+    # 如何不是指定的数据分析中心，则不进行语义分析
+    thisid = getdeviceid()
+    # print(f"type:{type(thisid)}\t{thisid}")
+    houseid = getinivaluefromnote('webchat', 'datahouse')
+    # print(f"type:{type(houseid)}\t{houseid}")
+    men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
+    if (thisid != str(houseid) or (men_wc != '白晔峰')) :
+        print(f"不是数据分析中心也不是主账号，指令咱不管哦")
+        return
 
     # 根据口令显示火界麻将战绩综合统计结果
     if msg['Text'].startswith('火界麻将战果统计') or msg['Text'].startswith('麻果'):
@@ -615,7 +615,7 @@ def text_reply(msg):
                 # rstfile必须是绝对路径，并且不能包含中文字符
                 itchat.send_file(rstfile, toUserName=msg['FromUserName'])
                 # 发给自己一份存档
-                makemsg2write(innermsg,rstfile.replace(os.path.abspath(dirmainpath),""))
+                makemsg2write(innermsg,rstfile.replace(os.path.abspath(dirmainpath), ""))
                 itchat.send_file(rstfile)
                 infostr = f"成功发送查询结果文件：{os.path.split(rstfile)[1]}给{innermsg['fmSender']}"
                 itchat.send_msg(infostr)
