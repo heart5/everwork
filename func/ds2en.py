@@ -36,7 +36,7 @@ def huojieds2note():
 
     jushufromnote = int([x.split('：')[1] for x in notecontent.find('pre').text.split()][0])
     musedatapath = getdirmain() / 'data' / 'muse'
-    tlst = [musedatapath / pt for pt in os.listdir(musedatapath)]
+    tlst = [musedatapath / pt for pt in os.listdir(musedatapath) if pt.endswith('xlsx') or pt.endswith('xls')]
     df = pd.DataFrame()
     for datafile in tlst:
         df = df.append(pd.read_excel(datafile))
