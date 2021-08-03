@@ -18,10 +18,6 @@
 展示足迹
 """
 
-
-
-
-
 # %% [markdown]
 # ## 库引入
 
@@ -29,16 +25,11 @@
 import os
 # import urllib2
 import re
-import socket
-import subprocess
 import datetime
-from threading import Timer
 from math import radians, cos, sin, asin, sqrt
 import pandas as pd
 import numpy as np
-from pylab import *
-
-
+from pylab import plt
 
 # %%
 import pathmagic
@@ -57,7 +48,6 @@ with pathmagic.context():
     from func.sysfunc import not_IPython, set_timeout, after_timeout
 
 
-
 # %% [markdown]
 # ## 功能函数
 
@@ -72,14 +62,9 @@ def geodistance(lng1, lat1, lng2, lat2):
     lng1, lat1, lng2, lat2 = map(radians, [lng1, lat1, lng2, lat2])
     dlon = lng2 - lng1
     dlat = lat2 - lat1
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2) ** 2
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
     dis = 4 * asin(sqrt(a)) * 6371 * 1000
     return dis
-
-
-
-
-
 
 
 # %% [markdown]
@@ -159,11 +144,6 @@ def chuli_datasource():
     return df.set_index(['time'])[['longi', 'lati', 'alti', 'provider', 'jiange', 'distance']]
 
 
-
-
-
-
-
 # %% [markdown]
 # ### foot2show(df4dis)
 
@@ -221,12 +201,7 @@ def foot2show(df4dis):
         device_name = device_id
     imglist2note(get_notestore(), imglst, guid,
                  f'手机_{device_name}_location更新记录',
-                 tablehtml2evernote(df4dis.sort_index(ascending=False).iloc[:100,], "坐标流水记录单"))
-
-
-
-
-
+                 tablehtml2evernote(df4dis.sort_index(ascending=False).iloc[:100, ], "坐标流水记录单"))
 
 
 # %% [markdown]
@@ -243,21 +218,14 @@ if __name__ == '__main__':
         log.info(f"完成文件{__file__}\t的运行")
 
 
-
-
-
-
-
 # %%
 def sampledef(dout):
     df = dout.copy(deep=True)
 
     df.sort_index(ascending=False).iloc[:100,]
 
-
     def is_normal(timed):
         return timed.total_seconds() > 12 * 3600
-
 
     df[df['jiange'].map(is_normal) == True]
 
