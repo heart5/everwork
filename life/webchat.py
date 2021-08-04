@@ -501,10 +501,11 @@ def text_reply(msg):
     thisid = getdeviceid()
     # print(f"type:{type(thisid)}\t{thisid}")
     houseid = getinivaluefromnote('webchat', 'datahouse')
+    mainaccount = getinivaluefromnote('webchat', 'mainaccount')
     # print(f"type:{type(houseid)}\t{houseid}")
     men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
-    if (thisid != str(houseid) or (men_wc != '白晔峰')) :
-        print(f"不是数据分析中心也不是主账号，指令咱不管哦")
+    if (thisid != str(houseid) or (men_wc != mainaccount)):
+        print(f"不是数据分析中心也不是主账号【{mainaccount}】，指令咱不管哦")
         return
 
     # 根据口令显示火界麻将战绩综合统计结果
@@ -638,11 +639,24 @@ def listchatrooms():
         print(cr)
 
 
+# %% [markdown]
+# ### @itchat.msg_register(FRIENDS)
+
 # %%
 @itchat.msg_register(FRIENDS)
 def add_friend(msg):
+    # 如何不是指定的数据分析中心和主账户，则不打招呼
+    thisid = getdeviceid()
+    houseid = getinivaluefromnote('webchat', 'datahouse')
+    mainaccount = getinivaluefromnote('webchat', 'mainaccount')
+    helloword1 = getinivaluefromnote('webchat', 'helloword1')
+    helloword2 = getinivaluefromnote('webchat', 'helloword2')
+    men_wc = getcfpoptionvalue('everwebchat', get_host_uuid(), 'host_nickname')
+    if (thisid != str(houseid) or (men_wc != mainaccount)):
+        print(f"不是数据分析中心也不是主账号【{mainaccount}】，不用打招呼哟")
+        return
     msg.user.verify()
-    msg.user.send('Nice to meet you!')
+    msg.user.send(f'Nice to meet you!\n{helloword1}\n{helloword2}')
     writefmmsg2txtandmaybeevernotetoo(msg)
     log.info(msg)
 
@@ -721,6 +735,9 @@ def keepliverun():
     itchat.run()
     # raise Exception
 
+
+# %% [markdown]
+# ## main 主函数
 
 # %%
 if __name__ == '__main__':
