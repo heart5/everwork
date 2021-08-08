@@ -1,4 +1,5 @@
 # encoding:utf-8
+# %%
 """
 DataFrame功能应用函数库
 """
@@ -28,17 +29,19 @@ with pathmagic.context():
 
 # print(f"{__file__} is loading now...")
 
+# %%
 # plot中显示中文
 # mpl.rcParams['font.sans-serif'] = ['SimHei']
 # mpl.rcParams['axes.unicode_minus'] = False
 
-
+# %%
 def db2img(inputdf: pd.DataFrame, title=None, showincell=True, fontsize=12, dpi=300, debug=False):
     dflines = inputdf.to_string(justify='left', show_dimensions=True).split('\n')
     
     return lststr2img(dflines, title=title, dpi=dpi, showincell=showincell, fontsize=fontsize, debug=debug)
 
 
+# %%
 def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=None, showincell=False, fontsize=12, dpi=300, debug=False) :
     if type(inputcontent) == str:
         dflines = inputcontent.split('\n')
@@ -714,6 +717,7 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
     cfpp.write(open(inifile, 'w', encoding='utf-8'))
 
 
+# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     isworkday(['2019-10-15'])
