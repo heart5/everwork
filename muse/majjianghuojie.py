@@ -558,7 +558,7 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     # print(rstdf.groupby(['guestid', 'guest']).count())
 
     fangdf = fetchmjfang(ownername)
-    print(fangdf)
+#     print(fangdf)
     fangdf = fixnamealias(fangdf, 'name')
 #     print(fangdf.dtypes)
     fangclosedf = rstdf.groupby('roomid')['time'].max()
@@ -566,8 +566,7 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     # 以房号为索引进行数据合并，默认join='outer'
     fangfinaldf: pd.DataFrame = pd.concat([fangdf, fangclosedf], axis=1).sort_values(by=['mintime'], ascending=False)
     fangfinaldf = fangfinaldf.rename(columns={'time': 'closetime'})
-    print(fangfinaldf.dtypes)
-    print(fangfinaldf)
+#     print(fangfinaldf.dtypes)
     # print(fangfinaldf) fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(lambda df: int((df['closetime'] - df[
     # 'maxtime']).total_seconds() / 60) if df['closetime'] else pd.NaT, axis=1)
     fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(
@@ -601,6 +600,7 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
         print(f"续局房号：\t{ix}，记录共有{zdds[ix]}条，需删除时间点\t{time2drop}，保留的终局时间点为：\t{time2keep}")
         rstdf = rstdf[rstdf.time != time2drop]
 
+    print(fangfinaldf)
     fangfinaldf.to_csv(csvfile:=touchfilepath2depth(getdirmain() / 'data' / 'game' / 'huojiemajiangfang.csv'))
 
     fangfdf = fangfinaldf.copy(deep=True)
@@ -616,7 +616,10 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
         fangfdf.loc[index, ['maxtime']] = fangfdf.loc[index, ['closetime']][0] - pd.to_timedelta(f'{playminmean}min')
         fangfdf.loc[index, ['mintime']] = fangfdf.loc[index, ['maxtime']][0]
         fangfdf.loc[index, ['count']] = 1
-        innername = rstdf[rstdf.host].set_index('roomid').loc[index, ['guest']] 
+        innername = rstdf[rstdf.host].set_index('roomid').loc[index, ['guest']]
+        if type(innername) == pd.DataFrame:
+            innername = innername.iloc[0, :]
+            print(f"内部名称为：\t{innername}")
         fangfdf.loc[index, ['name']] = innername[0]
         fangfdf.loc[index, ['playmin']] = playminmean
         fangfdf.loc[index, ['consumemin']] = 0
