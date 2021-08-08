@@ -616,7 +616,8 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
         fangfdf.loc[index, ['maxtime']] = fangfdf.loc[index, ['closetime']][0] - pd.to_timedelta(f'{playminmean}min')
         fangfdf.loc[index, ['mintime']] = fangfdf.loc[index, ['maxtime']][0]
         fangfdf.loc[index, ['count']] = 1
-        fangfdf.loc[index, ['name']] = rstdf[rstdf.host].set_index('roomid').loc[index, ['guest']][0]
+        innername = rstdf[rstdf.host].set_index('roomid').loc[index, ['guest']] 
+        fangfdf.loc[index, ['name']] = innername[0]
         fangfdf.loc[index, ['playmin']] = playminmean
         fangfdf.loc[index, ['consumemin']] = 0
 
