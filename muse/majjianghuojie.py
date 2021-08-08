@@ -548,6 +548,7 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     huojieds2note()
     recorddf = pd.read_excel(getdirmain() / 'data' / 'muse' / 'huojiemain.xlsx')
     rstdf = recorddf.copy(deep=True)
+#     print(rstdf.dtypes)
     # print(rstdf.groupby(['guestid', 'guest']).count())
     rstdf = fixnamebyguestid(rstdf)
     rstdf.drop_duplicates(['roomid', 'guestid'], inplace=True)
@@ -557,13 +558,16 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     # print(rstdf.groupby(['guestid', 'guest']).count())
 
     fangdf = fetchmjfang(ownername)
+    print(fangdf)
     fangdf = fixnamealias(fangdf, 'name')
-    # print(fangdf.dtypes)
+#     print(fangdf.dtypes)
     fangclosedf = rstdf.groupby('roomid')['time'].max()
     # print(fangclosedf)
     # 以房号为索引进行数据合并，默认join='outer'
     fangfinaldf: pd.DataFrame = pd.concat([fangdf, fangclosedf], axis=1).sort_values(by=['mintime'], ascending=False)
     fangfinaldf = fangfinaldf.rename(columns={'time': 'closetime'})
+    print(fangfinaldf.dtypes)
+    print(fangfinaldf)
     # print(fangfinaldf) fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(lambda df: int((df['closetime'] - df[
     # 'maxtime']).total_seconds() / 60) if df['closetime'] else pd.NaT, axis=1)
     fangfinaldf.loc[:, 'playmin'] = fangfinaldf.apply(
@@ -790,7 +794,8 @@ if __name__ == '__main__':
 
 #     combinedataset(own)
 
-    rcdf, img = showzhanjiimg(own, '年')
+#     rcdf, img = showzhanjiimg(own, '月')
+    zhanjidesc(own, recentday = '月')
 
     if not_IPython():
         log.info(f'文件{__file__}运行结束')
