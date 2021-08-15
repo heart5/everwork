@@ -519,7 +519,9 @@ def showhighscore(rstdf, highbool: bool = True):
     outlst = list()
     title = ('赛事暗黑', '赛事高亮')[highbool]
     outlst.append(title)
-    for idh in rstdf[rstdf['score'] == highscore]['roomid'].values:
+    roomidhighandlow = rstdf[rstdf['score'] == highscore]['roomid'].values
+    print(roomidhighandlow)
+    for idh in roomidhighandlow:
         iddf = rstdf[rstdf.roomid == idh]
         outstr = '赛事时间：'
         outstr += iddf['time'].max().strftime('%m-%d %H:%M')
@@ -550,7 +552,6 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     rstdf = recorddf.copy(deep=True)
 #     print(rstdf.dtypes)
     # print(rstdf.groupby(['guestid', 'guest']).count())
-    rstdf = fixnamebyguestid(rstdf)
     rstdf.drop_duplicates(['roomid', 'guestid'], inplace=True)
     rstdf.sort_values(by=['time', 'score'], ascending=[False, False], inplace=True)
     # print(rstdf.head())
@@ -600,9 +601,11 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
         print(f"续局房号：\t{ix}，记录共有{zdds[ix]}条，需删除时间点\t{time2drop}，保留的终局时间点为：\t{time2keep}")
         rstdf = rstdf[rstdf.time != time2drop]
 
-    print(fangfinaldf)
+    rstdf = fixnamebyguestid(rstdf)  # 重新修正id和用户名
+    print(rstdf.shape[0])
+    rstdf.drop_duplicates(['roomid', 'time', 'guestid', 'score', 'host'], inplace=True)
+    print(rstdf.shape[0])
     fangfinaldf.to_csv(csvfile:=touchfilepath2depth(getdirmain() / 'data' / 'game' / 'huojiemajiangfang.csv'))
-
     fangfdf = fangfinaldf.copy(deep=True)
 
     # 找到那些没有开局链接的局，按照其他局的平均时间赋值，同时更新count、maxtime、mintime、consumemin、name的列值
@@ -618,13 +621,15 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
         fangfdf.loc[index, ['count']] = 1
         innername = rstdf[rstdf.host].set_index('roomid').loc[index, ['guest']]
         if type(innername) == pd.DataFrame:
-            innername = innername.iloc[0, :]
+            print(innername)
+            innername = innername.iloc[-1, :]
             print(f"内部名称为：\t{innername}")
         fangfdf.loc[index, ['name']] = innername[0]
         fangfdf.loc[index, ['playmin']] = playminmean
         fangfdf.loc[index, ['consumemin']] = 0
 
     fangfinaldf = fangfdf.sort_values(['mintime'], ascending=False)
+    fangfinaldf.drop_duplicates(inplace=True)
 
     if (zuijindatestart:=getstartdate(recentday, rstdf['time'].max())) != rstdf['time'].max():
         rstdf = rstdf[rstdf.time >= zuijindatestart]
@@ -632,8 +637,10 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
                                    zuijindatestart or x['closetime'] >= zuijindatestart, axis=1)
         # print(fangfilter)
         fangfinaldf = fangfdf[fangfilter]
-    # print(fangfinaldf)
-    # print(rstdf)
+#     print(fangfinaldf)
+#     print(rstdf.shape[0])
+#     rstdf.drop_duplicates(inplace=True)
+#     print(rstdf.shape[0])
     outlst = list()
     rgp = rstdf.groupby(['guest']).count()
     timeend = rstdf['time'].max().strftime("%y-%m-%d %H:%M")
@@ -799,7 +806,8 @@ if __name__ == '__main__':
 #     combinedataset(own)
 
 #     rcdf, img = showzhanjiimg(own, '月')
-    zhanjidesc(own, recentday = '月')
+    zhanjistr = zhanjidesc(own, recentday = '月', simpledesc=False)
+    print(zhanjistr)
 
     if not_IPython():
         log.info(f'文件{__file__}运行结束')
