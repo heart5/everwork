@@ -1,8 +1,16 @@
 # encoding:utf-8
+# %% [markdown]
+# # pandas应用函数库
+
 # %%
 """
 DataFrame功能应用函数库
 """
+
+# %% [markdown]
+# ## 库导入
+
+# %%
 import os
 import evernote.edam.type.ttypes as ttypes
 import numpy as np
@@ -18,12 +26,14 @@ from pylab import plt, FuncFormatter
 from PIL import Image, ImageFont, ImageDraw
 # import matplotlib.pyplot as plt
 
+# %%
 import pathmagic
 with pathmagic.context():
     from func.evernttest import evernoteapijiayi, makenote, getinivaluefromnote
     from func.first import dbpathworkplan, dbpathquandan, dirmainpath, ywananchor, touchfilepath2depth
     from func.logme import log
     from func.nettools import trycounttimes2
+    from func.sysfunc import not_IPython
     from func.wrapfuncs import timethis
 #    from func.profilerlm import lpt_wrapper
 
@@ -34,15 +44,25 @@ with pathmagic.context():
 # mpl.rcParams['font.sans-serif'] = ['SimHei']
 # mpl.rcParams['axes.unicode_minus'] = False
 
+# %% [markdown]
+# ## 功能函数集
+
+# %% [markdown]
+# ### def db2img(inputdf: pd.DataFrame, title=None, showincell=True, fontsize=12, dpi=300, debug=False):
+
 # %%
 def db2img(inputdf: pd.DataFrame, title=None, showincell=True, fontsize=12, dpi=300, debug=False):
     dflines = inputdf.to_string(justify='left', show_dimensions=True).split('\n')
-    
+
     return lststr2img(dflines, title=title, dpi=dpi, showincell=showincell, fontsize=fontsize, debug=debug)
 
 
+# %% [markdown]
+# ###  def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=None, showincell=False, fontsize=12, dpi=300, debug=False):
+
 # %%
-def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=None, showincell=False, fontsize=12, dpi=300, debug=False) :
+def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=None,
+               showincell=False, fontsize=12, dpi=300, debug=False):
     if type(inputcontent) == str:
         dflines = inputcontent.split('\n')
     elif type(inputcontent) == list:
@@ -50,8 +70,8 @@ def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=N
     else:
         logstr = f"传入参数类型为：\t{type(inputcontent)}，既不是str也不是list，暂不做处理返回None"
         log.critical(logstr)
-        return 
-    
+        return
+
     rows = len(dflines)
     collenmax = max([len(x) for x in dflines])
     print(f"行数和行最长长度（字符）：\t{(rows, collenmax)}")
@@ -73,7 +93,7 @@ def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=N
     if not debug:
         if (notedpi := getinivaluefromnote('webchat', 'imgdpi')):
             dpi = notedpi
-        
+
     # im.show()
     figdefaultdpi = plt.rcParams.get('figure.dpi')
     figwinchs = round(colwidthmax * (dpi / figdefaultdpi) / figdefaultdpi / 10, 3)
@@ -90,10 +110,14 @@ def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=N
     plt.savefig(imgtmppath)
     if not showincell:
         plt.close()
-    
+
     return imgtmppath
 
 
+# %% [markdown]
+# ### def descdb(df)
+
+# %%
 # 显示DataFrame或Series的轮廓信息
 # df，DataFrame或Series
 def descdb(df):
@@ -106,6 +130,10 @@ def descdb(df):
     print(df.describe())
 
 
+# %% [markdown]
+# ### def desclitedb(cnx)
+
+# %%
 # 显示SQlite数据库的各种信息
 # cnx，数据库连接
 def desclitedb(cnx):
@@ -129,6 +157,10 @@ def desclitedb(cnx):
         # print(col_name_list)
 
 
+# %% [markdown]
+# ### def dftotal2top(df)
+
+# %%
 def dftotal2top(df: pd.DataFrame):
     """
     给DataFrame增加汇总行，并将汇总行置顶
@@ -196,6 +228,10 @@ def dftotal2top(df: pd.DataFrame):
     return dfout
 
 
+# %% [markdown]
+# ### def isworkday(dlist, person, fromthen)
+
+# %%
 @timethis
 #@lpt_wrapper()
 def isworkday(dlist: list, person: str = '全体', fromthen=False):
@@ -274,6 +310,10 @@ def isworkday(dlist: list, person: str = '全体', fromthen=False):
     return dfout
 
 
+# %% [markdown]
+# ### def gengxinfou(filename, conn, tablename)
+
+# %%
 def gengxinfou(filename, conn, tablename='fileread'):
     try:
         create_tb_cmd = "CREATE TABLE IF NOT EXISTS %s " \
@@ -335,6 +375,10 @@ def gengxinfou(filename, conn, tablename='fileread'):
     return rt
 
 
+# %% [markdown]
+# ### def dataokay(cnx)
+
+# %%
 def dataokay(cnx):
     # global dirmainpath
     pathxitongbiaoxls = str(dirmainpath / 'data' / '系统表.xlsx')
@@ -404,6 +448,10 @@ def dataokay(cnx):
         df.to_sql(name='jiaqi', con=cnx, schema=sql_df, if_exists='replace')
 
 
+# %% [markdown]
+# ### def biaozhukedu(dfc, weibiao)
+
+# %%
 def biaozhukedu(dfc, weibiao):
     if weibiao == dfc.index.max():
         kedus = [dfc.loc[weibiao]]
@@ -447,6 +495,10 @@ def biaozhukedu(dfc, weibiao):
                          arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
 
 
+# %% [markdown]
+# ### def readiniseciton2df(cfpp, section, biaoti)
+
+# %%
 def readinisection2df(cfpp: ConfigParser, section: object, biaoti: object):
     """
     读取ini中的section，返回df
@@ -468,6 +520,10 @@ def readinisection2df(cfpp: ConfigParser, section: object, biaoti: object):
     return df
 
 
+# %% [markdown]
+# ### def chutuyuezhexian(ds, riqienddate, xiangmu, cum, quyu, leixinng, pinpai, nianshu)
+
+# %%
 def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, quyu='', leixing='', pinpai='', nianshu=3,
                     imgpath=dirmainpath / 'img'):
     """
@@ -569,6 +625,10 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, quyu='', leixing='', pi
     return imglist
 
 
+# %% [markdown]
+# ### def chuturizhexian(df, riqienddate, xiangmu, cum, quyu, leixing, pinpai, imgpath)
+
+# %%
 def chuturizhexian(df, riqienddate, xiangmu, cum=False,
                    quyu='', leixing='', pinpai='', imgpath=dirmainpath / 'img'):
     """
@@ -641,6 +701,10 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False,
     return imglistctrz
 
 
+# %% [markdown]
+# ### def dfin2imglist(dfin, cum, leixingset, fenbuset, pinnpai, imgmonthcount)
+
+# %%
 def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount=1):
     # print(dfin.tail())
     imglists = []
@@ -677,6 +741,10 @@ def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount
     return imglistreturn
 
 
+# %% [markdown]
+# ### def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhuti)
+
+# %%
 def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhuti='销售业绩图表'):
     """
     根据fromsection中的值构建新的tosection，fenbu、guid
@@ -717,13 +785,18 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
     cfpp.write(open(inifile, 'w', encoding='utf-8'))
 
 
+# %% [markdown]
+# ## 主函数main
+
 # %%
 if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}')
     isworkday(['2019-10-15'])
     dtlist = list(pd.date_range('2019-01-01', '2019-10-07', freq='D'))
     dfresult = isworkday(dtlist, '梅富忠')
     print(dfresult)
     # cnxp = lite.connect(dbpathquandan)
     # dataokay(cnxp)
-    log.info(f'文件{__file__}运行结束！')
+    if not_IPython():
+        log.info(f'文件{__file__}运行结束！')
