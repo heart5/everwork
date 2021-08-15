@@ -525,6 +525,7 @@ def getnoteall(guid: str):
 
 # ###  def getnotecontent(guid: str):
 
+@trycounttimes2('evernote服务器')
 def getnotecontent(guid: str):
     """
     获取笔记内容
@@ -540,6 +541,7 @@ def getnotecontent(guid: str):
 
 # ###  def getnoteresource(guid: str):
 
+@trycounttimes2('evernote服务器')
 def getnoteresource(guid: str):
     """
     获取笔记附件
