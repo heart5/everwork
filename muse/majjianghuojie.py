@@ -143,7 +143,8 @@ def splitmjurlfromtext(incontent:str):
     #  '微信【Text】信息中发现新的火界麻将战绩网页链接并处理，房间号为：\t806666\thttp://s0.lgmob.com/h5_whmj_qp/zhanji/index.php?id=fks0_9b8bd588d1d44ae2867aa1319241881b'
     # ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     # reg .+? 限制为非贪婪模式，用于提取文本多个有效连接
-    ptn = re.compile("(http://.+?h5_whmj_qp/(?:zhanji/index.php\\?id=|fks0_)\S+)\s*")
+#     ptn = re.compile("(http://.+?h5_whmj_qp/(?:zhanji/index.php\\?id=|fks0_)\S+)\s*")
+    ptn = getinivaluefromnote('game', 'ptn')
     # rstlst = [inurl for inurl in vurl if (vurl := re.findall(ptn, incontent))]
     if (vurl := re.findall(ptn, incontent)):
         return [url for url in vurl]
@@ -415,7 +416,8 @@ def updateurl2excelandini(ownername, url):
     """
     处理url，提取网页内容，有效数据写入数据文件，并更新相应配套ini辅助文件
     """
-    ptn = re.compile("(http://.+?h5_whmj_qp/(?:zhanji/index.php\\?id=|fks0_)\S+)\s*")
+#     ptn = re.compile("(http://.+?h5_whmj_qp/(?:zhanji/index.php\\?id=|fks0_)\S+)\s*")
+    ptn = getinivaluefromnote('game', 'ptn')
     if (urlst := re.findall(ptn, url)):
         url = urlst[0]
     else:
