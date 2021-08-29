@@ -3,9 +3,10 @@
 # jupyter:
 #   jupytext:
 #     text_representation:
-#       jupytext_version: 1.10.3
+#       jupytext_version: 1.11.4
 # ---
 
+# %%
 # %%
 """
 用evernote作为工作平台，通过Python链接整理各种工作数据，呈现给各个相关岗位。.
@@ -28,11 +29,13 @@ import sys
 
 
 # %%
+# %%
 sys.path.extend(['func', 'work', 'life', 'etc'])
 # from func.pdtools import dataokay
 # from func.evernt import get_notestore
 # from func.first import dbpathquandan
 
+# %%
 # %%
 log.debug('自动线程任务启动……')
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
@@ -41,6 +44,7 @@ log.debug('自动线程任务启动……')
 # cnx.close()
 # isnoteupdate(token, note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
 
+# %%
 # %%
 filegmailevernote2datacenter(60 * 55)
 showorderstat2note(60 * 60 * 1 + 60 * 8)
@@ -54,9 +58,10 @@ financetimer(60 * 60 * 3 + 60 * 33)
 pinpaifenxi_timer(60 * 60 * 24)
 zipdata2one_timer(60 * 60 * 12 + 60 * 35)
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # writeini()
 
+# %%
 # %%
 # findnotebookfromevernote(token)
 # log.debug('程序结束！')

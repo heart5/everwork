@@ -3,14 +3,16 @@
 # jupyter:
 #   jupytext:
 #     text_representation:
-#       jupytext_version: 1.10.3
+#       jupytext_version: 1.11.4
 # ---
 
+# %%
 # %%
 # %%
 import sys
 import calendar as cal
 
+# %%
 # %%
 sys.path.insert(0, 'work')
 sys.path.insert(0, 'life')
@@ -21,11 +23,13 @@ from func.everfunc import *
 
 
 # %%
+# %%
 # plot中显示中文
 mpl.rcParams['font.sans-serif'] = ['SimHei']
 mpl.rcParams['axes.unicode_minus'] = False
 
 
+# %%
 # %%
 # 显示DataFrame或Series的轮廓信息
 # df，DataFrame或Series
@@ -39,6 +43,7 @@ def descdb(df):
     print(df.describe())
 
 
+# %%
 # %%
 # 显示SQlite数据库的各种信息
 # cnx，数据库连接
@@ -63,6 +68,7 @@ def desclitedb(cnx):
         print(col_name_list)
 
 
+# %%
 # %%
 def swissknife(cnx):
     # desclitedb(cnx)
