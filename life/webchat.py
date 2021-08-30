@@ -31,7 +31,7 @@ import sys
 import math
 import itchat
 import itchat.storage
-from itchat.content import *
+from itchat.content import CARD, FRIENDS, NOTE, TEXT, MAP, PICTURE, RECORDING, ATTACHMENT, VIDEO, SHARING
 from bs4 import BeautifulSoup
 
 # %%
@@ -372,7 +372,7 @@ def sharing_reply(msg):
         else:
             descstr = updateurllst(men_wc, ulst)
         outstr = f"【Text】信息中发现新的火界麻将战绩网页链接并处理：\t{descstr}"
-        itchat.send_msg(f'({sendernick})'  +outstr)
+        itchat.send_msg(f'({sendernick})' + outstr)
         makemsg2write(innermsg, outstr)
         makemsg2write(innermsg, msgurl)
 
