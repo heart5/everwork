@@ -133,7 +133,7 @@ def getsinglepage(url: str):
 # ### splitmjurlfromtext(incontent:str)
 
 # %%
-def splitmjurlfromtext(incontent:str):
+def splitmjurlfromtext(incontent: str):
     """
     从输入文本中提取有效的url链接，返回包含有效链接的list
     **正则中的贪婪和非贪婪搞得一头包，慎之慎之**
@@ -144,11 +144,16 @@ def splitmjurlfromtext(incontent:str):
     # ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     # reg .+? 限制为非贪婪模式，用于提取文本多个有效连接
 #     ptn = re.compile("(http://.+?h5_whmj_qp/(?:zhanji/index.php\\?id=|fks0_)\S+)\s*")
-    ptn = getinivaluefromnote('game', 'ptn')
+    print(incontent)
+    ptnfromnote = getinivaluefromnote('game', 'ptn')
+    print(ptnfromnote)
+    ptn = re.compile(ptnfromnote)
+    print(ptn)
     # rstlst = [inurl for inurl in vurl if (vurl := re.findall(ptn, incontent))]
     if (vurl := re.findall(ptn, incontent)):
         return [url for url in vurl]
     else:
+        print('未发现有效火界战绩链接')
         return list()
 
 
@@ -183,8 +188,10 @@ def fetchmjurlfromfile(ownername):
                     print(len(rstlst), len(rstlstraw), filename, dk)
                     break
             except UnicodeDecodeError as eef:
+                print(eef)
                 continue
             except LookupError as eel:
+                print(eel)
                 if dk == 'Error':
                     print(f"{filename}没办法用预设的字符集正确打开")
                 break
@@ -270,7 +277,7 @@ def fetchmjfang(owner):
 
     resultlst = list(tuple(resultlst))
     ownpy = Pinyin().get_pinyin(owner, '')
-    if (urlsnum:=getcfpoptionvalue(f'evermuse_{ownpy}', 'huojiemajiang', 'fangsnum')):
+    if (urlsnum := getcfpoptionvalue(f'evermuse_{ownpy}', 'huojiemajiang', 'fangsnum')):
         if urlsnum == len(resultlst):
             log.info(f"战绩链接数量暂无变化, till then is {urlsnum}.")
         else:
@@ -342,7 +349,7 @@ def combinedataset(ownername):
     rstdf = fixnamebyguestid(rstdf)
     rstdf = rstdf.sort_values(by=['time', 'score'], ascending=[False, False])
     rstdf.to_excel(excelpath, index=False, encoding='utf-8')
-    
+
     return rstdf
 
 
