@@ -144,17 +144,27 @@ def splitmjurlfromtext(incontent: str):
     # ptn = re.compile("h5_whmj_qp/(zhanji/index.php\\?id=|fks0_)")
     # reg .+? 限制为非贪婪模式，用于提取文本多个有效连接
 #     ptn = re.compile("(http://.+?h5_whmj_qp/(?:zhanji/index.php\\?id=|fks0_)\S+)\s*")
-    print(incontent)
     ptnfromnote = getinivaluefromnote('game', 'ptn')
-    print(ptnfromnote)
-    ptn = re.compile(ptnfromnote)
-    print(ptn)
+    ptn = re.compile("r" + f"{ptnfromnote}")
     # rstlst = [inurl for inurl in vurl if (vurl := re.findall(ptn, incontent))]
     if (vurl := re.findall(ptn, incontent)):
+        print(ptn)
+        print(incontent)
         return [url for url in vurl]
     else:
-        print('未发现有效火界战绩链接')
         return list()
+
+
+# %%
+def checkptn():
+#     ptnstr = "(http://.+?tcloudbaseapp.com/port.html\?j=\S+)\s*"
+
+    ptnstr = getinivaluefromnote('game', 'ptn')
+    ptnstr
+    ptn = re.compile(ptnstr)
+    ptn
+    teststr = "(http://cloud1.tcloudbaseapp.com/port.html?j=afjoajoa)"
+    re.findall(ptn, teststr)
 
 
 # %% [markdown]
