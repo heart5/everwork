@@ -12,6 +12,7 @@ import sys
 import platform
 import signal
 import time
+import datetime
 import uuid
 import re
 from IPython import get_ipython
@@ -46,7 +47,8 @@ def extract_traceback4exception(tbtuple, func_name, sleeptime=None):
         rsttb.extend([x for x in tblst[(-1 * shownums):]])
     if brief:
         rsttb = [x.replace("/data/data/com.termux/files", "/d/d/c/f") for x in rsttb]
-    rststr = f"&&&\t{sleeptime}\t&&& in [{func_name}],\t"
+    nowstr = datetime.datetime.strftime(datetime.datetime.now(), "%F %T")
+    rststr = f"&&&\t{sleeptime}\t&&& in [{func_name}] at {nowstr},\t"
     rststr += f"type is\t[{eee_type}]\t, value is \t[{eee_value}],\t"
     tbstr = '\t'.join(rsttb)
     rststr += f"traceback is \t{tbstr}"
