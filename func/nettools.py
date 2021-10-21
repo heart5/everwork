@@ -1,8 +1,14 @@
 # encoding:utf-8
+# %% [markdown]
+# # 网络函数包
+
 # %%
 """
 网络相关函数集
 """
+
+# %% [markdown]
+# # 引入库
 
 # %%
 import sys
@@ -27,12 +33,17 @@ from py2ifttt import IFTTT
 
 # %%
 import pathmagic
-
 with pathmagic.context():
     from func.logme import log
     from func.termuxtools import termux_sms_send
     from func.sysfunc import not_IPython, extract_traceback4exception
 
+
+# %% [markdown]
+# # 函数集
+
+# %% [markdown]
+# ## def ischat(pklabpath)
 
 # %%
 def isitchat(pklabpath):
@@ -67,6 +78,9 @@ def isitchat(pklabpath):
     return True
 
 
+# %% [markdown]
+# ## def get_ip(*args)
+
 # %%
 def get_ip(*args):
     if platform.system() == 'Windows':
@@ -92,6 +106,9 @@ def get_ip(*args):
         return ip
 
 
+# %% [markdown]
+# ## def get_host_ip()
+
 # %%
 def get_host_ip():
     """
@@ -109,6 +126,9 @@ def get_host_ip():
         s.close()
     return ip
 
+
+# %% [markdown]
+# ## def get_ip4alleth(*args)
 
 # %%
 def get_ip4alleth(*args):
@@ -141,6 +161,9 @@ def get_ip4alleth(*args):
     #  print(resultiplst)
     return resultiplst
 
+
+# %% [markdown]
+# ## def trycounttimes2(servname, maxtimes ,maxsecs)
 
 # %%
 def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
