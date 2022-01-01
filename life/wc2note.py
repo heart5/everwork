@@ -20,7 +20,6 @@ from pathlib import Path
 
 # %%
 def items2df(fl):
-    print(fl)
     content = open(fl, 'r').read()
 #     ptn = re.compile("(^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\t(True|False)\t(\S+)\t(\S+)\t", re.M)
     ptn = re.compile("(^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\t(True|False)\t([^\t]+)\t(\w+)\t", re.M)
@@ -42,15 +41,20 @@ def txtfiles2dfdict(wcdatapath):
     dfdict = dict()
     fllst = [f for f in os.listdir(wcdatapath) if f.startswith("chatitems")]
     for fl in fllst[::-1]:
-        rs1 = re.search("\((\w+)\)", fl)
-        account = rs1.groups()[0]
+        rs1 = re.search("\((\w*)\)", fl)
+        if (account := rs1.groups()[0]) in ['', 'None']:
+            account = "白晔峰"
         dfinner = items2df(wcdatapath / fl)
+        print(f"{account}\t{dfinner.shape[0]}", end="\t")
         if account in dfdict.keys():
             dfall = dfdict[account].append(dfinner)
             dfall = dfall.drop_duplicates().sort_values(['time'], ascending=False)
+            print(f"{dfall.shape[0]}\t{fl}")
             dfdict.update({account:dfall})
         else:
-            dfdict[account] = dfinner.drop_duplicates().sort_values(['time'], ascending=False)
+            dfall = dfinner.drop_duplicates().sort_values(['time'], ascending=False)
+            print(f"{dfall.shape[0]}\t{fl}")
+            dfdict[account] = dfall
 
     return dfdict
 
@@ -58,13 +62,6 @@ def txtfiles2dfdict(wcdatapath):
 # %%
 wcdatapath = Path("../data/webchat")
 dfdict = txtfiles2dfdict(wcdatapath)
-
-# %%
-dfdict
-
-# %%
-for k in dfdict:
-    print(f"{k}\t{dfdict[k].shape[0]}")
 
 # %%
 for k in dfdict:
@@ -77,9 +74,6 @@ dfbyf = dfdict[name_byf]
 dfheart5 = dfdict[name_heart5]
 filepath_byf = wcdatapath / f"{name_byf}.xlsx"
 filepath_heart5 = wcdatapath / f"{name_heart5}.xlsx"
-
-# %%
-dfbyf.to_excel(filepath_byf, engine='xlsxwriter', index=False)
 
 
 # %%
@@ -137,6 +131,9 @@ dfbyf.describe()
 
 # %%
 dfbyf.iloc[32767]
+
+# %%
+dfbyf.to_excel(filepath_byf, engine='xlsxwriter', index=False)
 
 # %%
 dfdict['heart5'].to_excel(wcdatapath / 'heart5.xlsx', index=False)
