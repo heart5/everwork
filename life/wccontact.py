@@ -1,8 +1,12 @@
 # coding:utf-8
+# %%
 """
 微信联系人管理
 """
 
+
+
+# %%
 from pathlib import Path
 from io import BytesIO
 import time
@@ -16,6 +20,9 @@ import numpy as np
 import itchat
 # from binascii import hexlify, unhexlify
 
+
+
+# %%
 import pathmagic
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
@@ -29,6 +36,8 @@ with pathmagic.context():
     from func.wcfuncs import getownername
 
 
+
+# %%
 def checktable(dbpath: str, ownername: str):
     """
     检查数据表是否存在并根据情况创建
@@ -54,16 +63,20 @@ def checktable(dbpath: str, ownername: str):
         ifnotcreate(tablename_cc, csql, dbnameinner)
         logstr = f"数据表{tablename_cc}于{dbnameinner}中被删除并完成重构"
         log.critical(logstr)
-        
+
         setcfpoptionvalue('everwebchat', 'wcdb', ownername, str(True))
 
 
+
+# %%
 def getimguuid(inputbytes: bytes):
     imgfrombytes = Image.open(BytesIO(inputbytes))
-    
+
     return sha2hexstr(np.array(imgfrombytes))
 
 
+
+# %%
 def getwcdffromfrdlst(frdlst: list, howmany: str='fixed', needheadimg=False):
 
     def yieldrange(startnum: int, width: int = 20):
@@ -130,10 +143,12 @@ def getwcdffromfrdlst(frdlst: list, howmany: str='fixed', needheadimg=False):
         attrlst.extend(['imguuid', 'headimg'])
 
     frddf = pd.DataFrame(frdinfolst, columns=attrlst)
-    
+
     return frddf
 
 
+
+# %%
 def dfsha2noimg(inputdf: pd.DataFrame):
     # ['UserName', 'NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord', 'imguuid' 'headimg']
     frddf2append = inputdf.copy(deep=True)
@@ -144,10 +159,12 @@ def dfsha2noimg(inputdf: pd.DataFrame):
     frddf2append['contactuuid'] = frddf2append[clnamescleanlst].apply(lambda x: sha2hexstr(list(x.values)), axis=1)
     # ['UserName', 'NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord', 'headimg', 'appendtime']
     frddf2append['appendtime'] = pd.Timestamp.now()
-    
+
     return frddf2append
 
 
+
+# %%
 @timethis
 def updatectdf(howmuch: str = "all", haveimg=False):
     owner = getownername()
@@ -172,26 +189,28 @@ def updatectdf(howmuch: str = "all", haveimg=False):
         print(sltuple, '/', len(frdlst), end='\t')
         conn = lite.connect(dbname)
         readdf = getwcdffromfrdlst(frdlst, sltuple, needheadimg=haveimg)
-        
+
         frddfready = dfsha2noimg(readdf)
         outcls = [cl for cl in list(frddfready.columns.values) if cl.lower() not in ['username', 'headimg']]
         frddfready[outcls].to_sql(dftablename, con=conn, if_exists='append', index=False)
-        
+
         if haveimg:
             dftablenameimg = 'wcheadimg'
             frddfreadyforimg = readdf[readdf.imguuid.notnull()][['RemarkName', 'imguuid', 'headimg']]
             frddfreadyforimg.to_sql(dftablenameimg, con=conn, if_exists='append', index=False)
-        
+
             # 如果涉及到拉取图片，避免系统认为有意干扰，每个间隔随机休息几秒
             sleepsecs = random.randint(0, 15)
             # print(f"{time.localtime()}随机休息{sleepsecs}秒……")
             time.sleep(sleepsecs)
-        
+
         conn.close()
 
     print()
 
 
+
+# %%
 def just4test():
     """
     用于测试。实际上是想看看怎么才能做得上pylint的俘虏！
@@ -204,6 +223,8 @@ def just4test():
     print(frddfttt)
 
 
+
+# %%
 def getctdf():
     owner = getownername()
     dbpath = Path("data")/ 'db'
@@ -216,6 +237,8 @@ def getctdf():
     return frdfromdb
 
 
+
+# %%
 def showwcsimply(inputdb: pd.DataFrame):
     frdfromdb = inputdb.copy(deep=True)
     # 用nickname填充remarkname为空的记录
@@ -233,10 +256,12 @@ def showwcsimply(inputdb: pd.DataFrame):
     outready['appendtime'] = outready['appendtime'].apply(lambda x: pd.to_datetime(x).strftime("%y-%m-%d %H:%M"))
     outdone = outready.groupby(['remarkname', 'appendtime']).first().sort_index(ascending=[True, False])
     outslim = outdone[['nickname', 'contactflag', 'signature', 'province', 'city']]
-    
+
     return outslim
 
 
+
+# %%
 if __name__ == '__main__':
 
     try:

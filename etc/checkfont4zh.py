@@ -2,30 +2,22 @@
 # ---
 # jupyter:
 #   jupytext:
-#     cell_metadata_filter: -all
 #     text_representation:
-#       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
 #       jupytext_version: 1.10.3
 # ---
 
-# %%
 """
 查询linux系统下的可用中文字体
 """
 
-# %%
 import subprocess
 from matplotlib.font_manager import FontManager
 import pathmagic
 
-# %%
 with pathmagic.context():
     from func.logme import log
 
 
-# %%
 def getavailablezhfont():
     """
     获取系统中安装的中文字体列表
@@ -44,7 +36,6 @@ def getavailablezhfont():
     for f in available:
         print(f'{f}')
 
-# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     getavailablezhfont()

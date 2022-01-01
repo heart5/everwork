@@ -2,24 +2,17 @@
 # ---
 # jupyter:
 #   jupytext:
-#     cell_metadata_filter: -all
 #     text_representation:
-#       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
 #       jupytext_version: 1.10.3
 # ---
 
-# %%
 """
 让微信常驻运行，并保留有效pkg文件以便下次热启动而不用重新扫码
 """
 
-# %%
 import os
 import shutil
 
-# %%
 import pathmagic
 with pathmagic.context():
     from func.first import dirmainpath, touchfilepath2depth
@@ -27,7 +20,6 @@ with pathmagic.context():
     from etc.guanliprocess import judgeprocess
 
 
-# %%
 def keeplivewebchat():
     srcdir = dirmainpath
     trtdir = dirmainpath / 'data' / 'webchat'
@@ -42,7 +34,6 @@ def keeplivewebchat():
         print(f"{stdout.read()}")
 
 
-# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     keeplivewebchat()

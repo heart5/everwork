@@ -2,15 +2,10 @@
 # ---
 # jupyter:
 #   jupytext:
-#     cell_metadata_filter: -all
 #     text_representation:
-#       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
 #       jupytext_version: 1.10.3
 # ---
 
-# %%
 import pathmagic
 with pathmagic.context():
     from func.logme import log
@@ -18,7 +13,6 @@ with pathmagic.context():
     from etc.battery_manage import batteryrecord2db
     from func.sysfunc import not_IPython
 
-# %%
 if __name__ == "__main__":
     if not_IPython():
         logstrouter = "运行文件\t%s" % __file__

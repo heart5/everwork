@@ -11,8 +11,9 @@
 #     name: python3
 # ---
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # # 获取IP地址
+# -
 
 # %%
 """
@@ -20,7 +21,6 @@
 """
 # %% [markdown]
 # ## 库引入
-
 # %%
 import socket
 # %%

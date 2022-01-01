@@ -3,9 +3,9 @@
 # jupyter:
 #   jupytext:
 #     text_representation:
-#       jupytext_version: 1.10.3
+#       jupytext_version: 1.13.4
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
@@ -22,6 +22,7 @@ import platform
 import uuid
 # import wmi_client_wrapper as wmi
 
+# %%
 import pathmagic
 with pathmagic.context():
     from func.logme import log
@@ -134,3 +135,5 @@ if __name__ == '__main__':
     print(f"{devicename}")
     if not_IPython() and is_log_details:
         log.info(f'文件\t{__file__}\t运行完毕。')
+
+# %%

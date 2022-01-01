@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+# %%
 """
 记录足迹
 """
 
+# %%
 from pylab import *
 
 import pathmagic
@@ -17,6 +19,7 @@ with pathmagic.context():
     from func.sysfunc import set_timeout, after_timeout, not_IPython
 
 
+# %%
 @set_timeout(240, after_timeout)
 @timethis
 def foot2record():
@@ -30,7 +33,7 @@ def foot2record():
     else:
         device_id = getdeviceid()
         setcfpoptionvalue(namestr, namestr, 'device_id', device_id)
-    
+
     txtfilename = str(dirmainpath / 'data' / 'ifttt' /
                       f'location_{device_id}.txt')
     print(txtfilename)
@@ -54,6 +57,7 @@ def foot2record():
     write2txt(txtfilename, itemnewr)
 
 
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'运行文件\t{__file__}……')    

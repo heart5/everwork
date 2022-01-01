@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# %%
 #
 # encoding:utf-8
 #
@@ -32,6 +33,9 @@ a7e84055-f075-44ab-8205-5a42f3f05284 汉阳办进出记录统计图表    hanyan
 
 """
 
+
+
+# %%
 # from imp4nb import *
 import datetime
 import matplotlib.pyplot as plt
@@ -55,6 +59,8 @@ with pathmagic.context():
     from func.first import dirmainpath, touchfilepath2depth
 
 
+
+# %%
 def jilugooglefile(filepath):
     filelist = [ff for ff in listdir(
         str(filepath)) if isfile(str(filepath / ff))]
@@ -82,6 +88,8 @@ def jilugooglefile(filepath):
     return dfout
 
 
+
+# %%
 def jilugoogledrive():
     # 验证登录
     # global dirmainpath
@@ -123,6 +131,9 @@ def jilugoogledrive():
 # tmpdf = jilugoogledrive()
 # -
 
+
+
+# %%
 def jilunote(noteinfos):
     """
     读取ifttt自动通过gmail转发至evernote生成的地段进出记录，统计作图展示
@@ -139,6 +150,8 @@ def jilunote(noteinfos):
     return itemstr
 
 
+
+# %%
 def wifitodf(itemstr, noteinfolistw):
     itemstrjoin = '\n'.join(itemstr)
     pattern = re.compile(
@@ -227,6 +240,8 @@ def wifitodf(itemstr, noteinfolistw):
     return dfout
 
 
+
+# %%
 def itemstodf(itemstr, noteinfos):
     itemstrjoin = '\n'.join(itemstr)
     # 生成英文的月份列表，组装正则模式，以便准确识别
@@ -270,6 +285,8 @@ def itemstodf(itemstr, noteinfos):
     return dfout
 
 
+
+# %%
 def jinchustat(jinchujiluall, noteinfos):
     """
     读取ifttt自动通过gmail转发至evernote生成的地段进出记录，统计作图展示
@@ -347,6 +364,8 @@ def jinchustat(jinchujiluall, noteinfos):
     imglist2note(get_notestore(), imglist, destguid, notetitle, hout)
 
 
+
+# %%
 def jinchustatdo():
     # items = getcfp('everlife')[0].items('impinfolist')
     noteinfolistinside = []
@@ -418,6 +437,8 @@ def jinchustatdo():
         # raise eee
 
 
+
+# %%
 def jinchustattimer(jiangemiao):
     jinchustatdo()
 
@@ -427,6 +448,8 @@ def jinchustattimer(jiangemiao):
     timer_jinchu.start()
 
 
+
+# %%
 if __name__ == '__main__':
     # findnotefromnotebook(token, 'c068e01f-1a7a-4e65-b8e4-ed93eed6bd0b', '统计')
 
