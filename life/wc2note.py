@@ -16,11 +16,26 @@ import re
 import xlsxwriter
 import pandas as pd
 from pathlib import Path
+from datetime import datetime
+
+import pathmagic
+with pathmagic.context():
+    from func.first import getdirmain, touchfilepath2depth
+    from func.logme import log
+    from etc.getid import getdeviceid
+    from func.sysfunc import not_IPython
+    from func.evernttest import getinivaluefromnote, getnoteresource, \
+        gettoken, get_notestore, getnotecontent, updatereslst2note
+    from filedatafunc import getfilemtime
 
 
 # %%
 def items2df(fl):
-    content = open(fl, 'r').read()
+    try:
+        content = open(fl, 'r').read()
+    except Exception as e:
+        log.critical(f"文件{fl}读取时出现错误，返回空的pd.DataFrame")
+        return pd.DataFrame()
 #     ptn = re.compile("(^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\t(True|False)\t(\S+)\t(\S+)\t", re.M)
     ptn = re.compile("(^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\t(True|False)\t([^\t]+)\t(\w+)\t", re.M)
     itemlst = re.split(ptn, content)
@@ -38,46 +53,57 @@ def items2df(fl):
 
 # %%
 def txtfiles2dfdict(wcdatapath):
-    dfdict = dict()
     fllst = [f for f in os.listdir(wcdatapath) if f.startswith("chatitems")]
+    
+    def getownerfromfilename(fn):
+        """
+        从文件名中获取账号
+        """
+        ptn = re.compile("\((\w*)\)")
+        ac = ac if (ac := re.search(ptn, fn).groups()[0]) not in ['', 'None'] else '白晔峰'
+        return ac
+
+    names = list(set([getownerfromfilename(nm) for nm in fllst]))
+    print(names)
+    # 如果设置为new，则找到每个账号的最新记录文件处理，否则是全部记录文件
+    if (datafilesnew := getinivaluefromnote('wcitems', 'datafiles')) == 'new':
+        nametimedict = dict()
+        for nm in names:
+            nametimedict[f"{nm}_newtime"] = datetime.fromtimestamp(0)
+        for fl in fllst:
+            flmtime = getfilemtime(wcdatapath / fl)
+            accounttmp = getownerfromfilename(fl)
+            if flmtime > nametimedict[f"{accounttmp}_newtime"]:
+                nametimedict[f"{accounttmp}_newtime"] = flmtime
+                nametimedict[f"{accounttmp}_filename"] = fl
+        fllst = [nametimedict[f"{nm}_filename"] for nm in names]
+        fllst = [v for (k, v) in nametimedict.items() if k.endswith('filename')]
+
+    dfdict = dict()
     for fl in fllst[::-1]:
         rs1 = re.search("\((\w*)\)", fl)
-        if (account := rs1.groups()[0]) in ['', 'None']:
-            account = "白晔峰"
+        if rs1 is None:
+            log.critical(f"记录文件《{fl}》的文件名不符合规范，跳过")
+            continue
+        account = getownerfromfilename(fl)
         dfinner = items2df(wcdatapath / fl)
-        print(f"{account}\t{dfinner.shape[0]}", end="\t")
+        print(f"{fl}\t{getfilemtime(wcdatapath / fl).strftime('%F %T')}\t{account}\t{dfinner.shape[0]}", end="\t")
         if account in dfdict.keys():
             dfall = dfdict[account].append(dfinner)
             dfall = dfall.drop_duplicates().sort_values(['time'], ascending=False)
-            print(f"{dfall.shape[0]}\t{fl}")
+            print(f"{dfall.shape[0]}")
             dfdict.update({account:dfall})
         else:
             dfall = dfinner.drop_duplicates().sort_values(['time'], ascending=False)
-            print(f"{dfall.shape[0]}\t{fl}")
+            print(f"{dfall.shape[0]}")
             dfdict[account] = dfall
 
     return dfdict
 
 
 # %%
-wcdatapath = Path("../data/webchat")
-dfdict = txtfiles2dfdict(wcdatapath)
-
-# %%
-for k in dfdict:
-    print(f"{k}\t{dfdict[k].shape[0]}")
-
-# %%
-name_byf = "白晔峰"
-name_heart5 = "heart5"
-dfbyf = dfdict[name_byf]
-dfheart5 = dfdict[name_heart5]
-filepath_byf = wcdatapath / f"{name_byf}.xlsx"
-filepath_heart5 = wcdatapath / f"{name_heart5}.xlsx"
-
-
-# %%
 def getdaterange(start, end):
+    start = start + pd.Timedelta(-1, 'sec')
     if start.strftime("%Y-%m") == end.strftime('%Y-%m'):
         drlst = [start, end]
     else:
@@ -87,61 +113,40 @@ def getdaterange(start, end):
         drlst.insert(0, start)
         drlst.append(end)
     
-    print(drlst)
+    log.info(f"时间范围横跨{len(drlst) - 1}个月")
     return drlst
 
 
 # %%
-dftimestart = dfbyf['time'].min()
-dftimeend = dfbyf['time'].max()
-dr = getdaterange(dftimestart, dftimeend)
+def splitdf(name, df, wcdatapath):
+    dftimestart = df['time'].min()
+    dftimeend = df['time'].max()
+    dr = getdaterange(dftimestart, dftimeend)
+
+    for i in range(len(dr) - 1):
+        dftmp = df[(df.time > dr[i]) & (df.time <= dr[i + 1])]
+        if dftmp.shape[0] != 0:
+            nianyue = dftmp['time'].iloc[0].strftime("%y%m")
+            dftmp.to_excel(wcdatapath / f"wcitems_{name}_{nianyue}.xlsx", engine='xlsxwriter', index=False)
+            print(i, nianyue, dr[i], dr[i + 1], dftmp.shape[0])
+
+
 
 # %%
-for i in range(len(dr) - 1):
-    dftmp = dfbyf[(dfbyf.time >= dr[i]) & (dfbyf.time <= dr[i + 1])]
-    print(i, dr[i], dr[i + 1], dftmp.shape[0])
+if __name__ == '__main__':
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}')
 
-# %%
-dftmp
+    wcdatapath = getdirmain() / 'data' / 'webchat'
+    dfdict = txtfiles2dfdict(wcdatapath)
 
-# %%
-dfbyf
+    for k in dfdict:
+        dfinner = dfdict[k]
+        print(f"{k}\t{dfinner.shape[0]}", end='\n\n')
+        splitdf(k, dfinner, wcdatapath)
+        print("\n")
 
-# %%
-dfheart5['time'].duplicated()
-
-# %%
-dfbyf[dfbyf['time'].duplicated()]
-
-# %%
-lstunique = dfbyf['sender'].unique()
-print(type(lstunique))
-lstunique = sorted(lstunique)
-for tp in  lstunique[:20]:
-    print(tp)
-
-# %%
-dfbyf[dfbyf.content.str.contains("加入了群聊")].iloc[:10]
-
-# %%
-dfbyf[dfbyf.sender.str.contains('微信运动')]
-
-# %%
-dfbyf.describe()
-
-# %%
-dfbyf.iloc[32767]
-
-# %%
-dfbyf.to_excel(filepath_byf, engine='xlsxwriter', index=False)
-
-# %%
-dfdict['heart5'].to_excel(wcdatapath / 'heart5.xlsx', index=False)
-
-# %%
-dftmp[dftmp.sender == '徐晓锋']
-
-# %%
-dftmp[~dftmp.sender.str.contains("群")]
+    if not_IPython():
+        log.info(f"文件\t{__file__}\t运行结束。")
 
 # %%
