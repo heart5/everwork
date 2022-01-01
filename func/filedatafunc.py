@@ -1,4 +1,15 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       jupytext_version: 1.13.4
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
 # %%
 """
 文件、数据相关功能函数集
@@ -21,6 +32,11 @@ with pathmagic.context():
     from func.first import dbpathdingdanmingxi, dirmainpath, getdirmain, touchfilepath2depth
     from func.logme import log
     from func.configpr import getcfp
+
+
+# %%
+def getfilemtime(fl: Path):
+    return pd.to_datetime(datetime.datetime.fromtimestamp(fl.stat().st_mtime))
 
 
 # %%
