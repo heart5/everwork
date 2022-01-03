@@ -33,7 +33,7 @@ with pathmagic.context():
     from func.configpr import setcfpoptionvalue, getcfpoptionvalue
     from func.evernttest import getinivaluefromnote, getnoteresource, \
         gettoken, get_notestore, getnotecontent, updatereslst2note, \
-        createnotebook, makenote2, findnotebookfromevernote
+        createnotebook, makenote2, findnotebookfromevernote, findnotefromnotebook
     from filedatafunc import getfilemtime as getfltime
 
 
@@ -196,9 +196,14 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
     dftest_desc = f"更新时间：{timenowstr}\t记录时间自{dftest['time'].min()}至{dftest['time'].max()}，共有{dftest.shape[0]}条，来自主机：{getdevicename()}"
     
     if (dftfileguid := getcfpoptionvalue('everwcitems', dftfilename, 'guid')) is None:
-        first_note_desc = f"账号\t{None}\n记录数量\t0" # 初始化内容头部，和正常内容头部格式保持一致
-        first_note_body = f"<pre>{first_note_desc}\n---\n\n本笔记创建于{timenowstr}，来自于主机：{getdevicename()}</pre>"
-        dftfileguid = makenote2(dftfilename, notebody=first_note_body, parentnotebookguid=notebookguid).guid
+        findnotelst = findnotefromnotebook(notebookguid, dftfilename, notecount=1)
+        if len(findnotelst) == 1:
+            dftfileguid = findnotelst[0][0]
+            log.info(f"数据文件《{dftfilename}》的笔记已经存在，取用")
+        else:
+            first_note_desc = f"账号\t{None}\n记录数量\t0" # 初始化内容头部，和正常内容头部格式保持一致
+            first_note_body = f"<pre>{first_note_desc}\n---\n\n本笔记创建于{timenowstr}，来自于主机：{getdevicename()}</pre>"
+            dftfileguid = makenote2(dftfilename, notebody=first_note_body, parentnotebookguid=notebookguid).guid
         setcfpoptionvalue('everwcitems', dftfilename, 'guid', str(dftfileguid))
     if (itemsnum_old := getcfpoptionvalue('everwcitems', dftfilename, 'itemsnum')) is None:
         itemsnum_old = 0
@@ -207,6 +212,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
         log.info(f"{dftfilename}的记录数量和笔记相同，跳过")
         return
     
+    print(dftfileguid)
     reslst = getnoteresource(dftfileguid)
     if len(reslst) != 0:
         dfromnote = pd.DataFrame()
