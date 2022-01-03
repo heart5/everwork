@@ -1,12 +1,27 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       jupytext_version: 1.13.4
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
+# %% [markdown]
 # # evernote相关功能函数集
 
+# %%
 """
 evernote或印象笔记相关功能函数
 """
 
+# %% [markdown]
 # ## 引入重要库
 
+# %%
 import os
 import sys
 import binascii
@@ -28,8 +43,10 @@ from evernote.edam.notestore.NoteStore import NoteFilter, NotesMetadataResultSpe
 from evernote.edam.type.ttypes import Note, NoteAttributes, Resource, ResourceAttributes, Data, Notebook
 from evernote.edam.userstore.constants import EDAM_VERSION_MAJOR, EDAM_VERSION_MINOR
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue, removesection
     from func.first import dirlog, dirmainpath, touchfilepath2depth
@@ -39,12 +56,16 @@ with pathmagic.context():
     from func.datetimetools import timestamp2str
     # from etc.getid import getid
 
+# %% [markdown]
 # print(f"{__file__} is loading now...")
 
+# %% [markdown]
 # ## 函数集合
 
+# %% [markdown]
 # ### def gettoken():
 
+# %%
 def gettoken():
     if (china := getcfpoptionvalue('everwork', 'evernote', 'china')):
         # print(f"china value:\t{china}")
@@ -56,8 +77,10 @@ def gettoken():
     return auth_token
 
 
+# %% [markdown]
 # ### def get_notestore(forcenew=False):
 
+# %%
 def get_notestore(forcenew=False):
     """
     获取notestore实例以供使用
@@ -150,13 +173,16 @@ def get_notestore(forcenew=False):
     return outns
 
 
+# %%
 note_store = None
 en_username = None
 
 
-# ###  def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
+# %% [markdown]
+# ###  def imglist2note(notestore, reslist, noteguid, notetitle, neirong='', parentnotebookguid=None):
 
-def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
+# %%
+def imglist2note(notestore, reslist, noteguid, notetitle, neirong='', parentnotebookguid=None):
     """
     更新note内容，可以包含图片等资源类文件列表
     :param notestore:
@@ -175,6 +201,8 @@ def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
     note.attributes = noteattrib
     note.guid = noteguid.lower()
     note.title = notetitle
+    if (parentnotebookguid is not None) and (re.search("\w{8}(-\w{4}){3}-\w{12}", parentnotebookguid) is not None):
+        note.notebookGuid = parentnotebookguid
 
     # To include an attachment such as an image in a note, first create a Resource
     # for the attachment. At a minimum, the Resource contains the binary attachment
@@ -195,7 +223,8 @@ def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
     for res in reslist:
         """
         必须要重新构建一个Data（），否则内容不会变化
-        Data只有三个域：bodyHash（用MD5进行hash得到的值）、size（body的字节长度）和body（字节形式的内容本身）
+        Data只有三个域：bodyHash（用MD5进行hash得到的值）、size（body的字节长度）
+        和body（字节形式的内容本身）
         """
         resactual = open(res, 'rb').read()
         md5 = hashlib.md5()
@@ -206,7 +235,8 @@ def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
         data.bodyHash = reshash
         data.body = resactual
         """
-        Resource需要常用的域：guid、noteGuid、data（指定上面的Data）、mime（需要设定）、attributes（可以设定附件的原文件名）
+        Resource需要常用的域：guid、noteGuid、data（指定上面的Data）、
+        mime（需要设定）、attributes（可以设定附件的原文件名）
         """
         resource = Resource()
 #         resource.mime = 'image/png'
@@ -246,8 +276,11 @@ def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
                 # print (str1)
                 str1 = str1[2:-1]  # cd34b4b6c8d9279217b03c396ca913df
                 print(resource.mime)
-                nbody += "<en-media type=\"%s\" hash=\"%s\" align=\"center\" longdesc=\"%s\" /><br />%s<hr />" % (
-                    resource.mime, str1, resource.attributes.fileName, resource.attributes.fileName)
+                nbody += "<en-media type=\"%s\" hash=\"%s\" " \
+                    "align=\"center\" longdesc=\"%s\" /><br />%s<hr />" % (
+                            resource.mime, str1, 
+                            resource.attributes.fileName, 
+                            resource.attributes.fileName)
     # neirong= "<pre>" + neirong + "</pre>"
 
     # 去除控制符
@@ -281,9 +314,12 @@ def imglist2note(notestore, reslist, noteguid, notetitle, neirong=''):
     updatenote(note)
 
 
-# ###  def updatereslst2note(reslist, guidinput, title=None, neirong=None, filenameonly=False):
+# %% [markdown]
+# ###  def updatereslst2note(reslist, guidinput, title=None, neirong=None, filenameonly=False, parentnotebookguid=None):
 
-def updatereslst2note(reslist, guidinput, title=None, neirong=None, filenameonly=False):
+# %%
+def updatereslst2note(reslist, guidinput, title=None, neirong=None, 
+                      filenameonly=False, parentnotebookguid=None):
     """
     更新note附件和文字内容，附件只更新或添加，不影响其它附件，可以包含图片等资源类文件列表
     :param notestore:
@@ -299,32 +335,39 @@ def updatereslst2note(reslist, guidinput, title=None, neirong=None, filenameonly
         noteattrib.author = en_username
         print(f"I'm here while updating the note for special res, for evernote user {en_username}")
 
-    print(reslist)
     resfnonlylist = [os.path.basename(innerpath) for innerpath in reslist]  # 只取用文件名，保证名称唯一
-    print(resfnonlylist)
+    print(f"输入资源短文件名列表：\t{resfnonlylist}")
     reslist = [os.path.abspath(innerpath) for innerpath in reslist]  # 取用绝对路径，保证名称唯一
-    print(reslist)
+    print(f"输入资源长文件名列表：\t{reslist}")
 
     noteinput = getnoteall(guidinput)
     note = Note()
     note.attributes = noteattrib
     note.guid = guidinput
+
+    if (parentnotebookguid is not None) and (re.search("\w{8}(-\w{4}){3}-\w{12}", parentnotebookguid) is not None):
+        note.notebookGuid = parentnotebookguid
+        print(parentnotebookguid)
     if title is None:
         note.title = noteinput.title
     else:
         note.title = title
 
-    if filenameonly:
-        notereslstclean = [res for res in noteinput.resources if res.attributes.fileName not in resfnonlylist]
+#     print(f"inputnote's resources is {noteinput.resources}")
+    if (nirs :=noteinput.resources) is not None:
+        if filenameonly:
+            notereslstclean = [res for res in nirs if res.attributes.fileName not in resfnonlylist]
+        else:
+            notereslstclean = [res for res in nirs if res.attributes.fileName not in reslist]
+        print(f"待操作笔记中的资源文件共有{len(nirs)}个。")
     else:
-        notereslstclean = [res for res in noteinput.resources if res.attributes.fileName not in reslist]
-    print(f"待操作笔记的res共有{len(noteinput.resources)}个。")
+        notereslstclean = list()
     """
     必须重新构建note.resources，否则内容不会改变
     """
     note.resources = []
-    for res in notereslstclean:
-        note.resources.append(res)
+    for res1 in notereslstclean:
+        note.resources.append(res1)
 
     # To include an attachment such as an image in a note, first create a Resource
     # for the attachment. At a minimum, the Resource contains the binary attachment
@@ -370,19 +413,19 @@ def updatereslst2note(reslist, guidinput, title=None, neirong=None, filenameonly
         resource.attributes = resattrib
         note.resources.append(resource)
 
-    print(f"笔记res处理后共有{len(note.resources)}个。")
+    print(f"笔记中资源文件处理后共有{len(note.resources)}个。")
     # The content of an Evernote note is represented using Evernote Markup Language
     # (ENML). The full ENML specification can be found in the Evernote API Overview
     # at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
     nbody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
     nbody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
     nbody += "<en-note>"
-    if note.resources:
+    if ((nss :=note.resources) is not None) & (len(nss) != 0):
         # To display the Resource as part of the note's content, include an <en-media>
         # tag in the note's ENML content. The en-media tag identifies the corresponding
         # Resource using the MD5 hash.
         # nBody += "<br />" * 2
-        for resource in note.resources:
+        for resource in nss:
             #             print(resource.guid)
             if resource.mime.startswith('image') or True:
                 hexhash = binascii.hexlify(resource.data.bodyHash)
@@ -414,6 +457,8 @@ def updatereslst2note(reslist, guidinput, title=None, neirong=None, filenameonly
     # Finally, send the new note to Evernote using the updateNote method
     # The new Note object that is returned will contain server-generated
     # attributes such as the new note's unique GUID.
+#     print(f"I'm here while note'updating is ready.\t{note.guid}")
+#     p_noteattributeundertoken(noteinput)
     @trycounttimes2('evernote服务器，更新笔记。')
     def updatenote(notesrc):
         nsinner = get_notestore()
@@ -430,8 +475,10 @@ def updatereslst2note(reslist, guidinput, title=None, neirong=None, filenameonly
     updatenote(note)
 
 
+# %% [markdown]
 # ###  def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True, setwidth=True):
 
+# %%
 def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True,
                        setwidth=True):
     colwidth = pd.get_option('max_colwidth')
@@ -450,8 +497,10 @@ def tablehtml2evernote(dataframe, tabeltitle='表格标题', withindex=True,
     return outstr
 
 
+# %% [markdown]
 # ###  def findnotefromnotebook(notebookguid, titlefind='', notecount=10000):
 
+# %%
 def findnotefromnotebook(notebookguid, titlefind='', notecount=10000):
     """
     列出笔记本中包含某关键词的笔记信息
@@ -506,8 +555,10 @@ def findnotefromnotebook(notebookguid, titlefind='', notecount=10000):
     return items
 
 
+# %% [markdown]
 # ###  def getnoteall(guid: str):
 
+# %%
 @trycounttimes2('evernote服务器')
 def getnoteall(guid: str):
     """
@@ -523,8 +574,10 @@ def getnoteall(guid: str):
     return note
 
 
+# %% [markdown]
 # ###  def getnotecontent(guid: str):
 
+# %%
 @trycounttimes2('evernote服务器')
 def getnotecontent(guid: str):
     """
@@ -539,8 +592,10 @@ def getnotecontent(guid: str):
     return soup
 
 
+# %% [markdown]
 # ###  def getnoteresource(guid: str):
 
+# %%
 @trycounttimes2('evernote服务器')
 def getnoteresource(guid: str):
     """
@@ -552,6 +607,9 @@ def getnoteresource(guid: str):
     note = ns.getNote(gettoken(), guid, True, True, False, False)
     evernoteapijiayi()
     resultlst = list()
+    if  note.resources is None:
+        log.critical(f"笔记{guid}中没有包含资源文件，返回空列表")
+        return list()
     for resitem in note.resources:
         sonlst = list()
         sonlst.append(resitem.attributes.fileName)
@@ -563,8 +621,10 @@ def getnoteresource(guid: str):
     return resultlst
 
 
+# %% [markdown]
 # ###  def createnotebook(nbname: str, stack='fresh'):
 
+# %%
 def createnotebook(nbname: str, stack='fresh'):
     notebook = Notebook()
     notebook.name = nbname
@@ -573,9 +633,12 @@ def createnotebook(nbname: str, stack='fresh'):
     return get_notestore().createNotebook(gettoken(), notebook)
 
 
+# %% [markdown]
 # ###  def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
 
-def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
+# %%
+def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲食品经营专家',
+             parentnotebook=None):
     """
     创建一个note
     :param tokenmn:
@@ -628,9 +691,11 @@ def makenote(tokenmn, notestore, notetitle, notebody='真元商贸——休闲�
             exit(2)
 
 
-# ### def makenote2(notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
+# %% [markdown]
+# ### def makenote2(notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebookguid=None):
 
-def makenote2(notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebook=None):
+# %%
+def makenote2(notetitle, notebody='真元商贸——休闲食品经营专家', parentnotebookguid=None):
     """
     创建note，封装token和notestore
     :param notetitle:
@@ -650,12 +715,14 @@ def makenote2(notetitle, notebody='真元商贸——休闲食品经营专家', 
     ournote.content = nbody
 
     # parentNotebook is optional; if omitted, default notebook is used
-    if type(parentnotebook) is str:
+    if type(parentnotebookguid) is str:
         try:
-            parentnotebook = notestore.getNotebook(gettoken(), parentnotebook)
+            parentnotebook = notestore.getNotebook(gettoken(), parentnotebookguid)
         except:
             log.critical(f"新建笔记的笔记本guid属性无效，设置为默认")
             parentnotebook = None
+    else:
+        parentnotebook = None
     if parentnotebook and hasattr(parentnotebook, 'guid'):
         ournote.notebookGuid = parentnotebook.guid
 
@@ -686,8 +753,10 @@ def makenote2(notetitle, notebody='真元商贸——休闲食品经营专家', 
             exit(2)
 
 
+# %% [markdown]
 # ### def evernoteapijiayi():
 
+# %%
 def evernoteapijiayi():
     """
     evernote api调用次数加一。结合api调用限制，整点或达到限值（貌似是300次每小时）则重构一个继续干。
@@ -727,8 +796,10 @@ def evernoteapijiayi():
         log.critical(f'休息{sleepsecs:d}秒，重新构造了一个服务器连接{note_store}继续干……')
 
 
+# %% [markdown]
 # ### def evernoteapijiayi_test():
 
+# %%
 def evernoteapijiayi_test():
     calllink = [re.findall("^<FrameSummary file (.+), line (\d+) in (.+)>$", str(line)) for line in traceback.extract_stack()]
     if len(calllink) > 0:
@@ -761,8 +832,10 @@ def evernoteapijiayi_test():
         log.critical(f'休息{sleepsecs:d}秒，重新构造了一个服务器连接{note_store}继续干……{calllinks}')
 
 
+# %% [markdown]
 # ### def p_notebookattributeundertoken(notebook):
 
+# %%
 # @use_logging()
 def p_notebookattributeundertoken(notebook):
     """
@@ -808,8 +881,10 @@ def p_notebookattributeundertoken(notebook):
     return rstdict
 
 
+# %% [markdown]
 # ### def p_noteattributeundertoken(note):
 
+# %%
 def p_noteattributeundertoken(note):
     """
     测试笔记（note）数据结构每个属性的返回值,通过findNotesMetadata函数获取，开发口令（token）的方式调用返回如下:
@@ -818,20 +893,24 @@ def p_noteattributeundertoken(note):
     """
     print('guid\t%s' % note.guid)  #
     print('标题\t%s' % note.title)  #
-    print('内容长度\t%d' % note.contentLength)  # 762
+    print(f'内容长度\t{note.contentLength}')  # 762
     # 这种权限的调用没有返回这个值，报错；NoteStore.getNoteContent()也无法解析
     print('内容\t' + note.content)
     print('内容哈希值\t%s' % note.contentHash)  # 8285
-    # 2017-09-04 22:39:51
-    print('创建时间\t%s' % timestamp2str(int(note.created / 1000)))
-    # 2017-09-07 06:38:47
-    print('更新时间\t%s' % timestamp2str(int(note.updated / 1000)))
-    print('删除时间\t%s' % note.deleted)  # 这种权限的调用返回None
+    if note.created:
+        # 2017-09-04 22:39:51
+        print('创建时间\t%s' % timestamp2str(int(note.created / 1000)))
+    if note.updated:
+        # 2017-09-07 06:38:47
+        print('更新时间\t%s' % timestamp2str(int(note.updated / 1000)))
+    if note.deleted:
+        print('删除时间\t%s' % note.deleted)  # 这种权限的调用返回None
     print('活跃\t%s' % note.active)  # True
-    print('更新序列号\t%d' % note.updateSequenceNum)  # 173514
+    if note.updateSequenceNum:
+        print('更新序列号\t%d' % note.updateSequenceNum)  # 173514
     # 2c8e97b5-421f-461c-8e35-0f0b1a33e91c
     print('所在笔记本的guid\t%s' % note.notebookGuid)
-    print('标签的guid表\t%s' % note.tagGuids)  # 这种权限的调用返回None
+    print('标签的guid\t%s' % note.tagGuids)  # 这种权限的调用返回None
     print('资源表\t%s' % note.resources)  # 这种权限的调用返回None
     print('属性\t%s' % note.attributes)
     # NoteAttributes(lastEditorId=139947593, placeName=None, sourceURL=None, classifications=None,
@@ -847,9 +926,11 @@ def p_noteattributeundertoken(note):
     # print ('范围\t%s' % note.limits) #这种权限的调用没有返回这个值，报错AttributeError: 'Note' object has no attribute 'limits'
 
 
+# %% [markdown]
 # ### def findnotebookfromevernote():
 
-def findnotebookfromevernote():
+# %%
+def findnotebookfromevernote(ntname=None):
     """
     列出所有笔记本
     :return: rstdf，
@@ -875,12 +956,17 @@ def findnotebookfromevernote():
 
     rstdf['默认笔记本'] = rstdf['默认笔记本'].astype(bool)
     rstdf.set_index('guid', inplace=True)
+    
+    if ntname is not None:
+        rstdf = rstdf[rstdf.名称 == ntname]
 
     return rstdf
 
 
+# %% [markdown]
 # ### def readinifromnote():
 
+# %%
 @set_timeout(180, after_timeout)
 @trycounttimes2('evernote服务器', maxtimes=20, maxsecs=10)
 def readinifromnote():
@@ -931,15 +1017,18 @@ def readinifromnote():
     log.info(f'配置笔记内容有变化，更新本地化的ini配置文件。')
 
 
+# %%
 def getinivaluefromnote(section, option):
     readinifromnote()
 
     return getcfpoptionvalue('everinifromnote', section, option)
 
 
+# %%
 def writeini2note():
     pass
 
+# %%
 def findsomenotest2showornote(nbguid, keyword, newnote=False):
     """
     获取指定笔记本中主题包含某关键词的笔记
@@ -958,6 +1047,7 @@ def findsomenotest2showornote(nbguid, keyword, newnote=False):
     return notesfind
 
 
+# %%
 def getsampledffromdatahouse(keyword: str, notebookstr='datahouse', firstcolumn=True):
     """
     封装出直接获取示例数据集的函数
@@ -976,14 +1066,17 @@ def getsampledffromdatahouse(keyword: str, notebookstr='datahouse', firstcolumn=
     else:
         return pd.DataFrame(soupstrlst)
 
+# %% [markdown]
 # token = getcfpoptionvalue('everwork', 'evernote', 'token')
 # print(token)
 # ENtimes, ENAPIlasttime = enapistartlog()
 # evernoteapiclearatzero()
 
 
+# %% [markdown]
 # # 主函数
 
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'开始运行文件\t{__file__}……')
@@ -992,25 +1085,30 @@ if __name__ == '__main__':
     evernoteapijiayi_test()
     # readinifromnote()
     # writeini()
-    # ntdf = findnotebookfromevernote()
-    # print(ntdf)
+#     ntdf = findnotebookfromevernote('小菩萨')
+#     print(ntdf)
     # print(getsampledffromdatahouse('火界'))
 
     # 查找主题包含关键词的笔记
-#     notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
+    notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
 #     shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
 #     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
-#     findnoteguidlst = findnotefromnotebook(notification_guid, titlefind='tmux.conf', notecount=1433)
-#     print(len(findnoteguidlst))
+    findnoteguidlst = findnotefromnotebook(notification_guid, titlefind='tmux.conf', notecount=14)
+    print(len(findnoteguidlst))
+    testnote = nost.getNote(gettoken(), findnoteguidlst[-1][0], True, True, True, True)
+#     p_noteattributeundertoken(testnote)
+    file= dirmainpath / 'data' / 'webchat' / 'wcitems_heart5_2108.xlsx'
+    updatereslst2note([os.path.abspath(file)], testnote.guid, neirong="This is evil.", \
+                      filenameonly=True, parentnotebookguid=notification_guid)
 #     print(findnoteguidlst)
 #     findnoteguidlst = findsomenotest2showornote(notification_guid, 'data')
 #     print(findnoteguidlst)
 
     # 测试包含文件资源的笔记更新
-    samplenoteguid = "962f0358-7c7a-4dfd-968d-14dd161a3a39"
-    tpath = dirmainpath / 'data' / 'muse'
-    pylst = [tpath / fn for fn in os.listdir(tpath) if fn.endswith(".xls") or fn.endswith('.xlsx')]
-    updatereslst2note(pylst, samplenoteguid, title="火界游戏数据", filenameonly=True)
+#     samplenoteguid = "962f0358-7c7a-4dfd-968d-14dd161a3a39"
+#     tpath = dirmainpath / 'data' / 'muse'
+#     pylst = [tpath / fn for fn in os.listdir(tpath) if fn.endswith(".xls") or fn.endswith('.xlsx')]
+#     updatereslst2note(pylst, samplenoteguid, title="火界游戏数据", filenameonly=True)
 
     # 显示笔记内容，源码方式
     # '39c0d815-df23-4fcc-928d-d9193d5fff93' 转账
@@ -1030,3 +1128,4 @@ if __name__ == '__main__':
     if not_IPython():
         log.info(f"完成文件{__file__}\t的运行")
 
+# %%
