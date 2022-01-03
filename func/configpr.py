@@ -1,4 +1,15 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       jupytext_version: 1.13.4
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
 """
 配置处理器(ConfigParser)相关的功能函数
 """
