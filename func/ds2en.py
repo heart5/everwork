@@ -11,14 +11,7 @@
 # ---
 
 # %% [markdown]
-# # 数据集动态存储至evernote（不同主机针对同一类笔记）
-
-# %%
-"""
-date time function related
-getstartdate
-gethumantimedelay
-"""
+# # 火界游戏数据集动态存储至evernote（不同主机针对同一类笔记）
 
 # %% [markdown]
 # # 引入库
