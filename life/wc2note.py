@@ -10,6 +10,12 @@
 #     name: python3
 # ---
 
+# %% [markdown]
+# # 微信聊天记录文本文件智能远程存储 
+
+# %% [markdown]
+# ## 库导入
+
 # %%
 import os
 import re
@@ -22,12 +28,20 @@ import pathmagic
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
     from func.logme import log
-    from etc.getid import getdeviceid
+    from etc.getid import getdevicename
     from func.sysfunc import not_IPython
+    from func.configpr import setcfpoptionvalue, getcfpoptionvalue
     from func.evernttest import getinivaluefromnote, getnoteresource, \
-        gettoken, get_notestore, getnotecontent, updatereslst2note
-    from filedatafunc import getfilemtime
+        gettoken, get_notestore, getnotecontent, updatereslst2note, \
+        createnotebook, makenote2, findnotebookfromevernote
+    from filedatafunc import getfilemtime as getfltime
 
+
+# %% [markdown]
+# ## 功能函数集
+
+# %% [markdown]
+# ### def items2df(fl)
 
 # %%
 def items2df(fl):
@@ -51,9 +65,12 @@ def items2df(fl):
     return dfout
 
 
+# %% [markdown]
+# ### def txtfiles2dfdict(wcdatapath)
+
 # %%
-def txtfiles2dfdict(wcdatapath):
-    fllst = [f for f in os.listdir(wcdatapath) if f.startswith("chatitems")]
+def txtfiles2dfdict(dpath):
+    fllst = [f for f in os.listdir(dpath) if f.startswith("chatitems")]
     
     def getownerfromfilename(fn):
         """
@@ -71,7 +88,7 @@ def txtfiles2dfdict(wcdatapath):
         for nm in names:
             nametimedict[f"{nm}_newtime"] = datetime.fromtimestamp(0)
         for fl in fllst:
-            flmtime = getfilemtime(wcdatapath / fl)
+            flmtime = getfilemtime(dpath / fl)
             accounttmp = getownerfromfilename(fl)
             if flmtime > nametimedict[f"{accounttmp}_newtime"]:
                 nametimedict[f"{accounttmp}_newtime"] = flmtime
@@ -86,20 +103,24 @@ def txtfiles2dfdict(wcdatapath):
             log.critical(f"记录文件《{fl}》的文件名不符合规范，跳过")
             continue
         account = getownerfromfilename(fl)
-        dfinner = items2df(wcdatapath / fl)
-        print(f"{fl}\t{getfilemtime(wcdatapath / fl).strftime('%F %T')}\t{account}\t{dfinner.shape[0]}", end="\t")
+        dfin = items2df(dpath / fl)
+        print(f"{fl}\t{getfltime(dpath / fl).strftime('%F %T')}\t " \
+            f"{account}\t{dfin.shape[0]}", end="\t")
         if account in dfdict.keys():
-            dfall = dfdict[account].append(dfinner)
+            dfall = dfdict[account].append(dfin)
             dfall = dfall.drop_duplicates().sort_values(['time'], ascending=False)
             print(f"{dfall.shape[0]}")
             dfdict.update({account:dfall})
         else:
-            dfall = dfinner.drop_duplicates().sort_values(['time'], ascending=False)
+            dfall = dfin.drop_duplicates().sort_values(['time'], ascending=False)
             print(f"{dfall.shape[0]}")
             dfdict[account] = dfall
 
     return dfdict
 
+
+# %% [markdown]
+# ### def getdaterange(start, end)
 
 # %%
 def getdaterange(start, end):
@@ -117,34 +138,122 @@ def getdaterange(start, end):
     return drlst
 
 
+# %% [markdown]
+# ### def splitdf(name, df, wcdatapath)
+
 # %%
-def splitdf(name, df, wcdatapath):
+def splitdf(name, df, dpath):
     dftimestart = df['time'].min()
     dftimeend = df['time'].max()
     dr = getdaterange(dftimestart, dftimeend)
 
+    outlst = list()
     for i in range(len(dr) - 1):
-        dftmp = df[(df.time > dr[i]) & (df.time <= dr[i + 1])]
-        if dftmp.shape[0] != 0:
-            nianyue = dftmp['time'].iloc[0].strftime("%y%m")
-            dftmp.to_excel(wcdatapath / f"wcitems_{name}_{nianyue}.xlsx", engine='xlsxwriter', index=False)
-            print(i, nianyue, dr[i], dr[i + 1], dftmp.shape[0])
+        dfp = df[(df.time > dr[i]) & (df.time <= dr[i + 1])]
+        if dfp.shape[0] != 0:
+            ny = dfp['time'].iloc[0].strftime("%y%m")
+            filename = dpath / f"wcitems_{name}_{ny}.xlsx"
+            if os.path.exists(filename):
+                dftmp = pd.read_excel(filename)
+                if dftmp.shape[0] != dfp.shape[0]:
+                    logstr = f"{filename}文件存在且有{dftmp.shape[0]}条记录，" \
+                        f"新获取的DataFrame有{dfp.shape[0]}条记录，覆盖写入新数据记录。"
+                    log.info(logstr)
+                    dfp.to_excel(filename, engine='xlsxwriter', index=False)
+            outlst.append(dfp)
+            print(i, ny, dr[i], dr[i + 1], dfp.shape[0])
+
+    return outlst
 
 
+# %% [markdown]
+# ### def getnotebookguid(notebookname)
+
+# %%
+def getnotebookguid(notebookname):
+    ntfind =findnotebookfromevernote(notebookname)
+    if ntfind.shape[0] == 0:
+        notebookguid = createnotebook(notebookname)
+#         print(notebookguid)
+        setcfpoptionvalue('everwcitems', 'common', 'notebookguid', str(notebookguid))
+    else:
+        if (notebookguid := getcfpoptionvalue('everwcitems', 'common', 'notebookguid')) is None:
+            notebookguid = ntfind.index[0]
+#         print(notebookguid)
+        setcfpoptionvalue('everwcitems', 'common', 'notebookguid', str(notebookguid))
+        
+    return notebookguid
+
+
+# %%
+def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
+    ny = dftest['time'].iloc[0].strftime("%y%m")
+    dftfilename = f"wcitems_{name}_{ny}.xlsx"
+    dftallpath = wcpath / dftfilename
+    dftallpathabs = os.path.abspath(dftallpath)
+    print(dftallpathabs)
+    timenowstr =  pd.to_datetime(datetime.now()).strftime("%F %T")
+    dftest_desc = f"更新时间：{timenowstr}\t记录时间自{dftest['time'].min()}至{dftest['time'].max()}，共有{dftest.shape[0]}条，来自主机：{getdevicename()}"
+    
+    if (dftfileguid := getcfpoptionvalue('everwcitems', dftfilename, 'guid')) is None:
+        first_note_desc = f"账号\t{None}\n记录数量\t0" # 初始化内容头部，和正常内容头部格式保持一致
+        first_note_body = f"<pre>{first_note_desc}\n---\n\n本笔记创建于{timenowstr}，来自于主机：{getdevicename()}</pre>"
+        dftfileguid = makenote2(dftfilename, notebody=first_note_body, parentnotebookguid=notebookguid).guid
+        setcfpoptionvalue('everwcitems', dftfilename, 'guid', str(dftfileguid))
+    if (itemsnum_old := getcfpoptionvalue('everwcitems', dftfilename, 'itemsnum')) is None:
+        itemsnum_old = 0
+    itemnum = dftest.shape[0]
+    if itemnum == itemsnum_old:
+        log.info(f"{dftfilename}的记录数量和笔记相同，跳过")
+        return
+    
+    reslst = getnoteresource(dftfileguid)
+    if len(reslst) != 0:
+        dfromnote = pd.DataFrame()
+        filetmp = wcpath / 'wccitems_from_net.xlsx'
+        for res in reslst:
+            fh = open(filetmp, 'wb')
+            fh.write(res[1])
+            fh.close()
+            dfromnote = dfromnote.append(pd.read_excel(filetmp))
+        numfromnet = dfromnote.drop_duplicates().shape[0]
+        dfromnote = dfromnote.append(dftest).drop_duplicates()
+        if dfromnote.shape[0] == dftest.shape[0]:
+            log.info(f"笔记中资源文件和本地文件合并后总记录数量没变化，跳过")
+            return
+        log.info(f"本地数据文件记录数有{dftest.shape[0]}条，笔记资源文件记录数为{numfromnet}")
+        dftest = dfromnote
+    oldnotecontent = getnotecontent(dftfileguid).find("pre").text
+    nrlst = oldnotecontent.split("\n---\n")
+    note_desc = f"账号\t{name}\n记录数量\t{dftest.shape[0]}"
+    nrlst[0] = note_desc
+    nrlst[1] = f"{dftest_desc}\n{nrlst[1]}"
+    resultstr = "\n---\n".join(nrlst)
+    dftest.to_excel(dftallpathabs, engine='xlsxwriter', index=False)
+    print(dftfileguid)
+    updatereslst2note([dftallpathabs], dftfileguid, \
+                      neirong=resultstr, filenameonly=True, parentnotebookguid=notebookguid)
+    setcfpoptionvalue('everwcitems', dftfilename, 'itemsnum', str(itemnum))
+
+
+# %% [markdown]
+# ## main，主函数
 
 # %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'运行文件\t{__file__}')
 
-    wcdatapath = getdirmain() / 'data' / 'webchat'
-    dfdict = txtfiles2dfdict(wcdatapath)
-
+    wcpath = getdirmain() / 'data' / 'webchat'
+    dfdict = txtfiles2dfdict(wcpath)
+    notebookname = "微信记录数据仓"
+    notebookguid = getnotebookguid(notebookname)
     for k in dfdict:
         dfinner = dfdict[k]
         print(f"{k}\t{dfinner.shape[0]}", end='\n\n')
-        splitdf(k, dfinner, wcdatapath)
-        print("\n")
+        df4account = splitdf(k, dfinner, wcpath)
+        for dfson in df4account:
+            updatewcitemsxlsx2note(k, dfson, wcpath, notebookguid)
 
     if not_IPython():
         log.info(f"文件\t{__file__}\t运行结束。")
