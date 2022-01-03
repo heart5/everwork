@@ -10,10 +10,16 @@
 #     name: python3
 # ---
 
+# %% [markdown]
+# # 获取主机id和名称 
+
 # %%
 """
 获取主机的唯一id
 """
+
+# %% [markdown]
+# ## 库引入
 
 # %%
 # import os
@@ -39,6 +45,12 @@ with pathmagic.context():
         pass
 
 
+# %% [markdown]
+# ## 功能函数
+
+# %% [markdown]
+# ### def set_devicename2ini(id, sysstr)
+
 # %%
 def set_devicename2ini(id, sysstr):
     if (device_name := getcfpoptionvalue('everhard', id, 'device_name')) is None:
@@ -50,10 +62,16 @@ def set_devicename2ini(id, sysstr):
                 log.critical(f"主机信息：{execcmd('uname -a')}")
 
 
+# %% [markdown]
+# ### def get_devicenamefromnin(id)
+
 # %%
 def get_devicenamefromini(id):
     return getcfpoptionvalue('everhard', id, 'device_name')
 
+
+# %% [markdown]
+# ### def getdeviceid()
 
 # %%
 # @timethis
@@ -125,13 +143,28 @@ def getdeviceid():
     return id
 
 
+# %% [markdown]
+# ### getdevicename()
+
+# %%
+def getdevicename():
+    id = getdeviceid()
+    set_devicename2ini(id, 'Linux')
+    
+    return get_devicenamefromini(id)
+
+
+# %% [markdown]
+# ## 主函数
+
 # %%
 if __name__ == '__main__':
     if not_IPython() and is_log_details:
         log.info(f'运行文件\t{__file__}')
-    id = getdeviceid()
-    set_devicename2ini(id, 'Linux')
-    devicename = get_devicenamefromini(id)
+#     id = getdeviceid()
+#     set_devicename2ini(id, 'Linux')
+#     devicename = get_devicenamefromini(id)
+    devicename = getdevicename()
     print(f"{devicename}")
     if not_IPython() and is_log_details:
         log.info(f'文件\t{__file__}\t运行完毕。')
