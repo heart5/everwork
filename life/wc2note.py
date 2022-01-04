@@ -45,6 +45,9 @@ with pathmagic.context():
 
 # %%
 def items2df(fl):
+    """
+    读取txt记录文件，格式化拆分并存储至DataFrame返回
+    """
     try:
         content = open(fl, 'r').read()
     except Exception as e:
@@ -142,7 +145,10 @@ def getdaterange(start, end):
 # ### def splitdf(name, df, wcdatapath)
 
 # %%
-def splitdf(name, df, dpath):
+def txtdfsplit2xlsx(name, df, dpath):
+    """
+    按月份拆分从文本文件读取的指定账号的数据记录，存入对应格式化名称的excel表格中
+    """
     dftimestart = df['time'].min()
     dftimeend = df['time'].max()
     dr = getdaterange(dftimestart, dftimeend)
@@ -152,18 +158,29 @@ def splitdf(name, df, dpath):
         dfp = df[(df.time > dr[i]) & (df.time <= dr[i + 1])]
         if dfp.shape[0] != 0:
             ny = dfp['time'].iloc[0].strftime("%y%m")
-            filename = dpath / f"wcitems_{name}_{ny}.xlsx"
+            filenameonly = f"wcitems_{name}_{ny}.xlsx"
+            filename = os.path.abspath(dpath / filenameonly)
             if os.path.exists(filename):
+                if (oldnum := getcfpoptionvalue('everwcitems', filenameonly, 'itemsnumfromtxt')) is None:
+                    oldnum = 0
                 dftmp = pd.read_excel(filename)
-                if dftmp.shape[0] != dfp.shape[0]:
+                dfpall = dfp.append(dftmp).drop_duplicates().sort_values(['time'], ascending=False)
+                if oldnum != dfpall.shape[0]:
                     logstr = f"{filename}文件存在且有{dftmp.shape[0]}条记录，" \
-                        f"新获取的DataFrame有{dfp.shape[0]}条记录，覆盖写入新数据记录。"
+                        f"融合后的DataFrame有{dfpall.shape[0]}条记录，覆盖写入所有新数据。"
                     log.info(logstr)
-                    dfp.to_excel(filename, engine='xlsxwriter', index=False)
-            outlst.append(dfp)
+                    dfpall.to_excel(filename, engine='xlsxwriter', index=False)
+                    setcfpoptionvalue('everwcitems', filenameonly, 'itemsnumfromtxt',
+                                      f"{dfpall.shape[0]}")
+                else:
+                    print(f"{filename}已经存在，且融合后记录数量没有变化。")
+            else:
+                logstr = f"创建文件{filename}，记录共有{dftmp.shape[0]}条。"
+                log.info(logstr)
+                dfp.to_excel(filename, engine='xlsxwriter', index=False)
+                setcfpoptionvalue('everwcitems', filenameonly, 'itemsnumfromtxt',
+                                  f"{dfp.shape[0]}")
             print(i, ny, dr[i], dr[i + 1], dfp.shape[0])
-
-    return outlst
 
 
 # %% [markdown]
@@ -243,6 +260,21 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
 
 
 # %% [markdown]
+# ### def merge2note(dfdict)
+
+# %%
+def merge2note(dfdict, wcpath, notebookguid):
+    for name in dfdict.keys():
+        ptn = f"wcitems_{name}_\d\d\d\d.xlsx"
+        xlsxfllst = sorted([fl for fl in os.listdir(wcpath) if re.search(ptn, fl)])
+        print(f"{name}的数据文件数量\t{len(xlsxfllst)}")
+        for xfl in xlsxfllst:
+            dftest = pd.read_excel(wcpath / xfl)
+            updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid)
+    
+
+
+# %% [markdown]
 # ## main，主函数
 
 # %%
@@ -251,17 +283,15 @@ if __name__ == '__main__':
         log.info(f'运行文件\t{__file__}')
 
     wcpath = getdirmain() / 'data' / 'webchat'
-    dfdict = txtfiles2dfdict(wcpath)
     notebookname = "微信记录数据仓"
     notebookguid = getnotebookguid(notebookname)
+    dfdict = txtfiles2dfdict(wcpath)
     for k in dfdict:
         dfinner = dfdict[k]
         print(f"{k}\t{dfinner.shape[0]}", end='\n\n')
-        df4account = splitdf(k, dfinner, wcpath)
-        for dfson in df4account:
-            updatewcitemsxlsx2note(k, dfson, wcpath, notebookguid)
-
+        txtdfsplit2xlsx(k, dfinner, wcpath)
+        
+    merge2note(dfdict, wcpath, notebookguid)
+    
     if not_IPython():
         log.info(f"文件\t{__file__}\t运行结束。")
-
-# %%
