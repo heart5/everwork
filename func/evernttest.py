@@ -330,15 +330,15 @@ def updatereslst2note(reslist, guidinput, title=None, neirong=None,
     :return:
     """
     noteattrib = NoteAttributes()
-    global en_username
-    if en_username is not None:
-        noteattrib.author = en_username
-        print(f"I'm here while updating the note for special res, for evernote user {en_username}")
+#     global en_username
+#     if en_username is not None:
+#         noteattrib.author = en_username
+#         print(f"I'm here while updating the note for special res, for evernote user {en_username}")
 
     resfnonlylist = [os.path.basename(innerpath) for innerpath in reslist]  # 只取用文件名，保证名称唯一
-    print(f"输入资源短文件名列表：\t{resfnonlylist}")
+#     print(f"输入资源短文件名列表：\t{resfnonlylist}")
     reslist = [os.path.abspath(innerpath) for innerpath in reslist]  # 取用绝对路径，保证名称唯一
-    print(f"输入资源长文件名列表：\t{reslist}")
+#     print(f"输入资源长文件名列表：\t{reslist}")
 
     noteinput = getnoteall(guidinput)
     note = Note()
@@ -347,7 +347,7 @@ def updatereslst2note(reslist, guidinput, title=None, neirong=None,
 
     if (parentnotebookguid is not None) and (re.search("\w{8}(-\w{4}){3}-\w{12}", parentnotebookguid) is not None):
         note.notebookGuid = parentnotebookguid
-        print(parentnotebookguid)
+#         print(parentnotebookguid)
     if title is None:
         note.title = noteinput.title
     else:
@@ -359,9 +359,9 @@ def updatereslst2note(reslist, guidinput, title=None, neirong=None,
             notereslstclean = [res for res in nirs if res.attributes.fileName not in resfnonlylist]
         else:
             notereslstclean = [res for res in nirs if res.attributes.fileName not in reslist]
-        print(f"待操作笔记中的资源文件共有{len(nirs)}个。")
     else:
         notereslstclean = list()
+    print(f"待更新笔记中的资源文件共有{len(notereslstclean)}个", end="，")
     """
     必须重新构建note.resources，否则内容不会改变
     """
@@ -413,7 +413,7 @@ def updatereslst2note(reslist, guidinput, title=None, neirong=None,
         resource.attributes = resattrib
         note.resources.append(resource)
 
-    print(f"笔记中资源文件处理后共有{len(note.resources)}个。")
+    print(f"处理后共有{len(note.resources)}个。")
     # The content of an Evernote note is represented using Evernote Markup Language
     # (ENML). The full ENML specification can be found in the Evernote API Overview
     # at http://dev.evernote.com/documentation/cloud/chapters/ENML.php
