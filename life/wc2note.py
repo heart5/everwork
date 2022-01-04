@@ -160,26 +160,28 @@ def txtdfsplit2xlsx(name, df, dpath):
             ny = dfp['time'].iloc[0].strftime("%y%m")
             fn = f"wcitems_{name}_{ny}.xlsx" # 纯文件名称
             fna = os.path.abspath(dpath / fn) # 全路径文件名（绝对路径）
-            if os.path.exists(fna):
-                if (oldnum := getcfpoptionvalue('everwcitems', fn, 'itemsnumfromtxt')) is None:
-                    oldnum = 0
-                dftmp = pd.read_excel(fna)
-                dfpall = dfp.append(dftmp).drop_duplicates().sort_values(['time'], ascending=False)
-                if oldnum != dfpall.shape[0]:
-                    logstr = f"{fn}文件存在且有{dftmp.shape[0]}条记录，" \
-                        f"融合后的DataFrame有{dfpall.shape[0]}条记录，覆盖写入所有新数据。"
-                    log.info(logstr)
-                    dfpall.to_excel(fna, engine='xlsxwriter', index=False)
-                    setcfpoptionvalue('everwcitems', fn, 'itemsnumfromtxt',
-                                      f"{dfpall.shape[0]}")
-                else:
-                    print(f"{fn}已经存在，且融合后记录数量没有变化。")
-            else:
+            if not os.path.exists(fna):
                 logstr = f"创建文件{fn}，记录共有{dfp.shape[0]}条。"
                 log.info(logstr)
                 dfp.to_excel(fna, engine='xlsxwriter', index=False)
                 setcfpoptionvalue('everwcitems', fn, 'itemsnumfromtxt',
                                   f"{dfp.shape[0]}")
+            else:
+                if (oldnum := getcfpoptionvalue('everwcitems', fn, 'itemsnumfromtxt')) is None:
+                    oldnum = 0
+                if oldnum != dfp.shape[0]:
+                    dftmp = pd.read_excel(fna)
+                    dfpall = dfp.append(dftmp).drop_duplicates().sort_values(['time'],
+                                                                             ascending=False)
+                    logstr = f"本地（文本文件）登记的记录数量为（{oldnum}），但新文本文件中记录数量（" \
+                        f"{dfp.shape[0]}）条记录，" \
+                        f"融合本地excel文件后记录数量为({dfpall.shape[0]})。覆盖写入所有新数据！"
+                    log.info(logstr)
+                    dfpall.to_excel(fna, engine='xlsxwriter', index=False)
+                    setcfpoptionvalue('everwcitems', fn, 'itemsnumfromtxt',
+                                      f"{dfp.shape[0]}")
+                else:
+                    print(f"{fn}已经存在，且文本文件中记录数量没有变化。")
             print(i, ny, dr[i], dr[i + 1], dfp.shape[0])
 
 
@@ -248,10 +250,10 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
         numfromnet = dfromnote.drop_duplicates().shape[0]
         dfromnote = dfromnote.append(dftest).drop_duplicates().sort_values(['time'], ascending=False)
         if dfromnote.shape[0] == dftest.shape[0]:
-            log.info(f"笔记中资源文件和本地文件合并后总记录数量没变化，跳过")
+            log.info(f"笔记中资源文件和本地文件合并后总记录数量{dftest.shape[0]}没变化，跳过")
             return
         log.info(f"本地数据文件记录数有{dftest.shape[0]}条，笔记资源文件记录数为{numfromnet}" \
-                f"，合并后记录总数为：\t{dffromnote.shape[0]}")
+                f"，合并后记录总数为：\t{dfromnote.shape[0]}")
         dftest = dfromnote
     oldnotecontent = getnotecontent(dftfileguid).find("pre").text
     nrlst = oldnotecontent.split("\n---\n")
