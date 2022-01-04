@@ -173,8 +173,8 @@ def txtdfsplit2xlsx(name, df, dpath):
                     dftmp = pd.read_excel(fna)
                     dfpall = dfp.append(dftmp).drop_duplicates().sort_values(['time'],
                                                                              ascending=False)
-                    logstr = f"本地（文本文件）登记的记录数量为（{oldnum}），但新文本文件中记录数量（" \
-                        f"{dfp.shape[0]}）条记录，" \
+                    logstr = f"{fn}\t本地（文本文件）登记的记录数量为（{oldnum}），但新文本文件中" \
+                        f"记录数量（{dfp.shape[0]}）条记录，" \
                         f"融合本地excel文件后记录数量为({dfpall.shape[0]})。覆盖写入所有新数据！"
                     log.info(logstr)
                     dfpall.to_excel(fna, engine='xlsxwriter', index=False)
