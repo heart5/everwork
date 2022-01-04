@@ -278,10 +278,13 @@ def merge2note(dfdict, wcpath, notebookguid):
         ptn = f"wcitems_{name}_\d\d\d\d.xlsx"
         xlsxfllst = sorted([fl for fl in os.listdir(wcpath) if re.search(ptn, fl)])
         print(f"{name}的数据文件数量\t{len(xlsxfllst)}")
+        xflen = len(xlsxfllst)
         for xfl in xlsxfllst:
+            print(f"{'-' * 15}\t{name}\t【{xlsxfllst.index(xfl) + 1}/{xflen}】\tBegin\t{'-' * 15}")
             dftest = pd.read_excel(wcpath / xfl)
             updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid)
-    
+            print(f"{'-' * 15}\t{name}\t【{xlsxfllst.index(xfl) + 1}/{xflen}】\tDone!\t{'-' * 15}")
+            
 
 
 # %% [markdown]
