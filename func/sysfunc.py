@@ -1,8 +1,20 @@
 # encoding:utf-8
-# %%
-"""
-操作系统相关的函数集
-"""
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       jupytext_version: 1.13.4
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
+# %% [markdown]
+# # 系统函数 
+
+# %% [markdown]
+# ## 引入库
 
 # %%
 import os
@@ -23,6 +35,12 @@ import pathmagic
 with pathmagic.context():
     from func.logme import log
 
+
+# %% [markdown]
+# ## 功能函数集
+
+# %% [markdown]
+# ### extract_traceback4exception(tbtuple, func_name, sleeptime=None)
 
 # %%
 def extract_traceback4exception(tbtuple, func_name, sleeptime=None):
@@ -56,6 +74,9 @@ def extract_traceback4exception(tbtuple, func_name, sleeptime=None):
     return rststr
 
 
+# %% [markdown]
+# ### not_IPython()
+
 # %%
 def not_IPython():
     """
@@ -63,6 +84,9 @@ def not_IPython():
     """
     return get_ipython() is None
 
+
+# %% [markdown]
+# ### convertframe2dict(frame)
 
 # %%
 def convertframe2dic(frame):
@@ -73,6 +97,9 @@ def convertframe2dic(frame):
 
     return filename, lineno, code_context
 
+
+# %% [markdown]
+# ### set_timeout(num, callback)
 
 # %%
 def set_timeout(num, callback):
@@ -105,6 +132,9 @@ def set_timeout(num, callback):
     return wrap
 
 
+# %% [markdown]
+# ### after_timeout()
+
 # %%
 def after_timeout():
     """
@@ -113,12 +143,18 @@ def after_timeout():
     log.critical(("运行超出预设时间，强制退出!", traceback.extract_stack()))
 
 
+# %% [markdown]
+# ### uuid3hexstr(iniputo: object)
+
 # %%
 def uuid3hexstr(inputo: object):
     inputstr = str(inputo)
 
     return hex(hash(uuid.uuid3(uuid.NAMESPACE_URL, inputstr)))[2:].upper()
 
+
+# %% [markdown]
+# ### sha2hexstr(inputo: object)
 
 # %%
 def sha2hexstr(inputo: object):
@@ -131,13 +167,23 @@ def sha2hexstr(inputo: object):
     return hhh.hexdigest().upper()
 
 
+# %% [markdown]
+# ### execcmd(cmd)
+
 # %%
 def execcmd(cmd):
-    r = os.popen(cmd)
-    text = r.read()
-    r.close()
-    return text
+    try:
+        r = os.popen(cmd)
+        text = r.read()
+        r.close()
+        return text.strip("\n")
+    except Exception as e:
+        log.critical(f"执行命令 {cmd} 时出现错误，返回空字符串。{e}")
+        return ""
 
+
+# %% [markdown]
+# ## main主函数
 
 # %%
 if __name__ == '__main__':
@@ -151,3 +197,8 @@ if __name__ == '__main__':
     log.critical(outgetstr)
     if not_IPython():
         log.info(f'文件\t{__file__}\t测试完毕。')
+
+# %%
+execcmd("whoami")
+
+# %%
