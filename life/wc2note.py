@@ -29,7 +29,7 @@ with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
     from func.logme import log
     from etc.getid import getdevicename
-    from func.sysfunc import not_IPython
+    from func.sysfunc import not_IPython, execcmd
     from func.configpr import setcfpoptionvalue, getcfpoptionvalue
     from func.evernttest import getinivaluefromnote, getnoteresource, \
         gettoken, get_notestore, getnotecontent, updatereslst2note, \
@@ -202,6 +202,9 @@ def getnotebookguid(notebookname):
     return notebookguid
 
 
+# %% [markdown]
+# ### updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid)
+
 # %%
 def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
     ny = dftest['time'].iloc[0].strftime("%y%m")
@@ -210,7 +213,10 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
     dftallpathabs = os.path.abspath(dftallpath)
     print(dftallpathabs)
     timenowstr =  pd.to_datetime(datetime.now()).strftime("%F %T")
-    dftest_desc = f"更新时间：{timenowstr}\t记录时间自{dftest['time'].min()}至{dftest['time'].max()}，共有{dftest.shape[0]}条，来自主机：{getdevicename()}"
+    loginstr = "" if (whoami := execcmd("whoami")) and (len(whoami) == 0) else f"，登录用户：{whoami}"
+    dftest_desc = f"更新时间：{timenowstr}\t" \
+        f"记录时间自{dftest['time'].min()}至{dftest['time'].max()}，" \
+        f"共有{dftest.shape[0]}条，来自主机：{getdevicename()}{whoami}"
     
     if (dftfileguid := getcfpoptionvalue('everwcitems', dftfilename, 'guid')) is None:
         findnotelst = findnotefromnotebook(notebookguid, dftfilename, notecount=1)
