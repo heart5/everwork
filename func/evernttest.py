@@ -361,7 +361,7 @@ def updatereslst2note(reslist, guidinput, title=None, neirong=None,
             notereslstclean = [res for res in nirs if res.attributes.fileName not in reslist]
     else:
         notereslstclean = list()
-    print(f"待更新笔记中的资源文件共有{len(notereslstclean)}个", end="，")
+    print(f"待更新笔记中的资源文件有{len(notereslstclean)}个", end="，")
     """
     必须重新构建note.resources，否则内容不会改变
     """
@@ -467,10 +467,10 @@ def updatereslst2note(reslist, guidinput, title=None, neirong=None,
         evernoteapijiayi()
         log.info('成功更新了笔记《%s》，guid：%s。资源列表为：%s' %
                  (updated_note.title, updated_note.guid, reslist))
-        if updated_note:
-            if updated_note.resources:
-                print(f"笔记res更新后共有{len(updated_note.resources)}个")
-                print([res.attributes.fileName for res in updated_note.resources])
+#         if updated_note:
+#             if updated_note.resources:
+#                 print(f"笔记res更新后共有{len(updated_note.resources)}个")
+#                 print([res.attributes.fileName for res in updated_note.resources])
 
     updatenote(note)
 
