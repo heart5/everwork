@@ -218,7 +218,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
     loginstr = "" if (whoami := execcmd("whoami")) and (len(whoami) == 0) else f"，登录用户：{whoami}"
     dftest_desc = f"更新时间：{timenowstr}\t" \
         f"记录时间自{dftest['time'].min()}至{dftest['time'].max()}，" \
-        f"共有{dftest.shape[0]}条，来自主机：{getdevicename()}{whoami}"
+        f"共有{dftest.shape[0]}条，来自主机：{getdevicename()}{loginstr}"
     
     if (dftfileguid := getcfpoptionvalue('everwcitems', dftfilename, 'guid')) is None:
         findnotelst = findnotefromnotebook(notebookguid, dftfilename, notecount=1)
@@ -227,7 +227,8 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
             log.info(f"数据文件《{dftfilename}》的笔记已经存在，取用")
         else:
             first_note_desc = f"账号\t{None}\n记录数量\t0" # 初始化内容头部，和正常内容头部格式保持一致
-            first_note_body = f"<pre>{first_note_desc}\n---\n\n本笔记创建于{timenowstr}，来自于主机：{getdevicename()}</pre>"
+            first_note_body = f"<pre>{first_note_desc}\n---\n\n本笔记创建于{timenowstr}，" \
+                f"来自于主机：{getdevicename()}{loginstr}</pre>"
             dftfileguid = makenote2(dftfilename, notebody=first_note_body, parentnotebookguid=notebookguid).guid
         setcfpoptionvalue('everwcitems', dftfilename, 'guid', str(dftfileguid))
     if (itemsnum_old := getcfpoptionvalue('everwcitems', dftfilename, 'itemsnum')) is None:
