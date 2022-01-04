@@ -155,6 +155,7 @@ def txtdfsplit2xlsx(name, df, dpath):
 
     outlst = list()
     for i in range(len(dr) - 1):
+        print(f"{'-' * 15}\t{name}\t【{i + 1}/{len(dr) - 1}】\tBegin\t{'-' * 15}")
         dfp = df[(df.time > dr[i]) & (df.time <= dr[i + 1])]
         if dfp.shape[0] != 0:
             ny = dfp['time'].iloc[0].strftime("%y%m")
@@ -183,6 +184,7 @@ def txtdfsplit2xlsx(name, df, dpath):
                 else:
                     print(f"{fn}已经存在，且文本文件中记录数量没有变化。")
             print(i, ny, dr[i], dr[i + 1], dfp.shape[0])
+        print(f"{'-' * 15}\t{name}\t【{i + 1}/{len(dr) - 1}】\tDone!\t{'-' * 15}")
 
 
 # %% [markdown]
@@ -284,7 +286,6 @@ def merge2note(dfdict, wcpath, notebookguid):
             dftest = pd.read_excel(wcpath / xfl)
             updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid)
             print(f"{'-' * 15}\t{name}\t【{xlsxfllst.index(xfl) + 1}/{xflen}】\tDone!\t{'-' * 15}")
-            
 
 
 # %% [markdown]
