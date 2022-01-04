@@ -254,6 +254,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
         dfromnote = dfromnote.append(dftest).drop_duplicates().sort_values(['time'], ascending=False)
         if dfromnote.shape[0] == dftest.shape[0]:
             log.info(f"笔记中资源文件和本地文件合并后总记录数量{dftest.shape[0]}没变化，跳过")
+            setcfpoptionvalue('everwcitems', dftfilename, 'itemsnum', str(itemnum))
             return
         log.info(f"本地数据文件记录数有{dftest.shape[0]}条，笔记资源文件记录数为{numfromnet}" \
                 f"，合并后记录总数为：\t{dfromnote.shape[0]}")
