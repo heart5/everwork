@@ -240,11 +240,12 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
             fh.close()
             dfromnote = dfromnote.append(pd.read_excel(filetmp))
         numfromnet = dfromnote.drop_duplicates().shape[0]
-        dfromnote = dfromnote.append(dftest).drop_duplicates()
+        dfromnote = dfromnote.append(dftest).drop_duplicates().sort_values(['time'], ascending=False)
         if dfromnote.shape[0] == dftest.shape[0]:
             log.info(f"笔记中资源文件和本地文件合并后总记录数量没变化，跳过")
             return
-        log.info(f"本地数据文件记录数有{dftest.shape[0]}条，笔记资源文件记录数为{numfromnet}")
+        log.info(f"本地数据文件记录数有{dftest.shape[0]}条，笔记资源文件记录数为{numfromnet}" \
+                f"，合并后记录总数为：\t{dffromnote.shape[0]}")
         dftest = dfromnote
     oldnotecontent = getnotecontent(dftfileguid).find("pre").text
     nrlst = oldnotecontent.split("\n---\n")
