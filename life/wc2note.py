@@ -158,27 +158,27 @@ def txtdfsplit2xlsx(name, df, dpath):
         dfp = df[(df.time > dr[i]) & (df.time <= dr[i + 1])]
         if dfp.shape[0] != 0:
             ny = dfp['time'].iloc[0].strftime("%y%m")
-            filenameonly = f"wcitems_{name}_{ny}.xlsx"
-            filename = os.path.abspath(dpath / filenameonly)
-            if os.path.exists(filename):
-                if (oldnum := getcfpoptionvalue('everwcitems', filenameonly, 'itemsnumfromtxt')) is None:
+            fn = f"wcitems_{name}_{ny}.xlsx" # 纯文件名称
+            fna = os.path.abspath(dpath / fn) # 全路径文件名（绝对路径）
+            if os.path.exists(fna):
+                if (oldnum := getcfpoptionvalue('everwcitems', fn, 'itemsnumfromtxt')) is None:
                     oldnum = 0
-                dftmp = pd.read_excel(filename)
+                dftmp = pd.read_excel(fna)
                 dfpall = dfp.append(dftmp).drop_duplicates().sort_values(['time'], ascending=False)
                 if oldnum != dfpall.shape[0]:
-                    logstr = f"{filename}文件存在且有{dftmp.shape[0]}条记录，" \
+                    logstr = f"{fn}文件存在且有{dftmp.shape[0]}条记录，" \
                         f"融合后的DataFrame有{dfpall.shape[0]}条记录，覆盖写入所有新数据。"
                     log.info(logstr)
-                    dfpall.to_excel(filename, engine='xlsxwriter', index=False)
-                    setcfpoptionvalue('everwcitems', filenameonly, 'itemsnumfromtxt',
+                    dfpall.to_excel(fna, engine='xlsxwriter', index=False)
+                    setcfpoptionvalue('everwcitems', fn, 'itemsnumfromtxt',
                                       f"{dfpall.shape[0]}")
                 else:
-                    print(f"{filename}已经存在，且融合后记录数量没有变化。")
+                    print(f"{fn}已经存在，且融合后记录数量没有变化。")
             else:
-                logstr = f"创建文件{filename}，记录共有{dftmp.shape[0]}条。"
+                logstr = f"创建文件{fn}，记录共有{dfp.shape[0]}条。"
                 log.info(logstr)
-                dfp.to_excel(filename, engine='xlsxwriter', index=False)
-                setcfpoptionvalue('everwcitems', filenameonly, 'itemsnumfromtxt',
+                dfp.to_excel(fna, engine='xlsxwriter', index=False)
+                setcfpoptionvalue('everwcitems', fn, 'itemsnumfromtxt',
                                   f"{dfp.shape[0]}")
             print(i, ny, dr[i], dr[i + 1], dfp.shape[0])
 
