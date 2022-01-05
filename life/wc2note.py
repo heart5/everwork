@@ -237,7 +237,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
         itemsnum_old = 0
     itemnum = dftest.shape[0]
     if itemnum == itemsnum_old:
-        log.info(f"{dftfilename}的记录数量和笔记相同，跳过")
+        log.info(f"{dftfilename}的记录数量（{itemnum}）和笔记相同，跳过")
         return
     
     print(dftfileguid)
@@ -252,7 +252,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
             dfromnote = dfromnote.append(pd.read_excel(filetmp))
         numfromnet = dfromnote.drop_duplicates().shape[0]
         dfromnote = dfromnote.append(dftest).drop_duplicates().sort_values(['time'], ascending=False)
-        if dfromnote.shape[0] == dftest.shape[0]:
+        if dfromnote.shape[0] == itemnum:
             log.info(f"笔记中资源文件和本地文件合并后总记录数量{dftest.shape[0]}没变化，跳过")
             setcfpoptionvalue('everwcitems', dftfilename, 'itemsnum', str(itemnum))
             return
