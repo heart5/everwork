@@ -99,7 +99,7 @@ def txtfiles2dfdict(dpath, newfileonly=False):
         for nm in names:
             nametimedict[f"{nm}_newtime"] = datetime.fromtimestamp(0)
         for fl in fllst:
-            flmtime = getfilemtime(dpath / fl)
+            flmtime = getfltime(dpath / fl)
             accounttmp = getownerfromfilename(fl)
             if flmtime > nametimedict[f"{accounttmp}_newtime"]:
                 nametimedict[f"{accounttmp}_newtime"] = flmtime
@@ -259,7 +259,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
         itemsnum_old = 0
     itemnum = dftest.shape[0]
     if itemnum == itemsnum_old:
-        log.info(f"{dftfilename}的记录数量（{itemnum}）和笔记相同，跳过")
+        log.info(f"{dftfilename}的记录数量（{itemnum}）和本地登记数量相同，跳过")
         return
     
     print(dftfileguid)
