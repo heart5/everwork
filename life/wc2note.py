@@ -14,6 +14,11 @@
 # # 微信聊天记录文本文件智能远程存储 
 
 # %% [markdown]
+# - 文本文件：跑程序生成的txt存储的记录原始文件
+# - 资源文件：提取并排序后按月拆分的记录存储文件，excel表格
+# - 笔记：记录了分月统计和更新信息的云端笔记，附件为相应的资源文件
+
+# %% [markdown]
 # ## 库导入
 
 # %%
@@ -53,7 +58,6 @@ def items2df(fl):
     except Exception as e:
         log.critical(f"文件{fl}读取时出现错误，返回空的pd.DataFrame")
         return pd.DataFrame()
-#     ptn = re.compile("(^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\t(True|False)\t(\S+)\t(\S+)\t", re.M)
     ptn = re.compile("(^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\t(True|False)\t([^\t]+)\t(\w+)\t", re.M)
     itemlst = re.split(ptn, content)
     itemlst = [im.strip() for im in itemlst if len(im) > 0]
@@ -72,7 +76,11 @@ def items2df(fl):
 # ### def txtfiles2dfdict(wcdatapath)
 
 # %%
-def txtfiles2dfdict(dpath):
+def txtfiles2dfdict(dpath, newfileonly=False):
+    """
+    读取传入目录下符合标准（固定格式文件名）所有文本文件并提取融合分账号的df，
+    返回字典{name:dict}
+    """
     fllst = [f for f in os.listdir(dpath) if f.startswith("chatitems")]
     
     def getownerfromfilename(fn):
@@ -86,7 +94,7 @@ def txtfiles2dfdict(dpath):
     names = list(set([getownerfromfilename(nm) for nm in fllst]))
     print(names)
     # 如果设置为new，则找到每个账号的最新记录文件处理，否则是全部记录文件
-    if (datafilesnew := getinivaluefromnote('wcitems', 'datafiles')) == 'new':
+    if newfileonly:
         nametimedict = dict()
         for nm in names:
             nametimedict[f"{nm}_newtime"] = datetime.fromtimestamp(0)
@@ -99,6 +107,7 @@ def txtfiles2dfdict(dpath):
         fllst = [nametimedict[f"{nm}_filename"] for nm in names]
         fllst = [v for (k, v) in nametimedict.items() if k.endswith('filename')]
 
+    print(fllst)
     dfdict = dict()
     for fl in fllst[::-1]:
         rs1 = re.search("\((\w*)\)", fl)
@@ -127,6 +136,9 @@ def txtfiles2dfdict(dpath):
 
 # %%
 def getdaterange(start, end):
+    """
+    根据输入的起止时间按照月尾分割生成时间点列表返回
+    """
     start = start + pd.Timedelta(-1, 'sec')
     if start.strftime("%Y-%m") == end.strftime('%Y-%m'):
         drlst = [start, end]
@@ -147,7 +159,9 @@ def getdaterange(start, end):
 # %%
 def txtdfsplit2xlsx(name, df, dpath):
     """
-    按月份拆分从文本文件读取的指定账号的数据记录，存入对应格式化名称的excel表格中
+    按月份拆分指定账号的数据记录df，如果尚不存在本地相应资源文件，直接写入并更新ini中登记
+    数量；如果存在相应本地资源文件，则读取并融合df中的记录，存入对应格式化名称的excel表格
+    中，相应更新ini中登记数量
     """
     dftimestart = df['time'].min()
     dftimeend = df['time'].max()
@@ -192,6 +206,9 @@ def txtdfsplit2xlsx(name, df, dpath):
 
 # %%
 def getnotebookguid(notebookname):
+    """
+    根据输入的笔记本名称返回相应的guid
+    """
     ntfind =findnotebookfromevernote(notebookname)
     if ntfind.shape[0] == 0:
         notebookguid = createnotebook(notebookname)
@@ -211,6 +228,11 @@ def getnotebookguid(notebookname):
 
 # %%
 def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
+    """
+    处理从本地资源文件读取生成的df，如果和ini登记数量相同，则返回；如果不同，则从笔记端读取相应登记
+    数量再次对比，相同，则跳过，如果不同，则拉取笔记资源文件和本地资源文件融合，更新笔记端资源文件并
+    更新ini登记数量（用融合后的记录数量）
+    """
     ny = dftest['time'].iloc[0].strftime("%y%m")
     dftfilename = f"wcitems_{name}_{ny}.xlsx"
     dftallpath = wcpath / dftfilename
@@ -251,14 +273,14 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
             fh.close()
             dfromnote = dfromnote.append(pd.read_excel(filetmp))
         numfromnet = dfromnote.drop_duplicates().shape[0]
-        dfromnote = dfromnote.append(dftest).drop_duplicates().sort_values(['time'], ascending=False)
-        if dfromnote.shape[0] == itemnum:
-            log.info(f"笔记中资源文件和本地文件合并后总记录数量{dftest.shape[0]}没变化，跳过")
+        dfcombine = dfromnote.append(dftest).drop_duplicates().sort_values(['time'], ascending=False)
+        if dfcombine.shape[0] == itemnum:
+            log.info(f"本地数据文件记录有{itemnum}条，笔记中资源文件记录数为{numfromnet}条，合并后总记录数量{dfcombine.shape[0]}没变化，跳过")
             setcfpoptionvalue('everwcitems', dftfilename, 'itemsnum', str(itemnum))
             return
-        log.info(f"本地数据文件记录数有{dftest.shape[0]}条，笔记资源文件记录数为{numfromnet}" \
-                f"，合并后记录总数为：\t{dfromnote.shape[0]}")
-        dftest = dfromnote
+        log.info(f"本地数据文件记录数有{itemnum}条，笔记资源文件记录数为{numfromnet}条" \
+                f"，合并后记录总数为：\t{dfcombine.shape[0]}")
+        dftest = dfcombine
     oldnotecontent = getnotecontent(dftfileguid).find("pre").text
     nrlst = oldnotecontent.split("\n---\n")
     note_desc = f"账号\t{name}\n记录数量\t{dftest.shape[0]}"
@@ -269,7 +291,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
     print(dftfileguid)
     updatereslst2note([dftallpathabs], dftfileguid, \
                       neirong=resultstr, filenameonly=True, parentnotebookguid=notebookguid)
-    setcfpoptionvalue('everwcitems', dftfilename, 'itemsnum', str(itemnum))
+    setcfpoptionvalue('everwcitems', dftfilename, 'itemsnum', str(dftest.shape[0]))
 
 
 # %% [markdown]
@@ -277,6 +299,9 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
 
 # %%
 def merge2note(dfdict, wcpath, notebookguid):
+    """
+    处理从文本文件读取生成的dfdict，分账户读取本地资源文件和笔记进行对照，并做相应更新或跳过
+    """
     for name in dfdict.keys():
         ptn = f"wcitems_{name}_\d\d\d\d.xlsx"
         xlsxfllst = sorted([fl for fl in os.listdir(wcpath) if re.search(ptn, fl)])
@@ -284,7 +309,7 @@ def merge2note(dfdict, wcpath, notebookguid):
         xflen = len(xlsxfllst)
         for xfl in xlsxfllst:
             print(f"{'-' * 15}\t{name}\t【{xlsxfllst.index(xfl) + 1}/{xflen}】\tBegin\t{'-' * 15}")
-            dftest = pd.read_excel(wcpath / xfl)
+            dftest = pd.read_excel(wcpath / xfl).drop_duplicates()
             updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid)
             print(f"{'-' * 15}\t{name}\t【{xlsxfllst.index(xfl) + 1}/{xflen}】\tDone!\t{'-' * 15}")
 
@@ -300,7 +325,11 @@ if __name__ == '__main__':
     wcpath = getdirmain() / 'data' / 'webchat'
     notebookname = "微信记录数据仓"
     notebookguid = getnotebookguid(notebookname)
-    dfdict = txtfiles2dfdict(wcpath)
+    if (datafilesnew := getinivaluefromnote('wcitems', 'datafiles')) == 'new':
+        newfileonly = True
+    else:
+        newfileonly = False
+    dfdict = txtfiles2dfdict(wcpath, newfileonly=newfileonly)
     for k in dfdict:
         dfinner = dfdict[k]
         print(f"{k}\t{dfinner.shape[0]}", end='\n\n')
