@@ -270,7 +270,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
                  f"和笔记中登记的记录数量（{itemsnumfromnet}）相同，跳过")
         return
     log.info(f"本地资源的记录数量（{itemnum}），登记的记录数量（{itemsnum4net}）" \
-             f"和笔记中登记的记录数量（{itemsnumfromnet}）不相同，从笔记端拉取融合")
+             f"和笔记中登记的记录数量（{itemsnumfromnet}）三不相同，从笔记端拉取融合")
     reslst = getnoteresource(dftfileguid)
     if len(reslst) != 0:
         dfromnote = pd.DataFrame()
@@ -314,13 +314,13 @@ def merge2note(dfdict, wcpath, notebookguid, newfileonly=False):
     处理从文本文件读取生成的dfdict，分账户读取本地资源文件和笔记进行对照，并做相应更新或跳过
     """
     for name in dfdict.keys():
-        ptn = f"wcitems_{name}_\d\d\d\d.xlsx"
+        ptn = f"wcitems_{name}_\d\d\d\d.xlsx" # wcitems_heart5_2201.xlsx
         xlsxfllst = sorted([fl for fl in os.listdir(wcpath) if re.search(ptn, fl)])
         print(f"{name}的数据文件数量\t{len(xlsxfllst)}", end="，")
         if newfileonly:
             xlsxfllst = xlsxfllst[-2:]
         xflen = len(xlsxfllst)
-        print(f"本次处理的文件数为\t{xflen}")
+        print(f"本次处理的数量为\t{xflen}")
         for xfl in xlsxfllst:
             print(f"{'-' * 15}\t{name}\t【{xlsxfllst.index(xfl) + 1}/{xflen}】\tBegin\t{'-' * 15}")
             dftest = pd.read_excel(wcpath / xfl).drop_duplicates()
@@ -341,14 +341,14 @@ if __name__ == '__main__':
     notebookguid = getnotebookguid(notebookname)
     if (new := getinivaluefromnote('wcitems', 'txtfilesonlynew')) is None:
         new = False
-    print(new)
-    dfdict = txtfiles2dfdict(wcpath, newfileonly=False)
+    print(f"是否只处理新的文本文件：\t{new}")
+    dfdict = txtfiles2dfdict(wcpath, newfileonly=new)
     for k in dfdict:
         dfinner = dfdict[k]
         print(f"{k}\t{dfinner.shape[0]}", end='\n\n')
-        txtdfsplit2xlsx(k, dfinner, wcpath, newfileonly=False)
+        txtdfsplit2xlsx(k, dfinner, wcpath, newfileonly=new)
         
-    merge2note(dfdict, wcpath, notebookguid, newfileonly=False)
+    merge2note(dfdict, wcpath, notebookguid, newfileonly=new)
     
     if not_IPython():
         log.info(f"文件\t{__file__}\t运行结束。")
