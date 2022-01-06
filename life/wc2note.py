@@ -274,7 +274,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
             dfromnote = dfromnote.append(pd.read_excel(filetmp))
         numfromnet = dfromnote.drop_duplicates().shape[0]
         dfcombine = dfromnote.append(dftest).drop_duplicates().sort_values(['time'], ascending=False)
-        if dfcombine.shape[0] == itemnum:
+        if dfcombine.shape[0] == numfromnet == itemnum:
             log.info(f"本地数据文件记录有{itemnum}条，笔记中资源文件记录数为{numfromnet}条，合并后总记录数量{dfcombine.shape[0]}没变化，跳过")
             setcfpoptionvalue('everwcitems', dftfilename, 'itemsnum', str(itemnum))
             return
