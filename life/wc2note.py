@@ -92,21 +92,17 @@ def txtfiles2dfdict(dpath, newfileonly=False):
     fllst = [f for f in os.listdir(dpath) if f.startswith("chatitems")]
     names = list(set([getownerfromfilename(nm) for nm in fllst]))
     print(names)
-    # 如果设置为new，则找到每个账号的最新记录文件处理，否则是全部记录文件
+    # 如果设置为new，则找到每个账号的最新文本文件处理，否则是全部文本文件
     if newfileonly:
-        nametimedict = dict()
+        fl3lst = [[getownerfromfilename(fl), fl, getfltime(dpath / fl)] for fl in fllst]
+        fllstout = list()
         for nm in names:
-            nametimedict[f"{nm}_newtime"] = datetime.fromtimestamp(0)
-        for fl in fllst:
-            flmtime = getfltime(dpath / fl)
-            accounttmp = getownerfromfilename(fl)
-            if flmtime > nametimedict[f"{accounttmp}_newtime"]:
-                nametimedict[f"{accounttmp}_newtime"] = flmtime
-                nametimedict[f"{accounttmp}_filename"] = fl
-        fllst = [nametimedict[f"{nm}_filename"] for nm in names]
-        fllst = [v for (k, v) in nametimedict.items() if k.endswith('filename')]
+            fllstinner = [item for item in fl3lst if item[0] == nm]
+            fllstout4name = sorted(fllstinner, key=lambda x :x[2])
+            fllstout.extend(fllstout4name[-2:])
+        fllst = [item[1] for item in fllstout]
 
-    print(fllst)
+#     print(fllst)
     dfdict = dict()
     for fl in fllst[::-1]:
         rs1 = re.search("\((\w*)\)", fl)
@@ -148,7 +144,6 @@ def getdaterange(start, end):
         drlst.insert(0, start)
         drlst.append(end)
     
-    log.info(f"时间范围横跨{len(drlst) - 1}个月")
     return drlst
 
 
@@ -167,6 +162,7 @@ def txtdfsplit2xlsx(name, df, dpath, newfileonly=False):
     dr = getdaterange(dftimestart, dftimeend)
     if newfileonly:
         dr = dr[-2:]
+    log.info(f"时间范围横跨{len(dr) - 1}个月")
 
     outlst = list()
     for i in range(len(dr) - 1):
@@ -341,6 +337,7 @@ if __name__ == '__main__':
     notebookguid = getnotebookguid(notebookname)
     if (new := getinivaluefromnote('wcitems', 'txtfilesonlynew')) is None:
         new = False
+#     new = True
     print(f"是否只处理新的文本文件：\t{new}")
     dfdict = txtfiles2dfdict(wcpath, newfileonly=new)
     for k in dfdict:
