@@ -38,7 +38,8 @@ with pathmagic.context():
     from func.configpr import setcfpoptionvalue, getcfpoptionvalue
     from func.evernttest import getinivaluefromnote, getnoteresource, \
         gettoken, get_notestore, getnotecontent, updatereslst2note, \
-        createnotebook, makenote2, findnotebookfromevernote, findnotefromnotebook
+        createnotebook, makenote2, findnotebookfromevernote, \
+        findnotefromnotebook, imglist2note
     from filedatafunc import getfilemtime as getfltime
 
 
@@ -235,6 +236,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
     dftallpath = wcpath / dftfilename
     dftallpathabs = os.path.abspath(dftallpath)
     print(dftallpathabs)
+    loginstr = "" if (whoami := execcmd("whoami")) and (len(whoami) == 0) else f"，登录用户：{whoami}"
     timenowstr =  pd.to_datetime(datetime.now()).strftime("%F %T")
     
     if (dftfileguid := getcfpoptionvalue('everwcitems', dftfilename, 'guid')) is None:
@@ -248,6 +250,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
                 f"来自于主机：{getdevicename()}{loginstr}</pre>"
             dftfileguid = makenote2(dftfilename, notebody=first_note_body, parentnotebookguid=notebookguid).guid
         setcfpoptionvalue('everwcitems', dftfilename, 'guid', str(dftfileguid))
+
     if (itemsnum_old := getcfpoptionvalue('everwcitems', dftfilename, 'itemsnum')) is None:
         itemsnum_old = 0
     itemnum = dftest.shape[0]
@@ -287,7 +290,6 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
         dftest = dfcombine
     note_desc = f"账号\t{name}\n记录数量\t{dftest.shape[0]}"
     nrlst[0] = note_desc
-    loginstr = "" if (whoami := execcmd("whoami")) and (len(whoami) == 0) else f"，登录用户：{whoami}"
     dftest_desc = f"更新时间：{timenowstr}\t" \
         f"记录时间自{dftest['time'].min()}至{dftest['time'].max()}，" \
         f"共有{dftest.shape[0]}条，来自主机：{getdevicename()}{loginstr}"
@@ -302,6 +304,74 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
 
 
 # %% [markdown]
+# ### def getnotelist(name)
+
+# %%
+def getnotelist(name, notebookguid):
+    """
+    根据传入的微信账号名称获得云端记录笔记列表
+    """
+    notelisttitle = f"微信账号（{name}）记录笔记列表"
+    loginstr = "" if (whoami := execcmd("whoami")) and (len(whoami) == 0) else f"，登录用户：{whoami}"
+    timenowstr =  pd.to_datetime(datetime.now()).strftime("%F %T")
+    if (notelistguid := getcfpoptionvalue('everwcitems', "common", f"{name}_notelist_guid")) is None:
+        findnotelst = findnotefromnotebook(notebookguid, notelisttitle, notecount=100)
+        if len(findnotelst) == 1:
+            notelistguid = findnotelst[0][0]
+            log.info(f"文件列表《{notelisttitle}》的笔记已经存在，取用")
+        else:
+            nrlst = list()
+            nrlst.append(f"账号\t{name}\n笔记数量\t-1") # 初始化内容头部，和正常内容头部格式保持一致
+            nrlst.append("")
+            nrlst.append(f"\n本笔记创建于{timenowstr}，来自于主机：{getdevicename()}{loginstr}")
+            note_body_str = '\n---\n'.join(nrlst)
+            note_body = f"<pre>{note_body_str}</pre>"
+            notelistguid = makenote2(notelisttitle, notebody=note_body, parentnotebookguid=notebookguid).guid
+            log.info(f"文件列表《{notelisttitle}》被首次创建！")
+        setcfpoptionvalue('everwcitems', "common", f'{name}_notelist_guid', str(notelistguid))
+
+    if (numinlistcloud := getcfpoptionvalue('everwcitems', "common", f"{name}_num_in_list_cloud")) is None:
+        numinlistcloud = 0
+        setcfpoptionvalue('everwcitems', "common", f"{name}_num_in_list_cloud", str(numinlistcloud))
+    notent = getnotecontent(notelistguid)
+#     print(notent)
+    if notent.find("pre") is None:
+        nrlst = list()
+        nrlst.append(f"账号\t{name}\n笔记数量\t-1") # 初始化内容头部，和正常内容头部格式保持一致
+        nrlst.append("")
+        nrlst.append(f"\n本笔记创建于{timenowstr}，来自于主机：{getdevicename()}{loginstr}")
+        log.info(f"《{notelisttitle}》笔记内容不符合规范，重构之。【{nrlst}】")
+    else:
+        oldnotecontent = notent.find("pre").text
+        nrlst = oldnotecontent.split("\n---\n")
+#     print(nrlst)
+    numinnote = int(re.findall("\t(-?\d+)", nrlst[0])[0])
+#     ptn = f"(wcitems_{name}_\d\d\d\d\.xlsx)\t(\S+)"
+    ptn = f"(wcitems_{name}_" + "\d{4}.xlsx)\t(\S+)"
+#     print(ptn)
+    finditems = re.findall(ptn, nrlst[1])
+    finditems = sorted(finditems, key=lambda x: x[0], reverse=True)
+#     print(finditems)
+    print(numinnote, numinlistcloud, len(finditems))
+    if numinnote == numinlistcloud == len(finditems):
+        log.info(f"《{notelisttitle}》中数量无更新，跳过。")
+        return finditems
+    findnotelstwithgtu = findnotefromnotebook(notebookguid, f"wcitems_{name}_", notecount=1000)
+    findnotelst = [[nt[1], nt[0]] for nt in findnotelstwithgtu]
+    findnotelst = sorted(findnotelst, key=lambda x: x[0], reverse=True)
+    nrlst[0] = re.sub("\t(-?\d+)", "\t" + f"{len(findnotelst)}", nrlst[0])
+    nrlst[1] = "\n".join(["\t".join(sonlst) for sonlst in findnotelst])
+    nrlst[2] = f"\n更新于{timenowstr}，来自于主机：{getdevicename()}{loginstr}"
+    
+    imglist2note(get_notestore(), [], notelistguid, notelisttitle,
+                 neirong="<pre>" + "\n---\n".join(nrlst) + "</pre>", parentnotebookguid=notebookguid)
+    numinlistcloud = len(finditems)
+    setcfpoptionvalue('everwcitems', "common", f"{name}_num_in_list_cloud", str(numinlistcloud))
+    
+    return findnotelst
+
+
+# %% [markdown]
 # ### def merge2note(dfdict)
 
 # %%
@@ -310,7 +380,26 @@ def merge2note(dfdict, wcpath, notebookguid, newfileonly=False):
     处理从文本文件读取生成的dfdict，分账户读取本地资源文件和笔记进行对照，并做相应更新或跳过
     """
     for name in dfdict.keys():
-        ptn = f"wcitems_{name}_\d\d\d\d.xlsx" # wcitems_heart5_2201.xlsx
+        fllstfromnote = getnotelist(name, notebookguid=notebookguid)
+        ptn = f"wcitems_{name}_" + "\d{4}.xlsx" # wcitems_heart5_2201.xlsx
+        xlsxfllstfromlocal = [fl for fl in os.listdir(wcpath) if re.search(ptn, fl)]
+        if len(fllstfromnote) != len(xlsxfllstfromlocal):
+            print(f"{name}的数据文件本地数量\t{len(xlsxfllstfromlocal)}，云端笔记列表中为\t{len(fllstfromnote)}，两者不等，先把本地缺的从网上拉下来")
+            misslstfromnote = [fl for fl in fllstfromnote if fl[0] not in xlsxfllstfromlocal]
+            for fl, guid in misslstfromnote:
+                reslst = getnoteresource(guid)
+                if len(reslst) != 0:
+                    for res in reslst:
+                        flfull = wcpath / fl
+                        fh = open(flfull, 'wb')
+                        fh.write(res[1])
+                        fh.close()
+                        dftest = pd.read_excel(flfull)
+                        setcfpoptionvalue('everwcitems', fl, 'guid', guid)
+                        setcfpoptionvalue('everwcitems', fl, 'itemsnum', str(dftest.shape[0]))
+                        setcfpoptionvalue('everwcitems', fl, 'itemsnum4net', str(dftest.shape[0]))
+                        log.info(f"文件《{fl}》在本地不存在，从云端获取存入并更新ini（section：{fl}，guid：{guid}）")
+
         xlsxfllst = sorted([fl for fl in os.listdir(wcpath) if re.search(ptn, fl)])
         print(f"{name}的数据文件数量\t{len(xlsxfllst)}", end="，")
         if newfileonly:
