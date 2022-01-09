@@ -361,7 +361,7 @@ def getnotelist(name, notebookguid):
     findnotelst = sorted(findnotelst, key=lambda x: x[0], reverse=True)
     nrlst[0] = re.sub("\t(-?\d+)", "\t" + f"{len(findnotelst)}", nrlst[0])
     nrlst[1] = "\n".join(["\t".join(sonlst) for sonlst in findnotelst])
-    nrlst[2] = f"\n更新于{timenowstr}，来自于主机：{getdevicename()}{loginstr}"
+    nrlst[2] = f"\n更新于{timenowstr}，来自于主机：{getdevicename()}{loginstr}" + f"\n{nrlst[2]}"
     
     imglist2note(get_notestore(), [], notelistguid, notelisttitle,
                  neirong="<pre>" + "\n---\n".join(nrlst) + "</pre>", parentnotebookguid=notebookguid)
