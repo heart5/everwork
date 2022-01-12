@@ -74,6 +74,19 @@ def items2df(fl):
 
 
 # %% [markdown]
+# ### def getaccountowner()
+
+# %%
+def getownerfromfilename(fn):
+    """
+    从文件名中获取账号
+    """
+    ptn = re.compile("\((\w*)\)")
+    ac = ac if (ac := re.search(ptn, fn).groups()[0]) not in ['', 'None'] else '白晔峰'
+    return ac
+
+
+# %% [markdown]
 # ### def txtfiles2dfdict(wcdatapath)
 
 # %%
@@ -82,13 +95,6 @@ def txtfiles2dfdict(dpath, newfileonly=False):
     读取传入目录下符合标准（固定格式文件名）所有文本文件并提取融合分账号的df，
     返回字典{name:dict}
     """
-    def getownerfromfilename(fn):
-        """
-        从文件名中获取账号
-        """
-        ptn = re.compile("\((\w*)\)")
-        ac = ac if (ac := re.search(ptn, fn).groups()[0]) not in ['', 'None'] else '白晔峰'
-        return ac
 
     fllst = [f for f in os.listdir(dpath) if f.startswith("chatitems")]
     names = list(set([getownerfromfilename(nm) for nm in fllst]))
@@ -307,7 +313,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
 # ### def getnotelist(name)
 
 # %%
-def getnotelist(name, notebookguid):
+def getnotelist(name, wcpath, notebookguid):
     """
     根据传入的微信账号名称获得云端记录笔记列表
     """
@@ -330,9 +336,12 @@ def getnotelist(name, notebookguid):
             log.info(f"文件列表《{notelisttitle}》被首次创建！")
         setcfpoptionvalue('everwcitems', "common", f'{name}_notelist_guid', str(notelistguid))
 
-    if (numinlistcloud := getcfpoptionvalue('everwcitems', "common", f"{name}_num_in_list_cloud")) is None:
-        numinlistcloud = 0
-        setcfpoptionvalue('everwcitems', "common", f"{name}_num_in_list_cloud", str(numinlistcloud))
+    if (numatlocal := getcfpoptionvalue('everwcitems', "common", f"{name}_num_at_local")) is None:
+        ptn = f"wcitems_{name}_" + "\d{4}.xlsx" # wcitems_heart5_2201.xlsx
+        xlsxfllstfromlocal = [fl for fl in os.listdir(wcpath) if re.search(ptn, fl)]
+        numatlocal = len(xlsxfllstfromlocal)
+        setcfpoptionvalue('everwcitems', "common", f"{name}_num_at_local", str(numatlocal))
+        log.info(f"首次运行getnotelist函数，统计微信账户《{name}》的本地资源文件数量存入本地ini变量中")
     notent = getnotecontent(notelistguid)
 #     print(notent)
     if notent.find("pre") is None:
@@ -345,15 +354,15 @@ def getnotelist(name, notebookguid):
         oldnotecontent = notent.find("pre").text
         nrlst = oldnotecontent.split("\n---\n")
 #     print(nrlst)
-    numinnote = int(re.findall("\t(-?\d+)", nrlst[0])[0])
+    numinnotedesc = int(re.findall("\t(-?\d+)", nrlst[0])[0])
 #     ptn = f"(wcitems_{name}_\d\d\d\d\.xlsx)\t(\S+)"
     ptn = f"(wcitems_{name}_" + "\d{4}.xlsx)\t(\S+)"
 #     print(ptn)
     finditems = re.findall(ptn, nrlst[1])
     finditems = sorted(finditems, key=lambda x: x[0], reverse=True)
 #     print(finditems)
-    print(numinnote, numinlistcloud, len(finditems))
-    if numinnote == numinlistcloud == len(finditems):
+    print(numinnotedesc, numatlocal, len(finditems))
+    if numinnotedesc == numatlocal == len(finditems):
         log.info(f"《{notelisttitle}》中数量无更新，跳过。")
         return finditems
     findnotelstwithgtu = findnotefromnotebook(notebookguid, f"wcitems_{name}_", notecount=1000)
@@ -361,12 +370,12 @@ def getnotelist(name, notebookguid):
     findnotelst = sorted(findnotelst, key=lambda x: x[0], reverse=True)
     nrlst[0] = re.sub("\t(-?\d+)", "\t" + f"{len(findnotelst)}", nrlst[0])
     nrlst[1] = "\n".join(["\t".join(sonlst) for sonlst in findnotelst])
-    nrlst[2] = f"\n更新于{timenowstr}，来自于主机：{getdevicename()}{loginstr}" + f"\n{nrlst[2]}"
+    nrlst[2] = f"更新于{timenowstr}，来自于主机：{getdevicename()}{loginstr}" + f"{nrlst[2]}"
     
     imglist2note(get_notestore(), [], notelistguid, notelisttitle,
                  neirong="<pre>" + "\n---\n".join(nrlst) + "</pre>", parentnotebookguid=notebookguid)
-    numinlistcloud = len(finditems)
-    setcfpoptionvalue('everwcitems', "common", f"{name}_num_in_list_cloud", str(numinlistcloud))
+    numatlocal = len(finditems)
+    setcfpoptionvalue('everwcitems', "common", f"{name}_num_at_local", str(numatlocal))
     
     return findnotelst
 
@@ -380,11 +389,12 @@ def merge2note(dfdict, wcpath, notebookguid, newfileonly=False):
     处理从文本文件读取生成的dfdict，分账户读取本地资源文件和笔记进行对照，并做相应更新或跳过
     """
     for name in dfdict.keys():
-        fllstfromnote = getnotelist(name, notebookguid=notebookguid)
+        fllstfromnote = getnotelist(name, wcpath, notebookguid=notebookguid)
         ptn = f"wcitems_{name}_" + "\d{4}.xlsx" # wcitems_heart5_2201.xlsx
         xlsxfllstfromlocal = [fl for fl in os.listdir(wcpath) if re.search(ptn, fl)]
         if len(fllstfromnote) != len(xlsxfllstfromlocal):
-            print(f"{name}的数据文件本地数量\t{len(xlsxfllstfromlocal)}，云端笔记列表中为\t{len(fllstfromnote)}，两者不等，先把本地缺的从网上拉下来")
+            print(f"{name}的数据文件本地数量\t{len(xlsxfllstfromlocal)}，云端笔记列表中为\t{len(fllstfromnote)}，" \
+                  "两者不等，先把本地缺的从网上拉下来")
             misslstfromnote = [fl for fl in fllstfromnote if fl[0] not in xlsxfllstfromlocal]
             for fl, guid in misslstfromnote:
                 reslst = getnoteresource(guid)
