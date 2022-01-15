@@ -1,8 +1,27 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       jupytext_version: 1.13.4
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
+# %% [markdown]
+# # sqlite3数据库相关函数
+
+# %%
 """
 sqlite数据库相关应用函数
 """
 
+# %% [markdown]
+# ## 引入重要库
+
+# %%
 import sqlite3 as lite
 import os
 import re
@@ -12,15 +31,27 @@ with pathmagic.context():
     from func.logme import log
     from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
+    from func.sysfunc import not_IPython
     from func.wrapfuncs import timethis
 
 
+# %% [markdown]
+# ## 功能函数集
+
+# %% [markdown]
+# ### def get_filesize(filepath)
+
+# %%
 def get_filesize(filepath):
     fsize = os.path.getsize(filepath)
     fsize = fsize / float(1024 * 1024)
     return round(fsize, 2)
 
 
+# %% [markdown]
+# ### def istableindb(tablein, dbname)
+
+# %%
 def istableindb(tablenin: str, dbname: str):
     result = False
     try:
@@ -41,6 +72,10 @@ def istableindb(tablenin: str, dbname: str):
     return result
 
 
+# %% [markdown]
+# ### def ifnotcreate(tablein, createsql, dbn)
+
+# %%
 def ifnotcreate(tablen: str, createsql: str, dbn: str):
     """
     如果没有相应数据表就创建一个
@@ -67,6 +102,10 @@ def ifnotcreate(tablen: str, createsql: str, dbn: str):
             conn.close()
 
 
+# %% [markdown]
+# ### def ifclexists(dbin, tb, cl)
+
+# %%
 def ifclexists(dbin, tb, cl):
     conn = lite.connect(dbin)
     cursor = conn.cursor()
@@ -99,6 +138,10 @@ def ifclexists(dbin, tb, cl):
         return False
 
 
+# %% [markdown]
+# ### def shwotableindb(dbname)
+
+# %%
 def showtablesindb(dbname: str):
     conn = lite.connect(dbname)
     cursor = conn.cursor()
@@ -117,6 +160,10 @@ def showtablesindb(dbname: str):
     conn.close()
 
 
+# %% [markdown]
+# ### def droptablefromdb(dbname, tablename, confirm=False)
+
+# %%
 def droptablefromdb(dbname: str, tablename: str, confirm=False):
     if not confirm:
         logstr = f"【警告】：数据表{tablename}将从{dbname}中删除，请确认！！！"
@@ -133,6 +180,10 @@ def droptablefromdb(dbname: str, tablename: str, confirm=False):
         conn.close()
 
 
+# %% [markdown]
+# ### def checktableindb(ininame, dbpath, tablename, creattablesql, confirm=False)
+
+# %%
 def checktableindb(ininame: str, dbpath: str, tablename: str, creattablesql: str, confirm=False):
     """
     检查数据表（ini登记，物理存储）是否存在并根据情况创建
@@ -150,6 +201,10 @@ def checktableindb(ininame: str, dbpath: str, tablename: str, creattablesql: str
         setcfpoptionvalue(ininame, absdbpath, tablename, str(True))
 
 
+# %% [markdown]
+# ### def compact_sqlite3_db(dbpath)
+
+# %%
 @timethis
 def compact_sqlite3_db(dbpath):
     sizebefore = get_filesize(dbpath)
@@ -159,13 +214,21 @@ def compact_sqlite3_db(dbpath):
     log.info(f"{dbpath}数据库压缩前大小为{sizebefore}MB，压缩之后为{get_filesize(dbpath)}MB。")
 
 
+# %% [markdown]
+# ## 主函数main
+
+# %%
 if __name__ == "__main__":
-    logstr = f"运行文件\t{__file__}\t……"
-    log.info(logstr)
+    if not_IPython():
+        logstr = f"运行文件\t{__file__}\t……"
+        log.info(logstr)
     # print(get_filesize(dbpathquandan))
     compact_sqlite3_db(dbpathquandan)
     compact_sqlite3_db(dbpathworkplan)
     compact_sqlite3_db(dbpathdingdanmingxi)
 
-    logstr = f"文件\t{__file__}\t运行完毕。"
-    log.info(logstr)
+    if not_IPython():
+        logstr = f"文件\t{__file__}\t运行完毕。"
+        log.info(logstr)
+
+# %%
