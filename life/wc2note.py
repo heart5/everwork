@@ -26,6 +26,7 @@ import os
 import re
 import xlsxwriter
 import pandas as pd
+import sqlite3 as lite
 from pathlib import Path
 from datetime import datetime
 
@@ -34,8 +35,10 @@ with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
     from func.logme import log
     from etc.getid import getdevicename
+    from func.wrapfuncs import timethis
     from func.sysfunc import not_IPython, execcmd
     from func.configpr import setcfpoptionvalue, getcfpoptionvalue
+    from func.litetools import ifnotcreate, showtablesindb
     from func.evernttest import getinivaluefromnote, getnoteresource, \
         gettoken, get_notestore, getnotecontent, updatereslst2note, \
         createnotebook, makenote2, findnotebookfromevernote, \
@@ -228,6 +231,41 @@ def getnotebookguid(notebookname):
 
 
 # %% [markdown]
+# ### def df2db(dftest, name, wcpath)
+
+# %%
+def df2db(dftest, name, wcpath):
+    """
+    把指定微信账号的记录df写入db相应表中
+    """
+    ny = dftest['time'].iloc[0].strftime("%y%m")
+    dftfilename = f"wcitems_{name}_{ny}.xlsx"
+    if (itemsnum_db := getcfpoptionvalue('everwcitems', dftfilename, 'itemsnum_db')) is None:
+        itemsnum_db = 0
+    itemnum = dftest.shape[0]
+    if itemnum != itemsnum_db:
+        starttime = dftest['time'].min().strftime("%F %T")
+        endtime = dftest['time'].max().strftime("%F %T")
+        loginstr = "" if (whoami := execcmd("whoami")) and (len(whoami) == 0) else f"{whoami}"
+        dbfilename = f"wcitemsall_({getdevicename()})_({loginstr}).db".replace(" ", "_")
+        dbname = wcpath / dbfilename
+        with lite.connect(dbname) as conn:
+            tablename = f"wc_{name}"
+            csql = f"create table if not exists {tablename} " + f"(id INTEGER PRIMARY KEY AUTOINCREMENT, time DATETIME, send BOOLEAN, sender TEXT, type TEXT, content TEXT)"
+            ifnotcreate(tablename, csql, dbname)
+            cursor = conn.cursor()
+            sql = f"select * from {tablename} where time between \'{starttime}\' and \'{endtime}\';"
+            tb = cursor.execute(sql).fetchall()
+            if len(tb) != itemnum:
+                sqldel = f"delete from {tablename} where time between \'{starttime}\' and \'{endtime}\';"
+                cursor.execute(sqldel)
+                log.info(f"从数据库文件{dbname}的表{tablename}中删除{cursor.rowcount}条记录")
+                dftest.to_sql(tablename, conn, if_exists="append", index=False)
+                setcfpoptionvalue('everwcitems', dftfilename, 'itemsnum_db', str(itemnum))
+                log.info(f"{dftfilename}的数据写入数据库文件（{dbname}）的（{tablename}）表中，并在ini登记数量（{itemnum}）") 
+
+
+# %% [markdown]
 # ### updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid)
 
 # %%
@@ -257,6 +295,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
             dftfileguid = makenote2(dftfilename, notebody=first_note_body, parentnotebookguid=notebookguid).guid
         setcfpoptionvalue('everwcitems', dftfilename, 'guid', str(dftfileguid))
 
+    df2db(dftest, name, wcpath)
     if (itemsnum_old := getcfpoptionvalue('everwcitems', dftfilename, 'itemsnum')) is None:
         itemsnum_old = 0
     itemnum = dftest.shape[0]
@@ -294,6 +333,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
         log.info(f"本地数据文件记录数有{itemnum}条，笔记资源文件记录数为{itemsnumfromnet}条" \
                 f"，合并后记录总数为：\t{dfcombine.shape[0]}")
         dftest = dfcombine
+    df2db(dftest, name, wcpath)
     note_desc = f"账号\t{name}\n记录数量\t{dftest.shape[0]}"
     nrlst[0] = note_desc
     dftest_desc = f"更新时间：{timenowstr}\t" \
@@ -424,14 +464,11 @@ def merge2note(dfdict, wcpath, notebookguid, newfileonly=False):
 
 
 # %% [markdown]
-# ## main，主函数
+# ### def refreshres(wcpath)
 
 # %%
-if __name__ == '__main__':
-    if not_IPython():
-        log.info(f'运行文件\t{__file__}')
-
-    wcpath = getdirmain() / 'data' / 'webchat'
+@timethis
+def refreshres(wcpath):
     notebookname = "微信记录数据仓"
     notebookguid = getnotebookguid(notebookname)
     if (new := getinivaluefromnote('wcitems', 'txtfilesonlynew')) is None:
@@ -443,10 +480,62 @@ if __name__ == '__main__':
         dfinner = dfdict[k]
         print(f"{k}\t{dfinner.shape[0]}", end='\n\n')
         txtdfsplit2xlsx(k, dfinner, wcpath, newfileonly=new)
-        
+
     merge2note(dfdict, wcpath, notebookguid, newfileonly=new)
+
+
+# %% [markdown]
+# ### def alldfdesc2note(name)
+
+# %%
+@timethis
+def alldfdesc2note(wcpath):
+    """
+    读取本地所有资源文件的聊天记录到DataFrame中，输出描述性信息到相应笔记中
+    """
+    ptn4name = "wcitems_(\w+)_(\d{4}.xlsx)"
+    names = list(set([re.search(ptn4name, fl).groups()[0] for fl in os.listdir(wcpath)
+                if re.search(ptn4name, fl)]))
+    print(names)
+    loginstr = "" if (whoami := execcmd("whoami")) and (len(whoami) == 0) else f"{whoami}"
+    dbfilename = f"wcitemsall_({getdevicename()})_({loginstr}).db".replace(" ", "_")
+    dbname = wcpath / dbfilename
+    resultdict = dict()
+    for name in names[:]:
+        with lite.connect(dbname) as conn:
+            tbname = f"wc_{name}"
+            sql = f"select * from {tbname}"
+            finnaldf = pd.read_sql(sql, conn, 
+                                   index_col=['id'], 
+                                   parse_dates=['time'], 
+                                   columns=['id', 'time', 'send' ,'sender', 'type', 'content'])
+            finnaldf['send'] = finnaldf['send'].astype(bool)
+            resultdict[name] = finnaldf
+            print(f"{name}\t{finnaldf.shape[0]}")
     
+    return resultdict
+
+
+# %% [markdown]
+# ## main，主函数
+
+# %% jupyter={"outputs_hidden": true}
+if __name__ == '__main__':
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}')
+
+    wcpath = getdirmain() / 'data' / 'webchat'
+    refreshres(wcpath)
+    mydict = alldfdesc2note(wcpath)
+
     if not_IPython():
         log.info(f"文件\t{__file__}\t运行结束。")
+
+# %% [markdown]
+# mydict = alldfdesc2note(wcpath)
+# mydict['heart5'].dtypes
+
+# %% [markdown]
+# mydict['heart5'].describe()
 
 # %%
