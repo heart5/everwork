@@ -1,15 +1,32 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       jupytext_version: 1.13.4
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
+# %% [markdown]
+# # 装饰器功能函数集
+
+# %%
 """
 装饰器函数集，ift2phone、timethis, logit
 """
 
+# %% [markdown]
+# ## 引入重要库
 
+# %%
 import time
 from functools import wraps
 from inspect import signature
 
 import pathmagic
-
 with pathmagic.context():
     from func.logme import log
     from func.nettools import ifttt_notify
@@ -17,6 +34,13 @@ with pathmagic.context():
     from func.sysfunc import not_IPython
 
 
+# %% [markdown]
+# ## 功能函数集合
+
+# %% [markdown]
+# ### def logit(func)
+
+# %%
 def logit(func):
     """
     函数具体调用信息写入日志或print至控制台
@@ -34,6 +58,10 @@ def logit(func):
     return with_logging
 
 
+# %% [markdown]
+# ### def ift2phone(msg=None)
+
+# %%
 def ift2phone(msg=None):
     """
     目标函数运行时将信息通过ifttt发送至手机
@@ -57,6 +85,10 @@ def ift2phone(msg=None):
     return decorate
 
 
+# %% [markdown]
+# ### def timethis(func) 
+
+# %%
 def timethis(func):
     """
     装饰执行时间（tida）
@@ -87,6 +119,10 @@ def timethis(func):
     return wrapper
 
 
+# %% [markdown]
+# ### def countdown(n: int) # 用于测试各种装饰器
+
+# %%
 @timethis
 @ift2phone("倒数计时器")
 @ift2phone()
@@ -104,6 +140,10 @@ def countdown(n: int):
             print(n)
 
 
+# %% [markdown]
+# ## 主函数main
+
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'运行文件\t{__file__}')
