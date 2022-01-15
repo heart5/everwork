@@ -1,4 +1,15 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       jupytext_version: 1.13.4
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
 # %% [markdown]
 # # 网络函数包
 
@@ -184,7 +195,7 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                         ConnectionAbortedError, NewConnectionError,
                         ConnectionError, MaxRetryError,
                         struct.error, socket.gaierror,
-                        ssl.SSLError, EDAMSystemException,
+                        ssl.SSLError, ssl.SSLEOFError, EDAMSystemException,
                         OSError, IndexError, Exception, ValueError
                 ) as eee:
 
