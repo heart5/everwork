@@ -1,7 +1,27 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       jupytext_version: 1.13.4
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
+# %% [markdown]
+# # 微信聊天信息延迟管理
+
+# %%
 """
 微信延迟管理文件
 """
+
+# %% [markdown]
+# ## 引入重要库
+
+# %%
 import os
 import time
 # import datetime
@@ -19,6 +39,13 @@ with pathmagic.context():
     from func.sysfunc import not_IPython
 
 
+# %% [markdown]
+# ## 功能函数集
+
+# %% [markdown]
+# ### def checkdelaytable(dbname, tablename)
+
+# %%
 def checkwcdelaytable(dbname: str, tablename: str):
     """
     检查和dbname（绝对路径）相对应的延时数据表是否已经构建，设置相应的ini值避免重复打开关闭数据库文件进行检查
@@ -34,6 +61,10 @@ def checkwcdelaytable(dbname: str, tablename: str):
         log.info(logstr)
 
 
+# %% [markdown]
+# ### def inserttimeitem2db(dbname, timestampinput)
+
+# %%
 def inserttimeitem2db(dbname: str, timestampinput: int):
     '''
     insert timestamp to wcdelay db whose table name is wcdelay
@@ -61,6 +92,10 @@ def inserttimeitem2db(dbname: str, timestampinput: int):
             conn.close()
 
 
+# %% [markdown]
+# ### def getdelaydb(dbname, tablename)
+
+# %%
 def getdelaydb(dbname: str, tablename="wcdelaynew"):
     """
     从延时数据表提取数据（DataFrame），返回最近延时值和df
@@ -113,6 +148,10 @@ def getdelaydb(dbname: str, tablename="wcdelaynew"):
     return jujinmins, timedfgrp
 
 
+# %% [markdown]
+# ### def showdelayimg(dbname, jingdu)
+
+# %%
 def showdelayimg(dbname: str, jingdu: int = 300):
     '''
     show the img for wcdelay
@@ -163,6 +202,10 @@ def showdelayimg(dbname: str, jingdu: int = 300):
     return imgwcdelaypath
 
 
+# %% [markdown]
+# ## 主函数main
+
+# %%
 if __name__ == "__main__":
     if not_IPython():
         logstrouter = "运行文件\t%s" %__file__
