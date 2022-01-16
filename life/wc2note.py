@@ -93,6 +93,7 @@ def getownerfromfilename(fn):
 # ### def txtfiles2dfdict(wcdatapath)
 
 # %%
+@timethis
 def txtfiles2dfdict(dpath, newfileonly=False):
     """
     读取传入目录下符合标准（固定格式文件名）所有文本文件并提取融合分账号的df，
@@ -234,6 +235,7 @@ def getnotebookguid(notebookname):
 # ### def df2db(dftest, name, wcpath)
 
 # %%
+@timethis
 def df2db(dftest, name, wcpath):
     """
     把指定微信账号的记录df写入db相应表中
@@ -269,6 +271,7 @@ def df2db(dftest, name, wcpath):
 # ### updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid)
 
 # %%
+@timethis
 def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
     """
     处理从本地资源文件读取生成的df，如果和ini登记数量相同，则返回；如果不同，则从笔记端读取相应登记
@@ -353,6 +356,7 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
 # ### def getnotelist(name)
 
 # %%
+@timethis
 def getnotelist(name, wcpath, notebookguid):
     """
     根据传入的微信账号名称获得云端记录笔记列表
@@ -424,6 +428,7 @@ def getnotelist(name, wcpath, notebookguid):
 # ### def merge2note(dfdict)
 
 # %%
+@timethis
 def merge2note(dfdict, wcpath, notebookguid, newfileonly=False):
     """
     处理从文本文件读取生成的dfdict，分账户读取本地资源文件和笔记进行对照，并做相应更新或跳过
@@ -531,11 +536,15 @@ if __name__ == '__main__':
     if not_IPython():
         log.info(f"文件\t{__file__}\t运行结束。")
 
-# %% [markdown]
-# mydict = alldfdesc2note(wcpath)
-# mydict['heart5'].dtypes
+# %%
+mydict = alldfdesc2note(wcpath)
 
-# %% [markdown]
-# mydict['heart5'].describe()
+# %%
+name = 'heart5'
+df = mydict[name]
+df.dtypes
+
+# %%
+df.describe()
 
 # %%
