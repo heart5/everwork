@@ -125,6 +125,8 @@ def set_timeout(num, callback):
                     return r
 
             except RuntimeError as e123:
+                logstr = f"{func}出现错误。\t{e123}"
+                log.warning(logstr)
                 callback()
 
         return to_do
@@ -171,7 +173,9 @@ def sha2hexstr(inputo: object):
 # ### execcmd(cmd)
 
 # %%
+@set_timeout(3, after_timeout)
 def execcmd(cmd):
+    time.sleep(7)
     try:
         r = os.popen(cmd)
         text = r.read()
@@ -188,7 +192,7 @@ def execcmd(cmd):
 # %%
 if __name__ == '__main__':
     if not_IPython():
-        log.info(f'运行文件\t{__file__}……')
+        log.info(f'运行文件\t{__file__}')
     # outgetstr = execcmd("uname -a")
     outgetstr = execcmd("echo $PATH")
     print(outgetstr.strip("\n"))
@@ -197,3 +201,5 @@ if __name__ == '__main__':
     log.critical(outgetstr)
     if not_IPython():
         log.info(f'文件\t{__file__}\t测试完毕。')
+
+# %%
