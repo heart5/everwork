@@ -235,7 +235,6 @@ def getnotebookguid(notebookname):
 # ### def df2db(dftest, name, wcpath)
 
 # %%
-@timethis
 def df2db(dftest, name, wcpath):
     """
     把指定微信账号的记录df写入db相应表中
@@ -414,7 +413,7 @@ def getnotelist(name, wcpath, notebookguid):
     findnotelst = sorted(findnotelst, key=lambda x: x[0], reverse=True)
     nrlst[0] = re.sub("\t(-?\d+)", "\t" + f"{len(findnotelst)}", nrlst[0])
     nrlst[1] = "\n".join(["\t".join(sonlst) for sonlst in findnotelst])
-    nrlst[2] = f"更新于{timenowstr}，来自于主机：{getdevicename()}{loginstr}" + f"{nrlst[2]}"
+    nrlst[2] = f"更新于{timenowstr}，来自于主机：{getdevicename()}{loginstr}" + f"\n{nrlst[2]}"
     
     imglist2note(get_notestore(), [], notelistguid, notelisttitle,
                  neirong="<pre>" + "\n---\n".join(nrlst) + "</pre>", parentnotebookguid=notebookguid)
@@ -548,3 +547,4 @@ df.dtypes
 df.describe()
 
 # %%
+df.sort_values(['time'])
