@@ -173,9 +173,8 @@ def sha2hexstr(inputo: object):
 # ### execcmd(cmd)
 
 # %%
-@set_timeout(3, after_timeout)
+@set_timeout(9, after_timeout)
 def execcmd(cmd):
-    time.sleep(7)
     try:
         r = os.popen(cmd)
         text = r.read()
