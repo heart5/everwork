@@ -270,7 +270,6 @@ def df2db(dftest, name, wcpath):
 # ### updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid)
 
 # %%
-@timethis
 def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
     """
     处理从本地资源文件读取生成的df，如果和ini登记数量相同，则返回；如果不同，则从笔记端读取相应登记
