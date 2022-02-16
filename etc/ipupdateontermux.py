@@ -144,7 +144,8 @@ def showiprecords():
         itemread = readfromtxt(txtfilename)
         itemclean = [x for x in itemread if 'unknown' not in x]
         itempolluted = [x for x in itemread if 'unknown' in x]
-        log.info(f"不合法记录列表：\t{itempolluted}")
+        if len(itempolluted) > 0:
+            log.info(f"不合法记录列表：\t{itempolluted}")
         itemnewr = [
             f'{ipr}\t{wifir}\t{wifiidr}\t{tunr}\t{startr}\t{nowstr}']
         itemnewr.extend(itemclean)
