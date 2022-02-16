@@ -4,13 +4,20 @@
 # jupyter:
 #   jupytext:
 #     text_representation:
-#       jupytext_version: 1.10.3
+#       jupytext_version: 1.13.4
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
 # ---
 
-"""
-获取服务器ip并定期更新至相关笔记
-"""
+# %% [markdown]
+# # 获取服务器ip并定期更新至相关笔记
 
+# %% [markdown]
+# ## 导入核心库
+
+# %%
 import os
 import sys
 import datetime
@@ -18,6 +25,7 @@ import platform
 import re
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.first import getdirmain, dirmainpath
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
@@ -31,6 +39,13 @@ with pathmagic.context():
     from func.sysfunc import set_timeout, after_timeout, not_IPython
 
 
+# %% [markdown]
+# ## 功能函数库
+
+# %% [markdown]
+# ### def iprecord()
+
+# %%
 @set_timeout(240, after_timeout)
 @timethis
 def iprecord():
@@ -71,6 +86,10 @@ def iprecord():
     return ip, wifi, wifiid, tun, device_id
 
 
+# %% [markdown]
+# ### def evalnone(input)
+
+# %%
 def evalnone(input):
     if input == 'None':
         return eval(input)
@@ -78,6 +97,10 @@ def evalnone(input):
         return input
 
 
+# %% [markdown]
+# ### def showiprecords()
+
+# %%
 def showiprecords():
     namestr = 'everip'
     ip, wifi, wifiid, tun, device_id = iprecord()
@@ -91,7 +114,7 @@ def showiprecords():
         # note.title = "hengchu"
         print(note_title)
         note = makenote2(note_title, notebody='',
-                        parentnotebook=parentnotebookguid)
+                        parentnotebookguid=parentnotebookguid)
         guid = note.guid
         setcfpoptionvalue(namestr, device_id, 'guid', guid)
     if getcfpoptionvalue(namestr, device_id, 'ipr'):
@@ -146,6 +169,10 @@ def showiprecords():
                      f'服务器_{device_name}_ip更新记录', "<pre>" + "\n".join(itemnew) + "</pre>")
 
 
+# %% [markdown]
+# ## 主函数
+
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(
