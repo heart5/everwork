@@ -4,9 +4,9 @@
 # jupyter:
 #   jupytext:
 #     text_representation:
-#       jupytext_version: 1.10.3
+#       jupytext_version: 1.13.4
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
@@ -18,6 +18,7 @@
 """
 显示可用内存
 """
+
 # %% [markdown]
 # ## 库引入
 
@@ -28,6 +29,7 @@ import math
 import pandas as pd
 from pathlib import Path
 from pylab import plt
+
 # %%
 import pathmagic
 with pathmagic.context():
@@ -37,6 +39,8 @@ with pathmagic.context():
     from func.evernttest import get_notestore, imglist2note, \
         getinivaluefromnote
     from func.sysfunc import not_IPython
+
+
 # %% [markdown]
 # ## 函数集合
 
@@ -77,7 +81,7 @@ def gettotalmem(cpath):
     return totalmeminG
 
 
-# %%
+# %% [markdown]
 # datarelatepath = "sbase/zshscripts"
 # gettotalmem(getdatapath(datarelatepath))
 
@@ -95,6 +99,7 @@ def getdatadf(cpath):
     fdf = indf.loc[:, ['time', 1, 2, 3]]
     fdf = fdf.set_index('time', drop=False)
     fdf.columns = ['time', 'freeper', 'swap', 'swapfree']
+    fdf['freeper'] = fdf['freeper'].apply(lambda x: 100 - int(x))
 
     return fdf
 
