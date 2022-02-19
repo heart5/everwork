@@ -174,7 +174,7 @@ def getcutpoint(inputdatapath):
         plt.subplot(211)
 
     # 最近数据集图形化输出
-    plt.ylabel(f'空闲内存百分比({totalmen}G)')
+    plt.ylabel(f'内存百分比({totalmen}G)')
     cutdf = inputdf.iloc[outlst[-2]:outlst[-1]]
     plt.plot(cutdf.index, cutdf['freeper'])
     plt.ylim(0, 100)
@@ -192,7 +192,7 @@ def getcutpoint(inputdatapath):
         plt.subplot(212)
     elif len(outlst) > 3:
         plt.subplot(312)
-    plt.ylabel(f'空闲内存百分比({totalmen}G)')
+    plt.ylabel(f'内存百分比({totalmen}G)')
     plt.ylim(0, 100)
     plt.title('最近两次运行')
     twolst = outlst[-3:]
@@ -209,7 +209,7 @@ def getcutpoint(inputdatapath):
         return str(imgpath)
     else:
         plt.subplot(313)
-    plt.ylabel(f'空闲内存百分比({totalmen}G)')
+    plt.ylabel(f'内存百分比({totalmen}G)')
     plt.ylim(0, 100)
     plt.title('历次运行')
     for i in range(len(outlst) - 1):
@@ -231,7 +231,7 @@ def show2evernote(imglst):
         device_name = deviceid
 
     imglist2note(get_notestore(), imglst, guid,
-                 f'手机_{device_name}_空闲内存动态', "")
+                 f'手机_{device_name}_内存动态', "")
 
 
 # %% [markdown]
