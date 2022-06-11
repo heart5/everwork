@@ -41,6 +41,9 @@ with pathmagic.context():
 
 # %%
 def isclsatdf(cls, dfcls):
+    """
+    查询cls中的元素是否全部被包含在dfcls中
+    """
     isnotat = [cl for cl in cls if cl not in dfcls]
     if len(isnotat) > 0:
         # print(f"必须的列{isnotat}在该DataFrame中不存在，数据不符合规范")
@@ -55,7 +58,7 @@ def isclsatdf(cls, dfcls):
 # %%
 def managesourcesxlsx2cleandf(datapath):
     """
-    从数据目录读取xlsx文件，获取文件中的最后一个（默认）sheet，并判断列名是否符合规范
+    从数据目录读取xlsx文件，获取文件中的所有sheet，并判断列名是否符合规范
     然后按照原始销售数据重新处理生成标准、奖金等数据
     最后输出分组合计的标准df
     """
@@ -71,7 +74,11 @@ def managesourcesxlsx2cleandf(datapath):
                 # print(fl, dftmp.shape[0], k, "不合格的sheet", sep="\t")
                 continue
             else:
-                print(fl, dftmp.shape[0], k, "合格的sheet", sep="\t")
+                dftmp_dropdup = dftmp.dropna(axis=0, thresh=len(clnmsneeded))
+                if dftmp.shape[0] != dftmp_dropdup.shape[0]:
+                    print(f"{fl}\t{k}\t记录总数为{dftmp.shape[0]}，去除无效记录后数量为{dftmp_dropdup.shape[0]}")
+                    dftmp = dftmp_dropdup
+                print(fl, k, dftmp.shape[0], "合格的sheet", sep="\t")
             df = df.append(dftmp, ignore_index=False)
 #     print(df.shape[0])
 #     print(df.dtypes)
@@ -79,36 +86,52 @@ def managesourcesxlsx2cleandf(datapath):
         return
 
     # 拷贝一份数据进行操作，避免链式赋值错误警告
-    dftmp = df[clnmsneeded].copy()
+    dfcopy = df[clnmsneeded].copy()
+    ds = dfcopy.存货名称.str.contains("太白洞藏封坛", na=False)
+    # print(ds)
+    dfdingzhi = dfcopy[~ds]
+    dftmp = dfdingzhi.copy()
+    # dftmp = dfdingzhi.drop_duplicates()
+    # print(f"读取数据记录共有{dfcopy.shape[0]}条，定制记录共有{dfdingzhi.shape[0]}，去重后共有{dftmp.shape[0]}条。")
+    print(f"读取数据记录共有{dfcopy.shape[0]}条，定制开发产品记录（不包括封坛）后共有{dftmp.shape[0]}条。")
+    dftmp['提货金额'] = dftmp['提货金额'].astype("float64")
+    dftmp['含税单价'] = dftmp['含税单价'].astype("float64")
     dftmp['计提标准'] = dftmp['含税单价'].apply(lambda x: 0.024 if x < 20 else 0.03)
     dftmp['业务奖金标准'] = dftmp['计提标准'] / 2
     dftmp['奖金金额'] = dftmp['计提标准'] * dftmp['提货金额']
     dftmp['业务应分配金额'] = dftmp['业务奖金标准'] * dftmp['提货金额']
     dftmp['奖金金额'] = dftmp['奖金金额'].map(lambda x: round(x, 2))
     dftmp['业务应分配金额'] = dftmp['业务应分配金额'].map(lambda x: round(x, 2))
+    # print(dftmp.columns)
+    # print(dftmp.dtypes)
     dftmpgr = dftmp.groupby(['开票日期', '客户简称', '业务员', '计提标准', '业务奖金标准']).sum()[['提货金额', '奖金金额', '业务应分配金额']]
     dfdone = dftmpgr.reset_index(['开票日期', '客户简称', '计提标准', '业务奖金标准', '业务员'])
     dfout = dfdone[['开票日期', '客户简称', '提货金额', '计提标准', '奖金金额', '业务奖金标准', '业务应分配金额', '业务员']]
+    # print(dfout)
 
-    return dfout
-
-
-# %%
-datapath = getdirmain() / 'data' / 'taibai'
-dfoutsrc = managesourcesxlsx2cleandf(datapath)
-dfall = dfoutsrc.copy(deep=True)
+    return dfout[dfout.提货金额 != 0]
 
 
 # %% [markdown]
 # ### getmonthtotal(df, month)
 
 # %%
-def getmonthtotal(df, month):
+def getmonthdf(df, month):
     month_start = pd.to_datetime(f"{month[:4]}-{month[-2:]}-01")
     month_end = pd.to_datetime(f"{month[:4]}-{month[-2:]}-01 23:59:59") + MonthEnd()
-    print(month_start, month_end)
     dftmp = df[df['开票日期'] >= month_start]
     dftmp = dftmp[dftmp['开票日期'] <= month_end]
+    print(month_start, dftmp['开票日期'].min(),month_end, dftmp['开票日期'].max())
+    
+    return dftmp
+
+
+# %% [markdown]
+# ### def getdftotal(df, month)
+
+# %%
+def getdftotal(df, month):
+    dftmp = getmonthdf(df, month)
     dftmpgr = dftmp.groupby(['客户简称', '业务员', '计提标准', '业务奖金标准']).sum()[['提货金额', '奖金金额', '业务应分配金额']]
     dfdone = dftmpgr.reset_index(['客户简称', '计提标准', '业务奖金标准', '业务员'])
     dfout = dfdone[['客户简称', '提货金额', '计提标准', '奖金金额', '业务奖金标准', '业务应分配金额', '业务员']]
@@ -233,7 +256,7 @@ def fenpei2excel(dfin, month):
             for cl in range(1, len(dfdone.columns) - 1):
                 innerlst = list(dfdone.iloc[k:k+v, cl])
                 innerspdict = clsplit(innerlst)
-                print(cl, dfdone.columns[cl], innerspdict, innerlst, end="\t")
+                print("\t", cl, dfdone.columns[cl], innerspdict, innerlst, end="\t")
                 for innerk, innerv in innerspdict.items():
                     target = innerlst[innerk]
                     # ws.merge_range(1 + k + innerk, cl, 1 + k + innerv - 1, cl, target, vcenter_content)
@@ -251,7 +274,7 @@ def fenpei2excel(dfin, month):
                         cell_val = f"H{2 + k + innerk + i}"
                         cell_formula = f"={cell_val}/{cell_divided}"
                         ws.write_formula(cell_per_pos, cell_formula, vcenter_content_percent0)
-                        print(cell_per, cell_formula, end="\t")
+                        print(cell_per_pos, cell_formula, end="\t")
                     cell_minus_pos = f"J{2 + k + innerk}"
                     cell_minus_tobesub = f"F{2 + k + innerk}"
                     cell_minus_sum_start = f"H{2 + k + innerk}"
@@ -295,7 +318,7 @@ def fenpei2excel(dfin, month):
         start_wb = start_xg + 2 + 3
         ws.write_string(f"L{start_wb - 1}", "定制外部分配", bold_only)
         ws.write_formula(f"N{start_wb - 1}", 
-                         f"=index(P2:P{len(teamnamelst) + 1},match(\"外部分配\",O2:O{len(teamnamelst) + 1},0)) - sum(M{start_wb}:M{start_wb + 10})", bold_int)
+                         f"=index(P2:P{len(teamnamelst) + 1},match(\"外部分配\",O2:O{len(teamnamelst) + 1},0)) - sum(M{start_wb}:M{start_wb + 15})", bold_int)
 
         ws.merge_range(f"O{start_xg - 1}:P{start_xg - 1}",f"O{start_xg - 1}")
         ws.merge_range(f"O{start_xg}:P{start_xg}",f"O{start_xg}")
@@ -319,8 +342,9 @@ if __name__ == '__main__':
 
     datapath = getdirmain() / 'data' / 'taibai'
     dfout = managesourcesxlsx2cleandf(datapath)
-    yuefen = "202203"
-    dfdone = getmonthtotal(dfout, yuefen)
+    yuefen = "202204"
+    dfdone = getdftotal(dfout, yuefen)
+    print(dfdone.tail())
     fenpei2excel(dfdone, yuefen)
 
     if not_IPython():
