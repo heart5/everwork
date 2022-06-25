@@ -221,6 +221,7 @@ def getcutpoint(inputdatapath):
         plt.annotate(cutdf.index[0].strftime("%y-%m-%d %H:%M"), xy=[cutdf.index[0], cutdf.iloc[0, 1]])
         plt.annotate(cutdf.index[-1].strftime("%y-%m-%d %H:%M"), xy=[cutdf.index[-1], cutdf.iloc[-1, 1]])
 
+    plt.tight_layout() # 紧缩排版，缩小默认的边距
     plt.savefig(imgpath)
     return str(imgpath)
 

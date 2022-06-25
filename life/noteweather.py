@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
 # %%
 #
 # encoding:utf-8
@@ -261,6 +276,7 @@ def weatherstat(df, destguid=None):
     img_wenshifeng_path_str = str(img_wenshifeng_path)
     touchfilepath2depth(img_wenshifeng_path)
     plt.legend(loc='lower left')
+    plt.tight_layout() # 紧缩排版，缩小默认的边距
     plt.savefig(img_wenshifeng_path_str)
 
     imglist = list()
@@ -301,6 +317,7 @@ def weatherstat(df, destguid=None):
     img_sunonoff_path = dirmainpath / 'img' / 'weather' / 'sunonoff.png'
     img_sunonoff_path_str = str(img_sunonoff_path)
     touchfilepath2depth(img_sunonoff_path)
+    plt.tight_layout() # 紧缩排版，缩小默认的边距
     plt.savefig(img_sunonoff_path_str)
     imglist.append(img_sunonoff_path_str)
     plt.close()

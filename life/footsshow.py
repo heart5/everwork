@@ -2,10 +2,13 @@
 # ---
 # jupyter:
 #   jupytext:
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.10.3
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
@@ -184,6 +187,7 @@ def foot2show(df4dis):
         dstoday.plot()
         imgpathtoday = dirmainpath / 'img' / 'gpstoday.png'
         touchfilepath2depth(imgpathtoday)
+        plt.tight_layout() # 紧缩排版，缩小默认的边距
         plt.savefig(str(imgpathtoday))
         plt.close()
         imglst.append(str(imgpathtoday))
@@ -192,6 +196,7 @@ def foot2show(df4dis):
     dsdays.plot()
     imgpathdays = dirmainpath / 'img' / 'gpsdays.png'
     touchfilepath2depth(imgpathdays)
+    plt.tight_layout() # 紧缩排版，缩小默认的边距
     plt.savefig(str(imgpathdays))
     plt.close()
     imglst.append(str(imgpathdays))
