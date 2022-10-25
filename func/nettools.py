@@ -2,8 +2,12 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.13.4
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -247,10 +251,15 @@ def trycounttimes2(servname='服务器', maxtimes=100, maxsecs=50):
                         badnews = f'{__file__}\"{servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}\t{eee}'
                         # badnews = f'{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co__filename}\t\"{
                         # servname}\"连接尝试了{trytimes}次后仍然失败，只好无功而返。\t{" ".join(sys.argv)}'
-                        log.critical(badnews)
-                        termux_sms_send(badnews)
+                        log.critical(badnews)                        
+                        try:
+                            termux_sms_send(badnews)
+                        except (PermissionError, Exception) as eeee:
+                            print(eeee)
                         # exit(1)
-                        raise eee
+                        # raise eee
+                        break
+            
                     # 暂歇开始前终端输出，看看而已
                     print(extract_traceback4exception(tbtuple, 'trycounttimes2', sleeptime=sleeptime))
                     time.sleep(sleeptime)
