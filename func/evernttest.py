@@ -2,8 +2,11 @@
 # ---
 # jupyter:
 #   jupytext:
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.13.4
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -927,7 +930,7 @@ def p_noteattributeundertoken(note):
 
 
 # %% [markdown]
-# ### def findnotebookfromevernote():
+# ### def findnotebookfromevernote(ntname=None):
 
 # %%
 def findnotebookfromevernote(ntname=None):
@@ -950,7 +953,13 @@ def findnotebookfromevernote(ntname=None):
 
     rstdf = pd.DataFrame()
     for x in notebooks:
-        rstdf = rstdf.append(pd.Series(p_notebookattributeundertoken(x)), ignore_index=True)
+        # rstdf = rstdf.append(pd.Series(p_notebookattributeundertoken(x)), ignore_index=True)
+        ds = pd.Series(p_notebookattributeundertoken(x))
+        ds1 = ds.to_frame()
+        if rstdf.shape[0] == 0:
+            rstdf = ds1.T
+        else:
+            rstdf = pd.concat([rstdf,pd.DataFrame(ds1.values.T, columns=ds1.index)], ignore_index=True)
 
     # print(rstdf)
 
@@ -961,6 +970,62 @@ def findnotebookfromevernote(ntname=None):
         rstdf = rstdf[rstdf.名称 == ntname]
 
     return rstdf
+
+
+# %% [markdown]
+# ### expungenotes(inputguidlst)
+
+# %% tags=[]
+def expungenotes(inputguidlst):
+    @trycounttimes2("evernote服务器", maxtimes=8)
+    def innerexpungenote(intoken, nost, guid):
+        evernoteapijiayi()
+        nost.expungeNote(intoken, guid)
+
+    token = gettoken()
+    nost = get_notestore()
+    for son in inputguidlst:
+        log.info("\t".join([f"（{inputguidlst.index(son) + 1}/{len(inputguidlst)}）", son[0], son[1]]))
+        innerexpungenote(token, nost, son[0])
+        log.info("\t".join([f"（{inputguidlst.index(son) + 1}/{len(inputguidlst)}）", son[0], son[1], "\t完成删除操作（可能未能奏效哦^_^）！！！"]))
+
+
+# %% [markdown]
+# ### expungetrash()
+
+# %% tags=[]
+def expungetrash(times=50):
+    @trycounttimes2("evernote服务器", maxtimes=times)
+    def innerexpungetrash():
+        token = gettoken()
+        nost.expungeInactiveNotes(token)
+
+    log.info("开始清空垃圾篓……")
+    innerexpungetrash()
+    log.info("垃圾篓已完成清空操作（可能未奏效哦^_^）！！！")
+
+
+# %% [markdown]
+# ### expungenotescontainkey(keyword="图表")
+
+# %%
+def expungenotescontainkey(keyword="图表"):
+    from func.wrapfuncs import timethis
+    @timethis
+    def sonexpungenotescontainkey(keyword="图表"):
+        ntdf = findnotebookfromevernote()
+        tgds = ntdf[ntdf['名称'].str.contains("区$")]['名称']
+        ntlst = [[v, k] for (k, v) in dict(tgds).items()]
+
+        for nt in ntlst:
+            # 真元销售，分区，图表
+            findnoteguidlst = findnotefromnotebook(nt[1], titlefind=keyword, notecount=30)
+            log.info(f"开始删除【{ntlst.index(nt) + 1}/{len(ntlst)}】《{nt[0]}》中的笔记，共有{len(findnoteguidlst)}条………………………………")
+            findnoteguidlst = [x for x in findnoteguidlst if len(x[1]) != (len(nt[0]) + 4)]
+            expungenotes(findnoteguidlst)
+            expungetrash(times=88)
+            log.info(f"（{ntlst.index(nt) + 1}/{len(ntlst)}）《{nt[0]}》中符合规则的笔记共有{len(findnoteguidlst)}条，处理完毕，！")
+    sonexpungenotescontainkey(keyword)
 
 
 # %% [markdown]
@@ -1076,7 +1141,7 @@ def getsampledffromdatahouse(keyword: str, notebookstr='datahouse', firstcolumn=
 # %% [markdown]
 # # 主函数
 
-# %%
+# %% tags=[]
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'开始运行文件\t{__file__}……')
@@ -1085,21 +1150,35 @@ if __name__ == '__main__':
     evernoteapijiayi_test()
     # readinifromnote()
     # writeini()
-#     ntdf = findnotebookfromevernote('小菩萨')
-#     print(ntdf)
+
+    # 输出全部notebook，dataframe格式
+    # ntdf = findnotebookfromevernote()
+    # print(ntdf)
+    # 输出指定名称的notebook
+    # ntdf = findnotebookfromevernote("贰区")
+    # print(ntdf)
     # print(getsampledffromdatahouse('火界'))
 
     # 查找主题包含关键词的笔记
-    notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
+    # 真元销售，贰区，图表
+    # erqunb_guid = "2d04dc4e-85ef-4d23-8353-f98ab53024b1"
+    # findnoteguidlst = findnotefromnotebook(erqunb_guid, titlefind='图表', notecount=14)
+    # print(len(findnoteguidlst))
+    # print(findnoteguidlst)
+    # expungetrash(times=100)
+    # expungenotes(findnoteguidlst)
+
+    # notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
 #     shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
 #     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
-    findnoteguidlst = findnotefromnotebook(notification_guid, titlefind='tmux.conf', notecount=14)
-    print(len(findnoteguidlst))
-    testnote = nost.getNote(gettoken(), findnoteguidlst[-1][0], True, True, True, True)
-#     p_noteattributeundertoken(testnote)
-    file= dirmainpath / 'data' / 'webchat' / 'wcitems_heart5_2108.xlsx'
-    updatereslst2note([os.path.abspath(file)], testnote.guid, neirong="This is evil.", \
-                      filenameonly=True, parentnotebookguid=notification_guid)
+    # findnoteguidlst = findnotefromnotebook(notification_guid, titlefind='tmux.conf', notecount=14)
+    # print(len(findnoteguidlst))
+    # print(findnoteguidlst)
+#     testnote = nost.getNote(gettoken(), findnoteguidlst[-1][0], True, True, True, True)
+# #     p_noteattributeundertoken(testnote)
+#     file= dirmainpath / 'data' / 'webchat' / 'wcitems_heart5_2108.xlsx'
+#     updatereslst2note([os.path.abspath(file)], testnote.guid, neirong="This is evil.", \
+#                       filenameonly=True, parentnotebookguid=notification_guid)
 #     print(findnoteguidlst)
 #     findnoteguidlst = findsomenotest2showornote(notification_guid, 'data')
 #     print(findnoteguidlst)
@@ -1125,6 +1204,7 @@ if __name__ == '__main__':
     # makenote(token, nost,filetitle, neirong)
 
     # # makenote(token, nost, '转账记录笔记guid', str(notefind))
+    expungenotescontainkey()
     if not_IPython():
         log.info(f"完成文件{__file__}\t的运行")
 
