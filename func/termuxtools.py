@@ -1,24 +1,45 @@
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
+# %%
 """
 termux工具集，API
 """
 
+# %%
 import subprocess
 
+# %%
 import pathmagic
 with pathmagic.context():
     from func.common import utils
     from func.logme import log
-    from func.sysfunc import set_timeout, after_timeout, not_IPython
+    from func.sysfunc import set_timeout, after_timeout, not_IPython, is_tool_valid
 
 
+# %%
 """
     implementation of all the termux-api commands
     via subprocesses,
 """
 
+# %% [markdown]
 # print(f"{__file__} is loading now...")
 
+# %%
 def evaloutput(output):
     if (output is None) or (output == 'null') or (len(output) == 0):
         # print(f"output\'s content:\n{output}")
@@ -30,6 +51,7 @@ def evaloutput(output):
     return eval(out)
 
 
+# %%
 @set_timeout(60, after_timeout)
 def battery_status():
     out, rc, err = utils.execute('termux-battery-status')
@@ -38,6 +60,7 @@ def battery_status():
     return evaloutput(out)
 
 
+# %%
 def camera_info():
     out, rc, err = utils.execute('termux-camera-info')
     if rc:
@@ -45,6 +68,7 @@ def camera_info():
     return evaloutput(out)
 
 
+# %%
 def termux_camera_photo():
     out, rc, err = utils.execute('termux-camera-photo')
     if rc:
@@ -52,6 +76,7 @@ def termux_camera_photo():
     return out
 
 
+# %%
 def termux_clipboard_get():
     out, rc, err = utils.execute('termux-clipboard-get')
     if rc:
@@ -59,6 +84,7 @@ def termux_clipboard_get():
     return out
 
 
+# %%
 def termux_clipboard_set():
     out, rc, err = utils.execute('termux-clipboard-set')
     if rc:
@@ -66,6 +92,7 @@ def termux_clipboard_set():
     return out
 
 
+# %%
 def termux_contact_list():
     out, rc, err = utils.execute('termux-contact-list')
     if rc:
@@ -73,6 +100,7 @@ def termux_contact_list():
     return out
 
 
+# %%
 def termux_dialog():
     out, rc, err = utils.execute('termux-dialog')
     if rc:
@@ -80,6 +108,7 @@ def termux_dialog():
     return out
 
 
+# %%
 def termux_download():
     out, rc, err = utils.execute('termux-download')
     if rc:
@@ -87,6 +116,7 @@ def termux_download():
     return out
 
 
+# %%
 def termux_fix_shebang():
     out, rc, err = utils.execute('termux-fix-shebang')
     if rc:
@@ -94,6 +124,7 @@ def termux_fix_shebang():
     return out
 
 
+# %%
 def termux_info():
     out, rc, err = utils.execute('termux-info')
     if rc:
@@ -101,6 +132,7 @@ def termux_info():
     return out
 
 
+# %%
 def termux_infrared_frequencies():
     out, rc, err = utils.execute('termux-infrared-frequencies')
     if rc:
@@ -108,6 +140,7 @@ def termux_infrared_frequencies():
     return out
 
 
+# %%
 def termux_infrared_transmit():
     out, rc, err = utils.execute('termux-infrared-transmit')
     if rc:
@@ -115,6 +148,7 @@ def termux_infrared_transmit():
     return out
 
 
+# %%
 @set_timeout(90, after_timeout)
 def termux_location():
     out, rc, err = utils.execute('termux-location')
@@ -131,6 +165,7 @@ def termux_location():
     return evaloutput(out)
 
 
+# %%
 def termux_notification():
     out, rc, err = utils.execute('termux-notification')
     if rc:
@@ -138,6 +173,7 @@ def termux_notification():
     return out
 
 
+# %%
 def termux_notification_remove():
     out, rc, err = utils.execute('termux-notification-remote')
     if rc:
@@ -145,6 +181,7 @@ def termux_notification_remove():
     return out
 
 
+# %%
 def termux_open():
     out, rc, err = utils.execute('termux-open')
     if rc:
@@ -152,6 +189,7 @@ def termux_open():
     return out
 
 
+# %%
 def termux_open_url():
     out, rc, err = utils.execute('termux-open-url')
     if rc:
@@ -159,6 +197,7 @@ def termux_open_url():
     return out
 
 
+# %%
 def termux_reload_settings():
     out, rc, err = utils.execute('termux-reload-settings')
     if rc:
@@ -166,6 +205,7 @@ def termux_reload_settings():
     return out
 
 
+# %%
 def termux_setup_storage():
     out, rc, err = utils.execute('termux-setup-storage')
     if rc:
@@ -173,6 +213,7 @@ def termux_setup_storage():
     return out
 
 
+# %%
 def termux_share():
     out, rc, err = utils.execute('termux-share')
     if rc:
@@ -180,6 +221,7 @@ def termux_share():
     return out
 
 
+# %%
 @set_timeout(90, after_timeout)
 def termux_sms_list(timecreated:bool = True, num:int = 10, shownumber:bool = True,
                     where:str = "all"):
@@ -195,18 +237,24 @@ def termux_sms_list(timecreated:bool = True, num:int = 10, shownumber:bool = Tru
     return evaloutput(out)
 
 
+# %%
 @set_timeout(90, after_timeout)
 def termux_sms_send(msg='hi'):
-    cmdlist = ['termux-sms-send', '-n', '15387182166', f'{msg}']
+    cmdtool = 'termux-sms-send'
+    if not is_tool_valid(cmdtool):
+        log.critical(f"命令\t{cmdtool}\t在该系统不存在，跳过执行")
+        return
+    cmdlist = [cmdtool, '-n', '15387182166', f'{msg}']
     out, rc, err = utils.execute(cmdlist)
     if rc:
         log.Warning(f"发送短信时出现错误：{msg}")
-        raise Exception(err)
+        # raise Exception(err)
     else:
         log.info(f"成功发送短信。")
     return out
 
 
+# %%
 def termux_storage_get():
     out, rc, err = utils.execute('termux-storage-get')
     if rc:
@@ -214,6 +262,7 @@ def termux_storage_get():
     return out
 
 
+# %%
 def termux_telephony_call():
     out, rc, err = utils.execute('termux-telephony-call')
     if rc:
@@ -221,6 +270,7 @@ def termux_telephony_call():
     return out
 
 
+# %%
 def termux_telephony_cellinfo():
     out, rc, err = utils.execute('termux-telephony-cellinfo')
     if rc:
@@ -228,6 +278,7 @@ def termux_telephony_cellinfo():
     return evaloutput(out)
 
 
+# %%
 def termux_telephony_deviceinfo():
     out, rc, err = utils.execute('termux-telephony-deviceinfo')
     if rc:
@@ -235,6 +286,7 @@ def termux_telephony_deviceinfo():
     return evaloutput(out)
 
 
+# %%
 def termux_toast():
     out, rc, err = utils.execute('termux-toast')
     if rc:
@@ -242,6 +294,7 @@ def termux_toast():
     return out
 
 
+# %%
 def termux_tts_engines():
     out, rc, err = utils.execute('termux-tts-engines')
     if rc:
@@ -249,6 +302,7 @@ def termux_tts_engines():
     return out
 
 
+# %%
 def termux_tts_speak():
     out, rc, err = utils.execute('termux-tts-speak')
     if rc:
@@ -256,6 +310,7 @@ def termux_tts_speak():
     return out
 
 
+# %%
 def termux_vibrate():
     out, rc, err = utils.execute('termux-vibrate')
     if rc:
@@ -263,6 +318,7 @@ def termux_vibrate():
     return out
 
 
+# %%
 def termux_wake_lock():
     out, rc, err = utils.execute('termux-wake-lock')
     if rc:
@@ -270,6 +326,7 @@ def termux_wake_lock():
     return out
 
 
+# %%
 def termux_wake_unlock():
     out, rc, err = utils.execute('termux-wake-unlock')
     if rc:
@@ -277,6 +334,7 @@ def termux_wake_unlock():
     return out
 
 
+# %%
 def termux_wifi_connectioninfo():
     out, rc, err = utils.execute('termux-wifi-connectioninfo')
     if rc:
@@ -284,6 +342,7 @@ def termux_wifi_connectioninfo():
     return evaloutput(out)
 
 
+# %%
 def termux_wifi_scaninfo():
     out, rc, err = utils.execute('termux-wifi-scaninfo')
     if rc:
@@ -291,6 +350,7 @@ def termux_wifi_scaninfo():
     return evaloutput(out)
 
 
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'测试文件\t{__file__}……')
