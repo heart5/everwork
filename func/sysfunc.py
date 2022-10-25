@@ -2,8 +2,11 @@
 # ---
 # jupyter:
 #   jupytext:
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.13.4
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -167,6 +170,19 @@ def sha2hexstr(inputo: object):
     hhh = sha256(targetb)
 
     return hhh.hexdigest().upper()
+
+
+# %% [markdown]
+# ### def is_tool_valid(name)
+
+# %%
+def is_tool_valid(name):
+    """Check whether `name` is on PATH and marked as executable."""
+
+    # from whichcraft import which
+    from shutil import which
+
+    return which(name) is not None
 
 
 # %% [markdown]
