@@ -977,7 +977,7 @@ def findnotebookfromevernote(ntname=None):
 
 # %% tags=[]
 def expungenotes(inputguidlst):
-    @trycounttimes2("evernote服务器", maxtimes=8)
+    @trycounttimes2("evernote服务器，删除笔记", maxtimes=8)
     def innerexpungenote(intoken, nost, guid):
         evernoteapijiayi()
         nost.expungeNote(intoken, guid)
@@ -995,7 +995,7 @@ def expungenotes(inputguidlst):
 
 # %% tags=[]
 def expungetrash(times=50):
-    @trycounttimes2("evernote服务器", maxtimes=times)
+    @trycounttimes2("evernote服务器，清空垃圾篓", maxtimes=times)
     def innerexpungetrash():
         token = gettoken()
         evernoteapijiayi()
@@ -1011,6 +1011,10 @@ def expungetrash(times=50):
 
 # %%
 def expungenotescontainkey(qukw="区$", titlekw="图表"):
+    """
+    删除指定关键词笔记本中标题包含指定关键词的笔记
+    """
+    # 避免循环导入，在函数体内import
     from func.wrapfuncs import timethis
     @timethis
     def sonexpungenotescontainkey(qukw, titlekw):
@@ -1018,7 +1022,7 @@ def expungenotescontainkey(qukw="区$", titlekw="图表"):
         tgds = ntdf[ntdf['名称'].str.contains(qukw)]['名称']
         ntlst = [[v, k] for (k, v) in dict(tgds).items()]
 
-        for nt in ntlst:
+        for nt in ntlst[::-1]:
             # 真元销售，分区，图表
             findnoteguidlst = findnotefromnotebook(nt[1], titlefind=titlekw, notecount=30)
             findnoteguidlst = [x for x in findnoteguidlst if len(x[1]) != (len(nt[0]) + 4)]
@@ -1037,7 +1041,7 @@ def expungenotescontainkey(qukw="区$", titlekw="图表"):
 
 # %%
 @set_timeout(180, after_timeout)
-@trycounttimes2('evernote服务器', maxtimes=20, maxsecs=10)
+@trycounttimes2('evernote服务器，更新动态化配置文件至本地ini', maxtimes=20, maxsecs=10)
 def readinifromnote():
     """
     更新动态化配置到本地ini文件，确保数据新鲜
