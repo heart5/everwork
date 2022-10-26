@@ -1007,26 +1007,29 @@ def expungetrash(times=50):
 
 
 # %% [markdown]
-# ### expungenotescontainkey(keyword="图表")
+# ### expungenotescontainkey(qukw="区$", titlekw="图表")
 
 # %%
-def expungenotescontainkey(keyword="图表"):
+def expungenotescontainkey(qukw="区$", titlekw="图表"):
     from func.wrapfuncs import timethis
     @timethis
-    def sonexpungenotescontainkey(keyword="图表"):
+    def sonexpungenotescontainkey(qukw, titlekw):
         ntdf = findnotebookfromevernote()
-        tgds = ntdf[ntdf['名称'].str.contains("区$")]['名称']
+        tgds = ntdf[ntdf['名称'].str.contains(qukw)]['名称']
         ntlst = [[v, k] for (k, v) in dict(tgds).items()]
 
         for nt in ntlst:
             # 真元销售，分区，图表
-            findnoteguidlst = findnotefromnotebook(nt[1], titlefind=keyword, notecount=30)
-            log.info(f"开始删除【{ntlst.index(nt) + 1}/{len(ntlst)}】《{nt[0]}》中的笔记，共有{len(findnoteguidlst)}条………………………………")
+            findnoteguidlst = findnotefromnotebook(nt[1], titlefind=titlekw, notecount=30)
             findnoteguidlst = [x for x in findnoteguidlst if len(x[1]) != (len(nt[0]) + 4)]
+            if len(findnoteguidlst) == 0:
+                log.info(f"笔记本《{nt[0]}》中没有找到符合规则的笔记，跳过！！！")
+                continue
+            log.info(f"开始删除【{ntlst.index(nt) + 1}/{len(ntlst)}】笔记本《{nt[0]}》中的笔记，共有{len(findnoteguidlst)}条………………………………")
             expungenotes(findnoteguidlst)
             expungetrash(times=88)
-            log.info(f"（{ntlst.index(nt) + 1}/{len(ntlst)}）《{nt[0]}》中符合规则的笔记共有{len(findnoteguidlst)}条，处理完毕，！")
-    sonexpungenotescontainkey(keyword)
+            log.info(f"【{ntlst.index(nt) + 1}/{len(ntlst)}】笔记本《{nt[0]}》中符合规则的笔记共有{len(findnoteguidlst)}条，处理完毕！")
+    sonexpungenotescontainkey(qukw, titlekw)
 
 
 # %% [markdown]
@@ -1205,7 +1208,7 @@ if __name__ == '__main__':
     # makenote(token, nost,filetitle, neirong)
 
     # # makenote(token, nost, '转账记录笔记guid', str(notefind))
-    expungenotescontainkey()
+    expungenotescontainkey(qukw="区$", titlekw="图表")
     if not_IPython():
         log.info(f"完成文件{__file__}\t的运行")
 
