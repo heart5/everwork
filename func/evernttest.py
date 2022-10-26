@@ -979,8 +979,8 @@ def findnotebookfromevernote(ntname=None):
 def expungenotes(inputguidlst):
     @trycounttimes2("evernote服务器", maxtimes=8)
     def innerexpungenote(intoken, nost, guid):
-        nost.expungeNote(intoken, guid)
         evernoteapijiayi()
+        nost.expungeNote(intoken, guid)
 
     token = gettoken()
     nost = get_notestore()
@@ -998,8 +998,8 @@ def expungetrash(times=50):
     @trycounttimes2("evernote服务器", maxtimes=times)
     def innerexpungetrash():
         token = gettoken()
-        nost.expungeInactiveNotes(token)
         evernoteapijiayi()
+        nost.expungeInactiveNotes(token)
 
     log.info("开始清空垃圾篓……")
     innerexpungetrash()
