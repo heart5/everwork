@@ -977,33 +977,42 @@ def findnotebookfromevernote(ntname=None):
 
 # %% tags=[]
 def expungenotes(inputguidlst):
+    """
+    删除传入的笔记列表
+    """
     @trycounttimes2("evernote服务器，删除笔记", maxtimes=8)
     def innerexpungenote(intoken, nost, guid):
         evernoteapijiayi()
         nost.expungeNote(intoken, guid)
+        return True
 
     token = gettoken()
     nost = get_notestore()
     for son in inputguidlst:
         log.info("\t".join([f"（{inputguidlst.index(son) + 1}/{len(inputguidlst)}）", son[0], son[1]]))
-        innerexpungenote(token, nost, son[0])
-        log.info("\t".join([f"（{inputguidlst.index(son) + 1}/{len(inputguidlst)}）", son[0], son[1], "\t完成删除操作（可能未能奏效哦^_^）！！！"]))
+        if (done := innerexpungenote(token, nost, son[0])):
+            log.info("\t".join([f"（{inputguidlst.index(son) + 1}/{len(inputguidlst)}）", son[0], son[1], "\t成功删除^_^"]))
+        else:
+            log.critical("\t".join([f"（{inputguidlst.index(son) + 1}/{len(inputguidlst)}）", son[0], son[1], "\t未能删除！！！"]))
 
 
 # %% [markdown]
 # ### expungetrash()
 
 # %% tags=[]
-def expungetrash(times=50):
+def expungetrash(times=10):
     @trycounttimes2("evernote服务器，清空垃圾篓", maxtimes=times)
     def innerexpungetrash():
         token = gettoken()
         evernoteapijiayi()
         nost.expungeInactiveNotes(token)
+        return True
 
     log.info("开始清空垃圾篓……")
-    innerexpungetrash()
-    log.info("垃圾篓已完成清空操作（可能未奏效哦^_^）！！！")
+    if (done := innerexpungetrash()):
+        log.info("垃圾篓成功清空^_^")
+    else:
+        log.critical("垃圾篓清空失败！！！")
 
 
 # %% [markdown]
@@ -1031,7 +1040,7 @@ def expungenotescontainkey(qukw="区$", titlekw="图表"):
                 continue
             log.info(f"开始删除【{ntlst.index(nt) + 1}/{len(ntlst)}】笔记本《{nt[0]}》中的笔记，共有{len(findnoteguidlst)}条………………………………")
             expungenotes(findnoteguidlst)
-            expungetrash(times=88)
+            expungetrash(times=11)
             log.info(f"【{ntlst.index(nt) + 1}/{len(ntlst)}】笔记本《{nt[0]}》中符合规则的笔记共有{len(findnoteguidlst)}条，处理完毕！")
     sonexpungenotescontainkey(qukw, titlekw)
 
