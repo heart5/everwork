@@ -2,18 +2,19 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.11.4
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
 
 # %%
-# %matplotlib inline
-
-# %% [markdown]
 """
     everwork.four_test
     ~~~~~~~~~~~~~~~~~~
@@ -24,13 +25,10 @@
     :license: LICENSE_NAME, see LICENSE for more details.
 """
 
-# %%
+# %% [markdown]
 # -*- coding: utf-8 -*-
 
 # %%
-import os
-
-# %% [markdown]
 """
 File: four_test.py
 Author: heart5
@@ -39,6 +37,13 @@ Github: https://github.com/heart5
 Description: everwork.py four_test.py imp4nb.py main.py pathmagic.py
 showfuncstruct.py
 """
+
+# %%
+# %matplotlib inline
+
+# %%
+import os
+
 # %%
 import pathmagic
 with pathmagic.context():
@@ -74,6 +79,7 @@ if __name__ == '__main__':
     print(f"I am strong", end='\n\n')
 
     mo = myobj()
+    mo.__sizeof__()
     print(mo)
 
     print(os.path.abspath('.'))
@@ -81,3 +87,5 @@ if __name__ == '__main__':
     log.critical(mo)
 
     print("Home is warmful.")
+
+# %%

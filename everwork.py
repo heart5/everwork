@@ -2,8 +2,12 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.11.4
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
 # ---
 
 # %%
