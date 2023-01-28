@@ -2,8 +2,16 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.11.4
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
 # ---
 
 # %%
@@ -58,8 +66,9 @@ financetimer(60 * 60 * 3 + 60 * 33)
 pinpaifenxi_timer(60 * 60 * 24)
 zipdata2one_timer(60 * 60 * 12 + 60 * 35)
 
-# %% [markdown] magic_args="[markdown]"
+# + [markdown] magic_args="[markdown] magic_args=\"[markdown]\""
 # writeini()
+# -
 
 # %%
 # %%
