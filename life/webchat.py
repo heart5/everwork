@@ -2,10 +2,13 @@
 # ---
 # jupyter:
 #   jupytext:
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.10.3
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
@@ -683,6 +686,9 @@ def get_host_uuid():
 #     print(hotdir) # itchat.pkl
     return uuid3hexstr(os.path.abspath(hotdir))
 
+
+# %% [markdown]
+# ### def keepliverun()
 
 # %%
 @trycounttimes2('微信服务器', 200, 50)
