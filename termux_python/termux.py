@@ -1,21 +1,16 @@
 # ---
 # jupyter:
-#   jupytext_format_version: '1.3'
-#   jupytext_formats: py:light
+#   jupytext:
+#     formats: ipynb,py:light
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
-#   language_info:
-#     codemirror_mode:
-#       name: ipython
-#       version: 3
-#     file_extension: .py
-#     mimetype: text/x-python
-#     name: python
-#     nbconvert_exporter: python
-#     pygments_lexer: ipython3
-#     version: 3.6.6
 # ---
 
 import subprocess
@@ -263,5 +258,3 @@ def termux_wifi_scaninfo():
     if rc:
         raise Exception(err)
     return out
-
-
