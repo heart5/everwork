@@ -2,8 +2,12 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.11.4
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
 # ---
 
 # %%
@@ -16,11 +20,12 @@
 import sys
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # bp = os.path.dirname(os.path.realpath('.')).split(os.sep)
 # modpath = os.sep.join(bp + ['src'])
 # sys.path.insert(0, modpath)
 # sys.path.insert(0,os.sep.join(bp))
+# -
 
 
 # %%
