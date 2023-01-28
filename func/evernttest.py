@@ -1185,12 +1185,12 @@ if __name__ == '__main__':
     # expungetrash(times=100)
     # expungenotes(findnoteguidlst)
 
-    # notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
+    notification_guid =  '4524187f-c131-4d7d-b6cc-a1af20474a7f'
 #     shenghuo_guid =  '7b00ceb7-1762-4e25-9ba9-d7e952d57d8b'
 #     smsnbguid = "25f718c1-cb76-47f6-bdd7-b7b5ee09e445"
-    # findnoteguidlst = findnotefromnotebook(notification_guid, titlefind='tmux.conf', notecount=14)
-    # print(len(findnoteguidlst))
-    # print(findnoteguidlst)
+    findnoteguidlst = findnotefromnotebook(notification_guid, titlefind='Zsh', notecount=14)
+    print(len(findnoteguidlst))
+    print(findnoteguidlst)
 #     testnote = nost.getNote(gettoken(), findnoteguidlst[-1][0], True, True, True, True)
 # #     p_noteattributeundertoken(testnote)
 #     file= dirmainpath / 'data' / 'webchat' / 'wcitems_heart5_2108.xlsx'
@@ -1221,7 +1221,7 @@ if __name__ == '__main__':
     # makenote(token, nost,filetitle, neirong)
 
     # # makenote(token, nost, '转账记录笔记guid', str(notefind))
-    expungenotescontainkey(qukw="区$", titlekw="图表")
+    # expungenotescontainkey(qukw="区$", titlekw="图表")
     if not_IPython():
         log.info(f"完成文件{__file__}\t的运行")
 
