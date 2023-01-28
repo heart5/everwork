@@ -525,7 +525,7 @@ def alldfdesc2note(wcpath):
 # %% [markdown]
 # ## main，主函数
 
-# %% jupyter={"outputs_hidden": true}
+# %% tags=[]
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'运行文件\t{__file__}')
@@ -536,3 +536,11 @@ if __name__ == '__main__':
 
     if not_IPython():
         log.info(f"文件\t{__file__}\t运行结束。")
+
+
+# %%
+def explodedf():
+    mydf = mydict['heart5']
+    mydf[mydf.time >= "2022-10-01"].sort_values('time')
+
+# %%
