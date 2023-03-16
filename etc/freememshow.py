@@ -167,7 +167,7 @@ def getcutpoint(inputdatapath):
     else:
         picheight = 3
     plt.figure(figsize=(10, 10 * picheight))
-    imgpath = getdirmain() / 'img' / 'freemen.png'
+    imgpath = getdirmain() / 'img' / 'freemem.png'
     touchfilepath2depth(imgpath)
     #     fig, ax1 = plt.subplots()
     # 针对数据集周期次数进行处理，主要是处理小于三次的情况
