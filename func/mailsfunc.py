@@ -1,4 +1,23 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
+# %% [markdown]
+# # 引入核心库
+
+# %%
 """
 邮箱邮件获取相关功能模块
 """
@@ -11,8 +30,8 @@ import socket
 import threading
 from bs4 import BeautifulSoup
 
+# %%
 import pathmagic
-
 with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.first import dirmainpath, getdirmain
@@ -25,6 +44,13 @@ with pathmagic.context():
     from func.termuxtools import termux_sms_send
 
 
+# %% [markdown]
+# # 功能函数
+
+# %% [markdown]
+# ## def getmail()
+
+# %%
 def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum=100000, dirtarget='Inbox',
             unseen=False,
             topicloc='subject', topic='', datadir=os.path.join(getdirmain(), 'data', 'work')):
@@ -327,6 +353,10 @@ def getmail(hostmail, usernamemail, passwordmail, port=993, debug=False, mailnum
     return mailitemsresult
 
 
+# %% [markdown]
+# ## def jilugmail()
+
+# %%
 def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
     """
     从指定邮件目录读取包含关键字的新邮件并更新至txt文件
@@ -390,6 +420,73 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
     return items
 
 
+# %% [markdown]
+# ## def logingmailwithapi()
+
+# %%
+def logingmailwithapi():
+    from __future__ import print_function
+
+    import os.path
+
+    from google.auth.transport.requests import Request
+    from google.oauth2.credentials import Credentials
+    from google_auth_oauthlib.flow import InstalledAppFlow
+    from googleapiclient.discovery import build
+    from googleapiclient.errors import HttpError
+
+    # If modifying these scopes, delete the file token.json.
+    SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+
+
+    def listlabels():
+        """Shows basic usage of the Gmail API.
+        Lists the user's Gmail labels.
+        """
+        creds = None
+        # The file token.json stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first
+        # time.
+        tokenpath = getdirmain() / 'data' / 'token_gmail.json'
+        credenpath = getdirmain() / 'data' / 'imp' / 'gmail_credentials.json'
+        if os.path.exists(tokenpath):
+            creds = Credentials.from_authorized_user_file(tokenpath, SCOPES)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    credenpath, SCOPES)
+                creds = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with open(tokenpath, 'w') as token:
+                token.write(creds.to_json())
+
+        try:
+            # Call the Gmail API
+            service = build('gmail', 'v1', credentials=creds)
+            results = service.users().labels().list(userId='me').execute()
+            labels = results.get('labels', [])
+
+            if not labels:
+                print('No labels found.')
+                return
+            print('Labels:')
+            for label in labels:
+                print(label['name'])
+
+        except HttpError as error:
+            # TODO(developer) - Handle errors from gmail API.
+            print(f'An error occurred: {error}')
+            
+    listlabels()
+
+
+# %% [markdown]
+# ## def findnewthenupdatenote()
+
+# %%
 def findnewthenupdatenote(qrfile: str, cfpfile, cfpsection, pre, desc, sendmail=False, sendsms=False):
     """
     发现文件内容更新就更新至相应笔记，并视情况发送短信提醒
@@ -467,6 +564,10 @@ def findnewthenupdatenote(qrfile: str, cfpfile, cfpsection, pre, desc, sendmail=
     else:
         log.critical(f"{qrfile}不存在，请检查文件名称")
 
+# %% [markdown]
+# # main()主函数
+
+# %%
 if __name__ == '__main__':
     # log.info(f'运行文件\t{__file__}')
     # fl = 'QR.png'
@@ -475,6 +576,7 @@ if __name__ == '__main__':
 
     # cronfile = '/data/data/com.termux/files/usr/var/spool/cron/crontabs/u0_a133'
     # findnewthenupdatenote(cronfile, 'everwork', 'everwork', 'cron', 'cron自动运行排期表')
+    logingmailwithapi()
     srcpos = dirmainpath / 'itchat.pkl'
     trtpos = dirmainpath/ 'data' / 'tmp'
     print(os.path.abspath(srcpos))
