@@ -47,6 +47,7 @@ def findnewcronthenupdate():
 
     # 打开配置表，过滤掉注释并简单检查（由6部分构成）是否符合规范
     cronpath = Path('/data/data/com.termux/files/usr/var/spool/cron/crontabs')
+    print(cronpath / me, cronpath.parents[1] / me)
     if (cronpath / me ).exists():
         cronfile = cronpath / me
         print(cronfile)
@@ -57,8 +58,7 @@ def findnewcronthenupdate():
         logstr = f"本机用户{me}的自动运行规划文件不存在！"
         log.critical(logstr)
         return
-    
-    print(cronfile)
+
     cfl = open(cronfile, 'r').readlines()
     # print(f"{cfl}")
     cflen = [len(x.split()) for x in cfl if not x.startswith('#')]
