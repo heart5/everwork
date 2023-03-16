@@ -21,6 +21,7 @@
 """
 邮箱邮件获取相关功能模块
 """
+from __future__ import print_function
 import datetime
 import email
 import imaplib
@@ -425,7 +426,6 @@ def jilugmail(direc, mingmu, fenleistr='', topic='', bodyonly=True):
 
 # %%
 def logingmailwithapi():
-    from __future__ import print_function
 
     import os.path
 
