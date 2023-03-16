@@ -49,8 +49,10 @@ def findnewcronthenupdate():
     cronpath = Path('/data/data/com.termux/files/usr/var/spool/cron/crontabs')
     if (cronpath / me ).exists():
         cronfile = cronpath / me
+        print(cronfile)
     elif (cronpath.parents[1] / me).exists():
         cronfile = cronpath.parents[1] / me
+        print(cronfile)
     else:
         logstr = f"本机用户{me}的自动运行规划文件不存在！"
         log.critical(logstr)
