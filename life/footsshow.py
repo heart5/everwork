@@ -95,7 +95,7 @@ def chuli_datasource():
     print(f"有问题的数据共有{len(itemnotfine)}行：{itemnotfine}")
 #     itemfine = [x for x in itemsrc if len(x) >= 3][:10000]
     itemfine = [x for x in itemsrc if len(x) >= 3]
-    # print(itemfine)
+    print(itemfine)
     if len(itemfine) < 2:
         print('gps数据量不足，暂时无法输出移动距离信息')
         return
