@@ -106,7 +106,7 @@ def chuli_datasource():
     highspeed = getinivaluefromnote('life', 'highspeed')
     print(f"{highspeed}\t{type(highspeed)}")
     for i in range(len(itemfine) - 1):
-        if (len(itemfine[i] <5 ) | (len(itemfine[i + 1] <5):
+        if (len(itemfine[i]) <5 ) | (len(itemfine[i + 1]) <5):
             print(itemfine[i], itemfine[i + 1])
         time1, lat1, lng1, alt1, *others, pro1 = itemfine[i]
         time2, lat2, lng2, alt2, *others, pro2 = itemfine[i + 1]
