@@ -95,7 +95,7 @@ def chuli_datasource():
     print(f"有问题的数据共有{len(itemnotfine)}行：{itemnotfine}")
 #     itemfine = [x for x in itemsrc if len(x) >= 3][:10000]
     itemfine = [x for x in itemsrc if len(x) >= 3]
-    print(itemfine)
+    # print(itemfine)
     if len(itemfine) < 2:
         print('gps数据量不足，暂时无法输出移动距离信息')
         return
@@ -106,6 +106,8 @@ def chuli_datasource():
     highspeed = getinivaluefromnote('life', 'highspeed')
     print(f"{highspeed}\t{type(highspeed)}")
     for i in range(len(itemfine) - 1):
+        if (len(itemfine[i] <5 ) | (len(itemfine[i + 1] <5):
+            print(itemfine[i], itemfine[i + 1])
         time1, lat1, lng1, alt1, *others, pro1 = itemfine[i]
         time2, lat2, lng2, alt2, *others, pro2 = itemfine[i + 1]
         # print(f'{lng1}\t{lat1}\t\t{lng2}\t{lat2}')
