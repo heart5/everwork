@@ -1,0 +1,5 @@
+[tool.jupytext]
+formats = "ipynb,py:percent"
+notebook_metadata_filter = "jupytext,-kernelspec,-jupytext.text_representation.jupytext_version"
+cell_metadata_filter="-all"
+outdated_text_notebook_margin = 5 
