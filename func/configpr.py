@@ -2,12 +2,13 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:light
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.13.4
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
 # ---
 
 """
