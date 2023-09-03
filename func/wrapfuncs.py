@@ -2,24 +2,27 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:light
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.13.4
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
 # ---
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # # 装饰器功能函数集
+# -
 
 # %%
 """
 装饰器函数集，ift2phone、timethis, logit
 """
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ## 引入重要库
+# -
 
 # %%
 import time
@@ -34,11 +37,12 @@ with pathmagic.context():
     from func.sysfunc import not_IPython
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ## 功能函数集合
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def logit(func)
+# -
 
 # %%
 def logit(func):
@@ -58,8 +62,9 @@ def logit(func):
     return with_logging
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def ift2phone(msg=None)
+# -
 
 # %%
 def ift2phone(msg=None):
@@ -85,8 +90,9 @@ def ift2phone(msg=None):
     return decorate
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def timethis(func) 
+# -
 
 # %%
 def timethis(func):
@@ -119,8 +125,9 @@ def timethis(func):
     return wrapper
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def countdown(n: int) # 用于测试各种装饰器
+# -
 
 # %%
 @timethis
@@ -140,8 +147,9 @@ def countdown(n: int):
             print(n)
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ## 主函数main
+# -
 
 # %%
 if __name__ == '__main__':
