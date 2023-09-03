@@ -14,7 +14,7 @@
 #     name: python3
 # ---
 
-# %% [markdown] tags=[]
+# %% [markdown]
 # # everwork主文件
 # """
 # 用evernote作为工作平台，通过Python链接整理各种工作数据，呈现给各个相关岗位。.
@@ -24,10 +24,14 @@
 # ## 引入库
 
 # %%
+import sys
+from jupytext.config import global_jupytext_configuration_directories
+import jupytext
 import pathmagic
 
 # %%
 with pathmagic.context():
+    from pathlib import Path
     # from life.noteweather import weatherstattimer  # 调用同目录下其他文件（py）中的函数
     # from etc.log2note import log2notetimer
     # from work.order import showorderstat2note
@@ -51,6 +55,27 @@ with pathmagic.context():
 # %%
 if not_IPython():
     log.debug(f'线程任务\t{__file__}\t启动……')
+
+# %% [markdown]
+# ### 列出python版本和路径
+
+# %%
+print("python 版本：\t" + sys.version)
+print("python 路径：\t" + sys.executable)
+
+# %% [markdown]
+# ### 列出jupytext配置文件所在路径全单
+
+# %%
+print("jupytext 版本：\t" + jupytext.version.__version__)
+jtpath = Path(jupytext.__file__).parent
+print("所在路径：\t" + str(jtpath))
+
+# %%
+jtconfpaths = list(global_jupytext_configuration_directories())
+print("jupytext配置文件所在路径列表：\n" + "\n".join(jtconfpaths))
+
+# %%
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
 # desclitedb(cnx)
 # swissknife(cnx)
