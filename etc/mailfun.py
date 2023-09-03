@@ -2,10 +2,16 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.10.3
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
+# %%
 import argparse
 import yagmail
 import re
@@ -13,16 +19,17 @@ import os
 import sys
 # from pathlib import Path
 
+# %%
 import pathmagic
-
-with pathmagic.context():
     from func.first import dirmainpath
     from func.logme import log
     # from func.wrapfuncs import timethis, ift2phone
     from func.configpr import getcfp
+    from func.sysfunc import set_timeout, after_timeout, not_IPython
     from func.evernttest import getinivaluefromnote
 
 
+# %%
 def mailfun(txtorfile, tonotek=False):
     cfpew, cfpewpath = getcfp('everwork')
     host = cfpew.get('gmail', 'host')
@@ -47,12 +54,13 @@ def mailfun(txtorfile, tonotek=False):
         contents = [txtcontent, str(txtorfile)]
     else:
         contents = [txtorfile]
-        subject = txtorfile[:30]
+        subject = str(txtorfile)[:30]
     # print(f"{mail2lst}")
     yag_imap_connecttion.send(mail2lst, subject, contents)
     yag_imap_connecttion.close()
 
 
+# %%
 def mailfileindir(dirfrom, extstr='.txt'):
     fls = [x for x in os.listdir(dirfrom) if x.endswith(extstr)]
     print(f"{fls}")
@@ -60,12 +68,13 @@ def mailfileindir(dirfrom, extstr='.txt'):
         mailfun(dirfrom / fl1)
 
 
+# %%
 def configargp():
     parser = argparse.ArgumentParser(description='send files or content to mailbox.(发送文件或者文本内容到邮箱去。)')
     parser.add_argument('content', metavar='File', type=str, nargs='+', help='file name or content')
-    parser.add_argument('-to', '--to', metavar='note', type=str, choices=['note'],
-                        help='是否发送至笔记专用信箱创建新笔记')
-    if len(sys.argv) == 1:
+    parser.add_argument('-to', '--to', metavar='note', type=str, choices=['note'], help='是否发送至笔记专用信箱创建新笔记')
+    print(sys.argv)
+    if len(sys.argv) == 0:
         parser.print_help()
         exit()
     args1 = parser.parse_args()
@@ -74,8 +83,10 @@ def configargp():
     return args1
 
 
+# %%
 if __name__ == '__main__':
-    log.info(f'运行文件\t{__file__}')
+    if not_IPython():
+        log.info(f'运行文件\t{__file__}')
     # mailfun(notelststr)
     # mailtxtfileindir(dirmainpath / '..')
     args = configargp()
@@ -85,4 +96,5 @@ if __name__ == '__main__':
         else:
             tonote = False
         mailfun(dirmainpath / fl, tonote)
-    log.info(f'文件\t{__file__}\t运行完毕。')
+    if not_IPython():
+        log.info(f'文件\t{__file__}\t运行完毕。')
