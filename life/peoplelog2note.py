@@ -2,20 +2,21 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.13.4
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
-# %%
-#
-"""
-处理进出记录笔记，生成图表呈现
-"""
+# %% [markdown]
+# # 处理指定方位进出记录数据，生成图表呈现
 
+# %% [markdown]
+# ## 引入库
+
+# %%
 # from imp4nb import *
 import datetime
 import pandas as pd
@@ -32,6 +33,13 @@ with pathmagic.context():
     from func.first import dirmainpath
 
 
+# %% [markdown]
+# ## 功能函数
+
+# %% [markdown]
+# ### notification2df(items)
+
+# %%
 def notification2df(items):
     split_items = list()
     for itemstr in items:
@@ -77,6 +85,10 @@ def notification2df(items):
     return dfout
 
 
+# %% [markdown]
+# ### callsms2df(itemstr)
+
+# %%
 def callsms2df(itemstr):
     # 读取老记录
     # global dirmainpath
@@ -235,6 +247,11 @@ def callsms2df(itemstr):
         log.critical('更新人脉记录笔记时出现错误。%s' % str(eee))
     return dfout
 
+
+# %% [markdown]
+# ### peoplestatdo()
+
+# %%
 def peoplestatdo():
     strjilunotifi = jilugmail('Ifttt/Notification', 'notification', 'all')
     if strjilunotifi:
@@ -248,6 +265,10 @@ def peoplestatdo():
         callsms2df(strjilucallsms)
 
 
+# %% [markdown]
+# ### peoplestattimer(jiangemiao)
+
+# %%
 def peoplestattimer(jiangemiao):
     peoplestatdo()
 
@@ -256,6 +277,10 @@ def peoplestattimer(jiangemiao):
     timer_jinchu.start()
 
 
+# %% [markdown]
+# ## 主函数main(0
+
+# %%
 if __name__ == '__main__':
     peoplestatdo()
 
