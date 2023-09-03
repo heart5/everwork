@@ -2,21 +2,19 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:light
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.13.4
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
 # ---
 
-# %% [markdown]
 # # 火界游戏数据集动态存储至evernote（不同主机针对同一类笔记）
 
-# %% [markdown]
 # # 引入库
 
-# %%
 import os
 import re
 import pandas as pd
@@ -30,8 +28,9 @@ with pathmagic.context():
     from func.evernttest import getinivaluefromnote, getnoteresource, gettoken, get_notestore, getnotecontent, updatereslst2note
 # print(f"{__file__} is loading now...")
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # # 功能函数集
+# -
 
 # %%
 def huojieds2note():
@@ -90,8 +89,9 @@ def huojieds2note():
     return jushufromnote, jushufromhost
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # # 运行主函数main
+# -
 
 # %%
 if __name__ == '__main__':
@@ -103,4 +103,3 @@ if __name__ == '__main__':
     if not_IPython():
         log.info(f"文件\t{__file__}\t运行结束。")
 
-# %%
