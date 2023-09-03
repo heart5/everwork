@@ -2,25 +2,30 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,py
+#     formats: ipynb,py:percent
 #     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
+#       format_name: percent
+#       format_version: '1.3'
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
 # ---
 
-# %%
-# %%
-"""
-用evernote作为工作平台，通过Python链接整理各种工作数据，呈现给各个相关岗位。.
-"""
+# %% [markdown] tags=[]
+# # everwork主文件
+# """
+# 用evernote作为工作平台，通过Python链接整理各种工作数据，呈现给各个相关岗位。.
+# """
 
-# %%
+# %% [markdown]
+# ## 引入库
+
 # %%
 import pathmagic
 
-# %%
 # %%
 with pathmagic.context():
     # from life.noteweather import weatherstattimer  # 调用同目录下其他文件（py）中的函数
@@ -31,24 +36,27 @@ with pathmagic.context():
     # from life.notejinchujilu import jinchustattimer
     # from life.peoplelog2note import peoplestattimer
     # from work.fetchdata import filegmailevernote2datacenter
-    from work.notesaledetails import pinpaifenxido
+    # from work.notesaledetails import pinpaifenxido
     # from work.dutyon import duty_timer
     # from work.bankcard import financetimer
     # from etc.zip2onedrive import zipdata2one_timer
     # from func.evernt import get_notestore
     # from func.first import dbpathquandan
+    from func.sysfunc import not_IPython, set_timeout, after_timeout
     from func.logme import log
 
+# %% [markdown]
+# ## 功能语句
+
 # %%
-# %%
-log.debug(f'线程任务\t{__file__}\t启动……')
+if not_IPython():
+    log.debug(f'线程任务\t{__file__}\t启动……')
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
 # desclitedb(cnx)
 # swissknife(cnx)
 # cnx.close()
 # isnoteupdate(token, note_store, '1c0830d9-e42f-4ce7-bf36-ead868a55eca')
 
-# %%
 # %%
 # filegmailevernote2datacenter(60 * 55)
 # showorderstat2note(60 * 60 * 1 + 60 * 8)
@@ -60,11 +68,11 @@ log.debug(f'线程任务\t{__file__}\t启动……')
 # duty_timer(60 * 60 * 24)
 # financetimer(60 * 60 * 3 + 60 * 33)
 # pinpaifenxi_timer(60 * 60 * 4)
-pinpaifenxido()
+# pinpaifenxido()
 # zipdata2one_timer(60 * 60 * 12 + 60 * 35)
 
 # %%
-# %%
 # print(vars())
 log.info(f"倒数第二行")
-log.info('线程任务\t{__file__}\t执行完毕！')
+if not_IPython():
+    log.info(f'线程任务\t{__file__}\t执行完毕！')
