@@ -24,12 +24,12 @@
 import sys
 from jupytext.config import global_jupytext_configuration_directories
 from jupytext.config import find_jupytext_configuration_file
+from pathlib import Path
 import jupytext
-import pathmagic
 
 # %%
+import pathmagic
 with pathmagic.context():
-    from pathlib import Path
     # from life.noteweather import weatherstattimer  # 调用同目录下其他文件（py）中的函数
     # from etc.log2note import log2notetimer
     # from work.order import showorderstat2note
@@ -62,18 +62,15 @@ print("python 版本：\t" + sys.version)
 print("python 路径：\t" + sys.executable)
 
 # %% [markdown]
-# ### 列出jupytext配置文件所在路径全单
+# ### 列出jupytext配置文件相关核心信息
 
 # %%
 print("jupytext 版本：\t" + jupytext.version.__version__)
 jtpath = Path(jupytext.__file__).parent
 print("所在路径：\t" + str(jtpath))
 
-# %%
 jtconfpaths = list(global_jupytext_configuration_directories())
 print("jupytext配置文件所在路径列表：\n" + "\n".join(jtconfpaths))
-
-# %%
 print("\n当前目录所用的jupytext配置文件为：\t" + find_jupytext_configuration_file('.'))
 
 # %%
