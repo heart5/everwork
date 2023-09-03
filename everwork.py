@@ -2,16 +2,13 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
 #     formats: ipynb,py:percent
-#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
 # ---
 
 # %% [markdown]
@@ -26,6 +23,7 @@
 # %%
 import sys
 from jupytext.config import global_jupytext_configuration_directories
+from jupytext.config import find_jupytext_configuration_file
 import jupytext
 import pathmagic
 
@@ -74,6 +72,9 @@ print("所在路径：\t" + str(jtpath))
 # %%
 jtconfpaths = list(global_jupytext_configuration_directories())
 print("jupytext配置文件所在路径列表：\n" + "\n".join(jtconfpaths))
+
+# %%
+print("\n当前目录所用的jupytext配置文件为：\t" + find_jupytext_configuration_file('.'))
 
 # %%
 # pickstat(token, note_store, cnx, '1c0830d9-e42f-4ce7-bf36-ead868a55eca', '订单配货统计图', cum=True)
