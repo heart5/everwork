@@ -2,24 +2,27 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:light
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.13.4
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
 # ---
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # # sqlite3数据库相关函数
+# -
 
 # %%
 """
 sqlite数据库相关应用函数
 """
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ## 引入重要库
+# -
 
 # %%
 import sqlite3 as lite
@@ -35,11 +38,12 @@ with pathmagic.context():
     from func.wrapfuncs import timethis
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ## 功能函数集
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def get_filesize(filepath)
+# -
 
 # %%
 def get_filesize(filepath):
@@ -48,8 +52,9 @@ def get_filesize(filepath):
     return round(fsize, 2)
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def istableindb(tablein, dbname)
+# -
 
 # %%
 def istableindb(tablenin: str, dbname: str):
@@ -72,8 +77,9 @@ def istableindb(tablenin: str, dbname: str):
     return result
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def ifnotcreate(tablein, createsql, dbn)
+# -
 
 # %%
 def ifnotcreate(tablen: str, createsql: str, dbn: str):
@@ -102,8 +108,9 @@ def ifnotcreate(tablen: str, createsql: str, dbn: str):
             conn.close()
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def ifclexists(dbin, tb, cl)
+# -
 
 # %%
 def ifclexists(dbin, tb, cl):
@@ -138,8 +145,9 @@ def ifclexists(dbin, tb, cl):
         return False
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def shwotableindb(dbname)
+# -
 
 # %%
 def showtablesindb(dbname: str):
@@ -160,8 +168,9 @@ def showtablesindb(dbname: str):
     conn.close()
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def droptablefromdb(dbname, tablename, confirm=False)
+# -
 
 # %%
 def droptablefromdb(dbname: str, tablename: str, confirm=False):
@@ -180,8 +189,9 @@ def droptablefromdb(dbname: str, tablename: str, confirm=False):
         conn.close()
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def checktableindb(ininame, dbpath, tablename, creattablesql, confirm=False)
+# -
 
 # %%
 def checktableindb(ininame: str, dbpath: str, tablename: str, creattablesql: str, confirm=False):
@@ -201,8 +211,9 @@ def checktableindb(ininame: str, dbpath: str, tablename: str, creattablesql: str
         setcfpoptionvalue(ininame, absdbpath, tablename, str(True))
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def compact_sqlite3_db(dbpath)
+# -
 
 # %%
 @timethis
@@ -214,8 +225,9 @@ def compact_sqlite3_db(dbpath):
     log.info(f"{dbpath}数据库压缩前大小为{sizebefore}MB，压缩之后为{get_filesize(dbpath)}MB。")
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ## 主函数main
+# -
 
 # %%
 if __name__ == "__main__":
@@ -231,4 +243,3 @@ if __name__ == "__main__":
         logstr = f"文件\t{__file__}\t运行完毕。"
         log.info(logstr)
 
-# %%

@@ -1,4 +1,16 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:light
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+# ---
+
 """
 构建日志，格式化日志输出内容，限定每个日志文件大小为1M，在25个日志文件内循环
 """

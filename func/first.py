@@ -1,4 +1,16 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:light
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+# ---
+
 """
 首函，用于定位相对目录，丰富工作目录路径，还有构建路径的基本函数
 """
