@@ -2,24 +2,27 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:light
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.13.4
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
 # ---
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # # pandas应用函数库
+# -
 
 # %%
 """
 DataFrame功能应用函数库
 """
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ## 库导入
+# -
 
 # %%
 import os
@@ -50,16 +53,16 @@ with pathmagic.context():
 
 # print(f"{__file__} is loading now...")
 
-# %%
 # plot中显示中文
 # mpl.rcParams['font.sans-serif'] = ['SimHei']
 # mpl.rcParams['axes.unicode_minus'] = False
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ## 功能函数集
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def db2img(inputdf: pd.DataFrame, title=None, showincell=True, fontsize=12, dpi=300, debug=False):
+# -
 
 # %%
 def db2img(inputdf: pd.DataFrame, title=None, showincell=True, fontsize=12, dpi=300, debug=False):
@@ -68,8 +71,9 @@ def db2img(inputdf: pd.DataFrame, title=None, showincell=True, fontsize=12, dpi=
     return lststr2img(dflines, title=title, dpi=dpi, showincell=showincell, fontsize=fontsize, debug=debug)
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ###  def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=None, showincell=False, fontsize=12, dpi=300, debug=False):
+# -
 
 # %%
 def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=None,
@@ -125,8 +129,9 @@ def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=N
     return imgtmppath
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def descdb(df)
+# -
 
 # %%
 # 显示DataFrame或Series的轮廓信息
@@ -141,8 +146,9 @@ def descdb(df):
     print(df.describe())
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def desclitedb(cnx)
+# -
 
 # %%
 # 显示SQlite数据库的各种信息
@@ -168,8 +174,9 @@ def desclitedb(cnx):
         # print(col_name_list)
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def dftotal2top(df)
+# -
 
 # %%
 def dftotal2top(df: pd.DataFrame):
@@ -239,8 +246,9 @@ def dftotal2top(df: pd.DataFrame):
     return dfout
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def isworkday(dlist, person, fromthen)
+# -
 
 # %%
 @timethis
@@ -321,8 +329,9 @@ def isworkday(dlist: list, person: str = '全体', fromthen=False):
     return dfout
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def gengxinfou(filename, conn, tablename)
+# -
 
 # %%
 def gengxinfou(filename, conn, tablename='fileread'):
@@ -386,8 +395,9 @@ def gengxinfou(filename, conn, tablename='fileread'):
     return rt
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def dataokay(cnx)
+# -
 
 # %%
 def dataokay(cnx):
@@ -459,8 +469,9 @@ def dataokay(cnx):
         df.to_sql(name='jiaqi', con=cnx, schema=sql_df, if_exists='replace')
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def biaozhukedu(dfc, weibiao)
+# -
 
 # %%
 def biaozhukedu(dfc, weibiao):
@@ -506,8 +517,9 @@ def biaozhukedu(dfc, weibiao):
                          arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def readiniseciton2df(cfpp, section, biaoti)
+# -
 
 # %%
 def readinisection2df(cfpp: ConfigParser, section: object, biaoti: object):
@@ -531,8 +543,9 @@ def readinisection2df(cfpp: ConfigParser, section: object, biaoti: object):
     return df
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def chutuyuezhexian(ds, riqienddate, xiangmu, cum, quyu, leixinng, pinpai, nianshu)
+# -
 
 # %%
 def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, quyu='', leixing='', pinpai='', nianshu=3,
@@ -636,8 +649,9 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, quyu='', leixing='', pi
     return imglist
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def chuturizhexian(df, riqienddate, xiangmu, cum, quyu, leixing, pinpai, imgpath)
+# -
 
 # %%
 def chuturizhexian(df, riqienddate, xiangmu, cum=False,
@@ -712,8 +726,9 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False,
     return imglistctrz
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def dfin2imglist(dfin, cum, leixingset, fenbuset, pinnpai, imgmonthcount)
+# -
 
 # %%
 def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount=1):
@@ -752,8 +767,9 @@ def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount
     return imglistreturn
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ### def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhuti)
+# -
 
 # %%
 def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhuti='销售业绩图表'):
@@ -796,8 +812,9 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
     cfpp.write(open(inifile, 'w', encoding='utf-8'))
 
 
-# %% [markdown]
+# + [markdown] magic_args="[markdown]"
 # ## 主函数main
+# -
 
 # %%
 if __name__ == '__main__':
