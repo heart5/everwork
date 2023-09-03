@@ -2,31 +2,14 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
 #     formats: ipynb,py:percent
-#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
 # ---
-
-# %%
-"""
-    everwork.four_test
-    ~~~~~~~~~~~~~~~~~~
-
-    DESCRIPTION
-
-    :copyright: (c) 2021 by YOUR_NAME.
-    :license: LICENSE_NAME, see LICENSE for more details.
-"""
-
-# %% [markdown]
-# -*- coding: utf-8 -*-
 
 # %%
 """
@@ -87,5 +70,3 @@ if __name__ == '__main__':
     log.critical(mo)
 
     print("Home is warmful.")
-
-# %%
