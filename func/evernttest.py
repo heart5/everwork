@@ -2,15 +2,13 @@
 # ---
 # jupyter:
 #   jupytext:
-#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
 # ---
 
 # %% [markdown]
@@ -975,7 +973,7 @@ def findnotebookfromevernote(ntname=None):
 # %% [markdown]
 # ### expungenotes(inputguidlst)
 
-# %% tags=[]
+# %%
 def expungenotes(inputguidlst):
     """
     删除传入的笔记列表
@@ -999,7 +997,7 @@ def expungenotes(inputguidlst):
 # %% [markdown]
 # ### expungetrash()
 
-# %% tags=[]
+# %%
 def expungetrash(times=10):
     @trycounttimes2("evernote服务器，清空垃圾篓", maxtimes=times)
     def innerexpungetrash():
@@ -1158,7 +1156,7 @@ def getsampledffromdatahouse(keyword: str, notebookstr='datahouse', firstcolumn=
 # %% [markdown]
 # # 主函数
 
-# %% tags=[]
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'开始运行文件\t{__file__}……')
