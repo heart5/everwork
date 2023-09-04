@@ -3,49 +3,63 @@
 # jupyter:
 #   jupytext:
 #     cell_metadata_filter: -all
-#     formats: ipynb,py:light
-#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.3.1
+#   kernelspec:
+#     display_name: Python 3
+#     language: python
+#     name: python3
 # ---
 
-"""
-配置处理器(ConfigParser)相关的功能函数
-"""
+# %% [markdown]
+# # 配置处理器相关的功能函数
 
+# %% [markdown]
+# ## 引入库
+
+# %%
 import re
 import os
 from pathlib import Path
 from configparser import ConfigParser, DuplicateSectionError, DuplicateOptionError
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
     from func.logme import log
     from func.sysfunc import not_IPython
 
 
-def dropdup4option(opcontent:str):
-    """
-    manuplicate the content(str), which is such as 'option'='value',
-    then return clean option/value contents in list object, drop the duplicated
-    options, keep the first value
-    """
-    ptno = re.compile("(\w+)\s*=\s*(\w*)") # = pairs pattern
-    opdict = dict() # result container in dict
+# %% [markdown]
+# ## 功能函数
+
+# %% [markdown]
+# ### dropdup4option(opcontent)
+
+# %%
+def dropdup4option(opcontent):
+    ptno = re.compile("(\w+)\s*=\s*(\w*)")
+    opdict = dict()
     fdlst = re.findall(ptno, opcontent)
     for item in fdlst:
         if item[0] in opdict.keys():
             log.critical(f"出现option名称重复：\t{item[0]}，取用最新的数据")
         opdict.update(dict({item[0]: item[1]}))
-    # make = pairs list
+    # opdict
     rstlst = [' = '.join(list(x)) for x in list(zip(opdict.keys(), opdict.values()))]
-    # add two new lines at head and tail
+    # rstlst
     return '\n' + '\n'.join(rstlst) + '\n\n'
 
 
+# %% [markdown]
+# ### dropdup4section(fcontent)
+
+# %%
 def dropdup4section(fcontent):
     ftn = re.compile(r"\[\w+\]")
     sectionlst = re.findall(ftn, fcontent)
@@ -67,6 +81,10 @@ def dropdup4section(fcontent):
     return correctcontent
 
 
+# %% [markdown]
+# ### fixinifile(inipath)
+
+# %%
 def fixinifile(inipath):
     with open(inipath, 'r') as f:
         fcontent = f.read()
@@ -78,6 +96,10 @@ def fixinifile(inipath):
     return correctcontent
 
 
+# %% [markdown]
+# ### removesection(cfpfilename, sectionname)
+
+# %%
 def removesection(cfpfilename: str, sectionname: str):
     """
     删除指定section，默认清除其下面的所有option
@@ -89,6 +111,10 @@ def removesection(cfpfilename: str, sectionname: str):
         log.critical(f"成功清除{sectionname}下的所有option！！！")
 
 
+# %% [markdown]
+# ### getcfp(cfpfilename)
+
+# %%
 def getcfp(cfpfilename: str):
     cfpson = ConfigParser()
     inipathson = Path(getdirmain()) / 'data' / (cfpfilename + '.ini')
@@ -113,6 +139,10 @@ def getcfp(cfpfilename: str):
     return cfpson, inipathson
 
 
+# %% [markdown]
+# ### setcfpoptionvalue(cfpfilename, sectionname, optionname, optionvalue)
+
+# %%
 def setcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str, optionvalue):
     cfpin, cfpinpath = getcfp(cfpfilename)
     if not cfpin.has_section(sectionname):
@@ -122,11 +152,11 @@ def setcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str, optio
     cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
 
 
+# %% [markdown]
+# ### getcfpoptionvalue(cfpfilename, sectionname, optionname)
+
+# %%
 def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
-    """
-    return option value for certain optionname, under given ssction, all for indicated cfp filename
-    if section is not exsited, create it, then return None; if the option is not exsiteds, just return None.
-    """
     cfpin, cfpinpath = getcfp(cfpfilename)
     if not cfpin.has_section(sectionname):
         print(f"seticon {sectionname} is not exists. Then creating it now ...")
@@ -134,7 +164,7 @@ def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
         cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
         return
     if not cfpin.has_option(sectionname, optionname):
-        print(f"option {optionname} is not exists under section [{sectionname}]")
+        print(f"option {optionname} is not exists.")
         return
 
     targetvalue = str(cfpin.get(sectionname, optionname))
@@ -159,26 +189,18 @@ def getcfpoptionvalue(cfpfilename: str, sectionname: str, optionname: str):
     if result:
         targetvalue = float(result.group())
         return targetvalue
+    # if isinstance(targetvalue, int):
+        # targetvalue = int(targetvalue)
+    # elif isinstance(targetvalue, float):
+        # targetvalue = float(targetvalue)
 
     return targetvalue
 
 
-def getcfpsectionvalue(cfpfilename: str, sectionname: str):
-    """
-    return section value(which is list including tuple) for certain section name,, all for indicated cfp filename
-    if section is not exsited, create it, then return None.
-    """
-    cfpin, cfpinpath = getcfp(cfpfilename)
-    if not cfpin.has_section(sectionname):
-        print(f"seticon {sectionname} is not exists. Then creating it now ...")
-        cfpin.add_section(sectionname)
-        cfpin.write(open(cfpinpath, 'w', encoding='utf-8'))
-        return
-    else:
-        return cfpin.items(f'{sectionname}')
+# %%
+is_log_details = getcfpoptionvalue('everinifromnote', 'everwork', 'logdetails')
 
-
-is_log_details = getcfpoptionvalue('everinifromnote', 'everwork', 'logdetails') 
+# %% [markdown]
 # cfp, inifilepath = getcfp('everwork')
 # cfpdata, inidatanotefilepath = getcfp('everdatanote')
 # cfplife, inilifepath = getcfp('everlife')
@@ -186,6 +208,10 @@ is_log_details = getcfpoptionvalue('everinifromnote', 'everwork', 'logdetails')
 # cfpworkplan, iniworkplanpath = getcfp('everworkplan')
 
 
+# %% [markdown]
+# ## 主函数main()
+
+# %%
 if __name__ == '__main__':
     if not_IPython() and is_log_details:
         print(f'开始测试文件\t{__file__}')
@@ -195,10 +221,7 @@ if __name__ == '__main__':
     inipathson = Path(getdirmain()) / 'data' / (cfpapiname + '.ini')
     name = '[notestore]'
     cp, cppath = getcfp(cfpapiname)
-    print(cp)
 #     removesection(cfpapiname, nssectionname)
 #     ict = fixinifile(inipathson)
-    seccontent = getcfpsectionvalue('everwork', 'evernote')
-    print(seccontent)
     if not_IPython() and is_log_details:
         print('Done.')
