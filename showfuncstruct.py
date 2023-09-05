@@ -3,24 +3,23 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,py
-#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#   kernelspec:
-#     display_name: Python 3
-#     language: python
-#     name: python3
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
+# %%
 # %%
 # %%
 """
 显示当前目录下所有py文件（包括子目录）的函数结构并更新至evernote
 """
 
+# %%
 # %%
 # %%
 import os
@@ -35,6 +34,7 @@ with pathmagic.context():
     from func.evernttest import findnotefromnotebook, get_notestore, imglist2note
 
 
+# %%
 # %%
 # %%
 def findfilesincluedef(path, t, designext='.py'):
@@ -58,6 +58,7 @@ def findfilesincluedef(path, t, designext='.py'):
                 findfilesincluedef(npath, t, designext)
 
 
+# %%
 # %%
 # %%
 def checknewthenupdatenote():
@@ -126,6 +127,7 @@ def checknewthenupdatenote():
             setcfpoptionvalue('evercode', nbname, filename, f"{filetimenow}")
 
 
+# %%
 # %%
 # %%
 if __name__ == '__main__':

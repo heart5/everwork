@@ -2,12 +2,13 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,py
-#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
 # %%
@@ -20,12 +21,11 @@
 import sys
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # bp = os.path.dirname(os.path.realpath('.')).split(os.sep)
 # modpath = os.sep.join(bp + ['src'])
 # sys.path.insert(0, modpath)
 # sys.path.insert(0,os.sep.join(bp))
-# -
 
 
 # %%
