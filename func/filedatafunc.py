@@ -3,18 +3,20 @@
 # jupyter:
 #   jupytext:
 #     cell_metadata_filter: -all
-#     formats: ipynb,py:light
+#     formats: ipynb,py:percent
 #     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
+# %%
 """
 文件、数据相关功能函数集
 """
 
+# %%
 import datetime
 import os
 import pandas as pd
@@ -24,8 +26,10 @@ from pathlib import Path
 import xlrd
 import pygsheets
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.evernttest import imglist2note, get_notestore, tablehtml2evernote
     from func.first import dbpathdingdanmingxi, dirmainpath, getdirmain, touchfilepath2depth
@@ -33,10 +37,12 @@ with pathmagic.context():
     from func.configpr import getcfp
 
 
+# %%
 def getfilemtime(fl: Path):
     return pd.to_datetime(datetime.datetime.fromtimestamp(fl.stat().st_mtime))
 
 
+# %%
 def removeblanklinesfromtxt(fname):
     """
     去除文本文件中的空行
@@ -53,10 +59,12 @@ def removeblanklinesfromtxt(fname):
         log.info(f"文件《{fname}》只保留内容行（去除了空行），成功写入！！！")
 
 
+# %%
 def getdbname(dbpath: str, ownername: str, title='wccontact'):
     return touchfilepath2depth(getdirmain() / dbpath / f"{title}_{ownername}.db")
 
 
+# %%
 def gettopicfilefromgoogledrive(topic: str, neirong: str):
     """
     从googledrive读取文件名包含某关键词的文件并读取数据返回DataFrame
@@ -83,6 +91,7 @@ def gettopicfilefromgoogledrive(topic: str, neirong: str):
     return dfboottrails
 
 
+# %%
 def chulixls_zhifubao(orderfile):
     try:
         content = xlrd.open_workbook(filename=orderfile, encoding_override='gb18030')
@@ -100,6 +109,7 @@ def chulixls_zhifubao(orderfile):
         return
 
 
+# %%
 def chulidataindir(cnxp, tablename, mingmu, fnstart, notestr, pathorder: Path, chulixls):
     """
 
@@ -169,6 +179,7 @@ def chulidataindir(cnxp, tablename, mingmu, fnstart, notestr, pathorder: Path, c
     return dfttt
 
 
+# %%
 def fenliu2note(dfall):
     cfpzysm, inizysmpath = getcfp('everzysm')
     zhfromini = [[x, cfpzysm.get('支付宝账户', x).split()] for x in cfpzysm.options('支付宝账户')]
@@ -223,6 +234,7 @@ def fenliu2note(dfall):
     return dffine
 
 
+# %%
 def alipay2note():
     cnxp = lite.connect(dbpathdingdanmingxi)
     pathalipay = dirmainpath / 'data' / 'finance' / 'alipay'
@@ -251,6 +263,7 @@ def alipay2note():
     return zhds
 
 
+# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     zhds = alipay2note()

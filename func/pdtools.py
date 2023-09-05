@@ -3,27 +3,27 @@
 # jupyter:
 #   jupytext:
 #     cell_metadata_filter: -all
-#     formats: ipynb,py:light
+#     formats: ipynb,py:percent
 #     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # # pandas应用函数库
-# -
 
+# %%
 # %%
 """
 DataFrame功能应用函数库
 """
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ## 库导入
-# -
 
+# %%
 # %%
 import os
 import evernote.edam.type.ttypes as ttypes
@@ -41,6 +41,7 @@ from PIL import Image, ImageFont, ImageDraw
 # import matplotlib.pyplot as plt
 
 # %%
+# %%
 import pathmagic
 with pathmagic.context():
     from func.evernttest import evernoteapijiayi, makenote, getinivaluefromnote
@@ -51,19 +52,21 @@ with pathmagic.context():
     from func.wrapfuncs import timethis
 #    from func.profilerlm import lpt_wrapper
 
+# %% [markdown]
 # print(f"{__file__} is loading now...")
 
+# %% [markdown]
 # plot中显示中文
 # mpl.rcParams['font.sans-serif'] = ['SimHei']
 # mpl.rcParams['axes.unicode_minus'] = False
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ## 功能函数集
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def db2img(inputdf: pd.DataFrame, title=None, showincell=True, fontsize=12, dpi=300, debug=False):
-# -
 
+# %%
 # %%
 def db2img(inputdf: pd.DataFrame, title=None, showincell=True, fontsize=12, dpi=300, debug=False):
     dflines = inputdf.to_string(justify='left', show_dimensions=True).split('\n')
@@ -71,10 +74,10 @@ def db2img(inputdf: pd.DataFrame, title=None, showincell=True, fontsize=12, dpi=
     return lststr2img(dflines, title=title, dpi=dpi, showincell=showincell, fontsize=fontsize, debug=debug)
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ###  def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=None, showincell=False, fontsize=12, dpi=300, debug=False):
-# -
 
+# %%
 # %%
 def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=None,
                showincell=False, fontsize=12, dpi=300, debug=False):
@@ -129,10 +132,10 @@ def lststr2img(inputcontent, fontpath=dirmainpath / 'font' / 'msyh.ttf', title=N
     return imgtmppath
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def descdb(df)
-# -
 
+# %%
 # %%
 # 显示DataFrame或Series的轮廓信息
 # df，DataFrame或Series
@@ -146,10 +149,10 @@ def descdb(df):
     print(df.describe())
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def desclitedb(cnx)
-# -
 
+# %%
 # %%
 # 显示SQlite数据库的各种信息
 # cnx，数据库连接
@@ -174,10 +177,10 @@ def desclitedb(cnx):
         # print(col_name_list)
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def dftotal2top(df)
-# -
 
+# %%
 # %%
 def dftotal2top(df: pd.DataFrame):
     """
@@ -246,10 +249,10 @@ def dftotal2top(df: pd.DataFrame):
     return dfout
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def isworkday(dlist, person, fromthen)
-# -
 
+# %%
 # %%
 @timethis
 #@lpt_wrapper()
@@ -329,10 +332,10 @@ def isworkday(dlist: list, person: str = '全体', fromthen=False):
     return dfout
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def gengxinfou(filename, conn, tablename)
-# -
 
+# %%
 # %%
 def gengxinfou(filename, conn, tablename='fileread'):
     try:
@@ -395,10 +398,10 @@ def gengxinfou(filename, conn, tablename='fileread'):
     return rt
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def dataokay(cnx)
-# -
 
+# %%
 # %%
 def dataokay(cnx):
     # global dirmainpath
@@ -469,10 +472,10 @@ def dataokay(cnx):
         df.to_sql(name='jiaqi', con=cnx, schema=sql_df, if_exists='replace')
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def biaozhukedu(dfc, weibiao)
-# -
 
+# %%
 # %%
 def biaozhukedu(dfc, weibiao):
     if weibiao == dfc.index.max():
@@ -517,10 +520,10 @@ def biaozhukedu(dfc, weibiao):
                          arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=.2", color='Purple'))
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def readiniseciton2df(cfpp, section, biaoti)
-# -
 
+# %%
 # %%
 def readinisection2df(cfpp: ConfigParser, section: object, biaoti: object):
     """
@@ -543,10 +546,10 @@ def readinisection2df(cfpp: ConfigParser, section: object, biaoti: object):
     return df
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def chutuyuezhexian(ds, riqienddate, xiangmu, cum, quyu, leixinng, pinpai, nianshu)
-# -
 
+# %%
 # %%
 def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, quyu='', leixing='', pinpai='', nianshu=3,
                     imgpath=dirmainpath / 'img'):
@@ -649,10 +652,10 @@ def chutuyuezhexian(ds, riqienddate, xiangmu, cum=False, quyu='', leixing='', pi
     return imglist
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def chuturizhexian(df, riqienddate, xiangmu, cum, quyu, leixing, pinpai, imgpath)
-# -
 
+# %%
 # %%
 def chuturizhexian(df, riqienddate, xiangmu, cum=False,
                    quyu='', leixing='', pinpai='', imgpath=dirmainpath / 'img'):
@@ -726,10 +729,10 @@ def chuturizhexian(df, riqienddate, xiangmu, cum=False,
     return imglistctrz
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def dfin2imglist(dfin, cum, leixingset, fenbuset, pinnpai, imgmonthcount)
-# -
 
+# %%
 # %%
 def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount=1):
     # print(dfin.tail())
@@ -767,10 +770,10 @@ def dfin2imglist(dfin, cum, leixingset='', fenbuset='', pinpai='', imgmonthcount
     return imglistreturn
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhuti)
-# -
 
+# %%
 # %%
 def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhuti='销售业绩图表'):
     """
@@ -812,10 +815,10 @@ def updatesection(cfpp, fromsection, tosection, inifile, token, note_store, zhut
     cfpp.write(open(inifile, 'w', encoding='utf-8'))
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ## 主函数main
-# -
 
+# %%
 # %%
 if __name__ == '__main__':
     if not_IPython():

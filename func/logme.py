@@ -3,27 +3,31 @@
 # jupyter:
 #   jupytext:
 #     cell_metadata_filter: -all
-#     formats: ipynb,py:light
+#     formats: ipynb,py:percent
 #     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
+# %%
 """
 构建日志，格式化日志输出内容，限定每个日志文件大小为1M，在25个日志文件内循环
 """
 
+# %%
 import logging as lg
 import logging.handlers as lgh
 import os
 
+# %%
 import pathmagic
 with pathmagic.context():
     from func.first import dirlog, touchfilepath2depth
 
 
+# %%
 def mylog():
     """
     日志函数，定义输出文件和格式等内容
@@ -56,8 +60,10 @@ def mylog():
     return logew
 
 
+# %%
 log = mylog()
 
+# %%
 if __name__ == '__main__':
     cwd = os.getcwd()
     print(cwd)
