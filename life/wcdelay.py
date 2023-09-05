@@ -11,7 +11,7 @@
 #       format_version: '1.3'
 # ---
 
-# %% [markdown] magic_args="[markdown]"
+# %% [markdown]
 # # 微信聊天信息延迟管理
 
 # %%
@@ -20,7 +20,7 @@
 微信延迟管理文件
 """
 
-# %% [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ## 引入重要库
 
 # %%
@@ -43,10 +43,10 @@ with pathmagic.context():
     from func.sysfunc import not_IPython
 
 
-# %% [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ## 功能函数集
 
-# %% [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def checkdelaytable(dbname, tablename)
 
 # %%
@@ -66,7 +66,7 @@ def checkwcdelaytable(dbname: str, tablename: str):
         log.info(logstr)
 
 
-# %% [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def inserttimeitem2db(dbname, timestampinput)
 
 # %%
@@ -98,7 +98,7 @@ def inserttimeitem2db(dbname: str, timestampinput: int):
             conn.close()
 
 
-# %% [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def getdelaydb(dbname, tablename)
 
 # %%
@@ -155,7 +155,7 @@ def getdelaydb(dbname: str, tablename="wcdelaynew"):
     return jujinmins, timedfgrp
 
 
-# %% [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ### def showdelayimg(dbname, jingdu)
 
 # %%
@@ -210,7 +210,7 @@ def showdelayimg(dbname: str, jingdu: int = 300):
     return imgwcdelaypath
 
 
-# %% [markdown] magic_args="[markdown]"
+# %% [markdown]
 # ## 主函数main
 
 # %%
