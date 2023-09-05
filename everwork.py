@@ -9,20 +9,21 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.3.1
 # ---
 
 # %% [markdown]
 # # everwork主文件
-# """
-# 用evernote作为工作平台，通过Python链接整理各种工作数据，呈现给各个相关岗位。.
-# """
+
+# %% [markdown]
+# 用evernote作为工作平台，通过Python链接整理各种工作数据，呈现给各个相关岗位。
 
 # %% [markdown]
 # ## 引入库
 
 # %%
 import sys
+
+# %%
 from jupytext.config import global_jupytext_configuration_directories
 from jupytext.config import find_jupytext_configuration_file
 from pathlib import Path
