@@ -2,21 +2,19 @@
 # jupyter:
 #   jupytext:
 #     cell_metadata_filter: -all
-#     formats: ipynb,py:light
-#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
+# %%
 import termux
 # from termux import camera_info
 
+# %%
 # print(termux.battery_status())
 # print(termux.camera_info())
 print(termux.termux_location())
