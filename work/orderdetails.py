@@ -1,5 +1,17 @@
-#
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 #
 """
 销售订单明细处理汇总
@@ -20,8 +32,10 @@ import xlrd
 from threading import Timer
 from pathlib import Path
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     # from func.evernt import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
@@ -33,6 +47,7 @@ with pathmagic.context():
     from work.notesaledetails import pinpaifenxido
 
 
+# %%
 def chulixls_orderdetails(orderfile: Path):
     try:
         content = xlrd.open_workbook( filename=orderfile, encoding_override='gb18030')
@@ -90,6 +105,7 @@ def chulixls_orderdetails(orderfile: Path):
         return
 
 
+# %%
 def chulidataindir_orderdetails(pathorder: Path):
     notestr = '订单明细'
     cnxp = lite.connect(dbpathdingdanmingxi)
@@ -148,6 +164,7 @@ def chulidataindir_orderdetails(pathorder: Path):
     return dfttt, hasnewrecords
 
 
+# %%
 def orderdetails_check4product_customer():
     targetpath = dirmainpath / 'data' / 'work' / '订单明细'
     # chulixls_order(targetpath / '订单明细20180614.xls.xls')
@@ -229,6 +246,7 @@ def orderdetails_check4product_customer():
     # pinpaifenxido()
 
 
+# %%
 def showorderstat2note(jiangemiao):
     global workplannotebookguid
     workplannotebookguid = '2c8e97b5-421f-461c-8e35-0f0b1a33e91c'
@@ -243,6 +261,7 @@ def showorderstat2note(jiangemiao):
     timer_showorderstat.start()
 
 
+# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     orderdetails_check4product_customer()

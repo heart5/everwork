@@ -1,9 +1,22 @@
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 """
 微信支付账单处理
 """
 
-# +
+# %%
 import os
 import pandas as pd
 import numpy as np
@@ -18,10 +31,10 @@ with pathmagic.context():
     from func.litetools import istableindb, ifnotcreate, droptablefromdb, checktableindb
 
 
-# -
-
+# %% [markdown]
 # ### 提取账单记录输出为DataFrame格式数据
 
+# %%
 def chuliweixinzhifuzhangdan(dmpath):
     """
     处理“微信支付账单”文件，生成DataFrame输出
@@ -67,6 +80,7 @@ def chuliweixinzhifuzhangdan(dmpath):
     return rstdf.sort_values('交易时间', ascending=False)
 
 
+# %%
 def wczhifufile2table():
     dmpath = dirmainpath / "data" / "webchat" / "微信支付下载"
     # print(f"{dmpath}")
@@ -85,6 +99,7 @@ def wczhifufile2table():
     conn.close()
 
 
+# %%
 def getwczhifudf():
     wczhifufile2table()
     dbname = dirmainpath / 'data' / 'db'/ 'finance.db'
@@ -98,51 +113,69 @@ def getwczhifudf():
     return frdfromdb
 
 
+# %%
 wxzfzddf = getwczhifudf()
 
+# %%
 wxzfzddf.shape[0]
 wxzfzddf.columns
 wxzfzddf.dtypes
 wxzfzddf[:10]
 
+# %%
 wxzfzddf.groupby('交易对方').count()
 
+# %%
 wxzfzddf.describe()
 wxzfzddf.dtypes
 wxzfzddf.describe()
 
+# %%
 wxzfzddf['交易单号'].describe()
 wxzfzddf['商户单号'].describe()
 wxzfzddf['交易时间'].describe()
 
+# %%
 wxzfzddf.groupby('交易类型').count()
 
+# %% [markdown]
 # ### 红包相关
 
+# %%
 wxzfzddf[wxzfzddf.交易类型.isin([None])]
 
+# %%
 wxzfzddf[~wxzfzddf.备注.isin([None])]
 
+# %%
 set([len(x) for x in set(list(wxzfzddf.交易单号))])
 
+# %%
 set(list(wxzfzddf.备注))
 
+# %%
 import re
 [ x for x in set(list(wxzfzddf.当前状态)) if not re.findall("\d", x)]
 
+# %%
 wxzfzddf[(wxzfzddf.当前状态.str.find('退') != -1)][-20:]
 
+# %%
 wxzfzddf[(wxzfzddf.交易类型.str.find('商户消费') > -1)][-20:]
 
+# %%
 wxzfzddf[15380:15583]
 
+# %%
 ztlst = [x for x in set(list(wxzfzddf.交易类型)) if (x is not None) and (x.find("红包") >= 0) ]
 print(ztlst)
 hongbaodf = wxzfzddf[wxzfzddf.交易类型.isin(ztlst)]
 hongbaodf[~(hongbaodf.交易类型.str.find('群') != -1)][:20]
 
+# %% [markdown]
 # ### 公司财务相关
 
+# %%
 ztlst = [x for x in set(list(wxzfzddf.交易类型)) if (x is not None) and (x.find("红包") >= 0) ]
 ztlst
 cofitems = ['二维码收款', '转账']
@@ -150,24 +183,29 @@ cofitems
 cofitems + ztlst
 caiwudf = wxzfzddf[wxzfzddf.交易类型.isin(cofitems + ztlst)]
 
+# %%
 caiwudf
 
+# %%
 ztlst = [x for x in set(list(caiwudf.当前状态)) if x.find("退") >= 0 ]
 print(ztlst)
 caiwudf[~caiwudf.当前状态.isin(ztlst)]
 
+# %%
 caiwudf.groupby(['交易类型', '当前状态']).count()
 
 
+# %%
 def showfinance():
     showjinzhang()
     showshoukuan()
 
 
+# %%
 if __name__ == '__main__':
 #     log.info(f'开始测试文件\t{__file__}')
     showfinance()
 #     log.info(f'对\t{__file__}\t的测试结束。')
 
-
+# %%
 

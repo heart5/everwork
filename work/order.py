@@ -1,5 +1,17 @@
-#
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 #
 """
 销售订单处理汇总
@@ -29,8 +41,10 @@ import sqlite3 as lite
 import evernote.edam.type.ttypes as ttypes
 from threading import Timer
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.configpr import cfp, cfpzysm, inizysmpath, cfpdata, inidatanotefilepath
     from func.evernttest import get_notestore, imglist2note, tablehtml2evernote, evernoteapijiayi
@@ -41,6 +55,7 @@ with pathmagic.context():
     # from work.orderdetails import jiaoyanchanpinkehu
 
 
+# %%
 def fixerrodata4db():
     """
     用于底层修正文员的录入错误，直接操作数据库，必须谨慎
@@ -71,6 +86,7 @@ def fixerrodata4db():
     # print(result)
 
 
+# %%
 def chulixls_order(orderfile):
     book = xlrd.open_workbook(orderfile, encoding_override='gb18030')
     sheet_name = book.sheet_names()[0]  # 获得指定索引的sheet表名字
@@ -110,6 +126,7 @@ def chulixls_order(orderfile):
     return dfordergengming
 
 
+# %%
 def chulidataindir_order(pathorder):
     cnxp = lite.connect(dbpathworkplan)
     tablename_order = 'salesorder'
@@ -183,6 +200,7 @@ def chulidataindir_order(pathorder):
     return dfout
 
 
+# %%
 @timethis
 def dingdanxiaoshouyuedufenxi(dforder):
     dfall = dforder.loc[:, :]
@@ -420,6 +438,7 @@ def dingdanxiaoshouyuedufenxi(dforder):
         cfpdata.write(open(inidatanotefilepath, 'w', encoding='utf-8'))
 
 
+# %%
 @timethis
 def showorderstat():
     # xlsfile = 'data\\work\\销售订单\\销售订单20180606__20180607034848_480667.xls'
@@ -599,6 +618,7 @@ def showorderstat():
         log.info('下列人员的销售金额分析图表正常处置完毕：%s' % persons)
 
 
+# %%
 @timethis
 def showorderstat2note(jiangemiao):
     try:
@@ -612,6 +632,7 @@ def showorderstat2note(jiangemiao):
     timer_showorderstat.start()
 
 
+# %%
 if __name__ == '__main__':
     # fixerrodata4db()
     # chulidataindir_order()

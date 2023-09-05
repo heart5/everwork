@@ -1,19 +1,36 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 """
 真元信使
 """
 
+# %%
 import os
 import random
 import re
 import shutil
 import sqlite3 as lite
 
+# %%
 import pandas as pd
 import xlrd
 from xpinyin import Pinyin
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.evernttest import getinivaluefromnote
     from func.first import dbpathquandan, dbpathdingdanmingxi, dirmainpath
@@ -21,9 +38,11 @@ with pathmagic.context():
     from func.logme import log
     from func.pdtools import gengxinfou
 
+# %%
 print(f"{__file__} is loading now...")
 
 
+# %%
 def chulikhqd():
     """
     处理客户清单文档，有新文件则做相应更新
@@ -72,6 +91,7 @@ def chulikhqd():
     cnx.close()
 
 
+# %%
 def chuliquandan():
     """
     处理全单文件
@@ -123,6 +143,7 @@ def chuliquandan():
     cnx.close()
 
 
+# %%
 def getbianmalst(args):
     cnx = lite.connect(dbpathquandan)
     df = pd.read_sql('select 往来单位全名, 往来单位编号, 联系人, 地址  from customeruid', con=cnx, index_col='往来单位全名')
@@ -200,6 +221,7 @@ def getbianmalst(args):
     return list(set(resultlst))
 
 
+# %%
 def validfilename(prefix, args):
     if len(args) == 0:
         tezhengstr4filename = ''
@@ -212,6 +234,7 @@ def validfilename(prefix, args):
     return rdffile
 
 
+# %%
 def getresult(resultdf, prefix, args):
     number2showinapp = getinivaluefromnote('datasource', 'number2showinapp')
     if resultdf.shape[0] > number2showinapp:
@@ -248,11 +271,13 @@ def getresult(resultdf, prefix, args):
     return rdffile, rdfstr
 
 
+# %%
 def notfoundshow():
     custsample = "“百佳 捌区”，勤丰 联城路“，”凯旋 汉阳“"
     return f"没有找到符合条件的客户。\n请减少关键字或扩大查询区域范围重新查找，另外一定注意用空格分隔客户信息关键词，比如{custsample}"
 
 
+# %%
 def searchcustomer(*args, **kw):
     chulikhqd()
     targetbmlst = getbianmalst(args)
@@ -278,6 +303,7 @@ def searchcustomer(*args, **kw):
     return rdffile, rdfstr
 
 
+# %%
 def searchqiankuan(*args, **kw):
     print(kw)
     chuliquandan()
@@ -303,6 +329,7 @@ def searchqiankuan(*args, **kw):
     return rdffile, rdfstr
 
 
+# %%
 def strlst2sqltuple(lst):
     """
     list转换成适合sql使用的括号包括的set
@@ -314,6 +341,7 @@ def strlst2sqltuple(lst):
     return sqltuple
 
 
+# %%
 def searchpinxiang(*args, **kw):
     print(kw)
     chuliquandan()
@@ -373,6 +401,7 @@ def searchpinxiang(*args, **kw):
     return rdffile, rdfstr
 
 
+# %%
 if __name__ == '__main__':
     # global log
     log.info(f'文件\t{__file__}\t启动运行……')

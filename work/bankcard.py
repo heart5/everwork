@@ -1,4 +1,17 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 """
 根据银行卡的流水记录，自动提取更新公司相关记录到共享笔记本中相应笔记中
 笔记本：银行卡，guid：34b5423f-296f-4a87-b8c0-2ca0a6113053
@@ -35,8 +48,10 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from threading import Timer
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.logme import log
     from func.evernt import findnotefromnotebook, token, get_notestore, evernoteapijiayi, \
@@ -46,6 +61,7 @@ with pathmagic.context():
     from func.filedatafunc import alipay2note
 
 
+# %%
 def rulambda(x):
     if x in ['入', 'True']:
         return True
@@ -53,6 +69,7 @@ def rulambda(x):
         return False
 
 
+# %%
 def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
     souporigin = BeautifulSoup(content, "html.parser")
     ptn = re.compile(u'^(\d{4}年\d{1,2}月\d{1,2}日)\s+([出入])\s+([\d.]+)[日美]?元\s*')
@@ -119,6 +136,7 @@ def getnotecontent2resultlst(item, content, dubiousitems, resultlst):
         print(f'支付宝流水之后，总记录数为：{len(resultlst)}')
 
 
+# %%
 def fetchfinacefromliushui():
     @trycounttimes2('evernote服务器')
     def getnote(targetguid):
@@ -197,6 +215,7 @@ def fetchfinacefromliushui():
     return rstexistlst, dubiousitems, updatable
 
 
+# %%
 def chaijie2note():
     resultlst, dubiouslst, noteupdatable = fetchfinacefromliushui()
     # print(resultlst)
@@ -231,6 +250,7 @@ def chaijie2note():
     # print(dfall)
 
 
+# %%
 def financetimer(jiangemiao):
     # alipay2note()
     chaijie2note()
@@ -241,6 +261,7 @@ def financetimer(jiangemiao):
     timer_finace.start()
 
 
+# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     # chaijie2note()

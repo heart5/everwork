@@ -1,5 +1,17 @@
-#
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 #
 """
 处理业务计划总结
@@ -33,8 +45,10 @@ import sqlite3 as lite
 from threading import Timer
 from bs4 import BeautifulSoup
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.configpr import cfpworkplan, iniworkplanpath
     from func.evernttest import findnotefromnotebook, get_notestore, evernoteapijiayi, token, \
@@ -45,6 +59,7 @@ with pathmagic.context():
     # from work.dutyon import fetchattendance_from_evernote
 
 
+# %%
 def gezhongzaxiang():
     # findnotebookfromevernote(token)
     # global token
@@ -54,6 +69,7 @@ def gezhongzaxiang():
     # print(times)
 
 
+# %%
 def chulinote_workplan(wenben: str):
     """
     处理输入的文本，输出整理后的以日期为单位的工作日志列表
@@ -93,6 +109,7 @@ def chulinote_workplan(wenben: str):
     return items
 
 
+# %%
 def updatedb_workplan(note_store, persons):
     # global dbpathworkplan, token, cfp, cfpworkplan
     cnxp = lite.connect(dbpathworkplan)
@@ -214,6 +231,7 @@ def updatedb_workplan(note_store, persons):
         cnxp.close()
 
 
+# %%
 def planfenxifunc():
     # global dbpathworkplan
     cnxp = lite.connect(dbpathworkplan)
@@ -378,6 +396,7 @@ def planfenxifunc():
         cnxp.close()
 
 
+# %%
 def planfenxi(jiangemiao):
     planfenxifunc()
 
@@ -386,6 +405,7 @@ def planfenxi(jiangemiao):
     timer_plan2note.start()
 
 
+# %%
 def chulioldversion():
     note_store = get_notestore()
     notes = findnotefromnotebook(token, '2c8e97b5-421f-461c-8e35-0f0b1a33e91c', '业务推广')
@@ -443,6 +463,7 @@ def chulioldversion():
         cnxp.close()
 
 
+# %%
 def chayanshuju():
     cnxp = lite.connect(dbpathworkplan)
     tablename_updated = 'planupdated'
@@ -473,6 +494,7 @@ def chayanshuju():
     print(huizongnoteupdatedtime)
 
 
+# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     # gezhongzaxiang()

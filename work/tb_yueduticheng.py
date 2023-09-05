@@ -2,15 +2,13 @@
 # ---
 # jupyter:
 #   jupytext:
-#     notebook_metadata_filter: -jupytext.text_representation.jupytext_version
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
 # ---
 
 # %% [markdown]
@@ -183,7 +181,7 @@ def expandsale(df):
 # %% [markdown]
 # ### def clsplit(tglst)
 
-# %% tags=[]
+# %%
 def clsplit(tglst):
     """
     遍历输入列表，纵向查找不同内容的分割点，

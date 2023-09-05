@@ -1,15 +1,31 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 """
 处理销售明细数据
 """
 
+# %%
 # from imp4nb import *
 import pandas as pd
 import sqlite3 as lite
 from threading import Timer
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.configpr import cfpdata, inidatanotefilepath, getcfp, getcfpoptionvalue
     from func.evernttest import getinivaluefromnote, imglist2note, get_notestore, readinifromnote 
@@ -19,6 +35,7 @@ with pathmagic.context():
     from func.logme import log
 
 
+# %%
 def getgroupdf(dfs, xiangmus, period='month'):
     # global log
     # 日期唯一，就是求个框架，值其实随意，这里随意取了当天的sum（对数值有效）
@@ -54,6 +71,7 @@ def getgroupdf(dfs, xiangmus, period='month'):
     return dfout
 
 
+# %%
 @timethis
 def fenxiyueduibi(sqlstr, xiangmu, notefenbudf, noteleixingdf, cnxf, pinpai='', cum=False):
     # global log
@@ -96,6 +114,7 @@ def fenxiyueduibi(sqlstr, xiangmu, notefenbudf, noteleixingdf, cnxf, pinpai='', 
     kuangjiachutu(notefenbudf, noteleixingdf, df, xiangmu, cnxf, pinpai, cum)
 
 
+# %%
 @timethis
 def kuangjiachutu(notefenbudf, noteleixingdf, df, xiangmu, cnxk, pinpai, cum=False):
     # global log
@@ -165,6 +184,7 @@ def kuangjiachutu(notefenbudf, noteleixingdf, df, xiangmu, cnxk, pinpai, cum=Fal
                              noteleixingdf.loc[leixingset]['title'], neirong=htable)
 
 
+# %%
 @timethis
 def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
     cursor = cnxp.cursor()
@@ -236,6 +256,7 @@ def pinpaifenxi(cnxp, daysbefore=90, brandnum=30, fenbu='fenbu'):
         # fenximonthduibi(token, note_store, '退货客户数', notefbkhdf, notelxkhdf, cnxp, pinpai=br)
 
 
+# %%
 def pinpaifenxido():
     cnx = lite.connect(dbpathquandan)
     dataokay(cnx)
@@ -251,6 +272,7 @@ def pinpaifenxido():
     cnx.close()
 
 
+# %%
 def pinpaifenxi_timer(jiangemiao):
 
     pinpaifenxido()
@@ -260,6 +282,7 @@ def pinpaifenxi_timer(jiangemiao):
     timer_pinpai2note.start()
 
 
+# %%
 if __name__ == '__main__':
     # pinpaifenxi_timer(60 * 60 * 3)
     pinpaifenxido()

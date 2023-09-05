@@ -1,15 +1,31 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %% [markdown]
 # 整理并导入原始数据
 # from imp4nb import *
 
+# %%
 import datetime
 import pandas as pd
 import re
 import sqlite3 as lite
 from odps.df import DataFrame
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.first import dirmainpath, dbpathquandan
     from func.logme import log
@@ -17,6 +33,7 @@ with pathmagic.context():
     from func.pdtools import descdb
 
 
+# %%
 def chengbenjiaupdatedf(dfsall, cnxxc):
     """
     :param dfsall: 按照日期排序的销售明细记录
@@ -69,6 +86,7 @@ def chengbenjiaupdatedf(dfsall, cnxxc):
     return dfsall
 
 
+# %%
 def chengbenjiaupdateall(cnxc):
     dfsall = pd.read_sql_query(
         'select * from xiaoshoumingxi order by 日期, 单据编号', cnxc, parse_dates=['日期'])
@@ -83,6 +101,7 @@ def chengbenjiaupdateall(cnxc):
           [['数量', '成本金额', '金额', '毛利']].sum())
 
 
+# %%
 def details2db(filename, sheetname, xiangmu, tablename):
     """
 
@@ -162,6 +181,7 @@ def details2db(filename, sheetname, xiangmu, tablename):
     return dfout
 
 
+# %%
 def customerweihu2systable():
     """
     处理客户档案维护记录，规整（填充日期、取有效数据集、板块排序、拆分内容后取有效信息并填充、
@@ -288,6 +308,7 @@ def customerweihu2systable():
     pass
 
 
+# %%
 def jiaoyankehuchanpin():
     cnx = lite.connect(dbpathquandan)
 
@@ -315,6 +336,7 @@ def jiaoyankehuchanpin():
     cnx.close()
 
 
+# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
 

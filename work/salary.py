@@ -1,4 +1,17 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 """
 核算工资
 """
@@ -7,14 +20,17 @@ import numpy as np
 import pandas as pd
 import sqlite3 as lite
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.first import dbpathquandan, dirmainpath
     from func.pdtools import descdb, dataokay, desclitedb
     from func.logme import log
 
 
+# %%
 def salesjiangjin(cnxs):
     feiqudaokehustr = '  and (leixing.类型 !=\'渠道客户\')'
     # feiqudaokehustr = ''
@@ -57,6 +73,7 @@ def salesjiangjin(cnxs):
     print(dfy.tail(60))
 
 
+# %%
 def peisonghesuan(cnxp):
     qrystr = "select 订单日期,strftime('%Y%m',订单日期) as 年月订单, strftime('%Y%m',送达日期) as 年月送达, " \
              "strftime('%Y%m',收款日期) as 年月收款, 配货人, 配货准确 as 错配, 业务主管, " \
@@ -107,6 +124,7 @@ def peisonghesuan(cnxp):
     # descdb(df)
 
 
+# %%
 if __name__ == '__main__':
     log.info(f'测试文件\t{__file__}')
     cnx = lite.connect(dbpathquandan)

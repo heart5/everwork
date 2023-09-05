@@ -1,8 +1,23 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %% [markdown]
 # 综合销售分析
 
+# %%
 from imp4nb import *
 
 
+# %%
 def guanlianall(cnx):
     #关联客户档案、产品档案，获得区域信息和品牌信息
     tm0 = time.clock()
@@ -28,6 +43,7 @@ def guanlianall(cnx):
     print("起始：%f，关联客户编码、产品品牌和客户类型：%f，描述：%f，写入%s数据表：%f" %(tm0,tm1-tm0,tm2-tm1,readytablename,tm3-tm2))
 
 
+# %%
 def zashua():
     now = datetime.datetime.now()
     nexthour = now + datetime.timedelta(hours=1)
@@ -35,6 +51,7 @@ def zashua():
     pass
 
 
+# %%
 def timetest():
     '''
     用时测试；删除数据表并压缩数据库占用空间；
@@ -78,6 +95,7 @@ def timetest():
     print(mons)
 
 
+# %%
 def getapitimesfromlog():
     df = pd.read_csv(os.path.join('log', 'everwork.log'), sep='\t',  # index_col= False,
                      header=None, usecols=[0, 1, 2, 3, 4],
@@ -95,12 +113,15 @@ def getapitimesfromlog():
     return result
 
 
+# %%
 cnx = lite.connect(dbpathquandan)
 # guanlianall(cnx)
 
+# %%
 # zashua()
 # timetest()
 getapitimesfromlog()
 
 
+# %%
 cnx.close()

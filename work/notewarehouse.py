@@ -1,5 +1,17 @@
-#
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %% [markdown]
 #
 # 处理每日天气信息，生成图表呈现
 #
@@ -8,18 +20,22 @@
 # 输出信息笔记标题：武汉天气图，笔记guid：296f57a3-c660-4dd5-885a-56492deb2cee；所在笔记本《行政管理》，
 # 该笔记本guid：31eee750-e240-438b-a1f5-03ce34c904b4
 
+# %%
 import pandas as pd
 from matplotlib.pyplot import subplot2grid, figure, bar, gca, plot, legend, savefig, title, close
 from matplotlib.ticker import FuncFormatter
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.first import dirmainpath
     from func.pdtools import chuturizhexian
     from func.evernt import imglist2note
 
 
+# %%
 def pickstat(note_store, cnx, destguid=None, notetitle='', cum=False):
     # cnx = lite.connect('data\\quandan.db')
     # df = pd.read_sql('select * from fileread',cnx)

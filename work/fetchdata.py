@@ -1,4 +1,17 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 """
 获取数据
 """
@@ -11,6 +24,7 @@ import sqlite3 as lite
 from threading import Timer
 from bs4 import BeautifulSoup
 
+# %%
 import pathmagic
 with pathmagic.context():
     from func.first import dbpathworkplan
@@ -26,6 +40,7 @@ with pathmagic.context():
     from func.gmailfetch import getworknewmail
 
 
+# %%
 @timethis
 def fetchworkfile_from_gmail(topic):
     hostg = getcfpoptionvalue('everwork', 'gmail', 'host')
@@ -48,6 +63,7 @@ def fetchworkfile_from_gmail(topic):
              (dirwork, len(itemslst), topicstring))
 
 
+# %%
 @timethis
 # @lpm_wrapper()
 def chuliholidayleave_note(zhuti: list):
@@ -190,6 +206,7 @@ def chuliholidayleave_note(zhuti: list):
     return dfresult
 
 
+# %%
 @timethis
 def fetch_dutyondata2lite():
     zhutis = [
@@ -229,6 +246,7 @@ def fetch_dutyondata2lite():
         log.critical(f'从evernote获取{topic}笔记信息时出现未名错误。{exp}')
 
 
+# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     # fetchworkfile_from_gmail('')

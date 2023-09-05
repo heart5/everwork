@@ -1,4 +1,17 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 """
 月度出勤统计
 """
@@ -7,8 +20,10 @@ import re
 import math
 import pandas as pd
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.logme import log
     from func.first import dirmainpath
@@ -16,6 +31,7 @@ with pathmagic.context():
     from func.evernttest import getinivaluefromnote
 
 
+# %%
 def chuqinjiluzhengli():
     """
     整理原始出勤记录，输出有用信息
@@ -73,11 +89,13 @@ def chuqinjiluzhengli():
     return targetlst
 
 
+# %%
 def tongjichuqin():
     print('56')
     pass
 
 
+# %%
 def splitjs(jsstr: str):
     """
     处理《计时工》原始打卡记录，规范成合规的时间间隔
@@ -129,6 +147,7 @@ def splitjs(jsstr: str):
     return resultlst
 
 
+# %%
 def computejishi(inputlst: list):
     """
     计算工时
@@ -155,6 +174,7 @@ def computejishi(inputlst: list):
     return totalminute
 
 
+# %%
 def tongjichuqinjishigong(inputs: pd.Series):
     """
     统计工时
@@ -170,6 +190,7 @@ def tongjichuqinjishigong(inputs: pd.Series):
     return df['分钟'].count(), df['分钟'].sum(), math.ceil(df['分钟'].sum() / 60)
 
 
+# %%
 def tongjichuqinixingzheng(inputs: pd.Series):
     """
     统计行政岗位出勤统计信息
@@ -182,6 +203,7 @@ def tongjichuqinixingzheng(inputs: pd.Series):
     print(df)
 
 
+# %%
 def zonghetongji():
     qdlst = chuqinjiluzhengli()
     # print(qdlst)
@@ -207,6 +229,7 @@ def zonghetongji():
     return jilusdf
 
 
+# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
     jldf = zonghetongji()

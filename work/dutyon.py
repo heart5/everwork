@@ -1,4 +1,17 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 """
 处理放假休假请假等
 ['c1b8297a-2c3a-4afc-9faf-e36484495529', '武汉真元放假调休记录'],
@@ -12,8 +25,10 @@ import sqlite3 as lite
 from threading import Timer
 from pandas.tseries.offsets import *
 
+# %%
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.evernttest import *
     from func.pdtools import isworkday
@@ -23,6 +38,7 @@ with pathmagic.context():
     from work.fetchdata import fetch_dutyondata2lite
 
 
+# %%
 @timethis
 # @lpt_wrapper()
 def showdutyonfunc(dtlist: list = None, zglist: list = None):
@@ -191,6 +207,7 @@ def showdutyonfunc(dtlist: list = None, zglist: list = None):
     return dfout, dtfrom, dtto
 
 
+# %%
 @timethis
 def showdutyon2note(monthnum:int = 3):
     recentdutyguid = '02540689-911d-4a2a-bd22-89fe44d41f2a'
@@ -224,6 +241,7 @@ def showdutyon2note(monthnum:int = 3):
     imglist2note(get_notestore(), [], alldutyonguid, '真元员工出勤大统计', dutytableallstr)
 
 
+# %%
 if __name__ == '__main__':
     # global log
     log.info(f'运行文件\t{__file__}')
