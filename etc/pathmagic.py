@@ -2,10 +2,15 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.10.3
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
+# %%
 """
 魔法路径
 """

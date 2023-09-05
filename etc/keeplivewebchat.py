@@ -2,10 +2,15 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.10.3
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
+# %%
 """
 让微信常驻运行，并保留有效pkg文件以便下次热启动而不用重新扫码
 """
