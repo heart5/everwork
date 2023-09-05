@@ -11,15 +11,8 @@
 #       format_version: '1.3'
 # ---
 
-# %%
-"""
-File: four_test.py
-Author: heart5
-Email: baiyefeng@gmail.com
-Github: https://github.com/heart5
-Description: everwork.py four_test.py imp4nb.py main.py pathmagic.py
-showfuncstruct.py
-"""
+# %% [markdown]
+# # 一切为了测试
 
 # %%
 # %matplotlib inline
