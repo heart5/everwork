@@ -1,4 +1,17 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 """
 手机联系人信息管理
 """
@@ -12,6 +25,7 @@ import matplotlib.pyplot as plt
 from pandas.plotting import register_matplotlib_converters
 from bs4 import BeautifulSoup
 
+# %%
 import pathmagic
 with pathmagic.context():
     from func.logme import log
@@ -26,6 +40,7 @@ with pathmagic.context():
     from func.nettools import trycounttimes2
 
 
+# %%
 def checkphoneinfotable(dbname: str):
     """
     检查联系人和短信数据表是否已经构建，设置相应的ini值避免重复打开关闭数据库文件进行检查
@@ -62,7 +77,8 @@ def checkphoneinfotable(dbname: str):
         logstr = f"数据表{tablename}在数据库{dbname}中构建成功"
         log.info(logstr)
 
-            
+
+# %%
 def df2smsdb(indf: pd.DataFrame, tablename = "sms"):
     dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"phonecontact_{getdeviceid()}.db")
     checkphoneinfotable(dbname)
@@ -74,7 +90,8 @@ def df2smsdb(indf: pd.DataFrame, tablename = "sms"):
     logstr = f"记录既有数量：\t{recordctdf.shape[0]}，" + f"待添加的记录数量为：\t{indf.shape[0]}，" + f"后的记录数量总计为：\t{afterinsertctdf.shape[0]}"
     log.info(logstr)
 
-    
+
+# %%
 def splitcontentfromnote(noteguid: str):
     
     @trycounttimes2('evernote服务器')
@@ -175,6 +192,7 @@ def splitcontentfromnote(noteguid: str):
     return [nstitle, descpc + descnormal], smsnotedf[['sent', 'name', 'number', 'time', 'content', 'smsuuid', 'type']].sort_values('time', ascending=False)
 
 
+# %%
 def smsfromnotes2smsdb(notebookguid: str):
     notelst = findnotefromnotebook(notebookguid)    
     for item in notelst:
@@ -191,7 +209,8 @@ def smsfromnotes2smsdb(notebookguid: str):
             guidchulilst.append(item[0])
             setcfpoptionvalue('everpim', "noteguid", 'noteguid', ','.join(guidchulilst))
 
-            
+
+# %%
 def splitcontentfromnotemysms(noteguid: str):
     
     @trycounttimes2('evernote服务器')
@@ -219,6 +238,7 @@ def splitcontentfromnotemysms(noteguid: str):
     return [name], smsnotedf[['sent', 'name', 'number', 'time', 'content', 'smsuuid', 'type']].sort_values('time', ascending=False)
 
 
+# %%
 def mysmsfromnotes2smsdb(notebookguid: str):
     notelst = findnotefromnotebook(notebookguid)    
     for item in notelst:
@@ -235,6 +255,7 @@ def mysmsfromnotes2smsdb(notebookguid: str):
             setcfpoptionvalue('everpim', "notemysmsguid", 'noteguid', ','.join(guidchulilst))
 
 
+# %%
 def phonesms2db():
     """
     手机短信数据入库
@@ -259,6 +280,7 @@ def phonesms2db():
         setcfpoptionvalue('everpim', str(getdeviceid()), 'smsfirstrun', str(True))
 
 
+# %%
 def phonecontact2db():
     """
     手机联系人数据入库
@@ -282,6 +304,7 @@ def phonecontact2db():
     log.info(logstr)
 
 
+# %%
 def getphoneinfodb():
     """
     从联系人信息数据表提取数据（DataFrame）
@@ -312,10 +335,12 @@ def getphoneinfodb():
     return jujinmins, recordctdf
 
 
+# %%
 def showinfostream(keyin):
     pass
 
 
+# %%
 def showphoneinfoimg(jingdu: int = 300, showincell=False):
     '''
     show the img for phone info
@@ -338,6 +363,7 @@ def showphoneinfoimg(jingdu: int = 300, showincell=False):
     return lststr2img(contactoutstr, title="手机联系人综合描述", showincell=showincell)
 
 
+# %%
 if __name__ == "__main__":
     logstrouter = "运行文件\t%s" %__file__
     log.info(logstrouter)

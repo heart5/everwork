@@ -3,22 +3,26 @@
 # jupyter:
 #   jupytext:
 #     cell_metadata_filter: -all
-#     formats: ipynb,py:light
+#     formats: ipynb,py:percent
 #     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
+# %% [markdown]
 # # 微信聊天记录文本文件智能远程存储 
 
+# %% [markdown]
 # - 文本文件：跑程序生成的txt存储的记录原始文件
 # - 资源文件：提取并排序后按月拆分的记录存储文件，excel表格
 # - 笔记：记录了分月统计和更新信息的云端笔记，附件为相应的资源文件
 
+# %% [markdown]
 # ## 库导入
 
+# %%
 import os
 import re
 import xlsxwriter
@@ -27,6 +31,7 @@ import sqlite3 as lite
 from pathlib import Path
 from datetime import datetime
 
+# %%
 import pathmagic
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
@@ -43,10 +48,13 @@ with pathmagic.context():
     from filedatafunc import getfilemtime as getfltime
 
 
+# %% [markdown]
 # ## 功能函数集
 
+# %% [markdown]
 # ### def items2df(fl)
 
+# %%
 def items2df(fl):
     """
     读取txt记录文件，格式化拆分并存储至DataFrame返回
@@ -75,8 +83,10 @@ def items2df(fl):
     return dfout
 
 
+# %% [markdown]
 # ### def getaccountowner()
 
+# %%
 def getownerfromfilename(fn):
     """
     从文件名中获取账号
@@ -86,9 +96,10 @@ def getownerfromfilename(fn):
     return ac
 
 
+# %% [markdown]
 # ### def txtfiles2dfdict(wcdatapath)
 
-# +
+# %%
 @timethis
 def txtfiles2dfdict(dpath, newfileonly=False):
     """
@@ -133,10 +144,10 @@ def txtfiles2dfdict(dpath, newfileonly=False):
     return dfdict
 
 
-# -
-
+# %% [markdown]
 # ### def getdaterange(start, end)
 
+# %%
 def getdaterange(start, end):
     """
     根据输入的起止时间按照月尾分割生成时间点列表返回
@@ -154,8 +165,10 @@ def getdaterange(start, end):
     return drlst
 
 
+# %% [markdown]
 # ### def splitdf(name, df, wcdatapath)
 
+# %%
 def txtdfsplit2xlsx(name, df, dpath, newfileonly=False):
     """
     按月份拆分指定账号的数据记录df，如果尚不存在本地相应资源文件，直接写入并更新ini中登记
@@ -203,8 +216,10 @@ def txtdfsplit2xlsx(name, df, dpath, newfileonly=False):
         print(f"{'-' * 15}\t{name}\t【{i + 1}/{len(dr) - 1}】\tDone!\t{'-' * 15}")
 
 
+# %% [markdown]
 # ### def getnotebookguid(notebookname)
 
+# %%
 def getnotebookguid(notebookname):
     """
     根据输入的笔记本名称返回相应的guid
@@ -223,8 +238,10 @@ def getnotebookguid(notebookname):
     return notebookguid
 
 
+# %% [markdown]
 # ### def df2db(dftest, name, wcpath)
 
+# %%
 def df2db(dftest, name, wcpath):
     """
     把指定微信账号的记录df写入db相应表中
@@ -256,8 +273,10 @@ def df2db(dftest, name, wcpath):
                 log.info(f"{dftfilename}的数据写入数据库文件（{dbname}）的（{tablename}）表中，并在ini登记数量（{itemnum}）") 
 
 
+# %% [markdown]
 # ### updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid)
 
+# %%
 def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
     """
     处理从本地资源文件读取生成的df，如果和ini登记数量相同，则返回；如果不同，则从笔记端读取相应登记
@@ -338,8 +357,10 @@ def updatewcitemsxlsx2note(name, dftest, wcpath, notebookguid):
     setcfpoptionvalue('everwcitems', dftfilename, 'itemsnum4net', str(dftest.shape[0]))
 
 
+# %% [markdown]
 # ### def getnotelist(name)
 
+# %%
 @timethis
 def getnotelist(name, wcpath, notebookguid):
     """
@@ -408,8 +429,10 @@ def getnotelist(name, wcpath, notebookguid):
     return findnotelst
 
 
+# %% [markdown]
 # ### def merge2note(dfdict)
 
+# %%
 @timethis
 def merge2note(dfdict, wcpath, notebookguid, newfileonly=False):
     """
@@ -450,8 +473,10 @@ def merge2note(dfdict, wcpath, notebookguid, newfileonly=False):
             print(f"{'-' * 15}\t{name}\t【{xlsxfllst.index(xfl) + 1}/{xflen}】\tDone!\t{'-' * 15}")
 
 
+# %% [markdown]
 # ### def refreshres(wcpath)
 
+# %%
 @timethis
 def refreshres(wcpath):
     notebookname = "微信记录数据仓"
@@ -469,8 +494,10 @@ def refreshres(wcpath):
     merge2note(dfdict, wcpath, notebookguid, newfileonly=new)
 
 
+# %% [markdown]
 # ### def alldfdesc2note(name)
 
+# %%
 @timethis
 def alldfdesc2note(wcpath):
     """
@@ -499,8 +526,10 @@ def alldfdesc2note(wcpath):
     return resultdict
 
 
+# %% [markdown]
 # ## main，主函数
 
+# %%
 if __name__ == '__main__':
     if not_IPython():
         log.info(f'运行文件\t{__file__}')
@@ -513,8 +542,9 @@ if __name__ == '__main__':
         log.info(f"文件\t{__file__}\t运行结束。")
 
 
+# %%
 def explodedf():
     mydf = mydict['heart5']
     mydf[mydf.time >= "2022-10-01"].sort_values('time')
 
-
+# %%

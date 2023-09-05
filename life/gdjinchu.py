@@ -1,18 +1,34 @@
 # coding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
 
+# %%
+# %%
 import pygsheets
 import pandas as pd
 import time
 
+# %%
 # 验证登录
 gc = pygsheets.authorize(service_file='../data/imp/ewjinchu.json')
 files = gc.list_ssheets()
 dffiles = pd.DataFrame(files)
 # print(dffiles.head())
 
+# %%
 dfboot = dffiles[dffiles.name.str.contains('boots trail').values == True]
 print(dfboot.head())
 
+# %%
 dfboottrails = pd.DataFrame()
 for ix in dfboot.index:
     # print(ix, end='\t')
@@ -37,6 +53,7 @@ dfout = dfbout[['entered', 'shuxing', 'address']]
 print(dfout.tail())
 # print(dfbout)
 
+# %% [markdown]
 # sh = gc.open('boots trail')
 # sh = gc.open_by_key('1e-louzaHWBifMi8OzFrIDG9E2xMTTr92tGn9NcoRlHY')
 #

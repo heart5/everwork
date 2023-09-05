@@ -2,21 +2,24 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.13.4
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
+# %%
 # %%
 """
 微信联系人管理
 """
 
+# %%
 
-
+# %%
 # %%
 from pathlib import Path
 from io import BytesIO
@@ -31,8 +34,9 @@ import numpy as np
 import itchat
 # from binascii import hexlify, unhexlify
 
+# %%
 
-
+# %%
 # %%
 import pathmagic
 with pathmagic.context():
@@ -47,7 +51,9 @@ with pathmagic.context():
     from func.wcfuncs import getownername
 
 
+# %%
 
+# %%
 # %%
 def checktable(dbpath: str, ownername: str):
     """
@@ -78,7 +84,9 @@ def checktable(dbpath: str, ownername: str):
         setcfpoptionvalue('everwebchat', 'wcdb', ownername, str(True))
 
 
+# %%
 
+# %%
 # %%
 def getimguuid(inputbytes: bytes):
     imgfrombytes = Image.open(BytesIO(inputbytes))
@@ -86,7 +94,9 @@ def getimguuid(inputbytes: bytes):
     return sha2hexstr(np.array(imgfrombytes))
 
 
+# %%
 
+# %%
 # %%
 def getwcdffromfrdlst(frdlst: list, howmany: str='fixed', needheadimg=False):
 
@@ -158,7 +168,9 @@ def getwcdffromfrdlst(frdlst: list, howmany: str='fixed', needheadimg=False):
     return frddf
 
 
+# %%
 
+# %%
 # %%
 def dfsha2noimg(inputdf: pd.DataFrame):
     # ['UserName', 'NickName', 'ContactFlag', 'RemarkName', 'Sex', 'Signature', 'StarFriend', 'AttrStatus', 'Province', 'City', 'SnsFlag', 'KeyWord', 'imguuid' 'headimg']
@@ -174,7 +186,9 @@ def dfsha2noimg(inputdf: pd.DataFrame):
     return frddf2append
 
 
+# %%
 
+# %%
 # %%
 @timethis
 def updatectdf(howmuch: str = "all", haveimg=False):
@@ -220,7 +234,9 @@ def updatectdf(howmuch: str = "all", haveimg=False):
     print()
 
 
+# %%
 
+# %%
 # %%
 def just4test():
     """
@@ -234,7 +250,9 @@ def just4test():
     print(frddfttt)
 
 
+# %%
 
+# %%
 # %%
 def getctdf():
     owner = getownername()
@@ -248,7 +266,9 @@ def getctdf():
     return frdfromdb
 
 
+# %%
 
+# %%
 # %%
 def showwcsimply(inputdb: pd.DataFrame):
     frdfromdb = inputdb.copy(deep=True)
@@ -271,7 +291,9 @@ def showwcsimply(inputdb: pd.DataFrame):
     return outslim
 
 
+# %%
 
+# %%
 # %%
 if __name__ == '__main__':
 
@@ -301,4 +323,4 @@ if __name__ == '__main__':
     except NameError as ne:
         log.info(f"于notebook环境中调试，无法正常调用参数：__file__。运行环境：{sys.executable}\t{os.path.abspath(sys.argv[0])}")
 
-
+# %%

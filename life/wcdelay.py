@@ -2,25 +2,28 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.13.4
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # # 微信聊天信息延迟管理
 
+# %%
 # %%
 """
 微信延迟管理文件
 """
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ## 引入重要库
 
+# %%
 # %%
 import os
 import time
@@ -30,6 +33,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pandas.plotting import register_matplotlib_converters
 
+# %%
 import pathmagic
 with pathmagic.context():
     from func.logme import log
@@ -39,12 +43,13 @@ with pathmagic.context():
     from func.sysfunc import not_IPython
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ## 功能函数集
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### def checkdelaytable(dbname, tablename)
 
+# %%
 # %%
 def checkwcdelaytable(dbname: str, tablename: str):
     """
@@ -61,9 +66,10 @@ def checkwcdelaytable(dbname: str, tablename: str):
         log.info(logstr)
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### def inserttimeitem2db(dbname, timestampinput)
 
+# %%
 # %%
 def inserttimeitem2db(dbname: str, timestampinput: int):
     '''
@@ -92,9 +98,10 @@ def inserttimeitem2db(dbname: str, timestampinput: int):
             conn.close()
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### def getdelaydb(dbname, tablename)
 
+# %%
 # %%
 def getdelaydb(dbname: str, tablename="wcdelaynew"):
     """
@@ -148,9 +155,10 @@ def getdelaydb(dbname: str, tablename="wcdelaynew"):
     return jujinmins, timedfgrp
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### def showdelayimg(dbname, jingdu)
 
+# %%
 # %%
 def showdelayimg(dbname: str, jingdu: int = 300):
     '''
@@ -202,9 +210,10 @@ def showdelayimg(dbname: str, jingdu: int = 300):
     return imgwcdelaypath
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ## 主函数main
 
+# %%
 # %%
 if __name__ == "__main__":
     if not_IPython():
