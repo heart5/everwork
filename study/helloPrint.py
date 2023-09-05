@@ -1,14 +1,28 @@
-#
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 #
 """
 各种测试
 
 """
 
+# %%
 from imp4nb import *
 
 
+# %%
 def ttestprint():
     print('Hello')
     print('World')
@@ -18,6 +32,7 @@ def ttestprint():
     print('白', '晔', '峰')
 
 
+# %%
 def textspam():
     def spam(divideby):
         try:
@@ -32,6 +47,7 @@ def textspam():
     print(spam(9))
 
 
+# %%
 def textploterrorbar():
     # example data
     x = np.arange(0.1, 4, 0.5)
@@ -44,6 +60,7 @@ def textploterrorbar():
     print(plt.colors())
 
 
+# %%
 def ttesttimesplit():
     # mailtext = b'Subject: =?UTF-8?B?U01TIHdpdGgg5pyx5bmz?=\r\nTo: =?UTF-8?B?5pyx5bmz?=
     # <unknown_number@unknown.email>\r\nFrom: baiyefeng@gmail.com\r\nMIME-Version: 1.0\r\nContent-Type: text/plain;\r\n
@@ -74,6 +91,7 @@ def ttesttimesplit():
     print(time.mktime(itemtime))
 
 
+# %%
 def currentprocess():
     # fstream = os.popen('tasklist /fi "username ne NT authority\system"', 'r')
     fstream = os.popen('tasklist /fi "username ne NT authority\system" /fi "status eq running"', 'r')
@@ -93,6 +111,7 @@ def currentprocess():
     print(prodf)
 
 
+# %%
 def dfappend():
     ppp = [['order', 'time'], ['haochou', '2018-06-07']]
     df = pd.DataFrame(ppp)
@@ -102,6 +121,7 @@ def dfappend():
     pass
 
 
+# %%
 def showtables():
     cnxp = lite.connect(dbpathworkplan)
     tablename_order = 'salesorder'
@@ -113,6 +133,7 @@ def showtables():
     cnxp.close()
 
 
+# %%
 def tdaytest():
     tody = datetime.datetime.now().strftime('%F')
     print(tody)
@@ -129,6 +150,7 @@ def tdaytest():
     pass
 
 
+# %%
 def getholidayitems():
     note_store = get_notestore()
     hdayguid = cfpworkplan.get('行政管理', '放假guid')
@@ -163,6 +185,7 @@ def getholidayitems():
 
     return resultlist
 
+# %%
 if __name__ == '__main__':
     # ttesttimesplit()
     # currentprocess()

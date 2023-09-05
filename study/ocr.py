@@ -1,17 +1,34 @@
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 """
 图片中中文字符的识别
 """
 import pathmagic
 
+# %%
 with pathmagic.context():
     from func.logme import log
 
+# %%
 import requests
 from aip import AipOcr
 
+# %%
 image = requests.get('https://res.pandateacher.com/python_classic.png').content
 
+# %%
 APP_ID = '16149264'
 API_KEY = 'yxYg9r4OuAs4fYvfcl8tqCYd'
 SECRET_KEY = 'yWg3KMds2muFsWs7MBSSFcgMQl8Wng4s'
@@ -21,6 +38,7 @@ if 'words_result' in res.keys():
     for item in res['words_result']:
         print(item['words'])
 
+# %%
 else:
     APP_ID = '11756541'
     API_KEY = '2YhkLuyQGljPUYnmi1CFgxOP'
@@ -33,6 +51,7 @@ else:
     else:
         print(res)
 
+# %%
 if __name__ == '__main__':
     log.info(f'运行文件\t{__file__}')
 

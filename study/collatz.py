@@ -1,10 +1,23 @@
-#
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 # 这是一个数学中的Collatz序列。
 # 任何整数，如果是偶数则除以2，如果是奇数则乘以3然后再加1，
 # 如此迭代，最终总会得到1
 import random
 
+# %%
 def collatz(number):
     while True:
         print(int(number))
@@ -16,6 +29,7 @@ def collatz(number):
             number = number * 3 + 1
 
 
+# %%
 while True:
     print('请输入一个合格的整数值，或者输入exit退出')
     str_input = input()

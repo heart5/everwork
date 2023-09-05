@@ -2,26 +2,25 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,py:light
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.3.1
-#   kernelspec:
-#     display_name: Python 3
-#     language: python
-#     name: python3
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
+# %% [markdown]
 # ## 杂项试验田
 
-# +
+# %%
 # ?
-# -
 
+# %% [markdown]
 # ## PrettyTable
 
+# %%
 from prettytable import PrettyTable, from_html_one, from_html, from_csv, from_db_cursor
 table = PrettyTable(['No.', 'CVI', 'VUL', 'Rule', 'Lang', 'Level-Score', 'Target', 'Commit(Time, Author)', 'Source Code Content', 'Analysis'])
 table.align = 'l'
@@ -30,17 +29,22 @@ row = ["1", "130001", "HCP", "password", "PHP", "L-02: ■■□□□□□□�
 table.add_row(row)
 print(table)
 
+# %%
 ??from_csv
 
+# %%
 ??from_db_cursor
 
+# %%
 ??from_html_one
 
+# %% [markdown]
 # ## 运行时间管理
 
+# %% [markdown]
 # ### `signal`，适用于linux操作系统
 
-# +
+# %%
 # coding=utf-8
 import signal
 import time
@@ -84,8 +88,8 @@ def after_timeout():
 
 
 
-# -
 
+# %%
 @set_timeout(2, after_timeout)  # 限时 2 秒超时
 def connect(strtest: str = "I\'m just a test."):  
     """
@@ -96,34 +100,46 @@ def connect(strtest: str = "I\'m just a test."):
     print('Finished without timeout.')
 
 
+# %%
 
+# %%
 connect()
 
+# %%
 if __name__ == '__main__':
     connect()
 
+# %% [markdown]
 # ## 判断字符串是否包含
 
+# %% [markdown]
 # ### 使用成员操作符 `in`
 
+# %%
 mother = 'I have a litte boy. boy is fine. boy is little.'
 child = 'boy'
 child in mother
 child not in mother
 
+# %% [markdown]
 # ### 使用str模块的find / rfind方法
 
+# %% [markdown]
 # 找不到则返回 `-1`
 
+# %%
 str.find(mother, child) != -1
 str.rfind(mother, child) != -1
 str.find(mother, child) # 最近结果
 str.rfind(mother, child) # 最远结果
 
+# %% [markdown]
 # ### 使用str的index / rindex方法
 
+# %% [markdown]
 # 找不到则抛出异常 `ValueError`
 
+# %%
 str.index(mother, child)
 str.rindex(mother, child)
 try:
@@ -131,15 +147,17 @@ try:
 except ValueError as ve:
     print(ve)
 
+# %% [markdown]
 # ### 使用字符串对象的find()/rfind()、index()/rindex()和count()方法
 
+# %%
 mother.find(child)
 mother.rfind(child)
 mother.index(child)
 mother.rindex(child)
 mother.count(child)
 
-# +
+# %%
 childother = 'uu'
 
 mother.find(childother)
@@ -153,32 +171,40 @@ except ValueError as ve:
     
 # 找不到则返回 0
 mother.count(childother)
-# -
 
+# %% [markdown]
 # ## 判断变量名是否定义过
 
+# %%
 nnn = 123
 'conn' in locals() or 'conn' in globals()
 'nnn' in locals()
 
+# %%
 import sys
 import os
 import pandas as pd
 
+# %%
 # ?pd.DataFrame.to_sql
 
+# %% [markdown]
 # ## os相关
 
+# %%
 import os
 os.popen('ifconfig').read()
 
+# %% [markdown]
 # ## uuid库
 
+# %%
 # !jt -t onedork
 
+# %% [markdown]
 # 在判断联系人数据记录（包含头像数据）时发现用uuid好像无法约束，同一个联系人会产生不同的uuid。多轮次验证，发现对于`list(frddf2append.columns.values)`，传入uuid获取函数后会出现不同的值；但对于不包含头像的数据记录，uuid又是一样的。初步判断问题可能出在头像数据比较大，不同于一般的短字符串，是不是用了memoryview导致每次的内存地址不同进而引起不同。经过无聊测试，分析对`list(frddf2append.columns.values)`进行截取，在长度768之前都会一致，在768这个点上，多运行几次会出现不同值，但不同值的集合值只有两个；超过了768，则每次都会产生不同的uuid值。
 
-# +
+# %%
 import uuid
 
 def uuid3hexstr(inputo: object):
@@ -192,16 +218,18 @@ def uuid3hexstr(inputo: object):
 strlst4text = [list(), tuple(), '微信', 'heart5', 'blog', '生产力', ['12', '23'], 'blog', '生产力', ('12', '23'), None, None, 123, 321, '12', '12']
 for itm in strlst4text:
     print(itm, uuid3hexstr(itm))
-# -
 
+# %% [markdown]
 # ## sqlite3
 #
 # - SQLite是一个进程内的库，实现了自给自足的、无服务器的、零配置的、事务性的 SQL 数据库引擎。
 # - 它是一个零配置的数据库，这意味着与其他数据库不一样，您不需要在系统中配置。
 # - 就像其他数据库，SQLite 引擎不是一个独立的进程，可以按应用程序需求进行静态或动态连接。SQLite 直接访问其存储文件。
 
+# %% [markdown]
 # ### Python sqlite3 模块 API
 
+# %% [markdown]
 # #### `connection.total_changes()`
 #
 # 该例程返回自数据库连接打开以来被修改、插入或删除的数据库总行数。
@@ -212,22 +240,26 @@ for itm in strlst4text:
 # ```
 # 直接用`connection.total_changes`就行，类型是`int`
 
+# %% [markdown]
 # ## 编码
 
+# %% [markdown]
 # ### `binascii`模块
 #
 # 包含很多在二进制和二进制表示的各种ASCII码之间转换的方法。 通常情况不会直接使用这些函数，而是使用像 uu ， base64 ，或 binhex 这样的封装模块。 为了执行效率高，binascii 模块含有许多用 C 写的低级函数，这些底层函数被一些高级模块所使用。
 
+# %% [markdown]
 # #### `binascii.hexlify(data)`
 # 返回二进制数据 data 的十六进制表示形式。 data 的每个字节都被转换为相应的2位十六进制表示形式。因此返回的字节对象的长度是 data 的两倍。
 # 使用：bytes.hex() 方法也可以方便地实现相似的功能（但仅返回文本字符串）。
 
+# %% [markdown]
 # #### `binascii.unhexlify(hexstr)`
 # 返回由十六进制字符串 hexstr 表示的二进制数据。此函数功能与 b2a_hex() 相反。 hexstr 必须包含偶数个十六进制数字（可以是大写或小写），否则会引发 Error 异常。
 #
 # 使用：bytes.fromhex() 类方法也实现相似的功能（仅接受文本字符串参数，不限制其中的空白字符）。
 
-# +
+# %%
 import time
 import numpy as np
 import pandas as pd
@@ -270,11 +302,11 @@ plt.imshow(img)
 plt.axis('on') # 关掉坐标轴为 off
 plt.title('QR') # 图像题目
 plt.show()
-# -
 
+# %% [markdown]
 # ## 时间
 
-# +
+# %%
 import datetime
 import time
 import pandas as pd
@@ -287,14 +319,16 @@ print(len(str(tstp)))
 print(time.localtime(tstp))
 # mytime = time.localtime(tstp).strftime('%y-%m')
 # pd.to_datetime(mytime)
-# -
 
+# %% [markdown]
 # ## 三目表达式
 
+# %%
 age = 80
 aaa = ('worked', 'retired')[age > 65]
 aaa
 
+# %% [markdown]
 #
 # ```graph TD
 #         A[Christmas] --> B(Go shopping)
@@ -304,9 +338,10 @@ aaa
 #         C -->|Three| F[Car]
 # ``` 
 
+# %% [markdown]
 # ## math 数学函数
 
-# + [markdown] pycharm={"name": "#%% md\n"}
+# %% [markdown]
 # ### python中的除法和取整
 #
 # 1. /是精确除法，//是向下取整除法，%是求模
@@ -317,7 +352,7 @@ aaa
 # - second
 # - third
 
-# + pycharm={"name": "#%%\n", "is_executing": false}
+# %%
 print('usage of 3 operators /, // and % in python 3.4')
 print('1). usage of /')
 print('10/4 = ', 10 / 4)
@@ -338,17 +373,19 @@ print('10%-4 = ', 10 % -4)
 print('-10%-4 = ', -10 % -4)
 
 
-# + [markdown] toc-hr-collapsed=true
+# %% [markdown]
 # ## str 方法
-# -
 
+# %% [markdown]
 # ### **find() 方法**
 # ##### 用于查找字符串中是否能够找到子字符串，找到就返回所处位置，找不到则返回-1
 
+# %%
 teststr = "This is a very hard road."
 print(f"\'is\' is find in \"{teststr}\" at {teststr.find('is')}")
 print(f"\'iss\' is find in \"{teststr}\" at {teststr.find('iss')}")
 
+# %% [markdown]
 # ### **strip() 方法**
 # ##### 用于移除字符串头尾指定的字符（默认为空格或换行符）或字符序列。
 #
@@ -358,7 +395,7 @@ print(f"\'iss\' is find in \"{teststr}\" at {teststr.find('iss')}")
 # ```
 # ---
 
-# + pycharm={"name": "#%%\n", "is_executing": false}
+# %%
 tstr1 = " 我是一个兵 \n"
 print(tstr1)
 print(tstr1.strip())
@@ -367,7 +404,7 @@ tstr2 = "12dfahkj56232211"
 print(tstr2)
 print(tstr2.strip('12'))
 
-# + [markdown] pycharm={"name": "#%% md\n"}
+# %% [markdown]
 # ### **split() 方法**
 # ##### split() 通过指定分隔符对字符串进行切片，如果参数 num 有指定值，则分隔 num+1 个子字符串
 #
@@ -378,21 +415,21 @@ print(tstr2.strip('12'))
 # #### 参数
 # * str -- 分隔符，默认为所有的空字符，包括空格、换行(\n)、制表符(\t)等。
 # * num -- 分割次数。默认为 -1, 即分隔所有。
-# -
 
+# %%
 strp = "This is a line.\n Will you be happy?\t"
 print(strp.split())
 print(strp.split('.'))
 print(type(strp.split('.')))
 print([x.strip() for x in strp.split('.')])
 
-# + [markdown] pycharm={"name": "#%% md\n"}
+# %% [markdown]
 # ### **translate() 方法**
 # ##### str def translate(self, table: Union[Mapping[int, Union[int, str, None]], Sequence[Union[int, str, None]]])
 #   -> str
 # ##### 使用给出的转换表替换字符串中的每一个字符
 
-# + pycharm={"is_executing": false}
+# %%
 user_input = "This\nstring has\tsome whitespaces...\r\n"
 
 character_map = {
@@ -403,17 +440,16 @@ character_map = {
 user_input.translate(character_map)  # This string has some whitespaces... "
 
 
-# -
-
+# %% [markdown]
 # ## function 函数
 
-# + [markdown] pycharm={"name": "#%% md\n"}
+# %% [markdown]
 # #### 仅支持关键字参数（kwargs）的函数
 #
 #
 #
 
-# + pycharm={"name": "#%%\n", "is_executing": false}
+# %%
 def test(*, a, b):
     print(a, b)
     print()
@@ -422,7 +458,7 @@ def test(*, a, b):
 test(a="value", b="value 2")  # Works...
 test(a='2', b='you are great')  # TypeError: test() takes 0 positional arguments...
 
-# + [markdown] pycharm={"name": "#%% md\n"}
+# %% [markdown]
 # ```
 # def test(*, a, b):
 #     print(a, b)
@@ -442,23 +478,25 @@ test(a='2', b='you are great')  # TypeError: test() takes 0 positional arguments
 # cond(yes)->e
 # cond(no)->op
 # ```
-# + [markdown] toc-hr-collapsed=false toc-hr-collapsed=false
+# %% [markdown]
 # ## re 正则
-# -
 
 
+# %% [markdown]
 # **正则表达式是对字符串操作的一种逻辑公式，就是用事先定义好的一些特定字符、及这些特定字符的组合，组成一个“规则字符串”，这个“规则字符串”用来表达对字符串的一种过滤逻辑。**
 
+# %% [markdown]
 # ### 匹配过程
 
+# %% [markdown]
 # 1. 依次拿出表达式和文本中的字符比较，
 # 2. 如果每一个字符都能匹配，则匹配成功；一旦有匹配不成功的字符则匹配失败。
 # 3. 如果表达式中有量词或边界，这个过程会稍微有一些不同。
 
-# + [markdown] toc-hr-collapsed=true
+# %% [markdown]
 # ### 语法规则
-# -
 
+# %% [markdown]
 # #### 基本语法
 #
 # 语法|说明|表达式实例|完整匹配的字符串字符
@@ -468,17 +506,21 @@ test(a='2', b='you are great')  # TypeError: test() takes 0 positional arguments
 # [...]|<p>字符集（字符类）。对应的位置可以是字符集中任意字符。<p>字符集中的字符可以逐个列出，也可以给个范围，如[abc]或者[a-c]。<p>第一个字符如果是^则表示取反，如[^abc]表示不是abc的其它字符。<p>所有的特殊字符在字符集中都失去其原有的特殊含义。在字符集中如果使用]、-或者^，可以在前面加上反斜杠，或者把]、-放在第一个字符，把^放在非第一个字符。|a[bcde]e|abc<p>ace<p>ade<p>aee
 #
 
+# %%
 import re
 print(re.search('abc', 'abc'))
 
+# %%
 specialcharlst = ['.', '*', '\\', '-', '(', ')', '[', ']']
 print(specialcharlst)
 print(re.findall('a\.c', 'a.c'))
 
+# %%
 ptn = r"[.*\-()\[\]^]"
 print(ptn)
 print(re.findall(ptn, "abc.(Home is warmful.[chasing]) *.txt is text file. 2^2=4"))
 
+# %% [markdown]
 # #### 预定义字符集
 #
 # 语法|说明|表达式实例|完整匹配的字符串字符
@@ -492,6 +534,7 @@ print(re.findall(ptn, "abc.(Home is warmful.[chasing]) *.txt is text file. 2^2=4
 # \\W|非单词字符：[^\\w]|a\\Wc|a c
 #
 
+# %%
 predefinedteststr = 'abc a2c a4c a c '
 print(re.findall('a\dc', predefinedteststr))
 print(re.findall('a\Dc', predefinedteststr))
@@ -500,6 +543,7 @@ print(re.findall('a\Sc', predefinedteststr))
 print(re.findall('a\wc', predefinedteststr))
 print(re.findall('a\Wc', predefinedteststr))
 
+# %% [markdown]
 # #### 数量词
 #
 # 语法|说明|表达式实例|完整匹配的字符串字符
@@ -513,6 +557,7 @@ print(re.findall('a\Wc', predefinedteststr))
 # \*\? \+\? \?\? {m,n}\?|使\* \+ \? 和{m,n}变成非贪婪模式|示例在下文介绍|
 #
 
+# %%
 numberteststr = 'ab abc abcc abccc abcccc'
 print(re.findall('abc*', numberteststr))
 print(re.findall('abc+', numberteststr))
@@ -526,6 +571,7 @@ print(re.findall('abc??', numberteststr))
 print(re.findall('abc{2}?', numberteststr))
 print(re.findall('abc{2,4}?', numberteststr))
 
+# %% [markdown]
 # #### 边界匹配
 #
 # 语法|说明|表达式实例|完整匹配的字符串字符
@@ -539,6 +585,7 @@ print(re.findall('abc{2,4}?', numberteststr))
 # \\B|<p>匹配\\w和\\w之间<p>[^\b]|a\Bbc|abc
 #
 
+# %%
 delimiterstr = 'abc abc abd abe abf a!bg abg\nabb abz'
 print(re.findall('^ab\w', delimiterstr, re.MULTILINE))
 print(re.findall('^ab\w', delimiterstr))
@@ -552,6 +599,7 @@ print(re.findall(r'a\b\Wb\w', delimiterstr))
 print(re.findall('a\Bb\w*', delimiterstr))
 print(re.findall(r'\b\w+\b', delimiterstr))
 
+# %% [markdown]
 # #### 逻辑、分组
 #
 # 语法|说明|表达式实例|完整匹配的字符串字符
@@ -564,6 +612,7 @@ print(re.findall(r'\b\w+\b', delimiterstr))
 # \(\?P\=name\)|引用别名为\<name\>的分组匹配到的字符串|\(\?P\<id\>\\d\)abc\(\?P\=id\)|<p>2abc2<p>~~4abc5~~
 #
 
+# %%
 logicgroupstr = "abc def abcabc a123c a456c 34abc34 23abc34 2abc2"
 print(re.findall('abc|def', logicgroupstr))
 print(re.findall('(?:abc){2}', logicgroupstr))
@@ -571,6 +620,7 @@ print(re.findall('a(?:123|456)c', logicgroupstr))
 print(re.search(r'(\d)abc\1', logicgroupstr))
 print(re.search(r'(?P<id>\d)abc(?P=id)', logicgroupstr))
 
+# %% [markdown]
 # #### 特殊构造（不作为分组）
 #
 # 语法|说明|表达式实例|完整匹配的字符串字符
@@ -585,6 +635,7 @@ print(re.search(r'(?P<id>\d)abc(?P=id)', logicgroupstr))
 # \(\?\<\!...\)|之前的字符串内容需要匹配表达式才能匹配成功。不消耗字符串内容。|\(\?\<\!\\d\)a|<p>~~2a~~<p>ba
 # \(\?\(id/name\)yes-pattern\|no-pattern\)|<p>如果id/别名为name的组匹配到字符，则需要匹配yes-pattern，否则需要匹配no-pattern。<p>no-pattern可以省略。|\(\\d\)abc\(\?\(1\)\\d\|abc\)|<p>1abc2<p>abcabc
 
+# %%
 specialgroupstr = "abcabc AbC abc123 a2 ab 2a ba aabcabc 1abc2 aabcabc"
 print(re.search('(?:abc){2}', specialgroupstr))
 print(re.findall('(?i)abc', specialgroupstr))
@@ -595,17 +646,21 @@ print(re.findall('(?<!\d)abc', specialgroupstr))
 print(re.findall('(\d)abc(?(1)\d|abc)', specialgroupstr))
 print(re.search('(\d)abc(?(1)\d|abc)', specialgroupstr)) # 迷迷糊糊，没搞懂
 
+# %% [markdown]
 # ### 演练池
 
+# %% [markdown]
 # #### 去除控制符
 
+# %%
 neirong = "\x04heart5\x011 is a man."
 print(neirong)
 re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f]', '', neirong)
 
+# %% [markdown]
 # #### just for test
 
-# +
+# %%
 import re
 findit = re.findall(r'\b(\w+)\b', 'a@!bc@kcde')
 print(f"{findit}")
@@ -624,9 +679,10 @@ print(re.findall(r"(?P<id>\d)abc(?P=id)", "5abc6"))
 print(re.findall(r"(?P<id>\d)abc(?=\d)", "5abc5"))
 print(re.findall(r"(?P<id>\d)abc(?=id)", "5abc6"))
 
-# -
+# %% [markdown]
 # #### 从房间链接提取用户名和房间号
 
+# %%
 import re
 fangtabstr = "2020-02-13 11:27:21	True	搓雀雀(群)白晔峰	Text	http://s0.lgmob.com/h5_whmj_qp/?d=852734"
 namestr = fangtabstr.split('\t')[2]
@@ -637,18 +693,23 @@ print(ptn, re.findall(ptn, "白晔峰")[-1])
 fangidstr = fangtabstr.split("\t")[-1]
 print(re.findall("d=(\d+)", fangidstr)[-1])
 
+# %% [markdown]
 # ## 列表和字典之间的相互转换
 
 
+# %% [markdown]
 # ### 使用zip函数
 
+# %%
 a = ['a1','a2','a3','a4']
 b = ['b1','b2','b3']
 d = zip(a,b)
 print(dict(d)) 
 
+# %% [markdown]
 # ### 使用嵌套列表转换成字典
 
+# %%
 a = ['a1','a2']
 b = ['b1','b2']
 c = [a,b]
@@ -660,9 +721,10 @@ for i in c:
     dit[i[0]] = i[1]
 print(dit)
 
+# %% [markdown]
 # 字典转换成列表
 
-# +
+# %%
 dit = {'name':'zxf',
        'age':22,
        'gender':'male',
@@ -675,24 +737,29 @@ print(lst)  # ['name', 'age', 'gender', 'address']
 # 将字典的value转换成列表
 lst2 = list(dit.values())
 print(lst2)
-# -
+# %% [markdown]
 # ### 列印字典中的值
 
+# %%
 # 显示所有key和value
 for key, value in dit.items():
     print(key, type(value), value)
 
+# %%
 print("Home is hopeful.")
 
+# %% [markdown]
 # ## configparse
 
 
+# %% [markdown]
 # option name是支持包含空格的字符串的
 
+# %%
 import pathmagic
 with pathmagic.context():
     from func.logme import log
     from func.evernttest import getinivaluefromnote
 getinivaluefromnote('game', 'alles gut')
 
-
+# %%

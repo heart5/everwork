@@ -1,5 +1,18 @@
 #! python3
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 # 学习excel表格的操作
 # 0大数据分析（真元）.xlsx
 # 39ed537d-73fa-4ad8-b4fd-bc6f746fb302 真元日配送图
@@ -7,10 +20,12 @@ import openpyxl, matplotlib.pyplot as plt, pandas as pd, numpy, datetime, sqlite
 from pandas.io import sql
 from pylab import *
 
+# %%
 # plot中显示中文
 mpl.rcParams['font.sans-serif'] = ['SimHei']
 mpl.rcParams['axes.unicode_minus'] = False
 
+# %%
 def descdb(df):
     print(df.head(5))
     print(df.tail(5))
@@ -18,6 +33,7 @@ def descdb(df):
     print(len(df))
     print(df.describe())
 
+# %%
 #
 # 整理源数据，返回float数据列
 #
@@ -47,6 +63,7 @@ def clean2f(dfc):
         num += 1
     return jiqian
 
+# %%
 def clean2d(dfc):
     dts = []
     num = 0
@@ -63,6 +80,7 @@ def clean2d(dfc):
 
     return dts
 
+# %%
 def collectdata():
     print(u'打开excel表格中……')
     wb = openpyxl.load_workbook(u'2017年全单统计管理.xlsm', read_only=True )
@@ -147,15 +165,18 @@ def collectdata():
 
     return df
 
+# %% [markdown]
 # df = pd.read_excel('2017年全单统计管理.xlsm',sheetname='全单统计管理',na_values=['NA'])
 # descdb(df)
 
+# %%
 cnx = lite.connect('quandan.db')
 # sql_df=df.loc[:,['订单日期', '配货人', '配货准确', '业务主管', '终端编码', '终端名称', '积欠', '送货金额',
 #                  '实收金额', '收款方式', '退货金额', '客户拒收', '无货金额', '少配金额', '配错未要',
 #                  '送达日期', '车辆', '送货人', '收款日期', '收款人', '拒收品项']]
 # df.to_sql(name='sources', con=cnx, schema=sql_df, if_exists='replace', chunksize=10000)
 
+# %%
 def yingdacal(dfy,cnx):
     df = []
     dfjiaqi = pd.read_sql_query('select date from jiaqi',cnx)
@@ -179,16 +200,19 @@ def yingdacal(dfy,cnx):
 
     return df
 
+# %%
 df = pd.read_sql_query("select * from quandan",cnx)
 # df = df[(df['peihuoren'] != '作废') &(df['dingdanriqi'] >= '2016-03-29')]
 descdb(df)
 df['应达日期'] = yingdacal(df['订单日期'])
 descdb(df)
 
+# %%
 df['送达天数'] = (df['送达日期'] - df['订单日期']).dt.days
 df['收款天数'] = (df['收款日期'] - df['送达日期']).dt.days
 df = df[((df['送达天数'] >= -1)&(df['送达天数'] <= 14))]
 
+# %%
 descdb(df)
 # df = df[['dingdanriqi','yewuzhuguan', 'zhongduanbianma', 'songhuojine', 'shishoujine', 'yingdariqi','songdariqi', 'songhuoren', 'shoukuanriqi', 'songdatianshu', 'shoukuantianshu']]
 # # descdb(df)

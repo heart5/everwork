@@ -2,23 +2,22 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,py:light
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.3.1
-#   kernelspec:
-#     display_name: Python 3
-#     language: python
-#     name: python3
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
+# %% [markdown]
 # # sqlite学习笔记
 
+# %% [markdown]
 # ## 库准备
 
-# +
+# %%
 import sqlite3 as lite
 
 import pathmagic
@@ -47,21 +46,26 @@ def dbsql(dbin, csqlin):
     
 
 
-# -
 
+# %% [markdown]
 # ## 连接数据库文件并创建数据表
 
+# %%
 csql = "create table if not exists heart5 (id integer primary key autoincrement, name text, age int)"
 dbsql(testdb, csql)
 
+# %% [markdown]
 # ## 删除数据表
 
+# %%
 dsql = "drop table heart5"
 dbsql(testdb, dsql)
 
 
+# %% [markdown]
 # ## 显示数据库内容，数据表等
 
+# %%
 def showtablesindb(dbname: str):
     conn = lite.connect(dbname)
     cursor = conn.cursor()
@@ -80,15 +84,17 @@ def showtablesindb(dbname: str):
     conn.close()
 
 
+# %%
 owner = '白晔峰'
 dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wccontact_{owner}.db")
 print(dbname)
 showtablesindb(dbname)
 showtablesindb(testdb)
 
+# %% [markdown]
 # ## 查询数据表结构，返回列名是否存在，显示数据表的字段结构
 
-# +
+# %%
 import re
 
 def ifclexists(dbin, tb, cl):
@@ -124,17 +130,19 @@ def ifclexists(dbin, tb, cl):
     
 
 
-# -
 
+# %%
 ifclexists(testdb, 'heart5', 'imguuid')
 
+# %% [markdown]
 # ## 改变数据表结构，增加新列
 
+# %%
 if not ifclexists(testdb, 'heart5', 'imguuid'):
     asql = "alter table heart5 add column imguuid text"
     dbsql(testdb, asql)
 
-# +
+# %%
 owner = '白晔峰'
 dbname = touchfilepath2depth(getdirmain() / "data" / "db" / f"wccontact_{owner}.db")
 print(dbname)
@@ -142,6 +150,5 @@ print(dbname)
 if not ifclexists(dbname, 'wccontact', 'imguuid'):
     asql = "alter table wccontact add column imguuid text"
     dbsql(dbname, asql)
-# -
-
+# %%
 

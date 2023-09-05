@@ -1,7 +1,20 @@
-#
 #encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %% [markdown]
 # Python金融大数据分析，第五章：数据可视化
 
+# %%
 import time, calendar, re
 import numpy as np, pandas as pd, matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator, FuncFormatter
@@ -10,13 +23,16 @@ from mpl_toolkits.mplot3d import Axes3D
 from pylab import *
 
 
+# %%
 # plot中显示中文
 mpl.rcParams['font.sans-serif'] = ['SimHei']
 mpl.rcParams['axes.unicode_minus'] = False
 
+# %%
 def func(x):
     return 0.5* np.exp(x) +1
 
+# %%
 def arrayplot():
     np.random.seed(1000)
     y = np.random.standard_normal(20) #生成 20 个 标准 正态分布（ 伪） 随机数， 保存 在 一个 NumPy ndarray 中
@@ -41,6 +57,7 @@ def arrayplot():
 
     plt.show()
 
+# %%
 def narrayplot():
     np.random.seed(2000)
     y = np.random.standard_normal((20,2)).cumsum(axis=0)
@@ -194,4 +211,5 @@ def narrayplot():
     plt.show()
 
 
+# %%
 narrayplot()

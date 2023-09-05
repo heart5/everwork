@@ -1,20 +1,35 @@
-#
 # encoding:utf-8
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 #
 """
 进程和线程学习
 
 """
 
+# %%
 from multiprocessing import Process, Pool, Queue
 import os, sys, locale, time, random, subprocess
 
 
+# %%
 # 子进程要执行的代码
 def run_proc(name):
     print('Run child process %s (%s)...' % (name, os.getpid()))
 
 
+# %%
 def test1():
     print('Parent process %s.' % os.getpid())
     p = Process(target=run_proc, args=('test',))
@@ -24,6 +39,7 @@ def test1():
     print('Child process end.')
 
 
+# %%
 def long_time_task(name):
     print('Run task %s (%s)...' % (name, os.getpid()))
     start = time.time()
@@ -32,6 +48,7 @@ def long_time_task(name):
     print('Task %s runs %0.2f seconds.' % (name, (end - start)))
 
 
+# %%
 def test2():
     print('Parent process %s.' % os.getpid())
     p = Pool()  # 默认大小是运行计算机的CPU内核数量，也可以手动指定
@@ -43,12 +60,14 @@ def test2():
     print('All subprocesses done.')
 
 
+# %%
 def test_subprocess1():
     print('$ nslookup www.python.org')
     r = subprocess.call(['nslookup', 'heart5.com'])
     print('Exit code:', r)
 
 
+# %%
 def test_subporcess2():
     print('$ nslookup')
     p = subprocess.Popen(['nslookup'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -64,6 +83,7 @@ def test_subporcess2():
     print('Exit code:', p.returncode)
 
 
+# %%
 # 写数据进程执行的代码:
 def write(q):
     print('Process to write: %s' % os.getpid())
@@ -73,6 +93,7 @@ def write(q):
         time.sleep(random.random())
 
 
+# %%
 # 读数据进程执行的代码:
 def read(q):
     print('Process to read: %s' % os.getpid())
@@ -82,6 +103,7 @@ def read(q):
         print('Get %s from queue.' % value)
 
 
+# %%
 if __name__ == '__main__':
     # 父进程创建Queue，并传给各个子进程：
     q = Queue()
@@ -96,6 +118,7 @@ if __name__ == '__main__':
     # pr进程里是死循环，无法等待其结束，只能强行终止:
     pr.terminate()
 
+# %% [markdown]
 # if __name__=='__main__':
 # test1()
 # test2()

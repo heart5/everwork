@@ -1,5 +1,19 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+# ---
+
+# %%
 import random
 
+# %%
 def getAnswer(answerNumber):
     if answerNumber == 1:
         return 'It is certain'
@@ -18,6 +32,7 @@ def getAnswer(answerNumber):
     elif answerNumber == 8:
         return 'Very doubtful'
 
+# %%
 r = random.randint(1,9)
 print(str(r))
 fortune = getAnswer(r)
