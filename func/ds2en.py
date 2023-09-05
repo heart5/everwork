@@ -3,22 +3,26 @@
 # jupyter:
 #   jupytext:
 #     cell_metadata_filter: -all
-#     formats: ipynb,py:light
+#     formats: ipynb,py:percent
 #     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
+# %% [markdown]
 # # 火界游戏数据集动态存储至evernote（不同主机针对同一类笔记）
 
+# %% [markdown]
 # # 引入库
 
+# %%
 import os
 import re
 import pandas as pd
 
+# %%
 import pathmagic
 with pathmagic.context():
     from func.first import getdirmain, touchfilepath2depth
@@ -28,10 +32,10 @@ with pathmagic.context():
     from func.evernttest import getinivaluefromnote, getnoteresource, gettoken, get_notestore, getnotecontent, updatereslst2note
 # print(f"{__file__} is loading now...")
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # # 功能函数集
-# -
 
+# %%
 # %%
 def huojieds2note():
     huojieguid = getinivaluefromnote('game', 'guid')
@@ -89,10 +93,10 @@ def huojieds2note():
     return jushufromnote, jushufromhost
 
 
-# + [markdown] magic_args="[markdown]"
+# %% [markdown]
 # # 运行主函数main
-# -
 
+# %%
 # %%
 if __name__ == '__main__':
     if not_IPython():
