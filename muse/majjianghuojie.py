@@ -2,30 +2,33 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: jupytext,-kernelspec,-jupytext.text_representation.jupytext_version
 #     text_representation:
-#       jupytext_version: 1.10.3
-#   kernelspec:
-#     display_name: Python 3
-#     language: python
-#     name: python3
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
 # ---
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ## 火界数据处理
 
-# %% [raw]
+# %% [markdown] magic_args="[raw]"
 # ---
 # encodin:utf-8
 # ---
 
 # %%
+# %%
 """
 获取火界麻将的比赛结果并输出
 """
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ## 库引入
 
+# %%
 # %%
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -35,6 +38,7 @@ import re
 from bs4 import BeautifulSoup
 from xpinyin import Pinyin
 
+# %%
 # %%
 import pathmagic
 with pathmagic.context():
@@ -47,9 +51,10 @@ with pathmagic.context():
     from func.ds2en import huojieds2note
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ## 功能函数
 
+# %%
 # %%
 def find_class_in_tag(key: str, tags):
     resultlst = [x for x in tags if x.has_attr('class') and key in x['class']]
@@ -58,9 +63,10 @@ def find_class_in_tag(key: str, tags):
         return resultlst
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### getsinglepage(url: str)
 
+# %%
 # %%
 @trycounttimes2('火界麻将服务器', 17, 50)
 def getsinglepage(url: str):
@@ -129,9 +135,10 @@ def getsinglepage(url: str):
     return rstdf
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### splitmjurlfromtext(incontent:str)
 
+# %%
 # %%
 def splitmjurlfromtext(incontent: str):
     """
@@ -156,6 +163,7 @@ def splitmjurlfromtext(incontent: str):
 
 
 # %%
+# %%
 def checkptn():
 #     ptnstr = "(http://.+?tcloudbaseapp.com/port.html\?j=\S+)\s*"
 
@@ -167,9 +175,10 @@ def checkptn():
     re.findall(ptn, teststr)
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### fetchmjurlfromfile(ownername)
 
+# %%
 # %%
 def fetchmjurlfromfile(ownername):
     """
@@ -228,9 +237,10 @@ def fetchmjurlfromfile(ownername):
     return resultlst, changed
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### getfangitem(line)
 
+# %%
 # %%
 def getfangitem(line):
     """
@@ -243,9 +253,10 @@ def getfangitem(line):
     return rstlst
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### fetchmjfang(owner)
 
+# %%
 # %%
 def fetchmjfang(owner):
     """
@@ -319,9 +330,10 @@ def fetchmjfang(owner):
     return cleandf.sort_values('mintime', ascending=False)
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### updateurllst(ownername, urllst)
 
+# %%
 # %%
 def updateurllst(ownername, urllst):
     """
@@ -334,9 +346,10 @@ def updateurllst(ownername, urllst):
     return '\n'.join(rstlst)
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### combinedataset()
 
+# %%
 # %%
 def combinedataset(ownername):
 #     musedatapath = getdirmain() / 'data' / 'muse'
@@ -363,9 +376,10 @@ def combinedataset(ownername):
     return rstdf
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### makeexcelfileownpy(ownername)
 
+# %%
 # %%
 def makeexcelfileownpy(ownername):
     """
@@ -384,9 +398,10 @@ def makeexcelfileownpy(ownername):
     return excelpath, ownpy
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### geturlcontentwrite2excel(ownername, url)
 
+# %%
 # %%
 def geturlcontentwrite2excel(ownername, url):
     """
@@ -425,9 +440,10 @@ def geturlcontentwrite2excel(ownername, url):
     return outurl, descstr
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### updateurl2excelandini(ownername, url)
 
+# %%
 # %%
 def updateurl2excelandini(ownername, url):
     """
@@ -460,9 +476,10 @@ def updateurl2excelandini(ownername, url):
     return descstr
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### fixnamealias(inputdf: pd.DataFrame, clname: str)
 
+# %%
 # %%
 def fixnamealias(inputdf: pd.DataFrame, clname: str):
     '''
@@ -490,9 +507,10 @@ def fixnamealias(inputdf: pd.DataFrame, clname: str):
     return rstdf1
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### fixnamebyguestid(inputdf: pd.DataFrame, guestidcl: str='guestid')
 
+# %%
 # %%
 def fixnamebyguestid(inputdf: pd.DataFrame, guestidcl: str='guestid'):
     """
@@ -523,9 +541,10 @@ def fixnamebyguestid(inputdf: pd.DataFrame, guestidcl: str='guestid'):
     return rstdf1
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### showhighscore(rstdf, highbool: bool = True)
 
+# %%
 # %%
 def showhighscore(rstdf, highbool: bool = True):
     """
@@ -558,9 +577,10 @@ def showhighscore(rstdf, highbool: bool = True):
     return outputstr
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True)
 
+# %%
 # %%
 def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     excelpath, ownpy = makeexcelfileownpy(ownername)
@@ -742,9 +762,10 @@ def zhanjidesc(ownername, recentday: str = '日', simpledesc: bool = True):
     return outstr
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### showzhanjiimg(ownername, recentday="日", jingdu: int = 300)
 
+# %%
 # %%
 def showzhanjiimg(ownername, recentday="日", jingdu: int = 300):
     excelpath, ownpy = makeexcelfileownpy(ownername)
@@ -776,9 +797,10 @@ def showzhanjiimg(ownername, recentday="日", jingdu: int = 300):
     return recorddf, imgwcdelaypath
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ### updateallurlfromtxt(owner: str, startnum=0, itemsnnm=10)
 
+# %%
 # %%
 def updateallurlfromtxt(owner: str, startnum=0, itemsnnm=10):
     """
@@ -801,9 +823,10 @@ def updateallurlfromtxt(owner: str, startnum=0, itemsnnm=10):
             print(f"[{startnum}/{ii}/{endnum}]\t{desc}")
 
 
-# %% [markdown]
+# %% [markdown] magic_args="[markdown]"
 # ## 主函数main
 
+# %%
 # %%
 if __name__ == '__main__':
     if not_IPython():
@@ -820,10 +843,13 @@ if __name__ == '__main__':
     # updateurl2excelandini(own, sp2)
     # geturlcontentwrite2excel(own, sp2)
 
+# %% [markdown]
 #     updateallurlfromtxt(own, 0, 20)
 
+# %% [markdown]
 #     combinedataset(own)
 
+# %%
 #     rcdf, img = showzhanjiimg(own, '月')
     zhanjistr = zhanjidesc(own, recentday = '月', simpledesc=False)
     print(zhanjistr)
