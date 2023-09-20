@@ -11,20 +11,20 @@
 #       format_version: '1.3'
 # ---
 
-# %%
-"""
-魔法路径
-"""
+# %% [markdown]
+# # 魔法路径
 
-# import os
+# %% [markdown]
+# ## 引入库
+
+# %%
 import sys
 
-# bp = os.path.dirname(os.path.realpath('.')).split(os.sep)
-# modpath = os.sep.join(bp + ['src'])
-# sys.path.insert(0, modpath)
-# sys.path.insert(0,os.sep.join(bp))
 
+# %% [markdown]
+# ## context类
 
+# %%
 class context:
     def __enter__(self):
         sys.path.extend(['..', '.'])
@@ -33,6 +33,10 @@ class context:
         pass
 
 
+# %% [markdown]
+# ## 主函数main()
+
+# %%
 if __name__ == '__main__':
     print(f'运行文件\t{__file__}')
     for pp in sys.path:
