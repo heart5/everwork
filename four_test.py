@@ -14,6 +14,9 @@
 # %% [markdown]
 # # 一切为了测试
 
+# %% [markdown]
+# ## 引入库
+
 # %%
 # %matplotlib inline
 
@@ -26,6 +29,9 @@ with pathmagic.context():
     from func.first import getdirmain
     from func.logme import log
 
+
+# %% [markdown]
+# ## 功能函数
 
 # %%
 class myobj(object):
@@ -47,7 +53,11 @@ def mylast(homestr, secondstr, thirdstr):
 
     """
     myline = "Home is wonderful"
+    print(myline)
 
+
+# %% [markdown]
+# ## 主函数main()
 
 # %%
 if __name__ == '__main__':
@@ -63,3 +73,4 @@ if __name__ == '__main__':
     log.critical(mo)
 
     print("Home is warmful.")
+    print("这个jupyerlab环境，代码检查扩展能正常运作")
