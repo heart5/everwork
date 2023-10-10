@@ -11,10 +11,8 @@
 #       format_version: '1.3'
 # ---
 
-# %%
-#
-# encoding:utf-8
-#
+# %% [markdown]
+# # 处理每日天气信息，生成图表呈现
 
 # %%
 """
@@ -26,6 +24,9 @@ e5d81ffa-89e7-49ff-bd4c-a5a71ae14320 武汉雨天记录
 输出笔记：
 296f57a3-c660-4dd5-885a-56492deb2cee 武汉天气图
 """
+
+# %% [markdown]
+# ## 引入库
 
 # %%
 import re
@@ -55,6 +56,12 @@ with pathmagic.context():
     from func.sysfunc import not_IPython
 
 
+# %% [markdown]
+# ## 核心功能函数集合
+
+# %% [markdown]
+# ### getweatherfromevernote()
+
 # %%
 def getweatherfromevernote():
     noteguid_weather = '277dff5e-7042-47c0-9d7b-aae270f903b8'
@@ -77,6 +84,9 @@ def getweatherfromevernote():
     return split_item
 
 
+# %% [markdown]
+# ### getweatherfromgmail()
+
 # %%
 def getweatherfromgmail():
     host = getcfpoptionvalue('everwork', 'gmail', 'host')
@@ -96,6 +106,9 @@ def getweatherfromgmail():
     return split_items
 
 
+# %% [markdown]
+# ### getweatherfromgoogledrive()
+
 # %%
 def getweatherfromgoogledrive():
     dfboottrails = gettopicfilefromgoogledrive('Today\'s weather report', 'A:H')
@@ -111,6 +124,9 @@ def getweatherfromgoogledrive():
     print(dfout.tail())
     return dfout
 
+
+# %% [markdown]
+# ### weatherstat(df, destguid=None)
 
 # %%
 def weatherstat(df, destguid=None):
@@ -322,6 +338,9 @@ def weatherstat(df, destguid=None):
     imglist2note(get_notestore(), imglist, destguid, '武汉天气图')
 
 
+# %% [markdown]
+# ### getnewestdataday(item)
+
 # %%
 def getnewestdataday(item):
     weatherlastestday = getcfpoptionvalue('everlife', '天气', f"{item}最新日期")
@@ -331,6 +350,9 @@ def getnewestdataday(item):
 
     return weatherlastestday
 
+
+# %% [markdown]
+# ### fetchweatherinfo_from_gmail(weathertxtfilename)
 
 # %%
 def fetchweatherinfo_from_gmail(weathertxtfilename):
@@ -349,6 +371,9 @@ def fetchweatherinfo_from_gmail(weathertxtfilename):
                 items[0].split(' ：')[0], '%B %d, %Y at %I:%M%p'))
             setcfpoptionvalue('everlife', '天气', '存储数据最新日期', '%s' % weathertxtlastestday)
 
+
+# %% [markdown]
+# ### isweatherupdate(weathertxtfilename)
 
 # %%
 def isweatherupdate(weathertxtfilename):
@@ -378,6 +403,9 @@ def isweatherupdate(weathertxtfilename):
     else:
         return False
 
+
+# %% [markdown]
+# ### items2df(items)
 
 # %%
 def items2df(items):
@@ -429,6 +457,9 @@ def items2df(items):
     return df
 
 
+# %% [markdown]
+# ### fetchweatherinfo_from_googledrive()
+
 # %%
 def fetchweatherinfo_from_googledrive():
     weatherdatalastestday = getnewestdataday('存储数据')
@@ -444,6 +475,9 @@ def fetchweatherinfo_from_googledrive():
 
             return df
 
+
+# %% [markdown]
+# ### getrainfromgoogledrive()
 
 # %%
 @timethis
@@ -474,6 +508,9 @@ def getrainfromgoogledrive():
     return dfout, dfrain
 
 
+# %% [markdown]
+# ### getgaowenfromgoogledrive()
+
 # %%
 @timethis
 def getgaowenfromgoogledrive():
@@ -490,6 +527,9 @@ def getgaowenfromgoogledrive():
 
     return dfout, dfgaowen
 
+
+# %% [markdown]
+# ### weatherstatdo()
 
 # %%
 @timethis
@@ -533,6 +573,9 @@ def weatherstatdo():
     else:
         log.info('时间的花儿静悄悄！')
 
+
+# %% [markdown]
+# ## 主函数main()
 
 # %%
 if __name__ == '__main__':
