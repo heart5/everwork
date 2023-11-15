@@ -35,8 +35,6 @@ from work.workplan import planfenxi
 from work.order import showorderstat2note
 from etc.log2note import log2notetimer
 from life.noteweather import weatherstattimer  # 调用同目录下其他文件（py）中的函数
-
-
 # %%
 sys.path.extend(['func', 'work', 'life', 'etc'])
 # from func.pdtools import dataokay
