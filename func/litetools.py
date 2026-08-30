@@ -15,7 +15,6 @@
 # # sqlite3数据库相关函数
 
 # %%
-# %%
 """
 sqlite数据库相关应用函数
 """
@@ -24,16 +23,16 @@ sqlite数据库相关应用函数
 # ## 引入重要库
 
 # %%
-# %%
 import sqlite3 as lite
 import os
 import re
+from pathlib import Path
 
 # %%
 import pathmagic
 with pathmagic.context():
     from func.logme import log
-    from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi
+    from func.first import dbpathquandan, dbpathworkplan, dbpathdingdanmingxi, getdirmain
     from func.configpr import getcfpoptionvalue, setcfpoptionvalue
     from func.sysfunc import not_IPython
     from func.wrapfuncs import timethis
@@ -46,7 +45,6 @@ with pathmagic.context():
 # ### def get_filesize(filepath)
 
 # %%
-# %%
 def get_filesize(filepath):
     fsize = os.path.getsize(filepath)
     fsize = fsize / float(1024 * 1024)
@@ -56,7 +54,6 @@ def get_filesize(filepath):
 # %% [markdown]
 # ### def istableindb(tablein, dbname)
 
-# %%
 # %%
 def istableindb(tablenin: str, dbname: str):
     result = False
@@ -81,7 +78,6 @@ def istableindb(tablenin: str, dbname: str):
 # %% [markdown]
 # ### def ifnotcreate(tablein, createsql, dbn)
 
-# %%
 # %%
 def ifnotcreate(tablen: str, createsql: str, dbn: str):
     """
@@ -112,7 +108,6 @@ def ifnotcreate(tablen: str, createsql: str, dbn: str):
 # %% [markdown]
 # ### def ifclexists(dbin, tb, cl)
 
-# %%
 # %%
 def ifclexists(dbin, tb, cl):
     conn = lite.connect(dbin)
@@ -150,7 +145,6 @@ def ifclexists(dbin, tb, cl):
 # ### def shwotableindb(dbname)
 
 # %%
-# %%
 def showtablesindb(dbname: str):
     conn = lite.connect(dbname)
     cursor = conn.cursor()
@@ -169,10 +163,35 @@ def showtablesindb(dbname: str):
     conn.close()
 
 
+# %%
+sitedb = getdirmain() / Path("data/db/site.db")
+sitedbstr = sitedb.resolve()
+print(sitedbstr)
+conn = lite.connect(sitedbstr)
+cursor = conn.cursor()
+
+# %%
+tbnsql = f"select * from sites;"
+tablefd = cursor.execute(tbnsql).fetchall()
+
+# %%
+for cl in tablefd:
+    print(cl)
+
+# %%
+cursor.execute("update sites set name='longjiu.club' where id = 3;")
+conn.commit()
+
+# %%
+conn.close()
+
+# %%
+showtablesindb(sitedb.resolve())
+
+
 # %% [markdown]
 # ### def droptablefromdb(dbname, tablename, confirm=False)
 
-# %%
 # %%
 def droptablefromdb(dbname: str, tablename: str, confirm=False):
     if not confirm:
@@ -193,7 +212,6 @@ def droptablefromdb(dbname: str, tablename: str, confirm=False):
 # %% [markdown]
 # ### def checktableindb(ininame, dbpath, tablename, creattablesql, confirm=False)
 
-# %%
 # %%
 def checktableindb(ininame: str, dbpath: str, tablename: str, creattablesql: str, confirm=False):
     """
@@ -216,7 +234,6 @@ def checktableindb(ininame: str, dbpath: str, tablename: str, creattablesql: str
 # ### def compact_sqlite3_db(dbpath)
 
 # %%
-# %%
 @timethis
 def compact_sqlite3_db(dbpath):
     sizebefore = get_filesize(dbpath)
@@ -229,7 +246,6 @@ def compact_sqlite3_db(dbpath):
 # %% [markdown]
 # ## 主函数main
 
-# %%
 # %%
 if __name__ == "__main__":
     if not_IPython():

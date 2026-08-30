@@ -1,0 +1,3 @@
+formats = "ipynb,md"
+split_at_heading = true
+cell_metadata_filter = "-all"

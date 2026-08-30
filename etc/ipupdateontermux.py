@@ -184,7 +184,7 @@ if __name__ == '__main__':
     if not_IPython():
         log.info(
             f'开始运行文件\t{__file__}\t……\t{sys._getframe().f_code.co_name}\t{sys._getframe().f_code.co_filename}')
-    if (bsdict := battery_status())['percentage'] >= 20:
+    if (bsdict := battery_status()) and (bsdict['percentage'] >= 20):
         showiprecords()
     else:
         log.warning("手机电量低于20%，跳过ip轮询")
